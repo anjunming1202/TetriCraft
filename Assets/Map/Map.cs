@@ -1,19 +1,18 @@
 ﻿using Unity.Mathematics;
 using UnityEngine;
 
-public class Grid
+public class Map
 {
-    public Grid()
+    public Map()
     {
-        width = GridBoundaryData.Instance.width;
-        height = GridBoundaryData.Instance.height;
         grid = new Block[width, height + 5]; // all null
     }
 
-    // Grid data
-    private int width;
-    private int height;
     public Block[,] grid;
+
+    // Map Boundary Data
+    private int width => MapBoundaryData.Instance.width;
+    private int height => MapBoundaryData.Instance.height;
     public Block this[int x, int y]
     {
         get => grid[x, y];

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "GridData", menuName = "ScriptableObjects/GridData")]
-public class GridBoundaryData : ScriptableObject
+public class MapBoundaryData : ScriptableObject
 {
     // Grid coords data
     public Rect boundary;
@@ -13,23 +13,23 @@ public class GridBoundaryData : ScriptableObject
     public Vector3 origin => boundary.min;
 
     // Use as static resource
-    private static GridBoundaryData instance;
-    public static GridBoundaryData Instance
+    private static MapBoundaryData instance;
+    public static MapBoundaryData Instance
     {
         get
         {
             if (instance == null)
             {
-                instance = CreateInstance<GridBoundaryData>();
+                instance = CreateInstance<MapBoundaryData>();
                 Debug.Log("New GridData instance created!");
             }
             return instance;
         }
     }
     // Initialise
-    public static GridBoundaryData Create(Transform boundaryRegion)
+    public static MapBoundaryData Create(Transform boundaryRegion)
     {
-        instance = CreateInstance<GridBoundaryData>();
+        instance = CreateInstance<MapBoundaryData>();
         instance.boundary.size = boundaryRegion.transform.localScale;
         instance.boundary.center = boundaryRegion.transform.position;
         return instance;

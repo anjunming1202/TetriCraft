@@ -86,11 +86,11 @@ public class Tetromino
     public Block this[int x, int y] => blocks[x, y];
     public bool IsBlock(int x, int y) => blocks[x, y] != null;
 
-    public void GoTo(Grid grid, int x, int y)
+    public void GoTo(Map grid, int x, int y)
     {
         GoTo(grid, new Vector2Int(x, y));
     }
-    public void GoTo(Grid grid, Vector2Int to)
+    public void GoTo(Map grid, Vector2Int to)
     {
         for (int j = 0; j < size; j++) // column
             for (int i = 0; i < size; i++) // row

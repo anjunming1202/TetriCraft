@@ -7,12 +7,12 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     // Grid
-    private Grid grid;
-    private int width => GridBoundaryData.Instance.width;
-    private int height => GridBoundaryData.Instance.height;
+    private Map grid;
+    private int width => MapBoundaryData.Instance.width;
+    private int height => MapBoundaryData.Instance.height;
     // Boundary
     public Transform boundaryRegion;
-    public GridBoundaryData boundary; // static resource
+    public MapBoundaryData boundary; // static resource
 
     // Falling Tetromino
     [SerializeField] private Tetromino fallingTetromino;
@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
         LoadResources();
 
         // Initialise grid
-        grid = new Grid();
+        grid = new Map();
 
         // Initialise block object list
         blockObjects = new List<Transform>();
@@ -108,6 +108,6 @@ public class GameManager : MonoBehaviour
         BlockResources.LoadBlockTextures();
 
         // Initialise boundary data
-        boundary = GridBoundaryData.Create(boundaryRegion);
+        boundary = MapBoundaryData.Create(boundaryRegion);
     }
 }

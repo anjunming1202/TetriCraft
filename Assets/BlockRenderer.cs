@@ -35,7 +35,7 @@ public class BlockRenderer : MonoBehaviour
     {
         if (block.isMoving)
         {
-            Vector3 targetPosition = GridBoundaryData.GridToWorld(block.position);
+            Vector3 targetPosition = MapBoundaryData.GridToWorld(block.position);
             transform.position = targetPosition;
         }
     }
