@@ -6,29 +6,30 @@ using UnityEngine;
 // Game Manager for managing the whole game
 public class GameManager : MonoBehaviour
 {
-    // Grid
-    private Map grid;
+    // Map Manager
+    private MapManager mapManager;
+
+    // Map Data (readonly)
+    private Map map => mapManager.map;
     private int width => MapBoundaryData.Instance.width;
     private int height => MapBoundaryData.Instance.height;
-    // Boundary
+    private MapBoundaryData boundary => MapBoundaryData.Instance;
+
+    // Boundary Region Definer
     public Transform boundaryRegion;
-    public MapBoundaryData boundary; // static resource
 
-    // Falling Tetromino
-    [SerializeField] private Tetromino fallingTetromino;
-
-
-    // Game objects
+    // Game Objects Container
     private List<Transform> blockObjects;
 
 
     void Awake()
     {
         // Load resources
-        LoadResources();
+        LoadStaticResources();
 
-        // Initialise grid
-        grid = new Map();
+        // Initialise map
+        mapManager = FindObjectOfType<MapManager>();
+        mapManager.NewMap();
 
         // Initialise block object list
         blockObjects = new List<Transform>();
@@ -37,7 +38,7 @@ public class GameManager : MonoBehaviour
     {
 
         // Test
-        SpawnTetromino(TetrominoType.T);
+        SpawnNewTetromino();
     }
 
     ////////////////////////////////////////////////////
@@ -55,22 +56,13 @@ public class GameManager : MonoBehaviour
 
     ////////////////////////////////////////////////////
 
-    public void SpawnTetromino(TetrominoType type)
+    public void SpawnNewTetromino()
     {
-        // New a tetromino
-        fallingTetromino = new Tetromino(type);
+        // New tetromino data
+        mapManager.SpawnTetromino();
 
-        // Set tetromino position (at the centre)
-        int x = (width - fallingTetromino.size) / 2;
-        fallingTetromino.position = new Vector2Int(x, height);
-
-        // Rotate tetromino randomly
-
-        // Place tetromino to spawn point
-        grid.AddTetromino(fallingTetromino);
-
-        // Store reference of block objects to a container
-        InstantiateTetromino(fallingTetromino);
+        // Instantiate the tetromino and keep block objects reference
+        InstantiateTetromino(mapManager.CurrentTetromino);
     }
     private void InstantiateTetromino(Tetromino tetromino)
     {
@@ -101,13 +93,13 @@ public class GameManager : MonoBehaviour
     }
 
     // Initialising Helper Functions
-    private void LoadResources()
+    private void LoadStaticResources()
     {
         // Load block resources
         BlockResources.LoadBlockPrefabs();
         BlockResources.LoadBlockTextures();
 
         // Initialise boundary data
-        boundary = MapBoundaryData.Create(boundaryRegion);
+        MapBoundaryData.Create(boundaryRegion);
     }
 }

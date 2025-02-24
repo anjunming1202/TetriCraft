@@ -14,6 +14,7 @@ public class Tetromino
     public Block[,] blocks;
     public Vector2Int position = new Vector2Int(0, 0); // grid position
     public int size;
+    public bool isActive = false; // inactive tetromino is not in the map
 
     public Tetromino(TetrominoType type) : this(type, new NullBlock(), new NullBlock(), new NullBlock(), new NullBlock()) { }
     // public Tetromino(TetrominoType type, BlockType blockType) : this(type, block, block, block, block) { }
@@ -86,18 +87,18 @@ public class Tetromino
     public Block this[int x, int y] => blocks[x, y];
     public bool IsBlock(int x, int y) => blocks[x, y] != null;
 
-    public void GoTo(Map grid, int x, int y)
+    public void MoveTo(Map grid, int x, int y)
     {
-        GoTo(grid, new Vector2Int(x, y));
+        MoveTo(grid, new Vector2Int(x, y));
     }
-    public void GoTo(Map grid, Vector2Int to)
+    public void MoveTo(Map grid, Vector2Int to)
     {
         for (int j = 0; j < size; j++) // column
             for (int i = 0; i < size; i++) // row
             {
                 Block block = blocks[i, j];
                 if (block != null)
-                    block.GoTo(grid, to + new Vector2Int(j, size - 1 - i));
+                    block.MoveTo(grid, to + new Vector2Int(j, size - 1 - i));
             }
     }
     public void Fall()

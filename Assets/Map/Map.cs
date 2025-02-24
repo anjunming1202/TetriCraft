@@ -5,24 +5,20 @@ public class Map
 {
     public Map()
     {
-        grid = new Block[width, height + 5]; // all null
+        blockMap = new Block[width, height + 5]; // all null
     }
 
-    public Block[,] grid;
+    public Block[,] blockMap;
 
     // Map Boundary Data
     private int width => MapBoundaryData.Instance.width;
     private int height => MapBoundaryData.Instance.height;
     public Block this[int x, int y]
     {
-        get => grid[x, y];
-        set => grid[x, y] = value;
+        get => blockMap[x, y];
+        set => blockMap[x, y] = value;
     }
 
-    public void AddTetromino(Tetromino tetromino)
-    {
-        tetromino.GoTo(this, tetromino.position);
-    }
     public bool CheckInside(Tetromino tetromino)
     {
         return true;
@@ -30,11 +26,11 @@ public class Map
     /*
     public void AddBlock(Block block)
     {
-        grid[block.position.x, block.position.y] = block;
+        blockMap[block.position.x, block.position.y] = block;
     }
     private void MoveGrid(Vector2Int from, Vector2Int to)
     {
-        grid[to.x, to.y] = grid[from.x, from.y];
-        grid[from.x, from.y] = null;
+        blockMap[to.x, to.y] = blockMap[from.x, from.y];
+        blockMap[from.x, from.y] = null;
     }*/
 }
