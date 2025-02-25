@@ -21,6 +21,12 @@ public class GameManager : MonoBehaviour
     // Game Objects Container
     private List<Transform> blockObjects;
 
+    // Input Key Mapping
+    private KeyCode MoveLeftKey => KeyCode.A;
+    private KeyCode MoveRightKey => KeyCode.F;
+    private KeyCode FallDownKey => KeyCode.S;
+    private KeyCode LandKey => KeyCode.Space;
+
 
     void Awake()
     {
@@ -44,7 +50,27 @@ public class GameManager : MonoBehaviour
     ////////////////////////////////////////////////////
     void Update()
     {
-        
+        if (Input.GetMouseButtonDown(0))
+        {
+            // Test
+            //SpawnNewTetromino();
+        }
+        if (Input.GetKey(MoveLeftKey))
+        {
+            //mapManager.CurrentTetromino.
+        }
+        if (Input.GetKey(MoveRightKey))
+        {
+
+        }
+        if (Input.GetKey(FallDownKey))
+        {
+
+        }
+        if (Input.GetKey(LandKey))
+        {
+
+        }
     }
 
     void OnRenderObject()

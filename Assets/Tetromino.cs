@@ -93,17 +93,24 @@ public class Tetromino
     }
     public void MoveTo(Map grid, Vector2Int to)
     {
-        for (int j = 0; j < size; j++) // column
-            for (int i = 0; i < size; i++) // row
+        // Move tetromino
+        position = to;
+        // Block position update
+        for (int c = 0; c < size; c++)
+            for (int r = 0; r < size; r++)
             {
-                Block block = blocks[i, j];
+                Block block = blocks[r, c];
                 if (block != null)
-                    block.MoveTo(grid, to + new Vector2Int(j, size - 1 - i));
+                    block.MoveTo(grid, LocalToMap(r, c));
             }
+    }
+    public Vector2Int LocalToMap(int row, int column)
+    {
+        return position + new Vector2Int(column, size - 1 - row);
     }
     public void Fall()
     {
-
+        
     }
     public void Left()
     {
@@ -121,11 +128,12 @@ public class Tetromino
 
 public enum TetrominoType
 {
-    I,
+    I = 0,
     O,
     T,
     J,
     L,
     S,
-    Z
+    Z,
+    Count
 }
