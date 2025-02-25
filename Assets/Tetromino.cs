@@ -108,17 +108,9 @@ public class Tetromino
     {
         return position + new Vector2Int(column, size - 1 - row);
     }
-    public void Fall()
+    public void Move(int x, int y)
     {
-        
-    }
-    public void Left()
-    {
-
-    }
-    public void Right()
-    {
-
+        position += new Vector2Int(x, y);
     }
     public void Rotate(bool isclockwise = true)
     {
