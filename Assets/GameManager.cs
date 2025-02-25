@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
 
     // Input Key Mapping
     private KeyCode MoveLeftKey => KeyCode.A;
-    private KeyCode MoveRightKey => KeyCode.F;
+    private KeyCode MoveRightKey => KeyCode.D;
     private KeyCode FallDownKey => KeyCode.S;
     private KeyCode LandKey => KeyCode.Space;
 
@@ -57,25 +57,20 @@ public class GameManager : MonoBehaviour
         }
         if (Input.GetKey(MoveLeftKey))
         {
-            //mapManager.CurrentTetromino.
+            mapManager.Left();
         }
         if (Input.GetKey(MoveRightKey))
         {
-
+            mapManager.Right();
         }
         if (Input.GetKey(FallDownKey))
         {
-
+            mapManager.Accelerate();
         }
-        if (Input.GetKey(LandKey))
+        if (Input.GetKeyDown(LandKey))
         {
-
+            mapManager.Land();
         }
-    }
-
-    void OnRenderObject()
-    {
-
     }
 
 
@@ -96,26 +91,6 @@ public class GameManager : MonoBehaviour
         {
             blockObjects.Add(block);
         }
-    }
-
-    public void Fall()
-    {
-
-    }
-
-    public void Rotate(bool isclockwise = true)
-    {
-
-    }
-
-    public void AccelerateFall()
-    {
-
-    }
-
-    public void Land()
-    {
-
     }
 
     // Initialising Helper Functions

@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using UnityEngine;
 
 // Control the lifecycles of data in the map;
@@ -21,7 +22,9 @@ public class MapManager : MonoBehaviour
 
 
 
-
+    //================================//
+    //  Initialise
+    //================================//
     public void NewMap()
     {
         // New a map
@@ -31,6 +34,11 @@ public class MapManager : MonoBehaviour
         CreateNextTetromino();
     }
 
+
+
+    //================================//
+    //  Initialise Tetromino
+    //================================//
     public void SpawnTetromino()
     {
         // Initialise next falling tetromino (nextTetromino should be prepared anytime)
@@ -45,7 +53,7 @@ public class MapManager : MonoBehaviour
         // Rotate tetromino randomly
 
         // Place tetromino to spawn point
-        AddTetromino(fallingTetromino);
+        map.SetBlocksPosition(fallingTetromino);
 
         // Generate next tetromino with random type
         CreateNextTetromino();
@@ -62,13 +70,6 @@ public class MapManager : MonoBehaviour
         // New a tetromino
         nextTetromino = new Tetromino(type);
     }
-
-
-
-    private void AddTetromino(Tetromino tetromino)
-    {
-        tetromino.MoveTo(map, tetromino.position);
-    }
     private void SetSittingOnCeiling(Tetromino tetromino)
     {
         // distance tetromino need to move
@@ -84,6 +85,60 @@ public class MapManager : MonoBehaviour
                 }
             }
         // move tetromino downwards
-        tetromino.MoveTo(map, tetromino.position + Vector2Int.down * distance);
+        map.SetTetrominoPosition(tetromino, tetromino.position + Vector2Int.down * distance);
+    }
+
+
+    //================================//
+    //  Tetromino Control
+    //================================//
+    public bool Move(int x, int y)
+    {
+        fallingTetromino.Move(x, y);
+        if (!map.CheckInside(fallingTetromino))
+        {
+            fallingTetromino.Move(-x, -y);
+            Debug.Log(fallingTetromino.position);
+            return false;
+        }
+        map.SetBlocksPosition(fallingTetromino);
+
+        return true;
+    }
+    public bool Left()
+    {
+        Move(-1, 0);
+
+        return true;
+    }
+    public bool Right()
+    {
+        Move(1, 0);
+
+        return true;
+    }
+
+    public bool Fall()
+    {
+        Move(0, -1);
+
+        return true;
+    }
+
+    public bool Accelerate()
+    {
+        Move(0, -1);
+
+        return true;
+    }
+
+    public bool Rotate(bool isclockwise = true)
+    {
+        return true;
+    }
+
+    public bool Land()
+    {
+        return true;
     }
 }

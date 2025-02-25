@@ -87,7 +87,7 @@ public class Tetromino
     public Block this[int x, int y] => blocks[x, y];
     public bool IsBlock(int x, int y) => blocks[x, y] != null;
 
-    public void MoveTo(Map grid, int x, int y)
+    /*public void MoveTo(Map grid, int x, int y)
     {
         MoveTo(grid, new Vector2Int(x, y));
     }
@@ -103,7 +103,7 @@ public class Tetromino
                 if (block != null)
                     block.MoveTo(grid, LocalToMap(r, c));
             }
-    }
+    }*/
     public Vector2Int LocalToMap(int row, int column)
     {
         return position + new Vector2Int(column, size - 1 - row);

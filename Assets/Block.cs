@@ -30,7 +30,7 @@ public abstract class Block
 
     }
 
-    public void MoveTo(Map grid, int x, int y)
+    /*public void MoveTo(Map grid, int x, int y)
     {
         MoveTo(grid, new Vector2Int(x, y));
     }
@@ -39,7 +39,7 @@ public abstract class Block
         grid[to.x, to.y] = this;
         grid[position.x, position.y] = null;
         position = to;
-    }
+    }*/
 
 
 
