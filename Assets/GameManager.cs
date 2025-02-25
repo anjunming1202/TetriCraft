@@ -15,6 +15,17 @@ public class GameManager : MonoBehaviour
     private int height => MapBoundaryData.Instance.height;
     private MapBoundaryData boundary => MapBoundaryData.Instance;
 
+    // Timer
+    private float timer = 0;
+
+    // Control
+    //private bool isAccelerating = false;
+    public float speedFalling = 1;
+    public float speedAcclerating = 2;
+    private float interval;
+    private float intervalNormal => 1 / speedFalling;
+    private float intervalAccelerating => 1 / speedAcclerating;
+
     // Boundary Region Definer
     public Transform boundaryRegion;
 
@@ -32,52 +43,94 @@ public class GameManager : MonoBehaviour
     {
         // Load resources
         LoadStaticResources();
-
+    }
+    public void NewGame()
+    {
         // Initialise map
         mapManager = FindObjectOfType<MapManager>();
         mapManager.NewMap();
 
         // Initialise block object list
+        if (blockObjects != null)
+        {
+            foreach (Transform t in blockObjects)
+                GameObject.Destroy(t);
+        }
         blockObjects = new List<Transform>();
+
+        // Spawn the first tetromino
+        SpawnTetromino();
+
+        // Initialise falling speed
+        interval = intervalNormal;
     }
+
     void Start()
     {
-
-        // Test
-        SpawnNewTetromino();
+        // New game
+        NewGame();
     }
 
     ////////////////////////////////////////////////////
     void Update()
     {
+        // Timer
+        timer += Time.deltaTime;
+
+        // Control
         if (Input.GetMouseButtonDown(0))
         {
             // Test
-            //SpawnNewTetromino();
+            //SpawnTetromino();
         }
-        if (Input.GetKey(MoveLeftKey))
+        if (Input.GetKeyDown(MoveLeftKey)) // Left
         {
-            mapManager.Left();
+            mapManager.MoveLeft();
         }
-        if (Input.GetKey(MoveRightKey))
+        if (Input.GetKeyDown(MoveRightKey)) // Right
         {
-            mapManager.Right();
+            mapManager.MoveRight();
         }
-        if (Input.GetKey(FallDownKey))
+        if (Input.GetKeyDown(FallDownKey)) // Accelerating
         {
-            mapManager.Accelerate();
+            OnAccelerating();
         }
-        if (Input.GetKeyDown(LandKey))
+        if (Input.GetKeyUp(FallDownKey))
+        {
+            StopAccelerating();
+        }
+        if (Input.GetKeyDown(LandKey)) // Land
         {
             mapManager.Land();
         }
+
+        // Fall of tetromino
+        if (timer >= interval)
+        {
+            mapManager.MoveDown();
+            timer = 0;
+        }
     }
 
-
+    public void OnAccelerating()
+    {
+        interval = intervalAccelerating;
+    }
+    private void StopAccelerating()
+    {
+        interval = intervalNormal;
+    }
 
     ////////////////////////////////////////////////////
 
-    public void SpawnNewTetromino()
+    public void TrySpawnTetromino()
+    {
+        if (mapManager.CurrentTetromino.landed)
+        {
+
+        }
+    }
+    public void SpawnTetromino()
     {
         // New tetromino data
         mapManager.SpawnTetromino();
@@ -87,10 +140,15 @@ public class GameManager : MonoBehaviour
     }
     private void InstantiateTetromino(Tetromino tetromino)
     {
-        foreach (Transform block in TetrominoFactory.CreateTetromino(tetromino).GetComponentInChildren<Transform>())
+        GameObject tetrominoObject = TetrominoFactory.CreateTetromino(tetromino);
+        foreach (Transform block in tetrominoObject.GetComponentInChildren<Transform>())
         {
             blockObjects.Add(block);
         }
+    }
+    private void DestroyTetromino(Tetromino tetromino)
+    {
+        
     }
 
     // Initialising Helper Functions

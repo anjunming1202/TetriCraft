@@ -32,7 +32,7 @@ public static class BlockResources
         foreach (Sprite sprite in blockSprites)
         {
             blockTexture[sprite.name] = sprite;
-            Debug.Log($"Loaded Sprite: {sprite.name}");
+            //Debug.Log($"Loaded Sprite: {sprite.name}");
         }
 
         Debug.Log($"Successfully Loaded {blockSprites.Length} Texture Sprite!");
@@ -57,7 +57,7 @@ public static class BlockResources
             {
                 BlockPrefabs[i] = prefab; // prefab list
                 BlockPrefabsDict[prefab.name] = prefab; // prefab dictionary (indexed by name)
-                Debug.Log($"Loaded Prefab: {prefab.name}");
+                //Debug.Log($"Loaded Prefab: {prefab.name}");
             }
         }
 

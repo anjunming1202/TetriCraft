@@ -14,6 +14,7 @@ public class Tetromino
     public Block[,] blocks;
     public Vector2Int position = new Vector2Int(0, 0); // grid position
     public int size;
+    public bool landed = false;
     public bool isActive = false; // inactive tetromino is not in the map
 
     public Tetromino(TetrominoType type) : this(type, new NullBlock(), new NullBlock(), new NullBlock(), new NullBlock()) { }
