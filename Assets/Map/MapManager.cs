@@ -53,7 +53,7 @@ public class MapManager : MonoBehaviour
         // Rotate tetromino randomly
 
         // Place tetromino to spawn point
-        map.SetBlocksPosition(fallingTetromino);
+        SetBlocksPosition(fallingTetromino);
 
         // Generate next tetromino with random type
         CreateNextTetromino();
@@ -85,7 +85,7 @@ public class MapManager : MonoBehaviour
                 }
             }
         // move tetromino downwards
-        map.SetTetrominoPosition(tetromino, tetromino.position + Vector2Int.down * distance);
+        SetTetrominoPosition(tetromino, tetromino.position + Vector2Int.down * distance);
     }
 
 
@@ -95,13 +95,13 @@ public class MapManager : MonoBehaviour
     public bool Move(int x, int y)
     {
         fallingTetromino.Move(x, y);
-        if (!map.CheckInside(fallingTetromino))
+        if (!CheckInside(fallingTetromino))
         {
             fallingTetromino.Move(-x, -y);
             Debug.Log(fallingTetromino.position);
             return false;
         }
-        map.SetBlocksPosition(fallingTetromino);
+        SetBlocksPosition(fallingTetromino);
 
         return true;
     }
@@ -139,6 +139,62 @@ public class MapManager : MonoBehaviour
 
     public bool Land()
     {
+        return true;
+    }
+
+
+    //================================//
+    //  Set map data
+    //================================//
+
+    /// <summary>
+    /// Set position of tetromino, position of blocks contained, and update block map.
+    /// </summary>
+    public void SetTetrominoPosition(Tetromino tetromino, Vector2Int position)
+    {
+        // Set tetromino data -> set position
+        tetromino.position = position;
+        // Set block data & update map data
+        SetBlocksPosition(tetromino);
+    }
+    /// <summary>
+    /// Set position of blocks contained and update block map, based on current tetromino data
+    /// </summary>
+    public void SetBlocksPosition(Tetromino tetromino)
+    {
+        // Getting blocks reference -> set block position by tetromino position + local position in the tetromino
+        for (int c = 0; c < tetromino.size; c++)
+            for (int r = 0; r < tetromino.size; r++)
+            {
+                Block block = tetromino[r, c];
+                if (block != null)
+                {
+                    Vector2Int to = tetromino.LocalToMap(r, c);
+                    Vector2Int from = block.position;
+                    // Set block data
+                    block.position = to;
+                    // Set map data
+                    map[from.x, from.y] = null;
+                    map[to.x, to.y] = block;
+                }
+            }
+    }
+
+    /// <summary>
+    /// Check for bottom, left, and right boundaries
+    /// </summary>
+    public bool CheckInside(Tetromino tetromino)
+    {
+        for (int r = 0; r < tetromino.size; r++)
+            for (int c = 0; c < tetromino.size; c++)
+            {
+                if (tetromino[r, c] != null)
+                {
+                    Vector2Int blockPos = tetromino.LocalToMap(r, c);
+                    if (!map.CheckInside(blockPos.x, blockPos.y))
+                        return false;
+                }
+            }
         return true;
     }
 }
