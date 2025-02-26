@@ -17,17 +17,20 @@ public class TetrominoFactory : MonoBehaviour
         {
             if (block != null)
             {
-                BlockFactory.CreateBlock(block).transform.parent = Tetromino.transform;
+                BlockFactory.CreateBlock(block).transform.SetParent(Tetromino.transform);
             }
         }
         Tetromino.name = $"Tetromino {tetromino.Type}";
         return Tetromino;
     }
-    public static void DeleteTetromino(Tetromino tetromino)
+    /// <summary>
+    /// Detach from "Tetromino" and reattach to "Blocks"
+    /// </summary>
+    public static void ReparentAsBlocks()
     {
         foreach (var block_object in Tetromino.GetComponentsInChildren<Transform>())
         {
-            block_object.parent = BlockFactory.Blocks.transform;
+            block_object.SetParent(BlockFactory.Blocks.transform);
         }
     }
 }

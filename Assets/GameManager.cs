@@ -85,11 +85,11 @@ public class GameManager : MonoBehaviour
         }
         if (Input.GetKeyDown(MoveLeftKey)) // Left
         {
-            mapManager.MoveLeft();
+            mapManager.Left();
         }
         if (Input.GetKeyDown(MoveRightKey)) // Right
         {
-            mapManager.MoveRight();
+            mapManager.Right();
         }
         if (Input.GetKeyDown(FallDownKey)) // Accelerating
         {
@@ -107,9 +107,12 @@ public class GameManager : MonoBehaviour
         // Fall of tetromino
         if (timer >= interval)
         {
-            mapManager.MoveDown();
+            mapManager.Fall();
             timer = 0;
         }
+
+        // Spawn new tetromino by checking the falling tetromino state (is isLanded)
+        TrySpawnTetromino();
     }
 
     public void OnAccelerating()
@@ -125,9 +128,13 @@ public class GameManager : MonoBehaviour
 
     public void TrySpawnTetromino()
     {
-        if (mapManager.CurrentTetromino.landed)
+        if (mapManager.CurrentTetromino.isLanded)
         {
+            // Set blocks children to the block pool
+            TetrominoFactory.ReparentAsBlocks();
 
+            // Spawn new tetromino    
+            SpawnTetromino();
         }
     }
     public void SpawnTetromino()
@@ -145,10 +152,6 @@ public class GameManager : MonoBehaviour
         {
             blockObjects.Add(block);
         }
-    }
-    private void DestroyTetromino(Tetromino tetromino)
-    {
-        
     }
 
     // Initialising Helper Functions

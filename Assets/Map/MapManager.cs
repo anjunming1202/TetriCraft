@@ -150,20 +150,20 @@ public class MapManager : MonoBehaviour
 
         return true;
     }
-    public void MoveLeft()
+    public void Left()
     {
         TryMove(-1, 0);
     }
-    public void MoveRight()
+    public void Right()
     {
         TryMove(1, 0);
     }
-    public void MoveDown()
+    public void Fall()
     {
         bool successful = TryMove(0, -1);
         if (!successful)
         {
-            fallingTetromino.landed = true;
+            fallingTetromino.isLanded = true;
         }
     }
     public void Land()

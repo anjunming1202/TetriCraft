@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speedFalling: 1
-  speedAcclerating: 6
+  speedAcclerating: 8
   boundaryRegion: {fileID: 2103392089}
 --- !u!4 &2464639
 Transform:
