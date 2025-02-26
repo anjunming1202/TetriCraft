@@ -140,7 +140,7 @@ public class MapManager : MonoBehaviour
     private bool TryMove(int x, int y)
     {
         fallingTetromino.Move(x, y);
-        if (!CheckInside(fallingTetromino))
+        if (!CheckValid(fallingTetromino))
         {
             fallingTetromino.Move(-x, -y);
             Debug.Log(fallingTetromino.position);
@@ -163,7 +163,15 @@ public class MapManager : MonoBehaviour
         bool successful = TryMove(0, -1);
         if (!successful)
         {
-            fallingTetromino.isLanded = true;
+            OnLand();
+        }
+    }
+    private void OnLand()
+    {
+        fallingTetromino.isLanded = true;
+        foreach (var block in fallingTetromino.blocks)
+        {
+            block.isFalling = false;
         }
     }
     public void Land()
@@ -195,5 +203,28 @@ public class MapManager : MonoBehaviour
                 }
             }
         return true;
+    }
+    public bool CheckCollide(Tetromino tetromino)
+    {
+        for (int r = 0; r < tetromino.size; r++)
+            for (int c = 0; c < tetromino.size; c++)
+            {
+                if (tetromino[r, c] != null)
+                {
+                    Vector2Int blockPos = tetromino.LocalToMap(r, c);
+                    Block block = map[blockPos.x, blockPos.y];
+                    if (block != null && !block.isFalling)
+                    {
+                        Debug.Log("Collide");
+                        return true;
+                    }
+                }
+            }
+        return false;
+    }
+    public bool CheckValid(Tetromino tetromino)
+    {
+        // Check inside first, check not collide then
+        return (CheckInside(tetromino) && !CheckCollide(tetromino));
     }
 }

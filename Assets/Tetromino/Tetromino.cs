@@ -11,7 +11,8 @@ public class Tetromino
 {
     public TetrominoType Type { get; }
 
-    public Block[,] blocks;
+    private Block[,] shape;
+    public Block[] blocks = new Block[4];
     public Vector2Int position = new Vector2Int(0, 0); // grid position
     public int size;
     public bool isLanded = false;
@@ -26,7 +27,7 @@ public class Tetromino
         switch (type)
         {
             case TetrominoType.I:
-                blocks = new Block[4, 4] {
+                shape = new Block[4, 4] {
                 { null, null, null, null },
                 { block1, block2, block3, block4 },
                 { null, null, null, null },
@@ -34,7 +35,7 @@ public class Tetromino
                 size = 4;
                 break;
             case TetrominoType.O:
-                blocks = new Block[4, 4] {
+                shape = new Block[4, 4] {
                 { null, null, null, null },
                 { null, block1, block2, null },
                 { null, block3, block4, null },
@@ -42,35 +43,35 @@ public class Tetromino
                 size = 4;
                 break;
             case TetrominoType.T:
-                blocks = new Block[3, 3] {
+                shape = new Block[3, 3] {
                 { null, block1, null },
                 { block2, block3, block4 },
                 { null, null, null } };
                 size = 3;
                 break;
             case TetrominoType.J:
-                blocks = new Block[3, 3] {
+                shape = new Block[3, 3] {
                 { block1, null, null },
                 { block2, block3, block4 },
                 { null, null, null } };
                 size = 3;
                 break;
             case TetrominoType.L:
-                blocks = new Block[3, 3] {
+                shape = new Block[3, 3] {
                 { null, null, block1 },
                 { block2, block3, block4 },
                 { null, null, null } };
                 size = 3;
                 break;
             case TetrominoType.S:
-                blocks = new Block[3, 3] {
+                shape = new Block[3, 3] {
                 { null, block1, block2 },
                 { block3, block4, null },
                 { null, null, null } };
                 size = 3;
                 break;
             case TetrominoType.Z:
-                blocks = new Block[3, 3] {
+                shape = new Block[3, 3] {
                 { block1, block2, null },
                 { null, block3, block4 },
                 { null, null, null } };
@@ -78,33 +79,22 @@ public class Tetromino
                 break;
         }
 
+        // Block array
+        blocks[0] = block1;
+        blocks[1] = block2;
+        blocks[2] = block3;
+        blocks[3] = block4;
+
         // Initialise block data as in a tetromino
-        foreach (var block in new Block[] { block1, block2, block3, block4 })
+        foreach (var block in blocks)
         {
-            block.isMoving = true;
+            block.isFalling = true;
         }
     }
     
-    public Block this[int x, int y] => blocks[x, y];
-    public bool IsBlock(int x, int y) => blocks[x, y] != null;
+    public Block this[int x, int y] => shape[x, y];
+    public bool IsBlock(int x, int y) => shape[x, y] != null;
 
-    /*public void MoveTo(Map grid, int x, int y)
-    {
-        MoveTo(grid, new Vector2Int(x, y));
-    }
-    public void MoveTo(Map grid, Vector2Int to)
-    {
-        // Move tetromino
-        position = to;
-        // Block position update
-        for (int c = 0; c < size; c++)
-            for (int r = 0; r < size; r++)
-            {
-                Block block = blocks[r, c];
-                if (block != null)
-                    block.MoveTo(grid, LocalToMap(r, c));
-            }
-    }*/
     public Vector2Int LocalToMap(int row, int column)
     {
         return position + new Vector2Int(column, size - 1 - row);

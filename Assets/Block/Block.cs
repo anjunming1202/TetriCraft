@@ -22,7 +22,7 @@ public abstract class Block
     }
 
     // Block state flags
-    public bool isMoving = false;
+    public bool isFalling = false;
 
 
     protected Block()
