@@ -15,10 +15,7 @@ public class TetrominoFactory : MonoBehaviour
     {
         foreach (Block block in tetromino.blocks)
         {
-            if (block != null)
-            {
-                BlockFactory.CreateBlock(block).transform.SetParent(Tetromino.transform);
-            }
+            BlockFactory.CreateBlock(block).transform.SetParent(Tetromino.transform);
         }
         Tetromino.name = $"Tetromino {tetromino.Type}";
         return Tetromino;

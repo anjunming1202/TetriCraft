@@ -21,6 +21,7 @@ public class BlockRenderer : MonoBehaviour
         this.block = block;
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = BlockResources.blockTexture[block.Name];
+        spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; // only seen in the map region
 
         /*// Subscribe the OnChange event - update block data when block data changes
         this.block.OnChanged += UpdateBlockData;*/

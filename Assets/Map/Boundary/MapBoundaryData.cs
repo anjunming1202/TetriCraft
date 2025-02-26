@@ -39,4 +39,16 @@ public class MapBoundaryData : ScriptableObject
     {
         return (Vector3)((Vector2)posGrid * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
     }
+    // Check inside
+    /// <summary>
+    /// Check for top, bottom, left, and right boundaries
+    /// </summary>
+    public static bool CheckInside(float x, float y)
+    {
+        return x >= 0 && x < Instance.width && y >= 0 && y < Instance.height;
+    }
+    public static bool CheckInside(Vector2 pos)
+    {
+        return CheckInside(pos.x, pos.y);
+    }
 }

@@ -9,6 +9,9 @@ public class GameManager : MonoBehaviour
     // Map Manager
     private MapManager mapManager;
 
+    // Map region
+    public SpriteMask boundaryRegion;
+
     // Map Data (readonly)
     private Map map => mapManager.map;
     private int width => MapBoundaryData.Instance.width;
@@ -25,9 +28,6 @@ public class GameManager : MonoBehaviour
     private float interval;
     private float intervalNormal => 1 / speedFalling;
     private float intervalAccelerating => 1 / speedAcclerating;
-
-    // Boundary Region Definer
-    public Transform boundaryRegion;
 
     // Game Objects Container
     private List<Transform> blockObjects;
@@ -162,6 +162,6 @@ public class GameManager : MonoBehaviour
         BlockResources.LoadBlockTextures();
 
         // Initialise boundary data
-        MapBoundaryData.Create(boundaryRegion);
+        MapBoundaryData.Create(boundaryRegion.transform);
     }
 }

@@ -14,11 +14,16 @@ public class BlockFactory : MonoBehaviour
     
     public static GameObject CreateBlock(Block block)
     {
-        GameObject gameObject = new GameObject(block.Name);
-        gameObject.AddComponent<SpriteRenderer>();
-        BlockRenderer blockRenderer = gameObject.AddComponent<BlockRenderer>();
+        GameObject blockObject = new GameObject(block.Name);
+
+        // Add sprite renderer
+        blockObject.AddComponent<SpriteRenderer>();
+        // Add block renderer
+        BlockRenderer blockRenderer = blockObject.AddComponent<BlockRenderer>();
         blockRenderer.Initialise(block);
-        //gameObject.transform.parent = Blocks.transform;
-        return gameObject;
+        // Initial spawn position (avoid being seen at strange position)
+        blockObject.transform.position = MapBoundaryData.GridToWorld(block.position);
+
+        return blockObject;
     }
 }
