@@ -194,11 +194,10 @@ public class MapManager : MonoBehaviour
         if (!CheckValid(fallingTetromino))
         {
             fallingTetromino.Move(-x, -y);
-            Debug.Log(fallingTetromino.position);
+            Debug.Log("fail fall");
             return false;
         }
         MoveTetrominoTo(fallingTetromino, fallingTetromino.position);
-
         return true;
     }
     public void Left()
@@ -230,9 +229,21 @@ public class MapManager : MonoBehaviour
         
     }
 
-    public void Rotate(bool isclockwise = true)
+    private bool TryRotate(bool clockwise = true)
     {
-
+        fallingTetromino.Rotate(clockwise);
+        if (!CheckValid(fallingTetromino))
+        {
+            fallingTetromino.Rotate(!clockwise);
+            Debug.Log("fail rotation");
+            return false;
+        }
+        MoveTetrominoTo(fallingTetromino, fallingTetromino.position);
+        return true;
+    }
+    public void Rotate(bool clockwise = true)
+    {
+        TryRotate(clockwise);
     }
 
 

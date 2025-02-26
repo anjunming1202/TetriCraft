@@ -103,9 +103,22 @@ public class Tetromino
     {
         position += new Vector2Int(x, y);
     }
-    public void Rotate(bool isclockwise = true)
+    public void Rotate(bool clockwise = true)
     {
+        Block[,] rotated = new Block[size, size];
 
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                if (clockwise)
+                    rotated[j, size - 1 - i] = shape[i, j];
+                else
+                    rotated[size - 1 - j, i] = shape[i, j];
+            }
+        }
+
+        shape = rotated;
     }
 }
 

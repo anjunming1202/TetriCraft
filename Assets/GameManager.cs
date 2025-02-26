@@ -33,10 +33,12 @@ public class GameManager : MonoBehaviour
     private List<Transform> blockObjects;
 
     // Input Key Mapping
-    private KeyCode MoveLeftKey => KeyCode.A;
-    private KeyCode MoveRightKey => KeyCode.D;
-    private KeyCode FallDownKey => KeyCode.S;
-    private KeyCode LandKey => KeyCode.Space;
+    private KeyCode key_left => KeyCode.A;
+    private KeyCode key_right => KeyCode.D;
+    private KeyCode key_accelerate => KeyCode.S;
+    private KeyCode key_land => KeyCode.Space;
+    private KeyCode key_rotateCW => KeyCode.E;
+    private KeyCode key_rotateCCW => KeyCode.Q;
 
 
     void Awake()
@@ -102,25 +104,33 @@ public class GameManager : MonoBehaviour
             // Test
             //SpawnTetromino();
         }
-        if (Input.GetKeyDown(MoveLeftKey)) // Left
+        if (Input.GetKeyDown(key_left)) // Left
         {
             mapManager.Left();
         }
-        if (Input.GetKeyDown(MoveRightKey)) // Right
+        if (Input.GetKeyDown(key_right)) // Right
         {
             mapManager.Right();
         }
-        if (Input.GetKeyDown(FallDownKey)) // Accelerating
+        if (Input.GetKeyDown(key_accelerate)) // Accelerating
         {
             OnAccelerating();
         }
-        if (Input.GetKeyUp(FallDownKey))
+        if (Input.GetKeyUp(key_accelerate))
         {
             StopAccelerating();
         }
-        if (Input.GetKeyDown(LandKey)) // Land
+        if (Input.GetKeyDown(key_land)) // Land
         {
             mapManager.Land();
+        }
+        if (Input.GetKeyDown(key_rotateCW)) // Rotate clockwise
+        {
+            mapManager.Rotate(true);
+        }
+        if (Input.GetKeyDown(key_rotateCCW)) // Rotate anticlockwise
+        {
+            mapManager.Rotate(false);
         }
 
         // Fall of tetromino
