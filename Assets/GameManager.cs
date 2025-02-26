@@ -78,13 +78,7 @@ public class GameManager : MonoBehaviour
     {
         // debug
         int landedCount = 0;
-        foreach (var t in blockObjects)
-        {
-            if (t.GetComponent<BlockRenderer>().block.isFalling == false)
-            {
-                landedCount++;
-            }
-        }
+        landedCount = BlockFactory.Blocks.GetComponentsInChildren<Transform>().Length - 1;
         int blockCount = 0;
         foreach (var t in mapManager.map.blockMap)
         {

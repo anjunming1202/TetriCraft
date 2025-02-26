@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
 public class BlockRenderer : MonoBehaviour
 {
     // Reference of block data
-    public Block block;             // Use event-subscribe model, not having block reference
+    /*public Block block;   */          // Use event-subscribe model, not having block reference
 
     // Renderer
     public SpriteRenderer spriteRenderer;
@@ -18,35 +19,28 @@ public class BlockRenderer : MonoBehaviour
     public void Initialise(Block block)
     {
         // Initialise texture renderer
-        this.block = block;
+        /*this.block = block;*/
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = BlockResources.blockTexture[block.Name];
         spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; // only seen in the map region
 
-        /*// Subscribe the OnChange event - update block data when block data changes
-        this.block.OnChanged += UpdateBlockData;*/
+        // Subscribe the block "change" events - render by updating block object when block data changes
+        block.OnChanged += Render;
     }
 
     void Update()
     {
-        Render();
-    }
-
-    private void Render()
-    {
-        if (block.isFalling)
-        {
-            Vector3 targetPosition = MapBoundaryData.GridToWorld(block.position);
-            transform.position = targetPosition;
-        }
+        /*RenderAnimation();*/   // if want animation, animation update here
     }
 
 
-
-    ////////////////////////////////
-    /*// When block data changes, update block data by subscribing OnChange event
-    private void UpdateBlockData(Block block)
+    /// <summary>
+    /// Render block: set position, set texture
+    /// </summary>
+    private void Render(Block block)
     {
-        this.block = block;
-    }*/
+        Vector3 targetPosition = MapBoundaryData.GridToWorld(block.position);
+        transform.position = targetPosition;
+        spriteRenderer.sprite = block.texture;
+    }
 }

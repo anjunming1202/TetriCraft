@@ -223,10 +223,12 @@ public class MapManager : MonoBehaviour
         {
             block.isFalling = false;
         }
+        
     }
     public void Land()
     {
-        
+        while (TryMove(0, -1)) { }
+        OnLand();
     }
 
     private bool TryRotate(bool clockwise = true)

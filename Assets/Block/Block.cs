@@ -17,7 +17,7 @@ public abstract class Block
         set
         {
             _position = value;
-            TriggerOnMoved();
+            OnMoved();
         }
     }
 
@@ -46,15 +46,16 @@ public abstract class Block
     /////////////////////////////////////////////
 
     // Event for connecting the renderer
-    public delegate void OnChangedEvent(Block data);
-    public event OnChangedEvent OnMoved;
+    public delegate void OnChangedEvent(Block block);
+    public event OnChangedEvent OnChanged;
 
 
     // Trigger event when position changed
-    public void TriggerOnMoved()
+    public void OnMoved()
     {
-        OnMoved?.Invoke(this);
+        OnChanged?.Invoke(this);
     }
+    // 
 }
 
 public enum BlockType

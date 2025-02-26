@@ -25,9 +25,11 @@ public class TetrominoFactory : MonoBehaviour
     /// </summary>
     public static void ReparentBlocks()
     {
-        foreach (var block_object in Tetromino.GetComponentsInChildren<Transform>())
+        foreach (var obj in Tetromino.GetComponentsInChildren<Transform>())
         {
-            block_object.SetParent(BlockFactory.Blocks.transform);
+            if (obj == Tetromino.transform)
+                continue;
+            obj.SetParent(BlockFactory.Blocks.transform);
         }
     }
 }
