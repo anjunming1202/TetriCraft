@@ -131,7 +131,7 @@ public class GameManager : MonoBehaviour
         if (mapManager.CurrentTetromino.isLanded)
         {
             // Set blocks children to the block pool
-            TetrominoFactory.ReparentAsBlocks();
+            TetrominoFactory.ReparentBlocks();
 
             // Spawn new tetromino    
             SpawnTetromino();

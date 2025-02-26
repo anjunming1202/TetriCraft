@@ -26,7 +26,7 @@ public class TetrominoFactory : MonoBehaviour
     /// <summary>
     /// Detach from "Tetromino" and reattach to "Blocks"
     /// </summary>
-    public static void ReparentAsBlocks()
+    public static void ReparentBlocks()
     {
         foreach (var block_object in Tetromino.GetComponentsInChildren<Transform>())
         {
