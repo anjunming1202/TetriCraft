@@ -7,6 +7,7 @@ using UnityEngine;
 //      Control of the tetromino
 //      Control map to e.g. clear one row, spawn tetrominos, ... 
 //      ...
+[Serializable]
 public class MapManager : MonoBehaviour
 {
     // Map Data
@@ -53,7 +54,7 @@ public class MapManager : MonoBehaviour
         // Rotate tetromino randomly
 
         // Place tetromino to spawn point
-        PlaceTetrominoBlocks(fallingTetromino);
+        PlaceTetromino(fallingTetromino);
 
         // Generate next tetromino with random type
         CreateNextTetromino();
@@ -87,26 +88,48 @@ public class MapManager : MonoBehaviour
                 }
             }
         // move tetromino downwards
-        PlaceTetromino(tetromino, tetromino.position + Vector2Int.down * distance);
+        MoveTetrominoTo(tetromino, tetromino.position + Vector2Int.down * distance);
     }
 
 
 
     //================================//
-    //  Map Data Editing
+    //  Map Data Editing Operations
     //================================//
+
     /// <summary>
-    /// Place a tetromino to a position
+    /// Place a tetromino to another position
     /// </summary>
-    private void PlaceTetromino(Tetromino tetromino, Vector2Int position)
+    private void MoveTetrominoTo(Tetromino tetromino, Vector2Int to)
     {
-        // Set tetromino data -> set position
-        tetromino.position = position;
-        // Set block data & update map data
-        PlaceTetrominoBlocks(tetromino);
+        // Remove original blocks
+        RemoveTetromino(tetromino);
+
+        // Move tetromino -> set position
+        tetromino.position = to;
+
+        // Place down tetromino blocks
+        PlaceTetromino(tetromino);
+    }
+    /// <summary>
+    /// Move a block to another position
+    /// </summary>
+    private void MoveBlockTo(Block block, Vector2Int to)
+    {
+        // Remove original block
+        RemoveBlock(block);
+
+        // Move block -> set position
+        block.position = to;
+
+        // Place down block
+        PlaceBlock(block);
     }
 
-    private void PlaceTetrominoBlocks(Tetromino tetromino)
+    /// <summary>
+    /// Place tetromino blocks onto the map
+    /// </summary>
+    private void PlaceTetromino(Tetromino tetromino)
     {
         // Getting blocks reference -> set block position by tetromino position + local position in the tetromino
         for (int c = 0; c < tetromino.size; c++)
@@ -115,21 +138,49 @@ public class MapManager : MonoBehaviour
                 Block block = tetromino[r, c];
                 if (block != null)
                 {
-                    MoveBlock(block, tetromino.LocalToMap(r, c));
+                    block.position = tetromino.LocalToMap(r, c);
+                    PlaceBlock(block);
                 }
             }
     }
     /// <summary>
-    /// Move a block to a position
+    /// Place the block onto the map
     /// </summary>
-    private void MoveBlock(Block block, Vector2Int to)
+    private void PlaceBlock(Block block)
     {
-        Vector2Int from = block.position;
-        // Set block data
-        block.position = to;
-        // Set map data
-        map[from.x, from.y] = null;
-        map[to.x, to.y] = block;
+        Replace(block.position, block);
+    }
+    /// <summary>
+    /// Replace one position block by another
+    /// </summary>
+    private void Replace(Vector2Int pos, Block block)
+    {
+        map[pos.x, pos.y] = block;
+    }
+
+    /// <summary>
+    /// Remove tetromino blocks on the map
+    /// </summary>
+    private void RemoveTetromino(Tetromino tetromino)
+    {
+        foreach (Block block in tetromino.blocks)
+        {
+            RemoveBlock(block);
+        }
+    }
+    /// <summary>
+    /// Remove a block on the map
+    /// </summary>
+    private void RemoveBlock(Block block)
+    {
+        Remove(block.position);
+    }
+    /// <summary>
+    /// Remove one position block
+    /// </summary>
+    private void Remove(Vector2Int pos)
+    {
+        map[pos.x, pos.y] = null;
     }
 
 
@@ -146,7 +197,7 @@ public class MapManager : MonoBehaviour
             Debug.Log(fallingTetromino.position);
             return false;
         }
-        PlaceTetrominoBlocks(fallingTetromino);
+        MoveTetrominoTo(fallingTetromino, fallingTetromino.position);
 
         return true;
     }
@@ -185,12 +236,19 @@ public class MapManager : MonoBehaviour
     }
 
 
-    
+
 
     /// <summary>
     /// Check for bottom, left, and right boundaries
     /// </summary>
-    public bool CheckInside(Tetromino tetromino)
+    private bool CheckInside(Vector2Int pos)
+    {
+        return map.CheckInside(pos.x, pos.y);
+    }
+    /// <summary>
+    /// Check for bottom, left, and right boundaries
+    /// </summary>
+    private bool CheckInside(Tetromino tetromino)
     {
         for (int r = 0; r < tetromino.size; r++)
             for (int c = 0; c < tetromino.size; c++)
@@ -198,22 +256,22 @@ public class MapManager : MonoBehaviour
                 if (tetromino[r, c] != null)
                 {
                     Vector2Int blockPos = tetromino.LocalToMap(r, c);
-                    if (!map.CheckInside(blockPos.x, blockPos.y))
+                    if (!CheckInside(blockPos))
                         return false;
                 }
             }
         return true;
     }
-    public bool CheckCollide(Tetromino tetromino)
+    private bool CheckCollide(Tetromino tetromino)
     {
         for (int r = 0; r < tetromino.size; r++)
             for (int c = 0; c < tetromino.size; c++)
             {
                 if (tetromino[r, c] != null)
                 {
-                    Vector2Int blockPos = tetromino.LocalToMap(r, c);
-                    Block block = map[blockPos.x, blockPos.y];
-                    if (block != null && !block.isFalling)
+                    Vector2Int mapBlockPos = tetromino.LocalToMap(r, c);
+                    Block mapBlock = map[mapBlockPos.x, mapBlockPos.y];
+                    if (mapBlock != null && !mapBlock.isFalling)
                     {
                         Debug.Log("Collide");
                         return true;
@@ -222,7 +280,7 @@ public class MapManager : MonoBehaviour
             }
         return false;
     }
-    public bool CheckValid(Tetromino tetromino)
+    private bool CheckValid(Tetromino tetromino)
     {
         // Check inside first, check not collide then
         return (CheckInside(tetromino) && !CheckCollide(tetromino));

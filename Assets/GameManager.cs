@@ -74,6 +74,25 @@ public class GameManager : MonoBehaviour
     ////////////////////////////////////////////////////
     void Update()
     {
+        // debug
+        int landedCount = 0;
+        foreach (var t in blockObjects)
+        {
+            if (t.GetComponent<BlockRenderer>().block.isFalling == false)
+            {
+                landedCount++;
+            }
+        }
+        int blockCount = 0;
+        foreach (var t in mapManager.map.blockMap)
+        {
+            if (t != null)
+            {
+                blockCount++;
+            }
+        }
+        Debug.Log($"blocks in map: {blockCount}, blocks instantiated: {landedCount}");
+
         // Timer
         timer += Time.deltaTime;
 
