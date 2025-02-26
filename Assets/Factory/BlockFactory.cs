@@ -26,4 +26,9 @@ public class BlockFactory : MonoBehaviour
 
         return blockObject;
     }
+
+    public static void DestroyBlock(Block block)
+    {
+
+    }
 }

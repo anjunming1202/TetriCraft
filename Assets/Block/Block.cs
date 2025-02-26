@@ -5,57 +5,52 @@ using UnityEngine;
 [Serializable]
 public abstract class Block
 {
-    public abstract BlockType Type { get; }
-    public abstract string Name { get; }
-    public virtual Sprite texture => BlockResources.blockTexture[Name];
-
-    // Block position
-    private Vector2Int _position = Vector2Int.zero; // grid position, use position
-    public Vector2Int position
-    {
-        get => _position;
-        set
-        {
-            _position = value;
-            OnMoved();
-        }
-    }
-
-    // Block state flags
-    public bool isFalling = false;
-
-
     protected Block()
     {
 
     }
 
-    /*public void MoveTo(Map grid, int x, int y)
-    {
-        MoveTo(grid, new Vector2Int(x, y));
-    }
-    public void MoveTo(Map grid, Vector2Int to)
-    {
-        grid[to.x, to.y] = this;
-        grid[position.x, position.y] = null;
-        position = to;
-    }*/
+    // General
+    public abstract BlockType Type { get; }
+    public abstract string Name { get; }
+    public virtual Sprite texture => BlockResources.blockTexture[Name];
 
+    // Data in the map
+    private Vector2Int _position = Vector2Int.zero; // Block position in the map
 
+    // Block state flags
+    public bool isFalling = false;
 
-    /////////////////////////////////////////////
-
-    // Event for connecting the renderer
+    // Events
     public delegate void OnChangedEvent(Block block);
     public event OnChangedEvent OnChanged;
+    public event OnChangedEvent OnLanded;
 
 
-    // Trigger event when position changed
-    public void OnMoved()
+
+    // Getter & Setter
+    public Vector2Int position // position
+    {
+        get => _position;
+        set
+        {
+            _position = value;
+            TriggerMoving();
+        }
+    }
+
+    // On position changed
+    public void TriggerMoving()
     {
         OnChanged?.Invoke(this);
     }
-    // 
+
+    // On landed
+    public void TriggerLanding()
+    {
+        OnChanged?.Invoke(this);
+    }
+
 }
 
 public enum BlockType

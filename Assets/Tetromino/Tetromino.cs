@@ -9,15 +9,6 @@ using static Unity.Collections.AllocatorManager;
 [Serializable]
 public class Tetromino
 {
-    public TetrominoType Type { get; }
-
-    private Block[,] shape;
-    public Block[] blocks = new Block[4];
-    public Vector2Int position = new Vector2Int(0, 0); // grid position
-    public int size;
-    public bool isLanded = false;
-    public bool isActive = false; // inactive tetromino is not in the map
-
     public Tetromino(TetrominoType type) : this(type, new NullBlock(), new NullBlock(), new NullBlock(), new NullBlock()) { }
     // public Tetromino(TetrominoType type, BlockType blockType) : this(type, block, block, block, block) { }
     public Tetromino(TetrominoType type, Block block1, Block block2, Block block3, Block block4)
@@ -91,9 +82,23 @@ public class Tetromino
             block.isFalling = true;
         }
     }
-    
+
+    public TetrominoType Type { get; }
+
+    private Block[,] shape;
+    public Block[] blocks = new Block[4];
+    public Vector2Int position = new Vector2Int(0, 0); // grid position
+    public int size;
+    public bool isLanded = false;
+    public bool isActive = false; // inactive tetromino is not in the map
+
+    public delegate void OnLandedEvent(Tetromino tetromino);
+    public event OnLandedEvent OnLanded;
+
     public Block this[int x, int y] => shape[x, y];
     public bool IsBlock(int x, int y) => shape[x, y] != null;
+
+
 
     public Vector2Int LocalToMap(int row, int column)
     {
@@ -119,6 +124,12 @@ public class Tetromino
         }
 
         shape = rotated;
+    }
+
+    // On landed
+    public void TriggerLanding()
+    {
+        OnLanded?.Invoke(this);
     }
 }
 

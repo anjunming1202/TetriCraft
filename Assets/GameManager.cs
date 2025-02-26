@@ -117,6 +117,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(key_land)) // Land
         {
             mapManager.Land();
+            timer = 0;
         }
         if (Input.GetKeyDown(key_rotateCW)) // Rotate clockwise
         {

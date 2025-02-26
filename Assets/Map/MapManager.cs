@@ -213,22 +213,22 @@ public class MapManager : MonoBehaviour
         bool successful = TryMove(0, -1);
         if (!successful)
         {
-            OnLand();
+            OnLanded();
         }
     }
-    private void OnLand()
+    private void OnLanded()
     {
         fallingTetromino.isLanded = true;
         foreach (var block in fallingTetromino.blocks)
         {
             block.isFalling = false;
+            block.TriggerLanding();
         }
-        
     }
     public void Land()
     {
         while (TryMove(0, -1)) { }
-        OnLand();
+        OnLanded();
     }
 
     private bool TryRotate(bool clockwise = true)
