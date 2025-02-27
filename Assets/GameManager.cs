@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     private MapManager mapManager;
 
     // Map region
+    [Header("Map")]
     public SpriteMask boundaryRegion;
 
     // Map Data (readonly)
@@ -22,6 +23,7 @@ public class GameManager : MonoBehaviour
     private float timer = 0;
 
     // Control
+    [Header("Control")]
     //private bool isAccelerating = false;
     public float speedFalling = 1;
     public float speedAcclerating = 2;
@@ -40,10 +42,14 @@ public class GameManager : MonoBehaviour
     private KeyCode key_rotateCW => KeyCode.E;
     private KeyCode key_rotateCCW => KeyCode.Q;
 
+    // Visual
+    [Header("Visual")]
+    public AnimationCurveAsset blockMovementCurve;
+
 
     void Awake()
     {
-        // Load resources
+        // Load static resources
         LoadStaticResources();
     }
     public void NewGame()
@@ -178,7 +184,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Initialising Helper Functions
+    // Initialising all static data/resources
     private void LoadStaticResources()
     {
         // Load block resources
@@ -187,5 +193,8 @@ public class GameManager : MonoBehaviour
 
         // Initialise boundary data
         MapBoundaryData.Create(boundaryRegion.transform);
+
+        // Initialise block animator
+        BlockAnimator.MovementCurveAsset = blockMovementCurve;
     }
 }

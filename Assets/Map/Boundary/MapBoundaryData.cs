@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "GridData", menuName = "ScriptableObjects/GridData")]
+[CreateAssetMenu(fileName = "NewMapBoundaryData", menuName = "MapBoundaryData")]
 public class MapBoundaryData : ScriptableObject
 {
     // Grid coords data

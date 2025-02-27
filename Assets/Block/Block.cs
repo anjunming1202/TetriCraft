@@ -23,7 +23,9 @@ public abstract class Block
 
     // Events
     public delegate void OnChangedEvent(Block block);
-    public event OnChangedEvent OnChanged;
+    public event OnChangedEvent OnPositionChanged;
+    public event OnChangedEvent OnMove;
+    public event OnChangedEvent OnRotate;
     public event OnChangedEvent OnLanded;
 
 
@@ -42,13 +44,13 @@ public abstract class Block
     // On position changed
     public void TriggerMoving()
     {
-        OnChanged?.Invoke(this);
+        OnMove?.Invoke(this);
     }
 
     // On landed
     public void TriggerLanding()
     {
-        OnChanged?.Invoke(this);
+        OnLanded?.Invoke(this);
     }
 
 }

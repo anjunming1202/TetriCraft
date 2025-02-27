@@ -104,6 +104,7 @@ public class Tetromino
     {
         return position + new Vector2Int(column, size - 1 - row);
     }
+
     public void Move(int x, int y)
     {
         position += new Vector2Int(x, y);
