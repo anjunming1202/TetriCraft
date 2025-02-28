@@ -78,7 +78,7 @@ public class MapManager : MonoBehaviour
         PlaceTetromino(fallingTetromino);
 
         // Generate next tetromino with random type
-        CreateNextTetromino();
+        CreateNextTetromino(TetrominoType.O);
     }
 
     private void CreateNextTetromino()
@@ -216,7 +216,7 @@ public class MapManager : MonoBehaviour
         if (CheckFull(row))
         {
             // clear row
-            ClearLine(row);
+            DestroyLine(row);
             // move above rows down
             for (int x = 0; x < map.width; x++)
                 for (int y = row + 1; y < map.height; y++)  // * must from bottom to top
@@ -299,7 +299,7 @@ public class MapManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Remove tetromino blocks on the map
+    /// Remove tetromino blocks on the map, but not destroy
     /// </summary>
     private void RemoveTetromino(Tetromino tetromino)
     {
@@ -309,21 +309,21 @@ public class MapManager : MonoBehaviour
         }
     }
     /// <summary>
-    /// Remove a block on the map
+    /// Remove a block on the map, but not destroy
     /// </summary>
     private void RemoveBlock(Block block)
     {
         Remove(block.position);
     }
     /// <summary>
-    /// Remove one position block
+    /// Remove one position block, but not destroy
     /// </summary>
     private void Remove(Vector2Int pos)
     {
         map[pos.x, pos.y] = null;
     }
     /// <summary>
-    /// Remove one position block
+    /// Remove one position block, but not destroy
     /// </summary>
     private void Remove(int x, int y)
     {
@@ -331,14 +331,22 @@ public class MapManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Clear a row of blocks and leave it empty
+    /// Destroy then remove block
+    /// </summary>
+    private void Destroy(int x, int y)
+    {
+        map[x, y].Destroy();
+        Remove(x, y);
+    }
+    /// <summary>
+    /// Destroy a row of blocks and leave it empty
     /// </summary>
     /// <param name="row"></param>
-    private void ClearLine(int row)
+    private void DestroyLine(int row)
     {
         for (int i = 0; i < map.width; i++)
         {
-            Remove(i, row);
+            Destroy(i, row);
         }
     }
 
