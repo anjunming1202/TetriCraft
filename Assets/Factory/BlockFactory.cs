@@ -16,25 +16,10 @@ public class BlockFactory : MonoBehaviour
     {
         GameObject blockObject = new GameObject(block.Name);
 
-        // Add sprite renderer
-        blockObject.AddComponent<SpriteRenderer>();
-
-        // Add block renderer
-        BlockRenderer blockRenderer = blockObject.AddComponent<BlockRenderer>();
-        blockRenderer.Initialise(block);
-        
-        // Add block animator
-        BlockAnimator blockAnimator = blockObject.AddComponent<BlockAnimator>();
-        blockAnimator.Initialise(block);
-
-        // Initial spawn position (avoid being seen at strange position)
-        blockObject.transform.position = MapBoundaryData.GridToWorld(block.position);
+        // Add block object manager
+        BlockObjectManager blockObjectManager = blockObject.AddComponent<BlockObjectManager>();
+        blockObjectManager.Initialise(block);
 
         return blockObject;
-    }
-
-    public static void DestroyBlock(Block block)
-    {
-
     }
 }

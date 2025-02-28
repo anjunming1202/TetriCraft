@@ -20,7 +20,7 @@ public class BlockAnimator : MonoBehaviour
     public void Initialise(Block block)
     {
         // event
-        block.OnMove += AnimationOnSet;
+        block.OnMoved += AnimationOnSet;
     }
 
     private void Reset()

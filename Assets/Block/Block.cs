@@ -24,17 +24,34 @@ public abstract class Block
     // Events
     public delegate void OnChangedEvent(Block block);
     public event OnChangedEvent OnPositionChanged;
-    public event OnChangedEvent OnMove;
-    public event OnChangedEvent OnRotate;
+    public event OnChangedEvent OnMoved;
+    public event OnChangedEvent OnRotated;
     public event OnChangedEvent OnLanded;
+
+    public delegate void OnInstantiatedEvent();
+//  public event OnChangedEvent OnSpawn;
+    public event OnInstantiatedEvent OnDestroy;
 
 
 
     // General state change point for blocks
-    public void OnLand()
+    public void Spawn()
+    {
+        
+    }
+    public void SpawnFalling()
+    {
+        Spawn();
+        isFalling = true;
+    }
+    public void Destroy()
+    {
+        OnDestroy?.Invoke();
+    }
+    public void Land()
     {
         isFalling = false;
-        TriggerLanding();
+        OnLanded?.Invoke(this);
     }
 
     // Getter & Setter
@@ -51,7 +68,7 @@ public abstract class Block
     // On position changed
     public void TriggerMoving()
     {
-        OnMove?.Invoke(this);
+        OnMoved?.Invoke(this);
     }
 
     // On landed

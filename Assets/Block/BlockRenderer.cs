@@ -10,7 +10,7 @@ public class BlockRenderer : MonoBehaviour
     /*public Block block;*/
 
     // Renderer
-    public SpriteRenderer spriteRenderer;
+    private SpriteRenderer spriteRenderer;
 
     void Awake()
     {

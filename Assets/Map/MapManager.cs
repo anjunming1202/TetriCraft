@@ -59,7 +59,7 @@ public class MapManager : MonoBehaviour
     }
     private void InitialiseBlock(Block block)
     {
-        block.isFalling = true;
+        block.SpawnFalling();
     }
     public void SpawnTetromino()
     {
@@ -142,18 +142,18 @@ public class MapManager : MonoBehaviour
         bool successful = TryMove(0, -1);
         if (!successful)
         {
-            OnLanded();
+            OnLand();
         }
     }
     public void Land()
     {
         while (TryMove(0, -1)) { }
-        OnLanded();
+        OnLand();
     }
-    private void OnLanded()
+    private void OnLand()
     {
         // update tetromino & blocks data
-        fallingTetromino.OnLand();
+        fallingTetromino.Land();
     }
 
     private bool TryRotate(bool clockwise = true)

@@ -122,14 +122,14 @@ public class Tetromino
     }
 
     // On landed
-    public void OnLand()
+    public void Land()
     {
         isLanded = true;
-        TriggerLanding();
+        OnLanded?.Invoke(this);
 
         foreach (var block in blocks)
         {
-            block.OnLand();
+            block.Land();
         }
     }
     public void TriggerLanding()
