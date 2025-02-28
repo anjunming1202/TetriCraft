@@ -78,7 +78,7 @@ public class MapManager : MonoBehaviour
         PlaceTetromino(fallingTetromino);
 
         // Generate next tetromino with random type
-        CreateNextTetromino(TetrominoType.O);
+        CreateNextTetromino();
     }
 
     private void CreateNextTetromino()
@@ -313,7 +313,9 @@ public class MapManager : MonoBehaviour
     /// </summary>
     private void RemoveBlock(Block block)
     {
-        Remove(block.position);
+        // if block not be considered in the map, skip
+        if (block.isInstantiated)
+            Remove(block.position);
     }
     /// <summary>
     /// Remove one position block, but not destroy

@@ -19,6 +19,7 @@ public abstract class Block
     private Vector2Int _position = Vector2Int.zero; // Block position in the map
 
     // Block state flags
+    public bool isInstantiated = false;
     public bool isFalling = false;
 
     // Events

@@ -22,6 +22,9 @@ public class BlockObjectManager : MonoBehaviour
 
         // Subscribe block destroy event (automatic destroy object)
         block.OnDestroy += DestroyBlock;
+
+        // Set block instantiated state
+        block.isInstantiated = true;
     }
 
     private BlockRenderer blockRenderer;
