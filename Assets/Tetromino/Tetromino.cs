@@ -75,12 +75,6 @@ public class Tetromino
         blocks[1] = block2;
         blocks[2] = block3;
         blocks[3] = block4;
-
-        // Initialise block data as in a tetromino
-        foreach (var block in blocks)
-        {
-            block.isFalling = true;
-        }
     }
 
     public TetrominoType Type { get; }
@@ -128,6 +122,16 @@ public class Tetromino
     }
 
     // On landed
+    public void OnLand()
+    {
+        isLanded = true;
+        TriggerLanding();
+
+        foreach (var block in blocks)
+        {
+            block.OnLand();
+        }
+    }
     public void TriggerLanding()
     {
         OnLanded?.Invoke(this);

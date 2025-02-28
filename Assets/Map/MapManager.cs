@@ -18,6 +18,9 @@ public class MapManager : MonoBehaviour
     private Tetromino nextTetromino;
     public Tetromino CurrentTetromino => fallingTetromino;
 
+    // Clear Line
+    public int lastCombo = 0; // combo for clear by landing tetromino
+
     // Readonly Data
     private MapBoundaryData boundary => MapBoundaryData.Instance; // Boundary Data
 
@@ -40,11 +43,29 @@ public class MapManager : MonoBehaviour
     //================================//
     //  Initialise Tetromino
     //================================//
+
+    private void InitialiseNewTetromino(Tetromino tetromino)
+    {
+        // set up tetromino
+        fallingTetromino.isActive = true;
+        fallingTetromino.isLanded = false;
+        fallingTetromino.OnLanded += TryClearLine;
+
+        // set up blocks
+        foreach (var block in tetromino.blocks)
+        {
+            InitialiseBlock(block);
+        }
+    }
+    private void InitialiseBlock(Block block)
+    {
+        block.isFalling = true;
+    }
     public void SpawnTetromino()
     {
-        // Initialise next falling tetromino (nextTetromino should be prepared anytime)
+        // Initialise next falling tetromino & its blocks (nextTetromino should be prepared anytime)
         fallingTetromino = nextTetromino;
-        fallingTetromino.isActive = true;
+        InitialiseNewTetromino(fallingTetromino);
 
         // Set tetromino position (at the centre & sitting on ceiling)
         int x = (boundary.width - fallingTetromino.size) / 2;
@@ -89,6 +110,125 @@ public class MapManager : MonoBehaviour
             }
         // move tetromino downwards
         MoveTetrominoTo(tetromino, tetromino.position + Vector2Int.down * distance);
+    }
+
+
+
+    //================================//
+    //  Tetromino Control
+    //================================//
+    private bool TryMove(int x, int y)
+    {
+        fallingTetromino.Move(x, y);
+        if (!CheckValid(fallingTetromino))
+        {
+            fallingTetromino.Move(-x, -y);
+            Debug.Log("fail fall");
+            return false;
+        }
+        MoveTetrominoTo(fallingTetromino, fallingTetromino.position);
+        return true;
+    }
+    public void Left()
+    {
+        TryMove(-1, 0);
+    }
+    public void Right()
+    {
+        TryMove(1, 0);
+    }
+    public void Fall()
+    {
+        bool successful = TryMove(0, -1);
+        if (!successful)
+        {
+            OnLanded();
+        }
+    }
+    public void Land()
+    {
+        while (TryMove(0, -1)) { }
+        OnLanded();
+    }
+    private void OnLanded()
+    {
+        // update tetromino & blocks data
+        fallingTetromino.OnLand();
+    }
+
+    private bool TryRotate(bool clockwise = true)
+    {
+        fallingTetromino.Rotate(clockwise);
+        if (!CheckValid(fallingTetromino))
+        {
+            fallingTetromino.Rotate(!clockwise);
+            Debug.Log("fail rotation");
+            return false;
+        }
+        MoveTetrominoTo(fallingTetromino, fallingTetromino.position);
+        return true;
+    }
+    public void Rotate(bool clockwise = true)
+    {
+        TryRotate(clockwise);
+    }
+
+
+
+    //================================//
+    //  Line Clear
+    //================================//
+
+    /// <summary>
+    /// Try clear line for tetromino when landing
+    /// </summary>
+    private void TryClearLine(Tetromino tetromino)
+    {
+        int combo = 0;
+        foreach (var block in tetromino.blocks)
+        {
+            bool successful = TryClearLine(block.position.y);
+            if (successful)
+                combo++;
+        }
+
+        if (combo > 0)
+        {
+            lastCombo = combo;
+            // trigger on clear line
+        }
+    }
+    /// <summary>
+    /// For block that want to try clear line at time other than landing
+    /// </summary>
+    private void TryClearLine(Block block)
+    {
+        bool successful = TryClearLine(block.position.y);
+
+        if (successful)
+        {
+            lastCombo = 1;
+            // trigger on clear line
+        }
+    }
+    private bool TryClearLine(int row)
+    {
+        if (CheckFull(row))
+        {
+            // clear row
+            ClearLine(row);
+            // move above rows down
+            for (int x = 0; x < map.width; x++)
+                for (int y = row + 1; y < map.height; y++)  // * must from bottom to top
+                {
+                    if (!IsEmpty(x, y))
+                    {
+                        MoveBlockTo(map[x, y], new Vector2Int(x, y - 1));
+                    }
+                }
+            return true;
+        }
+        return false;
     }
 
 
@@ -182,81 +322,39 @@ public class MapManager : MonoBehaviour
     {
         map[pos.x, pos.y] = null;
     }
-
-
-
-    //================================//
-    //  Tetromino Control
-    //================================//
-    private bool TryMove(int x, int y)
+    /// <summary>
+    /// Remove one position block
+    /// </summary>
+    private void Remove(int x, int y)
     {
-        fallingTetromino.Move(x, y);
-        if (!CheckValid(fallingTetromino))
+        map[x, y] = null;
+    }
+
+    /// <summary>
+    /// Clear a row of blocks and leave it empty
+    /// </summary>
+    /// <param name="row"></param>
+    private void ClearLine(int row)
+    {
+        for (int i = 0; i < map.width; i++)
         {
-            fallingTetromino.Move(-x, -y);
-            Debug.Log("fail fall");
-            return false;
-        }
-        MoveTetrominoTo(fallingTetromino, fallingTetromino.position);
-        return true;
-    }
-    public void Left()
-    {
-        TryMove(-1, 0);
-    }
-    public void Right()
-    {
-        TryMove(1, 0);
-    }
-    public void Fall()
-    {
-        bool successful = TryMove(0, -1);
-        if (!successful)
-        {
-            OnLanded();
+            Remove(i, row);
         }
     }
-    private void OnLanded()
-    {
-        fallingTetromino.isLanded = true;
-        foreach (var block in fallingTetromino.blocks)
-        {
-            block.isFalling = false;
-            block.TriggerLanding();
-        }
-    }
-    public void Land()
-    {
-        while (TryMove(0, -1)) { }
-        OnLanded();
-    }
-
-    private bool TryRotate(bool clockwise = true)
-    {
-        fallingTetromino.Rotate(clockwise);
-        if (!CheckValid(fallingTetromino))
-        {
-            fallingTetromino.Rotate(!clockwise);
-            Debug.Log("fail rotation");
-            return false;
-        }
-        MoveTetrominoTo(fallingTetromino, fallingTetromino.position);
-        return true;
-    }
-    public void Rotate(bool clockwise = true)
-    {
-        TryRotate(clockwise);
-    }
 
 
 
+    private bool IsEmpty(int x, int y)
+    {
+        return map[x, y] == null;
+    }
 
     /// <summary>
     /// Check for bottom, left, and right boundaries
     /// </summary>
     private bool CheckInside(Vector2Int pos)
     {
-        return map.CheckInside(pos.x, pos.y);
+        return map.IsInside(pos.x, pos.y);
     }
     /// <summary>
     /// Check for bottom, left, and right boundaries
@@ -297,5 +395,10 @@ public class MapManager : MonoBehaviour
     {
         // Check inside first, check not collide then
         return (CheckInside(tetromino) && !CheckCollide(tetromino));
+    }
+
+    private bool CheckFull(int row)
+    {
+        return map.IsFull(row);
     }
 }

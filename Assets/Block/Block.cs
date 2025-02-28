@@ -30,6 +30,13 @@ public abstract class Block
 
 
 
+    // General state change point for blocks
+    public void OnLand()
+    {
+        isFalling = false;
+        TriggerLanding();
+    }
+
     // Getter & Setter
     public Vector2Int position // position
     {

@@ -15,8 +15,8 @@ public class Map
     public Block[,] blockMap;
 
     // Map Boundary Data
-    private int width => MapBoundaryData.Instance.width;
-    private int height => MapBoundaryData.Instance.height;
+    public int width => MapBoundaryData.Instance.width;
+    public int height => MapBoundaryData.Instance.height;
     public Block this[int x, int y]
     {
         get => blockMap[x, y];
@@ -26,8 +26,18 @@ public class Map
     /// <summary>
     /// Check for bottom, left, and right boundaries
     /// </summary>
-    public bool CheckInside(int x, int y)
+    public bool IsInside(int x, int y)
     {
         return x >= 0 && x < width && y >= 0;
+    }
+
+    public bool IsFull(int row)
+    {
+        for (int column = 0; column < width; column++)
+        {
+            if (blockMap[column, row] == null)
+                return false;
+        }
+        return true;
     }
 }

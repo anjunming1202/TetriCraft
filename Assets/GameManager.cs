@@ -141,7 +141,7 @@ public class GameManager : MonoBehaviour
             timer = 0;
         }
 
-        // Spawn new tetromino by checking the falling tetromino state (is isLanded)
+        // Spawn new tetromino by checking the if the tetromino is falling
         TrySpawnTetromino();
     }
 
