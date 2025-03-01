@@ -19,12 +19,21 @@ public class MapManager : MonoBehaviour
     private Tetromino nextTetromino;
     public Tetromino CurrentTetromino => fallingTetromino;
 
-    // Clear Line
-    public int lastCombo = 0; // combo for clear by landing tetromino
+    // Recorded data
+    public int lineCount = 0; // combo for clear by landing tetromino
+    public int combo = 0;
+    public int softDrop = 0;
+    public int hardDrop = 0;
 
     // Readonly Data
     private MapBoundaryData boundary => MapBoundaryData.Instance; // Boundary Data
 
+    // Event: notify the game manager
+    public delegate void MapEvent(MapManager mapManager);
+    public MapEvent OnTetrominoLanded;
+    public MapEvent OnTetrominoSoftDrop; // for player controlled drop: accelerate (soft drop)
+    public MapEvent OnTetrominoHardDrop; // for player controlled drop: land (hard drop)
+    public MapEvent OnLineClear;
 
 
     //================================//
@@ -47,20 +56,30 @@ public class MapManager : MonoBehaviour
 
     private void InitialiseNewTetromino(Tetromino tetromino)
     {
+        // reset tetromino data in map
+        lineCount = 0;
+        softDrop = 0;
+        hardDrop = 0;
+
         // set up tetromino
         fallingTetromino.isActive = true;
         fallingTetromino.isLanded = false;
-        fallingTetromino.OnLanded += TryClearLine;
 
         // set up blocks
         foreach (var block in tetromino.blocks)
         {
             InitialiseBlock(block);
         }
+
+        // tetromino lockdown (land) -> try clear line
+        fallingTetromino.OnLockdown += TryClearLine;
     }
     private void InitialiseBlock(Block block)
     {
+        // block on spawn falling
         block.SpawnFalling();
+        /*// block land -> try clear line
+        block.OnLanded += TryClearLine;*/
     }
     public void SpawnTetromino()
     {
@@ -143,18 +162,34 @@ public class MapManager : MonoBehaviour
         bool successful = TryMove(0, -1);
         if (!successful)
         {
-            OnLand();
+            Land();
         }
     }
-    public void Land()
+    public void SoftDrop()
     {
-        while (TryMove(0, -1)) { }
-        OnLand();
+        softDrop++;
+        OnTetrominoSoftDrop?.Invoke(this);
+        Fall();
     }
-    private void OnLand()
+    public void HardDrop()
+    {
+        while (TryMove(0, -1)) 
+        {
+            hardDrop++;
+        }
+        OnTetrominoHardDrop?.Invoke(this);
+        Land();
+    }
+    /// <summary>
+    /// Tetromino lockdown
+    /// </summary>
+    private void Land()
     {
         // update tetromino & blocks data
         fallingTetromino.Land();
+
+        // invoke map tetromino landing event
+        OnTetrominoLanded?.Invoke(this);
     }
 
     private bool TryRotate(bool clockwise = true)
@@ -192,18 +227,24 @@ public class MapManager : MonoBehaviour
     /// </summary>
     private void TryClearLine(Tetromino tetromino)
     {
-        int combo = 0;
+        int count = 0;
         foreach (var block in tetromino.blocks)
         {
             bool successful = TryClearLine(block.position.y);
             if (successful)
-                combo++;
+                count++;
         }
 
-        if (combo > 0)
+        if (count > 0)
         {
-            lastCombo = combo;
-            // trigger on clear line
+            lineCount = count;
+            combo++;
+            OnLineClear?.Invoke(this);
+        }
+        else
+        {
+            // reset combo for fail clear of tetromino landing only
+            combo = 0;
         }
     }
     /// <summary>
@@ -215,28 +256,33 @@ public class MapManager : MonoBehaviour
 
         if (successful)
         {
-            lastCombo = 1;
-            // trigger on clear line
+            lineCount = 1;
+            combo++;
+            OnLineClear?.Invoke(this);
         }
     }
     private bool TryClearLine(int row)
     {
         if (CheckFull(row))
         {
-            // clear row
-            DestroyLine(row);
-            // move above rows down
-            for (int x = 0; x < map.width; x++)
-                for (int y = row + 1; y < map.height; y++)  // * must from bottom to top
-                {
-                    if (!IsEmpty(x, y))
-                    {
-                        MoveBlockTo(map[x, y], new Vector2Int(x, y - 1));
-                    }
-                }
+            ClearLine(row);
             return true;
         }
         return false;
+    }
+    private void ClearLine(int row)
+    {
+        // clear row
+        DestroyLine(row);
+        // move above rows down
+        for (int x = 0; x < map.width; x++)
+            for (int y = row + 1; y < map.height; y++)  // * must from bottom to top
+            {
+                if (!IsEmpty(x, y))
+                {
+                    MoveBlockTo(map[x, y], new Vector2Int(x, y - 1));
+                }
+            }
     }
 
 
@@ -420,5 +466,10 @@ public class MapManager : MonoBehaviour
     private bool CheckFull(int row)
     {
         return map.IsFull(row);
+    }
+
+    public bool IsGameover()
+    {
+        return !map.IsEmpty(boundary.height);
     }
 }

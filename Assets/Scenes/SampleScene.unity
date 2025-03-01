@@ -154,6 +154,7 @@ MonoBehaviour:
   boundaryRegion: {fileID: 1631176127}
   speedFalling: 1
   speedAcclerating: 8
+  gameover: 1
   blockMovementCurve: {fileID: 11400000, guid: 175ca8d13feb6744885bbae30b9d5cdd, type: 2}
   blockLandCurve: {fileID: 11400000, guid: 4173132a645dac9489e29b5abcfc9058, type: 2}
 --- !u!4 &2464639

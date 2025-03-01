@@ -40,4 +40,13 @@ public class Map
         }
         return true;
     }
+    public bool IsEmpty(int row)
+    {
+        for (int column = 0; column < width; column++)
+        {
+            if (blockMap[column, row] != null)
+                return false;
+        }
+        return true;
+    }
 }

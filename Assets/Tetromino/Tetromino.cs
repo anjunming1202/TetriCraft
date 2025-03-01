@@ -129,11 +129,11 @@ public class Tetromino
     private Dictionary<Vector2Int, Vector2Int[]> wallkick;
     public Vector2Int position = new Vector2Int(0, 0); // grid position
 
-    public bool isLanded = false;
+    public bool isLanded = false; // lockdown
     public bool isActive = false; // inactive tetromino is not in the map
 
     public delegate void OnLandedEvent(Tetromino tetromino);
-    public event OnLandedEvent OnLanded;
+    public event OnLandedEvent OnLockdown;
 
     public Block this[int x, int y] => shape[x, y];
     public Vector2Int[] Wallkick(int from, int to) => wallkick[new Vector2Int(from, to)];
@@ -178,16 +178,12 @@ public class Tetromino
     public void Land()
     {
         isLanded = true;
-        OnLanded?.Invoke(this);
+        OnLockdown?.Invoke(this);
 
         foreach (var block in blocks)
         {
             block.Land();
         }
-    }
-    public void TriggerLanding()
-    {
-        OnLanded?.Invoke(this);
     }
 }
 
