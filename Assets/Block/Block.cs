@@ -1,5 +1,6 @@
 // Block, the most basic unit, one block occupies one grid
 using System;
+using System.Collections;
 using UnityEngine;
 
 [Serializable]
@@ -19,8 +20,9 @@ public abstract class Block
     private Vector2Int _position = Vector2Int.zero; // Block position in the map
 
     // Block state flags
-    public bool isInstantiated = false;
+    public bool isInMap = false;
     public bool isFalling = false;
+    public bool isMoving = false;
 
     // Events
     public delegate void OnChangedEvent(Block block);
@@ -30,7 +32,7 @@ public abstract class Block
     public event OnChangedEvent OnLanded;
 
     public delegate void OnInstantiatedEvent();
-//  public event OnChangedEvent OnSpawn;
+//  public event OnChangedEvent OnSpawned;
     public event OnInstantiatedEvent OnDestroy;
 
 
@@ -40,20 +42,31 @@ public abstract class Block
     {
         
     }
+
     public void SpawnFalling()
     {
         Spawn();
         isFalling = true;
     }
+
     public void Destroy()
     {
         OnDestroy?.Invoke();
     }
+
     public void Land()
     {
         isFalling = false;
         OnLanded?.Invoke(this);
     }
+
+    public void StopMoving()
+    {
+        isMoving = false;
+    }
+
+
+
 
     // Getter & Setter
     public Vector2Int position // position
@@ -62,22 +75,10 @@ public abstract class Block
         set
         {
             _position = value;
-            TriggerMoving();
+            isMoving = true;
+            OnMoved?.Invoke(this);
         }
     }
-
-    // On position changed
-    public void TriggerMoving()
-    {
-        OnMoved?.Invoke(this);
-    }
-
-    // On landed
-    public void TriggerLanding()
-    {
-        OnLanded?.Invoke(this);
-    }
-
 }
 
 public enum BlockType

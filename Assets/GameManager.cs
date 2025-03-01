@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviour
     // Visual
     [Header("Visual")]
     public AnimationCurveAsset blockMovementCurve;
+    public AnimationCurveAsset blockLandCurve;
 
 
     void Awake()
@@ -195,6 +196,7 @@ public class GameManager : MonoBehaviour
         MapBoundaryData.Create(boundaryRegion.transform);
 
         // Initialise block animator
-        BlockAnimator.MovementCurveAsset = blockMovementCurve;
+        BlockAnimator.MovingCurveAsset = blockMovementCurve;
+        BlockAnimator.LandingCurveAsset = blockLandCurve;
     }
 }

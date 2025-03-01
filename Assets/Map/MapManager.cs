@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
 
@@ -259,8 +260,8 @@ public class MapManager : MonoBehaviour
         // Remove original block
         RemoveBlock(block);
 
-        // Move block -> set position
-        block.position = to;
+        // Move block
+        block.position = to; // set position
 
         // Place down block
         PlaceBlock(block);
@@ -289,6 +290,8 @@ public class MapManager : MonoBehaviour
     private void PlaceBlock(Block block)
     {
         Replace(block.position, block);
+        if (!block.isInMap)
+            block.isInMap = true;
     }
     /// <summary>
     /// Replace one position block by another
@@ -314,7 +317,7 @@ public class MapManager : MonoBehaviour
     private void RemoveBlock(Block block)
     {
         // if block not be considered in the map, skip
-        if (block.isInstantiated)
+        if (block.isInMap)
             Remove(block.position);
     }
     /// <summary>

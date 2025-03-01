@@ -155,6 +155,7 @@ MonoBehaviour:
   speedFalling: 1
   speedAcclerating: 8
   blockMovementCurve: {fileID: 11400000, guid: 175ca8d13feb6744885bbae30b9d5cdd, type: 2}
+  blockLandCurve: {fileID: 11400000, guid: 4173132a645dac9489e29b5abcfc9058, type: 2}
 --- !u!4 &2464639
 Transform:
   m_ObjectHideFlags: 0
@@ -199,6 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df4ef17e4ddd81745849f5a4c5606ced, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lastCombo: 0
 --- !u!4 &310913973
 Transform:
   m_ObjectHideFlags: 0

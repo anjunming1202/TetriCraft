@@ -7,9 +7,12 @@ public class BlockAnimator : MonoBehaviour
     // Reference of block
     /*public Block block;*/
 
-    public static AnimationCurveAsset MovementCurveAsset;   // *static: make it can be initialised at other places
-    private static AnimationCurve movementCurve => MovementCurveAsset.curve;
-    private static float duration => MovementCurveAsset.duration;
+    public static AnimationCurveAsset MovingCurveAsset;   // *static: make it can be initialised at other places
+    public static AnimationCurveAsset LandingCurveAsset;
+
+    private AnimationCurveAsset currentCurveAsset;
+    private AnimationCurve movementCurve => currentCurveAsset.curve;
+    private float duration => currentCurveAsset.duration;
     private float elapsedTime = 0f;
 
     public Vector3 startPosition;
@@ -17,10 +20,14 @@ public class BlockAnimator : MonoBehaviour
 
     private Coroutine currentCoroutine = null;
 
+    public delegate void OnFlagEvent();
+    public OnFlagEvent OnFinish;
+
     public void Initialise(Block block)
     {
         // event
-        block.OnMoved += AnimationOnSet;
+        block.OnMoved += MoveAnimationOnSet;
+        block.OnLanded += LandAnimationOnSet;
     }
 
     private void Reset()
@@ -28,13 +35,25 @@ public class BlockAnimator : MonoBehaviour
         elapsedTime = 0f;
     }
 
-    public void AnimationOnSet(Block block)
+    public void MoveAnimationOnSet(Block block)
     {
+        // Stop current animation
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
-
+        // Start moving animation
+        currentCurveAsset = MovingCurveAsset;
         currentCoroutine = StartCoroutine(MoveTo(MapBoundaryData.GridToWorld(block.position)));
     }
+    public void LandAnimationOnSet(Block block)
+    {
+        // Stop current animation
+        if (currentCoroutine != null)
+            StopCoroutine(currentCoroutine);
+        // Start landing animation
+        currentCurveAsset = LandingCurveAsset;
+        currentCoroutine = StartCoroutine(MoveTo(MapBoundaryData.GridToWorld(block.position)));
+    }
+
     private IEnumerator MoveTo(Vector3 to)
     {
         startPosition = transform.position;
@@ -51,6 +70,8 @@ public class BlockAnimator : MonoBehaviour
             yield return null;
         }
 
+        // When finish
         transform.position = endPosition;
+        OnFinish?.Invoke();
     }
 }
