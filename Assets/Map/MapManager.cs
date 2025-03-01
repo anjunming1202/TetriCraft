@@ -160,14 +160,21 @@ public class MapManager : MonoBehaviour
     private bool TryRotate(bool clockwise = true)
     {
         fallingTetromino.Rotate(clockwise);
-        if (!CheckValid(fallingTetromino))
+        // check for each wall kick position
+        foreach (Vector2Int kick in fallingTetromino.Wallkick())
         {
-            fallingTetromino.Rotate(!clockwise);
-            Debug.Log("fail rotation");
-            return false;
+            fallingTetromino.Move(kick.x, kick.y);
+            if (CheckValid(fallingTetromino))
+            {
+                MoveTetrominoTo(fallingTetromino, fallingTetromino.position);
+                Debug.Log("success rotation");
+                return true;
+            }
+            fallingTetromino.Move(-kick.x, -kick.y);
         }
-        MoveTetrominoTo(fallingTetromino, fallingTetromino.position);
-        return true;
+        fallingTetromino.Rotate(!clockwise);
+        Debug.Log("fail rotation");
+        return false;
     }
     public void Rotate(bool clockwise = true)
     {
