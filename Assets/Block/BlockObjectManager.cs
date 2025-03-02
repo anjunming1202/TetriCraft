@@ -18,7 +18,7 @@ public class BlockObjectManager : MonoBehaviour
         blockAnimator.Initialise(block);
 
         // Set initial spawn position (avoid being seen at strange position)
-        gameObject.transform.position = MapBoundaryData.GridToWorld(block.position);
+        gameObject.transform.position = block.GetWorldPosition();
 
         // Subscribe block destroy event (automatic destroy object)
         block.OnDestroy += DestroyBlock;

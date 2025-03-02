@@ -42,7 +42,7 @@ public class BlockAnimator : MonoBehaviour
             StopCoroutine(currentCoroutine);
         // Start moving animation
         currentCurveAsset = MovingCurveAsset;
-        currentCoroutine = StartCoroutine(MoveTo(MapBoundaryData.GridToWorld(block.position)));
+        currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
     }
     public void LandAnimationOnSet(Block block)
     {
@@ -51,7 +51,7 @@ public class BlockAnimator : MonoBehaviour
             StopCoroutine(currentCoroutine);
         // Start landing animation
         currentCurveAsset = LandingCurveAsset;
-        currentCoroutine = StartCoroutine(MoveTo(MapBoundaryData.GridToWorld(block.position)));
+        currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
     }
 
     private IEnumerator MoveTo(Vector3 to)

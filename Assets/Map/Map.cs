@@ -23,6 +23,8 @@ public class Map
         set => blockMap[x, y] = value;
     }
         
+
+
     /// <summary>
     /// Check for bottom, left, and right boundaries
     /// </summary>
@@ -30,8 +32,12 @@ public class Map
     {
         return x >= 0 && x < width && y >= 0;
     }
+    public bool IsEmpty(int x, int y)
+    {
+        return blockMap[x, y] == null;
+    }
 
-    public bool IsFull(int row)
+    public bool IsRowFull(int row)
     {
         for (int column = 0; column < width; column++)
         {
@@ -40,7 +46,7 @@ public class Map
         }
         return true;
     }
-    public bool IsEmpty(int row)
+    public bool IsRowEmpty(int row)
     {
         for (int column = 0; column < width; column++)
         {

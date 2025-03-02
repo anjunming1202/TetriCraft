@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
 
@@ -127,9 +128,9 @@ public class Tetromino
     public int rotation = 0;
     public int lastRotation = 0;
     private Dictionary<Vector2Int, Vector2Int[]> wallkick;
-    public Vector2Int position = new Vector2Int(0, 0); // grid position
+    private Vector2Int position = new Vector2Int(0, 0); // grid position
 
-    public bool isLanded = false; // lockdown
+    public bool isLocked = false; // lockdown
     public bool isActive = false; // inactive tetromino is not in the map
 
     public delegate void OnLandedEvent(Tetromino tetromino);
@@ -142,15 +143,27 @@ public class Tetromino
 
 
 
+    public void SetPosition(Vector2Int position)
+    { 
+        this.position = position;
+    }
+    public Vector2Int MapPosition => position;
+
     public Vector2Int LocalToMap(int row, int column)
     {
         return position + new Vector2Int(column, size - 1 - row);
     }
 
+    /// <summary>
+    /// Move by x right and y up, only changes tetromino data, need update on the map
+    /// </summary>
     public void Move(int x, int y)
     {
         position += new Vector2Int(x, y);
     }
+    /// <summary>
+    /// Rotate shape of blocks, only changes tetromino data, need update on the map
+    /// </summary>
     public void Rotate(bool clockwise = true)
     {
         Block[,] rotated = new Block[size, size];
@@ -174,10 +187,26 @@ public class Tetromino
             rotation += 4;
     }
 
-    // On landed
-    public void Land()
+    /// <summary>
+    /// Move the tetromino
+    /// </summary>
+    public void MoveTo(Vector2Int to)
     {
-        isLanded = true;
+        // Set data of tetromino self
+        SetPosition(to);
+
+        /*// Move tetromino blocks
+        for (int r = 0; r < size; r++)
+            for (int c = 0; c < size; c++)
+            {
+                this[r, c].MoveTo(LocalToMap(r, c));
+            }*/
+    }
+
+    // On lockdown
+    public void Lockdown()
+    {
+        isLocked = true;
         OnLockdown?.Invoke(this);
 
         foreach (var block in blocks)

@@ -17,7 +17,7 @@ public abstract class Block
     public virtual Sprite texture => BlockResources.blockTexture[Name];
 
     // Data in the map
-    private Vector2Int _position = Vector2Int.zero; // Block position in the map
+    private Vector2Int position = Vector2Int.zero; // Block position in the map
 
     // Block state flags
     public bool isInMap = false;
@@ -65,20 +65,30 @@ public abstract class Block
         isMoving = false;
     }
 
-
-
-
-    // Getter & Setter
-    public Vector2Int position // position
+    /// <summary>
+    /// Set position
+    /// </summary>
+    public void SetPosition(Vector2Int position)
     {
-        get => _position;
-        set
-        {
-            _position = value;
-            isMoving = true;
-            OnMoved?.Invoke(this);
-        }
+        this.position = position;
     }
+    public Vector2Int MapPosition => position;
+    public Vector3 GetWorldPosition() => MapBoundaryData.GridToWorld(position);
+
+    /// <summary>
+    /// Move the block, trigger move event
+    /// </summary>
+    public void MoveTo(Vector2Int to)
+    {
+        // Set data of block self
+        SetPosition(to);
+        isMoving = true;
+        // Invoke block move event
+        OnMoved?.Invoke(this);
+    }
+
+
+
 }
 
 public enum BlockType

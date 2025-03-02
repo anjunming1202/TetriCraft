@@ -152,7 +152,7 @@ public class GameManager : MonoBehaviour
             isAccelerating = false;
             interval = intervalNormal;
         }
-        if (Input.GetKeyDown(key_land)) // Land
+        if (Input.GetKeyDown(key_land)) // Hard drop
         {
             mapManager.HardDrop();
             timer = 0;
@@ -166,13 +166,13 @@ public class GameManager : MonoBehaviour
             mapManager.Rotate(false);
         }
 
-        // Fall of tetromino
+        // Drop of tetromino
         if (timer >= interval)
         {
             if (isAccelerating)
-                mapManager.SoftDrop();
+                mapManager.SoftDrop(); // Soft drop
             else
-                mapManager.Fall();
+                mapManager.Drop(); // Normal drop
             timer = 0;
         }
     }
@@ -227,7 +227,7 @@ public class GameManager : MonoBehaviour
 
     private void CheckGameover(MapManager mapManager)
     {
-        if (mapManager.IsGameover())
+        if (mapManager.CheckGameover())
         {
             gameover = true;
             Debug.Log("Game Over!");
