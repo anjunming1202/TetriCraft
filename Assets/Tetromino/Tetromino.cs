@@ -154,15 +154,16 @@ public class Tetromino
         return position + new Vector2Int(column, size - 1 - row);
     }
 
+    // 
     /// <summary>
-    /// Move by x right and y up, only changes tetromino data, need update on the map
+    /// Move by x right and y up, only changes tetromino data, need MoveTo to update blocks
     /// </summary>
-    public void Move(int x, int y)
+    public void MoveBy(int x, int y)
     {
         position += new Vector2Int(x, y);
     }
     /// <summary>
-    /// Rotate shape of blocks, only changes tetromino data, need update on the map
+    /// Rotate shape, only changes tetromino data, need MoveTo to update blocks
     /// </summary>
     public void Rotate(bool clockwise = true)
     {
@@ -187,6 +188,7 @@ public class Tetromino
             rotation += 4;
     }
 
+    //
     /// <summary>
     /// Move the tetromino
     /// </summary>

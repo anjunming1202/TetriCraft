@@ -37,7 +37,7 @@ public abstract class Block
 
 
 
-    // Position 
+    // Position & Moving
     public Vector2Int MapPosition => position;
     public Vector3 GetWorldPosition() => MapBoundaryData.GridToWorld(position);
     /// <summary>
@@ -46,6 +46,26 @@ public abstract class Block
     public void SetPosition(Vector2Int position)
     {
         this.position = position;
+    }
+
+    /// <summary>
+    /// Move the block, trigger move event
+    /// </summary>
+    public void MoveTo(Vector2Int to)
+    {
+        // Set data of block self
+        SetPosition(to);
+        isMoving = true;
+        // Invoke block move event
+        OnMoved?.Invoke(this);
+    }
+
+    /// <summary>
+    /// Move the block, trigger move event
+    /// </summary>
+    public void MoveBy(int x, int y)
+    {
+        MoveTo(position + new Vector2Int(x, y));
     }
 
 
@@ -76,17 +96,6 @@ public abstract class Block
     public void StopMoving()
     {
         isMoving = false;
-    }
-    /// <summary>
-    /// Move the block, trigger move event
-    /// </summary>
-    public void MoveTo(Vector2Int to)
-    {
-        // Set data of block self
-        SetPosition(to);
-        isMoving = true;
-        // Invoke block move event
-        OnMoved?.Invoke(this);
     }
 
 

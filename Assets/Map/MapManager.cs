@@ -32,7 +32,7 @@ public class MapManager : MonoBehaviour
 
     // Event: notify the game manager
     public delegate void MapEvent(MapManager mapManager);
-    public MapEvent OnTetrominoLanded;
+    public MapEvent OnTetrominoLocked;
     public MapEvent OnTetrominoSoftDrop; // for player controlled drop: accelerate (soft drop)
     public MapEvent OnTetrominoHardDrop; // for player controlled drop: land (hard drop)
     public MapEvent OnLineClear;
@@ -55,6 +55,27 @@ public class MapManager : MonoBehaviour
     //================================//
     //  Initialise Tetromino
     //================================//
+
+    public void SpawnTetromino()
+    {
+        // Initialise next falling tetromino & its blocks
+        fallingTetromino = nextTetromino;
+        InitialiseNewTetromino(fallingTetromino);
+
+        // Set tetromino x position
+        int x = (boundary.width - fallingTetromino.size) / 2;
+        fallingTetromino.SetPosition(new Vector2Int(x, boundary.height));
+
+        // Set tetromino x position
+        SetSittingOnCeiling(fallingTetromino);
+
+        // Rotate tetromino randomly
+
+        // Generate next tetromino with random type
+        CreateNextTetromino();
+    }
+
+
 
     private void InitialiseNewTetromino(Tetromino tetromino)
     {
@@ -83,37 +104,17 @@ public class MapManager : MonoBehaviour
         /*// block land -> try clear line
         block.OnLanded += TryClearLine;*/
     }
-
-    public void SpawnTetromino()
-    {
-        // Initialise next falling tetromino & its blocks (nextTetromino should be prepared anytime)
-        fallingTetromino = nextTetromino;
-        InitialiseNewTetromino(fallingTetromino);
-
-        // Set tetromino position (at the centre & sitting on ceiling)
-        int x = (boundary.width - fallingTetromino.size) / 2;
-        fallingTetromino.SetPosition(new Vector2Int(x, boundary.height));
-        SetSittingOnCeiling(fallingTetromino);
-
-        // Rotate tetromino randomly
-
-
-        // Generate next tetromino with random type
-        CreateNextTetromino();
-    }
-
     private void CreateNextTetromino()
     {
         // Random type
         TetrominoType type = (TetrominoType)UnityEngine.Random.Range(0, (int)TetrominoType.Count);
         CreateNextTetromino(type);
     }
-    public void CreateNextTetromino(TetrominoType type)
+    private void CreateNextTetromino(TetrominoType type)
     {
         // New a tetromino
         nextTetromino = new Tetromino(type);
     }
-
     private void SetSittingOnCeiling(Tetromino tetromino)
     {
         // distance tetromino need to move
@@ -135,20 +136,18 @@ public class MapManager : MonoBehaviour
 
 
     //================================//
+    //  Game State Check
+    //================================//
+    public bool CheckGameover()
+    {
+        return !map.IsRowEmpty(boundary.height);
+    }
+
+
+
+    //================================//
     //  Tetromino Control
     //================================//
-    private bool TryMove(int x, int y)
-    {
-        fallingTetromino.Move(x, y);
-        if (!CheckValid(fallingTetromino))
-        {
-            fallingTetromino.Move(-x, -y);
-            Debug.Log("fail fall");
-            return false;
-        }
-        MoveTetrominoTo(fallingTetromino, fallingTetromino.MapPosition);
-        return true;
-    }
     public void Left()
     {
         TryMove(-1, 0);
@@ -180,6 +179,12 @@ public class MapManager : MonoBehaviour
         OnTetrominoHardDrop?.Invoke(this);
         Lockdown();
     }
+    public void Rotate(bool clockwise = true)
+    {
+        TryRotate(clockwise);
+    }
+
+
 
     /// <summary>
     /// Tetromino lockdown
@@ -190,31 +195,38 @@ public class MapManager : MonoBehaviour
         fallingTetromino.Lockdown();
 
         // invoke map tetromino landing event
-        OnTetrominoLanded?.Invoke(this);
+        OnTetrominoLocked?.Invoke(this);
     }
-
+    private bool TryMove(int x, int y)
+    {
+        fallingTetromino.MoveBy(x, y);
+        if (!CheckValid(fallingTetromino))
+        {
+            fallingTetromino.MoveBy(-x, -y);
+            Debug.Log("fail fall");
+            return false;
+        }
+        MoveTetrominoTo(fallingTetromino, fallingTetromino.MapPosition);
+        return true;
+    }
     private bool TryRotate(bool clockwise = true)
     {
         fallingTetromino.Rotate(clockwise);
         // check for each wall kick position
         foreach (Vector2Int kick in fallingTetromino.Wallkick())
         {
-            fallingTetromino.Move(kick.x, kick.y);
+            fallingTetromino.MoveBy(kick.x, kick.y);
             if (CheckValid(fallingTetromino))
             {
                 MoveTetrominoTo(fallingTetromino, fallingTetromino.MapPosition);
                 Debug.Log("success rotation");
                 return true;
             }
-            fallingTetromino.Move(-kick.x, -kick.y);
+            fallingTetromino.MoveBy(-kick.x, -kick.y);
         }
         fallingTetromino.Rotate(!clockwise);
         Debug.Log("fail rotation");
         return false;
-    }
-    public void Rotate(bool clockwise = true)
-    {
-        TryRotate(clockwise);
     }
 
 
@@ -289,7 +301,7 @@ public class MapManager : MonoBehaviour
 
 
     //================================//
-    //  Map Data Editting with Tetromino
+    // Map Data Editting with Tetromino
     //================================//
 
     private void MoveTetrominoTo(Tetromino tetromino, Vector2Int to)
@@ -315,42 +327,6 @@ public class MapManager : MonoBehaviour
             map.PlaceBlock(block);
         }
     }
-    #region * move tetromino old method *
-        /// <summary>
-        /// Place a tetromino to another position
-        /// </summary>
-        /*private void MoveTetrominoTo(Tetromino tetromino, Vector2Int to)
-        {
-            // Remove original blocks
-            RemoveTetromino(tetromino);
-
-            // Move tetromino -> set position
-            tetromino.MoveTo(to);
-
-            // Place down tetromino blocks with moving
-            PlaceTetromino(tetromino);
-        }
-
-        /// <summary>
-        /// Place down the tetromino according to its position data
-        /// </summary>
-        private void PlaceTetromino(Tetromino tetromino)
-        {
-            // Set data of blocks (in the map + block self)
-            for (int c = 0; c < tetromino.size; c++)
-                for (int r = 0; r < tetromino.size; r++)
-                {
-                    Block block = tetromino[r, c];
-                    if (block != null)
-                    {
-                        // block position = tetromino position + local position in the tetromino
-                        Vector2Int blockPosition = tetromino.LocalToMap(r, c);
-                        block.MoveTo(blockPosition);
-                        map.PlaceBlock(block);
-                    }
-                }
-        }*/
-        #endregion
 
     /// <summary>
         /// Set tetromino blocks onto the map
@@ -378,7 +354,6 @@ public class MapManager : MonoBehaviour
     /// </summary>
     private void SetTetromino(Tetromino tetromino, Vector2Int pos) => SetTetromino(tetromino, pos.x, pos.y);
 
-
     /// <summary>
     /// Remove tetromino blocks on the map, but not destroy
     /// </summary>
@@ -386,17 +361,8 @@ public class MapManager : MonoBehaviour
     {
         foreach (Block block in tetromino.blocks)
         {
-            RemoveBlock(block);
+            map.Remove(block);
         }
-    }
-    /// <summary>
-    /// Remove a block on the map, but not destroy
-    /// </summary>
-    private void RemoveBlock(Block block)
-    {
-        // if block not be considered in the map, skip
-        if (block.isInMap)
-            map.Remove(block.MapPosition);
     }
 
     /// <summary>
@@ -468,13 +434,8 @@ public class MapManager : MonoBehaviour
         // Check inside first, check not collide then
         return (CheckInside(tetromino) && !CheckCollide(tetromino));
     }
-
     private bool CheckFull(int row)
     {
         return map.IsRowFull(row);
-    }
-    public bool CheckGameover()
-    {
-        return !map.IsRowEmpty(boundary.height);
     }
 }

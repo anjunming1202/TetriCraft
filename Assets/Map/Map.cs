@@ -30,21 +30,24 @@ public class Map
 
     // Add block
     /// <summary>
-    /// Add the block onto the map
+    /// Place a block to an empty position
     /// </summary>
     public void PlaceBlock(Block block, int x, int y)
     {
+        // check for debuging
+        Debug.Assert(blockMap[x, y] == null, "Trying to place a block to an non-empty position");
+
         blockMap[x, y] = block;
         block.SetPosition(new Vector2Int(x, y));
         if (!block.isInMap)
             block.isInMap = true;
     }
     /// <summary>
-    /// Add the block onto the map
+    /// Place a block to an empty position
     /// </summary>
     public void PlaceBlock(Block block, Vector2Int pos) => PlaceBlock(block, pos.x, pos.y);
     /// <summary>
-    /// Add the block onto the map according to its data position
+    /// Place a block onto the map according to its data position
     /// </summary>
     public void PlaceBlock(Block block) => PlaceBlock(block, block.MapPosition);
 
@@ -60,6 +63,16 @@ public class Map
     /// Set one position to null
     /// </summary>
     public void Remove(Vector2Int pos) => Remove(pos.x, pos.y);
+    /// <summary>
+    /// Set one position to null according to the block data position
+    /// </summary>
+    public void Remove(Block block)
+    {
+        // checking for debug
+        Debug.Assert(blockMap[block.MapPosition.x, block.MapPosition.y] == block, "Block position inconsistent with map data");
+
+        Remove(block.MapPosition);
+    }
 
     // Move block
     /// <summary>
@@ -88,13 +101,13 @@ public class Map
         // Remove all original block first
         foreach (Block block in blocks)
         {
-            Remove(block.MapPosition);
+            Remove(block);
         }
         // Then move and place blocks
         foreach (Block block in blocks)
         {
             // Move block
-            block.MoveTo(new Vector2Int(x, y) + block.MapPosition);
+            block.MoveBy(x, y);
             // Place down block with moving
             PlaceBlock(block);
         }
