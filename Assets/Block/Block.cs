@@ -37,7 +37,20 @@ public abstract class Block
 
 
 
-    // General state change point for blocks
+    // Position 
+    public Vector2Int MapPosition => position;
+    public Vector3 GetWorldPosition() => MapBoundaryData.GridToWorld(position);
+    /// <summary>
+    /// Set position directly
+    /// </summary>
+    public void SetPosition(Vector2Int position)
+    {
+        this.position = position;
+    }
+
+
+
+    // General Behaviour of Block
     public void Spawn()
     {
         
@@ -64,17 +77,6 @@ public abstract class Block
     {
         isMoving = false;
     }
-
-    /// <summary>
-    /// Set position
-    /// </summary>
-    public void SetPosition(Vector2Int position)
-    {
-        this.position = position;
-    }
-    public Vector2Int MapPosition => position;
-    public Vector3 GetWorldPosition() => MapBoundaryData.GridToWorld(position);
-
     /// <summary>
     /// Move the block, trigger move event
     /// </summary>

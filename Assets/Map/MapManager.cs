@@ -281,7 +281,7 @@ public class MapManager : MonoBehaviour
             {
                 if (!IsEmpty(x, y))
                 {
-                    MoveBlockTo(map[x, y], new Vector2Int(x, y - 1));
+                    map.MoveBlockTo(map[x, y], new Vector2Int(x, y - 1));
                 }
             }
     }
@@ -289,12 +289,9 @@ public class MapManager : MonoBehaviour
 
 
     //================================//
-    //  Map Data Editing API
+    //  Map Data Editting with Tetromino
     //================================//
 
-    /// <summary>
-    /// Place a tetromino to another position
-    /// </summary>
     private void MoveTetrominoTo(Tetromino tetromino, Vector2Int to)
     {
         // Remove original blocks
@@ -306,20 +303,6 @@ public class MapManager : MonoBehaviour
         // Place down tetromino blocks with moving
         PlaceTetromino(tetromino);
     }
-    /// <summary>
-    /// Move a block to another position
-    /// </summary>
-    private void MoveBlockTo(Block block, Vector2Int to)
-    {
-        // Remove original block
-        RemoveBlock(block);
-
-        // Move block
-        block.MoveTo(to); // set position
-
-        // Place down tetromino blocks with moving
-        PlaceBlock(block);
-    }
 
     /// <summary>
     /// Place down the tetromino according to its position data
@@ -327,33 +310,51 @@ public class MapManager : MonoBehaviour
     private void PlaceTetromino(Tetromino tetromino)
     {
         // Set data of blocks (in the map + block self)
-        for (int c = 0; c < tetromino.size; c++)
-            for (int r = 0; r < tetromino.size; r++)
-            {
-                Block block = tetromino[r, c];
-                if (block != null)
+        foreach (Block block in tetromino.blocks)
+        {
+            map.PlaceBlock(block);
+        }
+    }
+    #region * move tetromino old method *
+        /// <summary>
+        /// Place a tetromino to another position
+        /// </summary>
+        /*private void MoveTetrominoTo(Tetromino tetromino, Vector2Int to)
+        {
+            // Remove original blocks
+            RemoveTetromino(tetromino);
+
+            // Move tetromino -> set position
+            tetromino.MoveTo(to);
+
+            // Place down tetromino blocks with moving
+            PlaceTetromino(tetromino);
+        }
+
+        /// <summary>
+        /// Place down the tetromino according to its position data
+        /// </summary>
+        private void PlaceTetromino(Tetromino tetromino)
+        {
+            // Set data of blocks (in the map + block self)
+            for (int c = 0; c < tetromino.size; c++)
+                for (int r = 0; r < tetromino.size; r++)
                 {
-                    // block position = tetromino position + local position in the tetromino
-                    Vector2Int blockPosition = tetromino.LocalToMap(r, c);
-                    block.MoveTo(blockPosition);
-                    PlaceBlock(block);
+                    Block block = tetromino[r, c];
+                    if (block != null)
+                    {
+                        // block position = tetromino position + local position in the tetromino
+                        Vector2Int blockPosition = tetromino.LocalToMap(r, c);
+                        block.MoveTo(blockPosition);
+                        map.PlaceBlock(block);
+                    }
                 }
-            }
-    }
-    /// <summary>
-    /// Place down the block according to its position data
-    /// </summary>
-    private void PlaceBlock(Block block)
-    {
-        Vector2Int pos = block.MapPosition;
-        map[pos.x, pos.y] = block;
-        if (!block.isInMap)
-            block.isInMap = true;
-    }
+        }*/
+        #endregion
 
     /// <summary>
-    /// Set tetromino blocks onto the map
-    /// </summary>
+        /// Set tetromino blocks onto the map
+        /// </summary>
     private void SetTetromino(Tetromino tetromino, int x, int y)
     {
         // Set data of tetromino self
@@ -368,7 +369,7 @@ public class MapManager : MonoBehaviour
                 {
                     // block position = tetromino position + local position in the tetromino
                     Vector2Int blockPosition = tetromino.LocalToMap(r, c);
-                    SetBlock(block, blockPosition);
+                    map.PlaceBlock(block, blockPosition);
                 }
             }
     }
@@ -377,20 +378,6 @@ public class MapManager : MonoBehaviour
     /// </summary>
     private void SetTetromino(Tetromino tetromino, Vector2Int pos) => SetTetromino(tetromino, pos.x, pos.y);
 
-    /// <summary>
-    /// Set the block onto the map
-    /// </summary>
-    private void SetBlock(Block block, int x, int y)
-    {
-        map[x, y] = block;
-        block.SetPosition(new Vector2Int(x, y));
-        if (!block.isInMap)
-            block.isInMap = true;
-    }
-    /// <summary>
-    /// Set the block onto the map
-    /// </summary>
-    private void SetBlock(Block block, Vector2Int pos) => SetBlock(block, pos.x, pos.y);
 
     /// <summary>
     /// Remove tetromino blocks on the map, but not destroy
@@ -409,31 +396,9 @@ public class MapManager : MonoBehaviour
     {
         // if block not be considered in the map, skip
         if (block.isInMap)
-            Remove(block.MapPosition);
-    }
-    /// <summary>
-    /// Remove one position block, but not destroy
-    /// </summary>
-    private void Remove(Vector2Int pos)
-    {
-        map[pos.x, pos.y] = null;
-    }
-    /// <summary>
-    /// Remove one position block, but not destroy
-    /// </summary>
-    private void Remove(int x, int y)
-    {
-        map[x, y] = null;
+            map.Remove(block.MapPosition);
     }
 
-    /// <summary>
-    /// Destroy then remove block
-    /// </summary>
-    private void Destroy(int x, int y)
-    {
-        map[x, y].Destroy();
-        Remove(x, y);
-    }
     /// <summary>
     /// Destroy a row of blocks and leave it empty
     /// </summary>
@@ -442,7 +407,7 @@ public class MapManager : MonoBehaviour
     {
         for (int i = 0; i < map.width; i++)
         {
-            Destroy(i, row);
+            map.Destroy(i, row);
         }
     }
 

@@ -195,12 +195,14 @@ public class Tetromino
         // Set data of tetromino self
         SetPosition(to);
 
-        /*// Move tetromino blocks
+        // Move tetromino blocks
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
             {
-                this[r, c].MoveTo(LocalToMap(r, c));
-            }*/
+                Block block = this[r, c];
+                if (block != null)
+                    block.MoveTo(LocalToMap(r, c));
+            }
     }
 
     // On lockdown

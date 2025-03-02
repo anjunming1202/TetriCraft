@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using Unity.Mathematics;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
 /// <summary>
 /// Data of blocks in the game
@@ -20,11 +21,96 @@ public class Map
     public Block this[int x, int y]
     {
         get => blockMap[x, y];
-        set => blockMap[x, y] = value;
     }
-        
 
 
+
+    // Block Data Editting API
+    // Ensure each change position for block syncs in both block and map data
+
+    // Add block
+    /// <summary>
+    /// Add the block onto the map
+    /// </summary>
+    public void PlaceBlock(Block block, int x, int y)
+    {
+        blockMap[x, y] = block;
+        block.SetPosition(new Vector2Int(x, y));
+        if (!block.isInMap)
+            block.isInMap = true;
+    }
+    /// <summary>
+    /// Add the block onto the map
+    /// </summary>
+    public void PlaceBlock(Block block, Vector2Int pos) => PlaceBlock(block, pos.x, pos.y);
+    /// <summary>
+    /// Add the block onto the map according to its data position
+    /// </summary>
+    public void PlaceBlock(Block block) => PlaceBlock(block, block.MapPosition);
+
+    // Remove block
+    /// <summary>
+    /// Set one position to null
+    /// </summary>
+    public void Remove(int x, int y)
+    {
+        blockMap[x, y] = null;
+    }
+    /// <summary>
+    /// Set one position to null
+    /// </summary>
+    public void Remove(Vector2Int pos) => Remove(pos.x, pos.y);
+
+    // Move block
+    /// <summary>
+    /// Move a block to another position at once, use when moving single block only
+    /// </summary>
+    public void MoveBlockTo(Block block, int x, int y) => MoveBlockTo(block, new Vector2Int(x, y));
+    /// <summary>
+    /// Move a block to another position at once, use when moving single block only
+    /// </summary>
+    public void MoveBlockTo(Block block, Vector2Int to)
+    {
+        // Remove original block
+        Remove(block.MapPosition);
+
+        // Move block
+        block.MoveTo(to); // set position
+
+        // Place down block with moving
+        PlaceBlock(block);
+    }
+    /// <summary>
+    /// Move a group of blocks at once
+    /// </summary>
+    public void MoveBlocksBy(Block[] blocks, int x, int y)
+    {
+        // Remove all original block first
+        foreach (Block block in blocks)
+        {
+            Remove(block.MapPosition);
+        }
+        // Then move and place blocks
+        foreach (Block block in blocks)
+        {
+            // Move block
+            block.MoveTo(new Vector2Int(x, y) + block.MapPosition);
+            // Place down block with moving
+            PlaceBlock(block);
+        }
+    }
+
+    // Destroy block
+    /// <summary>
+    /// Destroy and remove a block
+    /// </summary>
+    public void Destroy(int x, int y)
+    {
+        blockMap[x, y].Destroy();
+        Remove(x, y);
+    }
+
+    // Check map data
     /// <summary>
     /// Check for bottom, left, and right boundaries
     /// </summary>
@@ -36,7 +122,6 @@ public class Map
     {
         return blockMap[x, y] == null;
     }
-
     public bool IsRowFull(int row)
     {
         for (int column = 0; column < width; column++)
