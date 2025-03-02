@@ -11,7 +11,6 @@ using static Unity.Collections.AllocatorManager;
 public class Tetromino
 {
     public Tetromino(TetrominoType type) : this(type, new NullBlock(), new NullBlock(), new NullBlock(), new NullBlock()) { }
-    // public Tetromino(TetrominoType type, BlockType blockType) : this(type, block, block, block, block) { }
     public Tetromino(TetrominoType type, Block block1, Block block2, Block block3, Block block4)
     {
         // Initialise tetromino data
@@ -198,13 +197,7 @@ public class Tetromino
         SetPosition(to);
 
         // Move tetromino blocks
-        for (int r = 0; r < size; r++)
-            for (int c = 0; c < size; c++)
-            {
-                Block block = this[r, c];
-                if (block != null)
-                    block.MoveTo(LocalToMap(r, c));
-            }
+        MoveBlocks();
     }
 
     // On lockdown
@@ -217,6 +210,20 @@ public class Tetromino
         {
             block.Land();
         }
+    }
+
+
+
+    //
+    private void MoveBlocks()
+    {
+        for (int r = 0; r < size; r++)
+            for (int c = 0; c < size; c++)
+            {
+                Block block = this[r, c];
+                if (block != null)
+                    block.MoveTo(LocalToMap(r, c));
+            }
     }
 }
 

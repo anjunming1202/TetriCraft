@@ -274,6 +274,9 @@ public class MapManager : MonoBehaviour
             OnLineClear?.Invoke(this);
         }
     }
+
+
+
     private bool TryClearLine(int row)
     {
         if (CheckFull(row))
@@ -296,6 +299,18 @@ public class MapManager : MonoBehaviour
                     map.MoveBlockTo(map[x, y], new Vector2Int(x, y - 1));
                 }
             }
+    }
+
+    /// <summary>
+    /// Destroy a row of blocks and leave it empty
+    /// </summary>
+    /// <param name="row"></param>
+    private void DestroyLine(int row)
+    {
+        for (int i = 0; i < map.width; i++)
+        {
+            map.Destroy(i, row);
+        }
     }
 
 
@@ -362,18 +377,6 @@ public class MapManager : MonoBehaviour
         foreach (Block block in tetromino.blocks)
         {
             map.Remove(block);
-        }
-    }
-
-    /// <summary>
-    /// Destroy a row of blocks and leave it empty
-    /// </summary>
-    /// <param name="row"></param>
-    private void DestroyLine(int row)
-    {
-        for (int i = 0; i < map.width; i++)
-        {
-            map.Destroy(i, row);
         }
     }
 
