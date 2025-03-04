@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.U2D;
 
 // Load all block prefab from assets, stored in a global static list
 public static class BlockResources
@@ -22,7 +21,7 @@ public static class BlockResources
         blockSprites = Resources.LoadAll<Sprite>(spriteSheetFilename);
         
         blockTexture = new Dictionary<string, Sprite>();
-
+        
         foreach (Sprite sprite in blockSprites)
         {
             blockTexture[sprite.name] = sprite;
@@ -30,5 +29,11 @@ public static class BlockResources
         }
 
         Debug.Log($"Successfully Loaded {blockSprites.Length} Texture Sprite!");
+    }
+
+    // Register for all blocks
+    public static void RegisterBlocks()
+    {
+
     }
 }

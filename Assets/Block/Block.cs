@@ -101,10 +101,3 @@ public abstract class Block
 
 
 }
-
-public enum BlockType
-{
-    Null,
-}
-
-// TODO: use namspace(class) storing name strings of blocks
