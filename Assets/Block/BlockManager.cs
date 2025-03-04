@@ -2,10 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlockObjectManager : MonoBehaviour
+public class BlockManager : MonoBehaviour
 {
     public void Initialise(Block block)
     {
+        // Block reference
+        this.block = block;
+
         // Add sprite renderer
         SpriteRenderer renderer = gameObject.AddComponent<SpriteRenderer>();
 
@@ -26,6 +29,7 @@ public class BlockObjectManager : MonoBehaviour
         blockAnimator.OnFinish += block.StopMoving;
     }
 
+    private Block block;
     private BlockRenderer blockRenderer;
     private BlockAnimator blockAnimator;
 

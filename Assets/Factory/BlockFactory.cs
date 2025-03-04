@@ -17,7 +17,7 @@ public class BlockFactory : MonoBehaviour
         GameObject blockObject = new GameObject(block.Name);
 
         // Add block object manager
-        BlockObjectManager blockObjectManager = blockObject.AddComponent<BlockObjectManager>();
+        BlockManager blockObjectManager = blockObject.AddComponent<BlockManager>();
         blockObjectManager.Initialise(block);
 
         return blockObject;
