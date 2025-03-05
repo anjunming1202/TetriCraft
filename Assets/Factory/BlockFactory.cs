@@ -1,16 +1,21 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 // Job: instantiate block and keep instanced objects as child dynamically, if not using prefabs
-public class BlockFactory : MonoBehaviour
+public class BlockFactory
 {
     // Parent of instantiated blocks as placed in the map
     public static GameObject Blocks; 
-    // Loaded Block Prefabs
+
+    // Block Prefabs
     private static Dictionary<BlockType, GameObject> BlockPrefabs;
 
-    void Awake()
+    // Block Constructor
+    private static Dictionary<BlockType, Func<Block>> BlockConstructors;
+
+    public static void Initialise()
     {
         Blocks = GameObject.Find("Blocks");
     }
