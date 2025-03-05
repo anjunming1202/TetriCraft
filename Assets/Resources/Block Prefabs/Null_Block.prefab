@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 671932412832912740}
   - component: {fileID: 9028015919182796587}
   m_Layer: 0
-  m_Name: Cobblestone
+  m_Name: Null_Block
   m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -76,7 +76,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1800839560, guid: 0d98ff2e15a321b41bd0b6836f46a654, type: 3}
+  m_Sprite: {fileID: -1270879767, guid: 0d98ff2e15a321b41bd0b6836f46a654, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16bdf98159c6a344cbc5ea1dba9fba4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 1800839560, guid: 0d98ff2e15a321b41bd0b6836f46a654, type: 3}
+  texture: {fileID: -1270879767, guid: 0d98ff2e15a321b41bd0b6836f46a654, type: 3}
 --- !u!114 &9028015919182796587
 MonoBehaviour:
   m_ObjectHideFlags: 0

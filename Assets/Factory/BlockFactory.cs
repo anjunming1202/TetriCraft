@@ -23,6 +23,9 @@ public class BlockFactory
         {
             {BlockType.Null, () => new NullBlock() },
             {BlockType.Cobblestone, () => new NormalBlock(BlockType.Cobblestone) },
+            {BlockType.Dirt, () => new NormalBlock(BlockType.Dirt) },
+            {BlockType.WoodenPlank, () => new NormalBlock(BlockType.WoodenPlank) },
+            {BlockType.Stone, () => new NormalBlock(BlockType.Stone) },
             
         };
     }

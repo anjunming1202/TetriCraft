@@ -27,8 +27,11 @@ public static class BlockResources
     {
         BlockPrefabs = new Dictionary<BlockType, GameObject>();
 
-        LoadPrefab(BlockType.Null, "Null Block");
+        LoadPrefab(BlockType.Null, "Null_Block");
         LoadPrefab(BlockType.Cobblestone, "Cobblestone");
+        LoadPrefab(BlockType.Dirt, "Dirt");
+        LoadPrefab(BlockType.WoodenPlank, "Wooden_Plank");
+        LoadPrefab(BlockType.Stone, "Stone");
 
 
         Debug.Log($"Successfully Loaded {BlockPrefabs.Count} Prefabs!");
