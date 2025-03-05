@@ -42,8 +42,8 @@ public class BlockFactory
         blockObject.transform.SetParent(Blocks.transform);
 
         // Initialise block object manager
-        BlockObjectManager blockObjectManager = blockObject.GetComponent<BlockObjectManager>();
-        blockObjectManager.Initialise(block);
+        BlockManager blockManager = blockObject.GetComponent<BlockManager>();
+        blockManager.Initialise(block);
 
         return blockObject;
     }
