@@ -4,8 +4,11 @@ using UnityEngine;
 
 // Job: instantiate block and keep instanced objects as child dynamically, if not using prefabs
 public class BlockFactory : MonoBehaviour
-{    
-    public static GameObject Blocks; // parent of instantiated blocks as placed in the map
+{
+    // Parent of instantiated blocks as placed in the map
+    public static GameObject Blocks; 
+    // Loaded Block Prefabs
+    private static Dictionary<BlockType, GameObject> BlockPrefabs;
 
     void Awake()
     {
@@ -14,10 +17,11 @@ public class BlockFactory : MonoBehaviour
     
     public static GameObject CreateBlock(Block block)
     {
-        GameObject blockObject = new GameObject(block.Name);
+        // Instantiate block prefab
+        GameObject blockObject = GameObject.Instantiate(BlockResources.GetPrefab(block.Type));
 
-        // Add block object manager
-        BlockObjectManager blockObjectManager = blockObject.AddComponent<BlockObjectManager>();
+        // Initialise block object manager
+        BlockObjectManager blockObjectManager = blockObject.GetComponent<BlockObjectManager>();
         blockObjectManager.Initialise(block);
 
         return blockObject;

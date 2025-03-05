@@ -245,9 +245,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void LoadStaticResources()
     {
-        // Load block resources
+        // Load block prefabs
         BlockResources.LoadBlockPrefabs();
-        BlockResources.LoadBlockTextures();
 
         // Initialise boundary data
         MapBoundaryData.Create(boundaryRegion.transform);

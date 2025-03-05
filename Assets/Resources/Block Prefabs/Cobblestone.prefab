@@ -10,9 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 9079800203541379973}
   - component: {fileID: 2692196136773849335}
-  - component: {fileID: 4872889185820219037}
+  - component: {fileID: 3208763620551187237}
+  - component: {fileID: 671932412832912740}
+  - component: {fileID: 9028015919182796587}
   m_Layer: 0
-  m_Name: Null Block
+  m_Name: Cobblestone
   m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -85,7 +87,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &4872889185820219037
+--- !u!114 &3208763620551187237
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,9 +96,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 6118796901473174655}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8aa2a1de8ee670e4eb3861a5533f3473, type: 3}
+  m_Script: {fileID: 11500000, guid: 74f094f8c132e2a4eab89790dd25d473, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isInMap: 0
-  isFalling: 0
-  isMoving: 0
+--- !u!114 &671932412832912740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16bdf98159c6a344cbc5ea1dba9fba4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  texture: {fileID: 1800839560, guid: 0d98ff2e15a321b41bd0b6836f46a654, type: 3}
+--- !u!114 &9028015919182796587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83cde78856fb25741acdccb7ca2d5758, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startPosition: {x: 0, y: 0, z: 0}
+  endPosition: {x: 0, y: 0, z: 0}
