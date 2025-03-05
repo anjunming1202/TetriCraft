@@ -58,7 +58,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         // Load static resources
-        LoadStaticResources();
+        InitialiseResources();
     }
     public void NewGame()
     {
@@ -243,11 +243,14 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Initialising all static data/resources
     /// </summary>
-    private void LoadStaticResources()
+    private void InitialiseResources()
     {
-        // Load block resources
+        // Load block prefabs
         BlockResources.LoadBlockPrefabs();
-        BlockResources.LoadBlockTextures();
+
+        // Initialise factories
+        BlockFactory.Initialise();
+        TetrominoFactory.Initialise();
 
         // Initialise boundary data
         MapBoundaryData.Create(boundaryRegion.transform);

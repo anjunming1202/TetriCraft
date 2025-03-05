@@ -4,17 +4,19 @@ using UnityEngine;
 
 public class BlockObjectManager : MonoBehaviour
 {
+    private void Awake()
+    {
+
+    }
+
     public void Initialise(Block block)
     {
-        // Add sprite renderer
-        SpriteRenderer renderer = gameObject.AddComponent<SpriteRenderer>();
-
-        // Add block renderer
-        blockRenderer = gameObject.AddComponent<BlockRenderer>();
+        // Initialise block renderer
+        blockRenderer = GetComponent<BlockRenderer>();
         blockRenderer.Initialise(block);
 
-        // Add block animator
-        blockAnimator = gameObject.AddComponent<BlockAnimator>();
+        // Initialise block animator
+        blockAnimator = GetComponent<BlockAnimator>();
         blockAnimator.Initialise(block);
 
         // Set initial spawn position (avoid being seen at strange position)
@@ -26,6 +28,7 @@ public class BlockObjectManager : MonoBehaviour
         blockAnimator.OnFinish += block.StopMoving;
     }
 
+    private Block Block;
     private BlockRenderer blockRenderer;
     private BlockAnimator blockAnimator;
 

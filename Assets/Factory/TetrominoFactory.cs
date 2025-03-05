@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Job: instantiate tetromino (to 4 block objects) and keep instanced objects as child dynamically, if not using prefabs
-public class TetrominoFactory : MonoBehaviour
+public class TetrominoFactory
 {
     private static GameObject Tetromino; // parent of instantiated blocks as falling in a tetromino
 
-    void Awake()
+    public static void Initialise()
     {
         Tetromino = GameObject.Find("Tetromino");
     }
@@ -15,7 +15,7 @@ public class TetrominoFactory : MonoBehaviour
     {
         foreach (Block block in tetromino.blocks)
         {
-            BlockFactory.CreateBlock(block).transform.SetParent(Tetromino.transform);
+            BlockFactory.CreateBlockObject(block).transform.SetParent(Tetromino.transform);
         }
         Tetromino.name = $"Tetromino {tetromino.Type}";
         return Tetromino;
