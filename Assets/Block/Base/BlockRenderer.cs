@@ -6,8 +6,8 @@ using static Unity.Collections.AllocatorManager;
 // Manage the rendering of the instantiated block
 public class BlockRenderer : MonoBehaviour
 {
-    // Reference of block
-    /*public Block block;*/
+    // Block Texture
+    public Sprite texture;
 
     // Renderer
     private SpriteRenderer spriteRenderer;
@@ -21,7 +21,7 @@ public class BlockRenderer : MonoBehaviour
         // Initialise texture renderer
         /*this.block = block;*/
         spriteRenderer = GetComponent<SpriteRenderer>();
-        spriteRenderer.sprite = BlockResources.blockTexture[block.Name];
+        spriteRenderer.sprite = texture;
         spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; // only seen in the map region
 
         // Subscribe the block "change" events - render by updating block object when block data changes
@@ -39,6 +39,6 @@ public class BlockRenderer : MonoBehaviour
     /// </summary>
     private void Render(Block block)
     {
-        spriteRenderer.sprite = block.texture;
+        spriteRenderer.sprite = texture;
     }
 }
