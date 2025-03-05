@@ -6,14 +6,18 @@ using UnityEngine;
 [Serializable]
 public abstract class Block
 {
+    public Block()
+    {
+        this.Name = BlockResources.GetPrefab(Type).name;
+    }
     public Block(string name)
     {
         this.Name = name;
     }
 
-    // General
+    // Identity
+    public virtual string Name { get; }
     public abstract BlockType Type { get; }
-    public readonly string Name;
 
     // Data in the map
     private Vector2Int position = Vector2Int.zero; // Block position in the map

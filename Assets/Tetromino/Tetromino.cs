@@ -11,10 +11,6 @@ using static Unity.Collections.AllocatorManager;
 public class Tetromino
 {
     public Tetromino(TetrominoType type) : this(type, new NullBlock(), new NullBlock(), new NullBlock(), new NullBlock()) { }
-    public Tetromino(TetrominoType type, BlockType blockType)
-    {
-
-    }
     public Tetromino(TetrominoType type, Block block1, Block block2, Block block3, Block block4)
     {
         // Initialise tetromino data

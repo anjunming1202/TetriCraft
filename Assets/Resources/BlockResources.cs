@@ -25,10 +25,8 @@ public static class BlockResources
     // Load all block prefabs in a particular folder
     public static void LoadBlockPrefabs()
     {
-        // Initialize the array to store loaded Prefabs
         BlockPrefabs = new Dictionary<BlockType, GameObject>();
 
-        // Load prefabs manually
         LoadPrefab(BlockType.Null, "Null Block");
         LoadPrefab(BlockType.Cobblestone, "Cobblestone");
 

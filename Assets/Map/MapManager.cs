@@ -106,14 +106,25 @@ public class MapManager : MonoBehaviour
     }
     private void CreateNextTetromino()
     {
-        // Random type
-        TetrominoType type = (TetrominoType)UnityEngine.Random.Range(0, (int)TetrominoType.Count);
-        CreateNextTetromino(type);
+        // Random tetromino type
+        TetrominoType tetroType = (TetrominoType)UnityEngine.Random.Range(0, (int)TetrominoType.Count);
+
+        // Random blocks type
+        BlockType blockType = BlockRandomiser.GetRandomType();
+
+        CreateNextTetromino(tetroType, blockType);
     }
-    private void CreateNextTetromino(TetrominoType type)
+    private void CreateNextTetromino(TetrominoType tetroType, BlockType blockType)
     {
+        // For intrinsic tetromino (same four blocks)
+        Block[] blocks = new Block[4];
+        for (int i = 0; i < 4; i++)
+        {
+            blocks[i] = BlockFactory.CreateBlock(blockType);
+        }
+
         // New a tetromino
-        nextTetromino = new Tetromino(type);
+        nextTetromino = new Tetromino(tetroType, blocks[0], blocks[1], blocks[2], blocks[3]);
     }
     private void SetSittingOnCeiling(Tetromino tetromino)
     {

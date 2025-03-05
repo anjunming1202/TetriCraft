@@ -15,7 +15,7 @@ public class TetrominoFactory
     {
         foreach (Block block in tetromino.blocks)
         {
-            BlockFactory.CreateBlock(block).transform.SetParent(Tetromino.transform);
+            BlockFactory.CreateBlockObject(block).transform.SetParent(Tetromino.transform);
         }
         Tetromino.name = $"Tetromino {tetromino.Type}";
         return Tetromino;

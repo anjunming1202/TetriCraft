@@ -5,6 +5,6 @@ using UnityEngine;
 public class NullBlock : Block
 {
     public override BlockType Type => BlockType.Null;
-    public NullBlock() : base(BlockResources.GetPrefab(BlockType.Null).name) { }
-
+    public NullBlock() : base() { }
+    public NullBlock(string name) : base(name) { }
 }

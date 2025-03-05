@@ -18,17 +18,48 @@ public class BlockFactory
     public static void Initialise()
     {
         Blocks = GameObject.Find("Blocks");
+
+        BlockConstructors = new Dictionary<BlockType, Func<Block>>()
+        {
+            {BlockType.Null, () => new NullBlock() },
+            {BlockType.Cobblestone, () => new NormalBlock(BlockType.Cobblestone) },
+            
+        };
     }
     
-    public static GameObject CreateBlock(Block block)
+    /// <summary>
+    /// Instantiate a block game object from block
+    /// </summary>
+    public static GameObject CreateBlockObject(Block block)
     {
         // Instantiate block prefab
         GameObject blockObject = GameObject.Instantiate(BlockResources.GetPrefab(block.Type));
+
+        // Set block parent
+        blockObject.transform.SetParent(Blocks.transform);
 
         // Initialise block object manager
         BlockObjectManager blockObjectManager = blockObject.GetComponent<BlockObjectManager>();
         blockObjectManager.Initialise(block);
 
         return blockObject;
+    }
+
+    /// <summary>
+    /// New a block instance
+    /// </summary>
+    public static Block CreateBlock(BlockType type)
+    {
+        return BlockConstructors[type]?.Invoke();
+    }
+
+    /// <summary>
+    /// New a block instance and then instantiate a block game object
+    /// </summary>
+    public static Block InstantiateBlock(BlockType type)
+    {
+        Block block = CreateBlock(type);
+        CreateBlockObject(block);
+        return block;
     }
 }
