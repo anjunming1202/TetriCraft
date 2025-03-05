@@ -1,39 +1,56 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.U2D;
 
 // Load all block prefab from assets, stored in a global static list
 public static class BlockResources
 {
-    // Path of block texture sprite sheet
-    private static string spriteSheetFilename = "BlockTexture";
+    // Folder Path for prefabs
+    private static string prefabFolderPath = "Block Prefabs/";
 
-    // Loaded Block Textures
-    private static Sprite[] blockSprites;   // currently not used
-    public static Dictionary<string, Sprite> blockTexture;
-
+    // Loaded Block Prefabs
+    private static Dictionary<BlockType, GameObject> BlockPrefabs;
 
 
-    // Load all block texture
-    public static void LoadBlockTextures()
+    // Get block prefab
+    public static GameObject GetPrefab(BlockType type)
     {
-        blockSprites = Resources.LoadAll<Sprite>(spriteSheetFilename);
-        
-        blockTexture = new Dictionary<string, Sprite>();
-        
-        foreach (Sprite sprite in blockSprites)
-        {
-            blockTexture[sprite.name] = sprite;
-            //Debug.Log($"Loaded Sprite: {sprite.name}");
-        }
-
-        Debug.Log($"Successfully Loaded {blockSprites.Length} Texture Sprite!");
+        return BlockPrefabs[type];
     }
 
-    // Register for all blocks
-    public static void RegisterBlocks()
+    // Load all block prefabs in a particular folder
+    public static void LoadBlockPrefabs()
     {
+        BlockPrefabs = new Dictionary<BlockType, GameObject>();
 
+        LoadPrefab(BlockType.Null, "Null_Block");
+        LoadPrefab(BlockType.Cobblestone, "Cobblestone");
+        LoadPrefab(BlockType.Dirt, "Dirt");
+        LoadPrefab(BlockType.WoodenPlank, "Wooden_Plank");
+        LoadPrefab(BlockType.Stone, "Stone");
+
+
+        Debug.Log($"Successfully Loaded {BlockPrefabs.Count} Prefabs!");
+    }
+
+    private static void LoadPrefab(BlockType type, string name)
+    {
+        Debug.Assert(!BlockPrefabs.ContainsKey(type), $"Already loaded {type} prefab!");
+
+        GameObject prefab = Resources.Load<GameObject>(prefabFolderPath + name);
+
+        if (prefab == null)
+        {
+            Debug.LogError($"Failed to load prefab: {prefabFolderPath + name}");
+            return;
+        }
+
+        BlockPrefabs[type] = prefab;
+
+        Debug.Log($"Loaded Prefab: {prefab.name}");
     }
 }

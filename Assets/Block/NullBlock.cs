@@ -5,7 +5,6 @@ using UnityEngine;
 public class NullBlock : Block
 {
     public override BlockType Type => BlockType.Null;
-    public override string Name => "missing_block";
-
     public NullBlock() : base() { }
+    public NullBlock(string name) : base(name) { }
 }
