@@ -4,30 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Job: instantiate block and keep instanced objects as child dynamically, if not using prefabs
-public class BlockFactory
+public static class BlockFactory
 {
     // Parent of instantiated blocks as placed in the map
     public static GameObject Blocks; 
 
-    // Block Prefabs
-    private static Dictionary<BlockType, GameObject> BlockPrefabs;
-
-    // Block Constructor
-    private static Dictionary<BlockType, Func<Block>> BlockConstructors;
-
     public static void Initialise()
     {
         Blocks = GameObject.Find("Blocks");
-
-        BlockConstructors = new Dictionary<BlockType, Func<Block>>()
-        {
-            {BlockType.Null, () => new NullBlock() },
-            {BlockType.Cobblestone, () => new NormalBlock(BlockType.Cobblestone) },
-            {BlockType.Dirt, () => new NormalBlock(BlockType.Dirt) },
-            {BlockType.WoodenPlank, () => new NormalBlock(BlockType.WoodenPlank) },
-            {BlockType.Stone, () => new NormalBlock(BlockType.Stone) },
-            
-        };
     }
     
     /// <summary>
@@ -36,12 +20,12 @@ public class BlockFactory
     public static GameObject CreateBlockObject(Block block)
     {
         // Instantiate block prefab
-        GameObject blockObject = GameObject.Instantiate(BlockResources.GetPrefab(block.Type));
+        GameObject blockObject = Instantiate(block.Type);
 
         // Set block parent
         blockObject.transform.SetParent(Blocks.transform);
 
-        // Initialise block object manager
+        // Initialise block manager
         BlockManager blockManager = blockObject.GetComponent<BlockManager>();
         blockManager.Initialise(block);
 
@@ -49,20 +33,36 @@ public class BlockFactory
     }
 
     /// <summary>
-    /// New a block instance
+    /// Instantiate an empty block template (exactly like instantiate a prefab!)
     /// </summary>
-    public static Block CreateBlock(BlockType type)
+    private static GameObject Instantiate(BlockID type)
     {
-        return BlockConstructors[type]?.Invoke();
+        GameObject block = new GameObject();
+        block.name = BlockRegistry.GetMetadata(type).Name;
+
+        // Add component SpriteRenderer
+        SpriteRenderer spriteRenderer = block.AddComponent<SpriteRenderer>();
+        spriteRenderer.sprite = BlockRegistry.GetMetadata(type).DefaultTexture;
+        spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; // only seen in the map region
+
+        // Add component BlockManager
+        BlockManager blockManager = block.AddComponent<BlockManager>();
+
+        // Add component BlockRenderer
+        BlockRenderer blockRenderer = block.AddComponent<BlockRenderer>();
+        blockRenderer.texture = BlockRegistry.GetMetadata(type).DefaultTexture;
+
+        // Add component BlockAnimator
+        block.AddComponent<BlockAnimator>();
+
+        return block;
     }
 
     /// <summary>
-    /// New a block instance and then instantiate a block game object
+    /// New a block instance
     /// </summary>
-    public static Block InstantiateBlock(BlockType type)
+    public static Block NewBlock(BlockID type)
     {
-        Block block = CreateBlock(type);
-        CreateBlockObject(block);
-        return block;
+        return BlockRegistry.GetMetadata(type).Constructor?.Invoke();
     }
 }

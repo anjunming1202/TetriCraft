@@ -110,17 +110,17 @@ public class MapManager : MonoBehaviour
         TetrominoType tetroType = (TetrominoType)UnityEngine.Random.Range(0, (int)TetrominoType.Count);
 
         // Random blocks type
-        BlockType blockType = BlockRandomiser.GetRandomType();
+        BlockID blockType = BlockRandomiser.GetRandomType();
 
         CreateNextTetromino(tetroType, blockType);
     }
-    private void CreateNextTetromino(TetrominoType tetroType, BlockType blockType)
+    private void CreateNextTetromino(TetrominoType tetroType, BlockID blockType)
     {
         // For intrinsic tetromino (same four blocks)
         Block[] blocks = new Block[4];
         for (int i = 0; i < 4; i++)
         {
-            blocks[i] = BlockFactory.CreateBlock(blockType);
+            blocks[i] = BlockFactory.NewBlock(blockType);
         }
 
         // New a tetromino

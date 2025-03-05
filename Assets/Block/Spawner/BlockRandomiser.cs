@@ -1,13 +1,13 @@
 ﻿
 public class BlockRandomiser
 {
-    public static BlockType GetRandomType()
+    public static BlockID GetRandomType()
     {
-        int typeNumber = UnityEngine.Random.Range(0, (int)BlockType.Count);
+        int typeNumber = UnityEngine.Random.Range(0, (int)BlockID.Count);
 
-        if (typeNumber == (int)BlockType.Null)
+        if (typeNumber == (int)BlockID.Null)
             return GetRandomType();
 
-        return (BlockType)typeNumber;
+        return (BlockID)typeNumber;
     }
 }

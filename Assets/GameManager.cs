@@ -246,7 +246,7 @@ public class GameManager : MonoBehaviour
     private void InitialiseResources()
     {
         // Load block prefabs
-        BlockResources.LoadBlockPrefabs();
+        BlockResourcesManager.RegisterBlocks();
 
         // Initialise factories
         BlockFactory.Initialise();

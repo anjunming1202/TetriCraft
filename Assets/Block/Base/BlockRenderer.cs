@@ -21,8 +21,6 @@ public class BlockRenderer : MonoBehaviour
         // Initialise texture renderer
         /*this.block = block;*/
         spriteRenderer = GetComponent<SpriteRenderer>();
-        spriteRenderer.sprite = texture;
-        spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; // only seen in the map region
 
         // Subscribe the block "change" events - render by updating block object when block data changes
         //block.OnMove += Render;
