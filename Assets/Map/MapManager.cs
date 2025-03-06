@@ -139,8 +139,8 @@ public class MapManager : MonoBehaviour
         {
             fallingTetromino.hardDrop++;
         }
-        Lockdown(fallingTetromino);
         OnTetrominoHardDrop?.Invoke(fallingTetromino);
+        Lockdown(fallingTetromino);
     }
     public void Rotate(bool clockwise = true)
     {
