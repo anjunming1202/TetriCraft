@@ -10,7 +10,6 @@ using static UnityEditor.PlayerSettings;
 //      Control of the tetromino
 //      Control map to e.g. clear one row, spawn tetrominos, ... 
 //      ...*/
-[Serializable]
 public class MapManager : MonoBehaviour
 {
     // Map Data

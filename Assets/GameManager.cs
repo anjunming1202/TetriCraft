@@ -147,6 +147,8 @@ public class GameManager : MonoBehaviour
         }
         if (Input.GetKeyDown(key_accelerate)) // Accelerating
         {
+            mapManager.SoftDrop();  // drop immediately
+            timer = 0;
             isAccelerating = true;
             interval = intervalAccelerating;
         }

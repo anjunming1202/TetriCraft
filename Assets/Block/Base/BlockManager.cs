@@ -4,35 +4,48 @@ using UnityEngine;
 
 public class BlockManager : MonoBehaviour
 {
-    private void Awake()
-    {
-
-    }
-
     public void Initialise(Block block)
     {
-        // Initialise block renderer
+        // Initialise block and components
+        this.block = block;
         blockRenderer = GetComponent<BlockRenderer>();
-        blockRenderer.Initialise(block);
-
-        // Initialise block animator
         blockAnimator = GetComponent<BlockAnimator>();
-        blockAnimator.Initialise(block);
 
-        // Set initial spawn position (avoid being seen at strange position)
-        gameObject.transform.position = block.GetWorldPosition();
+        // Subscribe block events
+        block.OnPositionChanged += UpdatePosition;      // block set position   =>  change position instantaneously
+        block.OnMoved += UpdatePositionMoving;          // block on moved       =>  moving animation
+        block.OnLanded += UpdatePositionLanding;        // block on landed      =>  landing animation
 
-        // Subscribe block destroy event (automatic destroy object)
-        block.OnDestroy += DestroyBlock;
-        //
-        blockAnimator.OnFinish += block.StopMoving;
+        block.OnDestroyed += DestroyBlock;                // block on destroyed   =>  destroy block object
+
+        // Let block subscribe events
+        blockAnimator.OnFinish += AnimationFinished;
     }
 
-    private Block Block;
+    private Block block;
     private BlockRenderer blockRenderer;
     private BlockAnimator blockAnimator;
 
 
+    private void UpdatePosition(Block block)
+    {
+        blockAnimator.Stop();
+        transform.position = block.GetWorldPosition();
+    }
+    private void UpdatePositionMoving(Block block)
+    {
+        block.isAnimating = true;
+        blockAnimator.MoveAnimationOnSet(block);
+    }
+    private void UpdatePositionLanding(Block block)
+    {
+        block.isAnimating = true;
+        blockAnimator.LandAnimationOnSet(block);
+    }
+    private void AnimationFinished()
+    {
+        block.isAnimating = false;
+    }
 
     private void DestroyBlock()
     {

@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using Unity.Mathematics;
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
@@ -294,7 +295,7 @@ public class Map
                 {
                     Vector2Int mapBlockPos = tetromino.LocalToMap(r, c);
                     Block mapBlock = blockMap[mapBlockPos.x, mapBlockPos.y];
-                    if (mapBlock != null && !mapBlock.isFalling)
+                    if (mapBlock != null && mapBlock.isLocked)
                     {
                         Debug.Log("Collide");
                         return true;

@@ -12,15 +12,14 @@ public class BlockRenderer : MonoBehaviour
     // Renderer
     private SpriteRenderer spriteRenderer;
 
-    void Awake()
+    private void Start()
     {
-
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
     public void Initialise(Block block)
     {
         // Initialise texture renderer
         /*this.block = block;*/
-        spriteRenderer = GetComponent<SpriteRenderer>();
 
         // Subscribe the block "change" events - render by updating block object when block data changes
         //block.OnMove += Render;

@@ -25,18 +25,17 @@ public class BlockAnimator : MonoBehaviour
 
     public void Initialise(Block block)
     {
-        // event
-        block.OnMoved += MoveAnimationOnSet;
-        block.OnLanded += LandAnimationOnSet;
-        block.OnPositionChanged += UpdatePosition;
+
     }
 
-    private void Reset()
+    public void Stop()
     {
-        elapsedTime = 0f;
+        if (currentCoroutine != null)
+            StopCoroutine(currentCoroutine);
+        OnFinish?.Invoke();
     }
 
-    private void MoveAnimationOnSet(Block block)
+    public void MoveAnimationOnSet(Block block)
     {
         // Stop current animation
         if (currentCoroutine != null)
@@ -45,7 +44,7 @@ public class BlockAnimator : MonoBehaviour
         currentCurveAsset = MovingCurveAsset;
         currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
     }
-    private void LandAnimationOnSet(Block block)
+    public void LandAnimationOnSet(Block block)
     {
         // Stop current animation
         if (currentCoroutine != null)
@@ -54,12 +53,12 @@ public class BlockAnimator : MonoBehaviour
         currentCurveAsset = LandingCurveAsset;
         currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
     }
-    private void UpdatePosition(Block block)
+
+
+
+    private void Reset()
     {
-        if (currentCoroutine != null)
-            StopCoroutine(currentCoroutine);
-        transform.position = block.GetWorldPosition();
-        OnFinish?.Invoke();
+        elapsedTime = 0f;
     }
 
     private IEnumerator MoveTo(Vector3 to)

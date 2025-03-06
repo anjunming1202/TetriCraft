@@ -2,19 +2,15 @@
 using UnityEngine;
 
 /// <summary>
-/// Tetromino manager for all tetrominos
+/// Tetromino manager for a tetromino
 /// </summary>
 public class TetrominoManager : MonoBehaviour
 {
-    private Tetromino tetromino;
-
-    private void Update()
-    {
-        
-    }
-
     public void Initialise(Tetromino tetromino)
     {
 
     }
+
+    private Tetromino tetromino;
+
 }
