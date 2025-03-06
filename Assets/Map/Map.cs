@@ -13,6 +13,7 @@ public class Map
         blockMap = new Block[width, height + 5]; // all null
     }
 
+    // Blocks
     public Block[,] blockMap;
 
     // Map Boundary Data
@@ -23,19 +24,43 @@ public class Map
         get => blockMap[x, y];
     }
 
+    // Map recorded data
+    public int lastClearLineCount = 0;
+    public int combo = 0;
+        
+    // Debugging
+    public int blockCount
+    {
+        get
+        {
+            int blockCount = 0;
+            foreach (var t in blockMap)
+            {
+                if (t != null)
+                {
+                    blockCount++;
+                }
+            }
+            return blockCount;
+        }
+    }
+
+
+
+
 
 
     // Block Data Editting API
     // Ensure each change position for block syncs in both block and map data
 
-    // Add block
+    // Set
     /// <summary>
     /// Place a block to an empty position
     /// </summary>
-    public void PlaceBlock(Block block, int x, int y)
+    public void SetBlock(Block block, int x, int y)
     {
         // check for debuging
-        Debug.Assert(blockMap[x, y] == null, "Trying to place a block to an non-empty position");
+        Debug.Assert(blockMap[x, y] == null, $"Trying to place a block to an non-empty position {x}, {y}");
 
         blockMap[x, y] = block;
         block.SetPosition(new Vector2Int(x, y));
@@ -45,13 +70,57 @@ public class Map
     /// <summary>
     /// Place a block to an empty position
     /// </summary>
-    public void PlaceBlock(Block block, Vector2Int pos) => PlaceBlock(block, pos.x, pos.y);
+    public void SetBlock(Block block, Vector2Int pos) => SetBlock(block, pos.x, pos.y);
     /// <summary>
-    /// Place a block onto the map according to its data position
+    /// Set tetromino blocks onto the map
     /// </summary>
-    public void PlaceBlock(Block block) => PlaceBlock(block, block.MapPosition);
+    public void SetTetromino(Tetromino tetromino, int x, int y)
+    {
+        // Set data of tetromino self
+        tetromino.SetPosition(new Vector2Int(x, y));
 
-    // Remove block
+        // Set data of blocks (in the map + block self)
+        for (int c = 0; c < tetromino.size; c++)
+            for (int r = 0; r < tetromino.size; r++)
+            {
+                Block block = tetromino[r, c];
+                if (block != null)
+                {
+                    // block position = tetromino position + local position in the tetromino
+                    Vector2Int blockPosition = tetromino.LocalToMap(r, c);
+                    SetBlock(block, blockPosition);
+                }
+            }
+    }
+    /// <summary>
+    /// Set tetromino blocks onto the map
+    /// </summary>
+    public void SetTetromino(Tetromino tetromino, Vector2Int pos) => SetTetromino(tetromino, pos.x, pos.y);
+    /// <summary>
+    /// Place down the block onto the map according to its data position
+    /// </summary>
+    public void PlaceBlockDown(Block block)
+    {
+        // check for debuging
+        Debug.Assert(blockMap[block.MapPosition.x, block.MapPosition.y] == null, $"Trying to PLACE DOWN a block to an non-empty position {block.MapPosition.x}, {block.MapPosition.y}");
+
+        blockMap[block.MapPosition.x, block.MapPosition.y] = block;
+    }
+    /// <summary>
+    /// Place down the tetromino according to its position data
+    /// </summary>
+    public void PlaceTetrominoDown(Tetromino tetromino)
+    {
+        // Set data of blocks (in the map + block self)
+        foreach (Block block in tetromino.blocks)
+        {
+            PlaceBlockDown(block);
+        }
+    }
+
+
+
+    // Remove
     /// <summary>
     /// Set one position to null
     /// </summary>
@@ -66,15 +135,27 @@ public class Map
     /// <summary>
     /// Set one position to null according to the block data position
     /// </summary>
-    public void Remove(Block block)
+    public void RemoveBlock(Block block)
     {
         // checking for debug
         Debug.Assert(blockMap[block.MapPosition.x, block.MapPosition.y] == block, "Block position inconsistent with map data");
 
         Remove(block.MapPosition);
     }
+    /// <summary>
+    /// Remove tetromino blocks on the map, but not destroy
+    /// </summary>
+    public void RemoveTetromino(Tetromino tetromino)
+    {
+        foreach (Block block in tetromino.blocks)
+        {
+            RemoveBlock(block);
+        }
+    }
 
-    // Move block
+
+
+    // Move
     /// <summary>
     /// Move a block to another position at once, use when moving single block only
     /// </summary>
@@ -91,7 +172,7 @@ public class Map
         block.MoveTo(to); // set position
 
         // Place down block with moving
-        PlaceBlock(block);
+        PlaceBlockDown(block);
     }
     /// <summary>
     /// Move a group of blocks at once
@@ -101,7 +182,7 @@ public class Map
         // Remove all original block first
         foreach (Block block in blocks)
         {
-            Remove(block);
+            RemoveBlock(block);
         }
         // Then move and place blocks
         foreach (Block block in blocks)
@@ -109,11 +190,24 @@ public class Map
             // Move block
             block.MoveBy(x, y);
             // Place down block with moving
-            PlaceBlock(block);
+            PlaceBlockDown(block);
         }
     }
+    public void MoveTetrominoTo(Tetromino tetromino, Vector2Int to)
+    {
+        // Remove original blocks
+        RemoveTetromino(tetromino);
 
-    // Destroy block
+        // Move tetromino -> set position
+        tetromino.MoveTo(to);
+
+        // Place down tetromino blocks with moving
+        PlaceTetrominoDown(tetromino);
+    }
+
+
+
+    // Destroy
     /// <summary>
     /// Destroy and remove a block
     /// </summary>
@@ -122,6 +216,19 @@ public class Map
         blockMap[x, y].Destroy();
         Remove(x, y);
     }
+    /// <summary>
+    /// Destroy a row of blocks and leave it empty
+    /// </summary>
+    /// <param name="row"></param>
+    public void DestroyLine(int row)
+    {
+        for (int i = 0; i < width; i++)
+        {
+            Destroy(i, row);
+        }
+    }
+
+
 
     // Check map data
     /// <summary>
@@ -153,4 +260,67 @@ public class Map
         }
         return true;
     }
+
+    /// <summary>
+    /// Check for bottom, left, and right boundaries
+    /// </summary>
+    public bool CheckInside(Block block)
+    {
+        return IsInside(block.MapPosition.x, block.MapPosition.y);
+    }
+    /// <summary>
+    /// Check for bottom, left, and right boundaries
+    /// </summary>
+    public bool CheckInside(Tetromino tetromino)
+    {
+        for (int r = 0; r < tetromino.size; r++)
+            for (int c = 0; c < tetromino.size; c++)
+            {
+                if (tetromino[r, c] != null)
+                {
+                    Vector2Int blockPos = tetromino.LocalToMap(r, c);
+                    if (!IsInside(blockPos.x, blockPos.y))
+                        return false;
+                }
+            }
+        return true;
+    }
+    public bool CheckCollide(Tetromino tetromino)
+    {
+        for (int r = 0; r < tetromino.size; r++)
+            for (int c = 0; c < tetromino.size; c++)
+            {
+                if (tetromino[r, c] != null)
+                {
+                    Vector2Int mapBlockPos = tetromino.LocalToMap(r, c);
+                    Block mapBlock = blockMap[mapBlockPos.x, mapBlockPos.y];
+                    if (mapBlock != null && !mapBlock.isFalling)
+                    {
+                        Debug.Log("Collide");
+                        return true;
+                    }
+                }
+            }
+        return false;
+    }
+    public bool CheckValid(Tetromino tetromino)
+    {
+        // Check inside first, check not collide then
+        return (CheckInside(tetromino) && !CheckCollide(tetromino));
+    }
+
+    public bool CheckFull()
+    {
+        return !IsRowEmpty(height);
+    }
+    public bool CheckEmpty()
+    {
+        for (int row = 0; row < height - 1; row++)
+        {
+            if (!IsRowEmpty(row))
+                return false;
+        }
+        return true;
+    }
+
 }

@@ -10,31 +10,37 @@ public class GameManager : MonoBehaviour
     // Map Manager
     private MapManager mapManager;
 
-    // Map region
+    // Map Region
     [Header("Map")]
     public SpriteMask boundaryRegion;
 
     // Map Data (readonly)
-    private Map map => mapManager.map;
     private int width => MapBoundaryData.Instance.width;
     private int height => MapBoundaryData.Instance.height;
     private MapBoundaryData boundary => MapBoundaryData.Instance;
+
+    // Tetrominos
+    private Tetromino nextTetromino;
+    private TetrominoManager TetrominoManager;
 
     // Timer
     private float timer = 0;
 
     // Control
     [Header("Control")]
-    //private bool isAccelerating = false;
     private bool isAccelerating = false;
-    public float speedFalling = 1;
-    public float speedAcclerating = 2;
+    public float speedDrop = 1;
+    public float speedSoftDrop = 2;
     private float interval;
-    private float intervalNormal => 1 / speedFalling;
-    private float intervalAccelerating => 1 / speedAcclerating;
+    private float intervalNormal => 1 / speedDrop;
+    private float intervalAccelerating => 1 / speedSoftDrop;
+    public static float SpeedDrop => Instance.speedDrop;
+    public static float SpeedSoftDrop => Instance.speedDrop;
 
-    // Game Objects Container
-    private List<Transform> blockObjects;
+    // Game Objects
+    private Transform MapBlocks;
+    private Transform FallingTetromino;
+    private Transform NextTetromino;
 
     [Header("Input")]
     // Input Key Mapping
@@ -54,11 +60,20 @@ public class GameManager : MonoBehaviour
     public AnimationCurveAsset blockMovementCurve;
     public AnimationCurveAsset blockLandCurve;
 
+    public static GameManager Instance { get; private set; }
 
     void Awake()
     {
         // Load static resources
         InitialiseResources();
+
+        // Get game objects
+        MapBlocks = GameObject.Find("Map").transform;
+        FallingTetromino = GameObject.Find("Falling Tetromino").transform;
+        NextTetromino = GameObject.Find("Next Tetromino").transform;
+
+        // Singleton
+        Instance = this;
     }
     public void NewGame()
     {
@@ -66,27 +81,20 @@ public class GameManager : MonoBehaviour
         mapManager = FindObjectOfType<MapManager>();
         mapManager.NewMap();
 
-        mapManager.OnTetrominoLocked += CheckGameover;
+        mapManager.OnFinish += CheckGameover;
         mapManager.OnTetrominoLocked += SpawnTetromino;
         mapManager.OnTetrominoSoftDrop += ScoreSoftDrop;
         mapManager.OnTetrominoHardDrop += ScoreHardDrop;
         mapManager.OnLineClear += ScoreLineClear;
 
-        // Initialise block object list
-        if (blockObjects != null)
-        {
-            foreach (Transform t in blockObjects)
-                GameObject.Destroy(t);
-        }
-        blockObjects = new List<Transform>();
-
         // Initialise game logic
-        interval = intervalNormal;
         gameover = false;
         score = 0;
+        interval = intervalNormal;
 
         // Spawn the first tetromino
-        SpawnTetromino(mapManager);
+        nextTetromino = CreateRandomTetromino();
+        SpawnTetromino();
     }
 
     void Start()
@@ -100,21 +108,16 @@ public class GameManager : MonoBehaviour
     {
         // debug
         int landedCount = 0;
-        landedCount = BlockFactory.Blocks.GetComponentsInChildren<Transform>().Length - 1;
-        int blockCount = 0;
-        foreach (var t in mapManager.map.blockMap)
-        {
-            if (t != null)
-            {
-                blockCount++;
-            }
-        }
-        Debug.Log($"blocks in map: {blockCount}, blocks instantiated: {landedCount}");
+        landedCount = MapBlocks.GetComponentsInChildren<Transform>().Length - 1;      
+        Debug.Log($"blocks in map: {mapManager.blockCount}, blocks instantiated: {landedCount}");
 
         if (!gameover)
         {
             // Update tetromino control
             UpdateControl(mapManager);
+
+            // Try clear lines
+            mapManager.TryClearLines();
         }
     }
 
@@ -176,35 +179,61 @@ public class GameManager : MonoBehaviour
             timer = 0;
         }
     }
-    private void SpawnTetromino(MapManager mapManager)
+    private void SpawnTetromino()
     {
         // Stop when game over
         if (gameover)
             return;
 
         // Set blocks children to the block pool
-        TetrominoFactory.ReparentBlocks();
+        TetrominoFactory.ReparentBlocks(NextTetromino, MapBlocks);
 
-        // Create new tetromino in map
-        mapManager.SpawnTetromino();
+        // Instantiate the tetromino
+        TetrominoFactory.InstantiateTetromino(nextTetromino, NextTetromino);
 
-        // Instantiate the tetromino/* and keep block objects reference*/
-        GameObject tetrominoObject = TetrominoFactory.CreateTetromino(mapManager.CurrentTetromino);
-        // InstantiateTetromino(mapManager.CurrentTetromino);
+        // Spawn new tetromino in map
+        mapManager.SpawnTetromino(nextTetromino);
+
+        // Create new tetromino
+        nextTetromino = CreateRandomTetromino();
+    }
+    private Tetromino CreateRandomTetromino()
+    {
+        // Random tetromino type
+        TetrominoType tetroType = (TetrominoType)UnityEngine.Random.Range(0, (int)TetrominoType.Count);
+
+        // Random blocks type
+        BlockID blockType = BlockRandomiser.GetRandomType();
+
+        return CreateTetromino(tetroType, blockType);
+    }
+    private Tetromino CreateTetromino(TetrominoType tetroType, BlockID blockType)
+    {
+        // For intrinsic tetromino (same four blocks)
+        Block[] blocks = new Block[4];
+        for (int i = 0; i < 4; i++)
+        {
+            blocks[i] = BlockFactory.NewBlock(blockType);
+        }
+
+        // New a tetromino
+        return new Tetromino(tetroType, blocks[0], blocks[1], blocks[2], blocks[3]);
     }
 
-    private void ScoreSoftDrop(MapManager mapManager)
+
+
+    private void ScoreSoftDrop(Tetromino tetromino)
     {
         score += 1;
     }
-    private void ScoreHardDrop(MapManager mapManager)
+    private void ScoreHardDrop(Tetromino tetromino)
     {
-        score += mapManager.hardDrop * 2;
+        score += tetromino.hardDrop * 2;
     }
-    private void ScoreLineClear(MapManager mapManager)
+    private void ScoreLineClear(Map map)
     {
         // for clearing multiple lines
-        switch (mapManager.lineCount)
+        switch (map.lastClearLineCount)
         {
             case 0:
                 break;
@@ -222,12 +251,12 @@ public class GameManager : MonoBehaviour
                 break;
         }
         // for combo of clearing
-        score += mapManager.combo * 500;
+        score += map.combo * 500;
     }
 
-    private void CheckGameover(MapManager mapManager)
+    private void CheckGameover(Map map)
     {
-        if (mapManager.CheckGameover())
+        if (map.CheckFull())
         {
             gameover = true;
             Debug.Log("Game Over!");

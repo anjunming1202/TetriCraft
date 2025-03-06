@@ -5,31 +5,29 @@ using UnityEngine;
 // Job: instantiate tetromino (to 4 block objects) and keep instanced objects as child dynamically, if not using prefabs
 public class TetrominoFactory
 {
-    private static GameObject Tetromino; // parent of instantiated blocks as falling in a tetromino
-
     public static void Initialise()
     {
-        Tetromino = GameObject.Find("Tetromino");
+
     }
-    public static GameObject CreateTetromino(Tetromino tetromino)
+
+    public static void InstantiateTetromino(Tetromino tetromino, Transform parent)
     {
         foreach (Block block in tetromino.blocks)
         {
-            BlockFactory.CreateBlockObject(block).transform.SetParent(Tetromino.transform);
+            BlockFactory.InstantiateBlock(block, parent);
         }
-        Tetromino.name = $"Tetromino {tetromino.Type}";
-        return Tetromino;
     }
+
     /// <summary>
     /// Detach from "Tetromino" and reattach to "Blocks"
     /// </summary>
-    public static void ReparentBlocks()
+    public static void ReparentBlocks(Transform from, Transform to)
     {
-        foreach (var obj in Tetromino.GetComponentsInChildren<Transform>())
+        foreach (var obj in from.GetComponentsInChildren<Transform>())
         {
-            if (obj == Tetromino.transform)
+            if (obj == from.transform)
                 continue;
-            obj.SetParent(BlockFactory.Blocks.transform);
+            obj.SetParent(to.transform);
         }
     }
 }

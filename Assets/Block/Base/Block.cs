@@ -19,7 +19,8 @@ public abstract class Block
     private Vector2Int position = Vector2Int.zero; // Block position in the map
 
     // Block state flags
-    public bool isInMap = false;
+    public bool isInMap = false;    // is in the map data
+    public bool isLocked = false;   // is locked => ready to be cleared
     public bool isFalling = false;
     public bool isMoving = false;
 
@@ -45,6 +46,7 @@ public abstract class Block
     public void SetPosition(Vector2Int position)
     {
         this.position = position;
+        OnPositionChanged?.Invoke(this);
     }
 
     /// <summary>
@@ -53,7 +55,7 @@ public abstract class Block
     public void MoveTo(Vector2Int to)
     {
         // Set data of block self
-        SetPosition(to);
+        position = to;
         isMoving = true;
         // Invoke block move event
         OnMoved?.Invoke(this);
