@@ -247,7 +247,7 @@ public class Map
     {
         for (int column = 0; column < width; column++)
         {
-            if (blockMap[column, row] == null)
+            if (blockMap[column, row] == null || !blockMap[column, row].isLocked)
                 return false;
         }
         return true;
@@ -256,7 +256,7 @@ public class Map
     {
         for (int column = 0; column < width; column++)
         {
-            if (blockMap[column, row] != null)
+            if (blockMap[column, row] != null && blockMap[column, row].isLocked)
                 return false;
         }
         return true;
