@@ -81,8 +81,8 @@ public class GameManager : MonoBehaviour
         mapManager = FindObjectOfType<MapManager>();
         mapManager.NewMap();
 
-        mapManager.OnFinish += CheckGameover;
-        mapManager.OnTetrominoLocked += SpawnTetromino;
+        mapManager.OnFinishTurn += CheckGameover;
+        mapManager.OnLockdown += SpawnTetromino;
         mapManager.OnTetrominoSoftDrop += ScoreSoftDrop;
         mapManager.OnTetrominoHardDrop += ScoreHardDrop;
         mapManager.OnLineClear += ScoreLineClear;

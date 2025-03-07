@@ -34,13 +34,19 @@ public class BlockManager : MonoBehaviour
     }
     private void UpdatePositionMoving(Block block)
     {
-        block.isAnimating = true;
-        blockAnimator.MoveAnimationOnSet(block);
+        if (block.GetWorldPosition() != transform.position)
+        {
+            block.isAnimating = true;
+            blockAnimator.MoveAnimationOnSet(block);
+        }
     }
     private void UpdatePositionLanding(Block block)
     {
-        block.isAnimating = true;
-        blockAnimator.LandAnimationOnSet(block);
+        if (block.GetWorldPosition() != transform.position)
+        {
+            block.isAnimating = true;
+            blockAnimator.LandAnimationOnSet(block);
+        }
     }
     private void AnimationFinished()
     {

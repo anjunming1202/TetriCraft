@@ -138,16 +138,17 @@ public class Tetromino
     private Dictionary<Vector2Int, Vector2Int[]> wallkick;
 
     // State data
-    public bool isLocked = false; // lockdown
-    public bool isActive = false; // inactive tetromino is not in the map
+    public bool isActive = false;       // inactive tetromino is not in the map
+    public bool isGrounded = false;     // grounded => lock delay => lockdown
+    public bool isLocked = false;       // lockdown
 
     // Control recorded data
     public int softDrop = 0;
     public int hardDrop = 0;
 
-    // Events
-    public delegate void OnLandedEvent(Tetromino tetromino);
-    public event OnLandedEvent OnLockdown;
+    // Lock Delay
+    public float lockDelay = 1.0f;
+    public Coroutine lockDelayCoroutine = null;
 
 
 
@@ -216,11 +217,12 @@ public class Tetromino
         MoveBlocks();
     }
 
-    // On lockdown
+    /// <summary>
+    /// Lock down the tetromino and its blocks
+    /// </summary>
     public void Lockdown()
     {
         isLocked = true;
-        OnLockdown?.Invoke(this);
 
         foreach (var block in blocks)
         {

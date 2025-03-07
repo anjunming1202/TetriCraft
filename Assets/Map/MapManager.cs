@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
@@ -23,9 +24,9 @@ public class MapManager : MonoBehaviour
     public int blockCount => map.blockCount;
 
     // Events
-    public Action OnTetrominoLocked;
+    public Action OnLockdown;
     public delegate void MapEvent(Map map);
-    public MapEvent OnFinish;
+    public MapEvent OnFinishTurn;
     public MapEvent OnLineClear;
     public delegate void TetrominoEvent(Tetromino tetromino);
     public TetrominoEvent OnTetrominoSoftDrop; // for player controlled drop: accelerate (soft drop)
@@ -131,7 +132,11 @@ public class MapManager : MonoBehaviour
     {
         fallingTetromino.softDrop++;
         OnTetrominoSoftDrop?.Invoke(fallingTetromino);
-        Drop();
+        bool successful = TryMoveBy(fallingTetromino, 0, -1);
+        if (!successful)
+        {
+            Lockdown(fallingTetromino);
+        }
     }
     public void HardDrop()
     {
@@ -140,7 +145,7 @@ public class MapManager : MonoBehaviour
             fallingTetromino.hardDrop++;
         }
         OnTetrominoHardDrop?.Invoke(fallingTetromino);
-        Lockdown(fallingTetromino);
+        Ground(fallingTetromino);
     }
     public void Rotate(bool clockwise = true)
     {
@@ -178,17 +183,39 @@ public class MapManager : MonoBehaviour
         Debug.Log("fail rotation");
         return false;
     }
+
+    /// <summary>
+    /// Tetromino grounding
+    /// </summary>
+    private void Ground(Tetromino tetromino)
+    {
+        // Grounding
+        tetromino.isGrounded = true;
+
+        // Lock delay => lockdown
+        tetromino.lockDelayCoroutine = StartCoroutine(DelayedLockOnSet(tetromino, tetromino.lockDelay));
+    }
     /// <summary>
     /// Tetromino lockdown
     /// </summary>
     private void Lockdown(Tetromino tetromino)
     {
+        // stop lock delay
+        if (tetromino.lockDelayCoroutine != null)
+            StopCoroutine(tetromino.lockDelayCoroutine);
+
         // update tetromino & blocks data
         tetromino.Lockdown();
 
         // invoke map tetromino landing event
-        OnFinish?.Invoke(map);
-        OnTetrominoLocked?.Invoke();
+        OnLockdown?.Invoke();
+    }
+    private IEnumerator DelayedLockOnSet(Tetromino tetromino, float delay)
+    {
+        if (tetromino.isLocked)
+            StopCoroutine(tetromino.lockDelayCoroutine);
+        yield return new WaitForSeconds(delay);
+        Lockdown(tetromino);
     }
 
 
