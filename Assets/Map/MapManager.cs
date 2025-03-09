@@ -135,7 +135,7 @@ public class MapManager : MonoBehaviour
         bool successful = TryMoveBy(fallingTetromino, 0, -1);
         if (!successful)
         {
-            Lockdown(fallingTetromino);
+            Ground(fallingTetromino);
         }
     }
     public void HardDrop()
@@ -150,6 +150,19 @@ public class MapManager : MonoBehaviour
     public void Rotate(bool clockwise = true)
     {
         TryRotate(fallingTetromino, clockwise);
+    }
+    
+    public bool TryImmediateLockdown()
+    {
+        fallingTetromino.MoveBy(0, -1);
+        bool canLockdown = !map.CheckValid(fallingTetromino);
+        fallingTetromino.MoveBy(0, 1);
+
+        if (canLockdown)
+        {
+            Lockdown(fallingTetromino);
+        }
+        return canLockdown;
     }
 
 
@@ -189,6 +202,10 @@ public class MapManager : MonoBehaviour
     /// </summary>
     private void Ground(Tetromino tetromino)
     {
+        // make sure only ground once *
+        if (tetromino.isGrounded)
+            return;
+
         // Grounding
         tetromino.isGrounded = true;
 
@@ -200,6 +217,10 @@ public class MapManager : MonoBehaviour
     /// </summary>
     private void Lockdown(Tetromino tetromino)
     {
+        // make sure only lockdown once *
+        if (tetromino.isLocked)
+            return;
+
         // stop lock delay
         if (tetromino.lockDelayCoroutine != null)
             StopCoroutine(tetromino.lockDelayCoroutine);

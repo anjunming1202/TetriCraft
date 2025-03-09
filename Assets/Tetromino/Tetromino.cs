@@ -147,7 +147,7 @@ public class Tetromino
     public int hardDrop = 0;
 
     // Lock Delay
-    public float lockDelay = 1.0f;
+    public float lockDelay = 0.5f;
     public Coroutine lockDelayCoroutine = null;
 
 

@@ -82,10 +82,10 @@ public class GameManager : MonoBehaviour
         mapManager.NewMap();
 
         mapManager.OnFinishTurn += CheckGameover;
-        mapManager.OnLockdown += SpawnTetromino;
         mapManager.OnTetrominoSoftDrop += ScoreSoftDrop;
         mapManager.OnTetrominoHardDrop += ScoreHardDrop;
         mapManager.OnLineClear += ScoreLineClear;
+        mapManager.OnLockdown += SpawnTetromino;
 
         // Initialise game logic
         gameover = false;
@@ -147,8 +147,10 @@ public class GameManager : MonoBehaviour
         }
         if (Input.GetKeyDown(key_accelerate)) // Accelerating
         {
-            mapManager.SoftDrop();  // drop immediately
             timer = 0;
+            if (mapManager.TryImmediateLockdown()) // down key => skip delay and lockdown directly
+                return;
+            mapManager.SoftDrop();  // drop immediately
             isAccelerating = true;
             interval = intervalAccelerating;
         }
@@ -159,8 +161,8 @@ public class GameManager : MonoBehaviour
         }
         if (Input.GetKeyDown(key_land)) // Hard drop
         {
-            mapManager.HardDrop();
             timer = 0;
+            mapManager.HardDrop();
         }
         if (Input.GetKeyDown(key_rotateCW)) // Rotate clockwise
         {
