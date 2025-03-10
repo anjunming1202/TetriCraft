@@ -8,10 +8,18 @@ using UnityEngine.U2D;
 
 // Manage Resources of Block
 // * actually Block Register + ResourcesLoader
-public static class BlockResourcesManager
+public class BlockResourcesManager : MonoBehaviour
 {
-    // Path of block texture sprite sheet
-    private static string spriteSheetFilename = "BlockTexture";
+    public Material blockMaterialGeneral;
+    public static Material BlockMaterialGeneral;
+    public Sprite whiteSquare;
+    public static Sprite WhiteSquare;
+
+    private void Awake()
+    {
+        BlockMaterialGeneral = blockMaterialGeneral;
+        WhiteSquare = whiteSquare;
+    }
 
     /// <summary>
     /// Initialise registry for all blocks

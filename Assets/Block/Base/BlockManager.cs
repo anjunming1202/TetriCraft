@@ -12,13 +12,16 @@ public class BlockManager : MonoBehaviour
         blockAnimator = GetComponent<BlockAnimator>();
 
         // Subscribe block events
+        // animator:
         block.OnPositionChanged += UpdatePosition;      // block set position   =>  change position instantaneously
         block.OnMoved += UpdatePositionMoving;          // block on moved       =>  moving animation
-        block.OnLanded += UpdatePositionLanding;        // block on landed      =>  landing animation
-
+        //block.OnPlaced += UpdatePositionLanding;        // block on landed      =>  landing animation
+        // renderer:
+        block.OnPlaced += BlockOnPlaced;                // block on placed      =>  effect
+        // manager:
         block.OnDestroyed += DestroyBlock;                // block on destroyed   =>  destroy block object
 
-        // Let block subscribe events
+        // Subscribe animator callback
         blockAnimator.OnFinish += AnimationFinished;
     }
 
@@ -27,6 +30,8 @@ public class BlockManager : MonoBehaviour
     private BlockAnimator blockAnimator;
 
 
+
+    // Position change:
     private void UpdatePosition(Block block)
     {
         blockAnimator.Stop();
@@ -53,6 +58,13 @@ public class BlockManager : MonoBehaviour
         block.isAnimating = false;
     }
 
+    private void BlockOnPlaced(Block block)
+    {
+        blockRenderer.FlashOnSet(block);
+    }
+
+
+    // Lifecycle
     private void DestroyBlock()
     {
         GameObject.Destroy(gameObject);

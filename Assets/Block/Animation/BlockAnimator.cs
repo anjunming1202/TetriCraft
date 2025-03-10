@@ -35,6 +35,11 @@ public class BlockAnimator : MonoBehaviour
         OnFinish?.Invoke();
     }
 
+    public void Finish()
+    {
+        OnFinish?.Invoke();
+    }
+
     public void MoveAnimationOnSet(Block block)
     {
         // Stop current animation

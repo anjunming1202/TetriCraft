@@ -226,7 +226,7 @@ public class Tetromino
 
         foreach (var block in blocks)
         {
-            block.Land();
+            block.Lockdown();
         }
     }
 

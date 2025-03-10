@@ -260,6 +260,7 @@ public class MapManager : MonoBehaviour
         {
             map.lastClearLineCount = lineCount;
             map.combo++;
+            OnLineClear?.Invoke(map);
         }
         else
         {

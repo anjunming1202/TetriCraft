@@ -27,7 +27,7 @@ public abstract class Block
     public delegate void OnChangedEvent(Block block);
     public event OnChangedEvent OnPositionChanged;
     public event OnChangedEvent OnMoved;
-    public event OnChangedEvent OnLanded;
+    public event OnChangedEvent OnPlaced;
 
     public delegate void OnInstantiatedEvent();
 //  public event OnChangedEvent OnSpawned;
@@ -85,10 +85,10 @@ public abstract class Block
         OnDestroyed?.Invoke();
     }
 
-    public void Land()
+    public void Lockdown()
     {
         isLocked = true;
-        OnLanded?.Invoke(this);
+        OnPlaced?.Invoke(this);
     }
 
 

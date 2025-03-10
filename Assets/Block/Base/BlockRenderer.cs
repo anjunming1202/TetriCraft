@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
 
@@ -8,9 +9,17 @@ public class BlockRenderer : MonoBehaviour
 {
     // Block Texture
     public Sprite texture;
+    public Sprite flashTexture;
 
     // Renderer
     private SpriteRenderer spriteRenderer;
+
+    // Material
+    public Material material;
+
+    // Effect
+    private float flashDuration = 0.2f;
+    private Coroutine flashCoroutine;
 
     private void Start()
     {
@@ -18,24 +27,28 @@ public class BlockRenderer : MonoBehaviour
     }
     public void Initialise(Block block)
     {
-        // Initialise texture renderer
-        /*this.block = block;*/
-
-        // Subscribe the block "change" events - render by updating block object when block data changes
-        //block.OnMove += Render;
-    }
-
-    void Update()
-    {
-        /*RenderAnimation();*/   // if want animation, animation update here
+        
     }
 
 
     /// <summary>
     /// Render block: set position, set texture
     /// </summary>
-    private void Render(Block block)
+    public void Render(Block block)
     {
+        spriteRenderer.sprite = texture;
+    }
+
+    public void FlashOnSet(Block block)
+    {
+        if (flashCoroutine != null) 
+            StopCoroutine(flashCoroutine);
+        StartCoroutine(Flash());
+    }
+    private IEnumerator Flash()
+    {
+        spriteRenderer.sprite = flashTexture;
+        yield return new WaitForSeconds(flashDuration);
         spriteRenderer.sprite = texture;
     }
 }

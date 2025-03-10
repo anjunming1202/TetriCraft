@@ -47,17 +47,20 @@ public static class BlockFactory
         GameObject block = new GameObject();
         block.name = BlockRegistry.GetMetadata(type).Name;
 
-        // Add component SpriteRenderer
-        SpriteRenderer spriteRenderer = block.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = BlockRegistry.GetMetadata(type).DefaultTexture;
-        spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; // only seen in the map region
-
         // Add component BlockManager
         BlockManager blockManager = block.AddComponent<BlockManager>();
 
         // Add component BlockRenderer
         BlockRenderer blockRenderer = block.AddComponent<BlockRenderer>();
         blockRenderer.texture = BlockRegistry.GetMetadata(type).DefaultTexture;
+        blockRenderer.material = BlockResourcesManager.BlockMaterialGeneral;
+        blockRenderer.flashTexture = BlockResourcesManager.WhiteSquare;
+
+        // Add component SpriteRenderer
+        SpriteRenderer spriteRenderer = block.AddComponent<SpriteRenderer>();
+        spriteRenderer.sprite = BlockRegistry.GetMetadata(type).DefaultTexture;
+        spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; // only seen in the map region
+        spriteRenderer.material = blockRenderer.material;
 
         // Add component BlockAnimator
         block.AddComponent<BlockAnimator>();
