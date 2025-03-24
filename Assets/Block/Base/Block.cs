@@ -8,47 +8,44 @@ public abstract class Block
 {
     public Block()
     {
-        this.Name = BlockResources.GetPrefab(Type).name;
-    }
-    public Block(string name)
-    {
-        this.Name = name;
+        this.Name = BlockRegistry.GetMetadata(Type).Name;
     }
 
     // Identity
     public virtual string Name { get; }
-    public abstract BlockType Type { get; }
+    public abstract BlockID Type { get; }
 
     // Data in the map
     private Vector2Int position = Vector2Int.zero; // Block position in the map
 
     // Block state flags
-    public bool isInMap = false;
-    public bool isFalling = false;
-    public bool isMoving = false;
+    public bool isInMap = false;        // is in the map data
+    public bool isLocked = false;       // is locked => ready to be cleared
+    public bool isAnimating = false;    // is moving with animation
 
     // Events
     public delegate void OnChangedEvent(Block block);
     public event OnChangedEvent OnPositionChanged;
     public event OnChangedEvent OnMoved;
-    public event OnChangedEvent OnRotated;
     public event OnChangedEvent OnLanded;
 
     public delegate void OnInstantiatedEvent();
 //  public event OnChangedEvent OnSpawned;
-    public event OnInstantiatedEvent OnDestroy;
+    public event OnInstantiatedEvent OnDestroyed;
 
 
 
     // Position & Moving
     public Vector2Int MapPosition => position;
     public Vector3 GetWorldPosition() => MapBoundaryData.GridToWorld(position);
+
     /// <summary>
     /// Set position directly
     /// </summary>
     public void SetPosition(Vector2Int position)
     {
         this.position = position;
+        OnPositionChanged?.Invoke(this);
     }
 
     /// <summary>
@@ -57,12 +54,10 @@ public abstract class Block
     public void MoveTo(Vector2Int to)
     {
         // Set data of block self
-        SetPosition(to);
-        isMoving = true;
+        position = to;
         // Invoke block move event
         OnMoved?.Invoke(this);
     }
-
     /// <summary>
     /// Move the block, trigger move event
     /// </summary>
@@ -82,23 +77,18 @@ public abstract class Block
     public void SpawnFalling()
     {
         Spawn();
-        isFalling = true;
+        isLocked = false;
     }
 
     public void Destroy()
     {
-        OnDestroy?.Invoke();
+        OnDestroyed?.Invoke();
     }
 
     public void Land()
     {
-        isFalling = false;
+        isLocked = true;
         OnLanded?.Invoke(this);
-    }
-
-    public void StopMoving()
-    {
-        isMoving = false;
     }
 
 

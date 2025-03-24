@@ -119,21 +119,38 @@ public class Tetromino
         blocks[3] = block4;
     }
 
+
+
+    // Tetromino type
     public TetrominoType Type { get; }
 
+    // Block data
     private Block[,] shape;
     public Block[] blocks = new Block[4];
     public int size;
+
+    // Position data
+    private Vector2Int position = new Vector2Int(0, 0); // grid position
+
+    // Rotation data
     public int rotation = 0;
     public int lastRotation = 0;
     private Dictionary<Vector2Int, Vector2Int[]> wallkick;
-    private Vector2Int position = new Vector2Int(0, 0); // grid position
 
-    public bool isLocked = false; // lockdown
-    public bool isActive = false; // inactive tetromino is not in the map
+    // State data
+    public bool isActive = false;       // inactive tetromino is not in the map
+    public bool isGrounded = false;     // grounded => lock delay => lockdown
+    public bool isLocked = false;       // lockdown
 
-    public delegate void OnLandedEvent(Tetromino tetromino);
-    public event OnLandedEvent OnLockdown;
+    // Control recorded data
+    public int softDrop = 0;
+    public int hardDrop = 0;
+
+    // Lock Delay
+    public float lockDelay = 0.5f;
+    public Coroutine lockDelayCoroutine = null;
+
+
 
     public Block this[int x, int y] => shape[x, y];
     public Vector2Int[] Wallkick(int from, int to) => wallkick[new Vector2Int(from, to)];
@@ -200,11 +217,12 @@ public class Tetromino
         MoveBlocks();
     }
 
-    // On lockdown
+    /// <summary>
+    /// Lock down the tetromino and its blocks
+    /// </summary>
     public void Lockdown()
     {
         isLocked = true;
-        OnLockdown?.Invoke(this);
 
         foreach (var block in blocks)
         {

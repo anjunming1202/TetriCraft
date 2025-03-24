@@ -5,14 +5,10 @@ using UnityEngine;
 public class NormalBlock : Block
 {
     public override string Name { get; }
-    public override BlockType Type { get; }
-    public NormalBlock(BlockType type)
+    public override BlockID Type { get; }
+    public NormalBlock(BlockID type)
     { 
         Type = type;
-        Name = BlockResources.GetPrefab(Type).name;
-    }
-    public NormalBlock(string name, BlockType type) : base(name) 
-    {
-        Type = type;
+        this.Name = BlockRegistry.GetMetadata(Type).Name;
     }
 }
