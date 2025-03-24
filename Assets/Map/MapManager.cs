@@ -145,6 +145,7 @@ public class MapManager : MonoBehaviour
             fallingTetromino.hardDrop++;
         }
         OnTetrominoHardDrop?.Invoke(fallingTetromino);
+        fallingTetromino.hardDrop = 0;
         Ground(fallingTetromino);
     }
     public void Rotate(bool clockwise = true)
@@ -260,6 +261,7 @@ public class MapManager : MonoBehaviour
         {
             map.lastClearLineCount = lineCount;
             map.combo++;
+            OnLineClear?.Invoke(map);
         }
         else
         {

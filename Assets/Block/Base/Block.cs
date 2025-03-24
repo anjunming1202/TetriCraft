@@ -2,18 +2,18 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
 [Serializable]
-public abstract class Block
+public abstract class Block : MonoBehaviour
 {
-    public Block()
+    private void Awake()
     {
-        this.Name = BlockRegistry.GetMetadata(Type).Name;
+
     }
 
     // Identity
-    public virtual string Name { get; }
-    public abstract BlockID Type { get; }
+    public BlockID ID;
 
     // Data in the map
     private Vector2Int position = Vector2Int.zero; // Block position in the map
@@ -24,14 +24,13 @@ public abstract class Block
     public bool isAnimating = false;    // is moving with animation
 
     // Events
-    public delegate void OnChangedEvent(Block block);
-    public event OnChangedEvent OnPositionChanged;
+    public delegate void OnChangedEvent();
+    public event OnChangedEvent OnInstantPosChanged;
     public event OnChangedEvent OnMoved;
     public event OnChangedEvent OnLanded;
 
-    public delegate void OnInstantiatedEvent();
 //  public event OnChangedEvent OnSpawned;
-    public event OnInstantiatedEvent OnDestroyed;
+    public event OnChangedEvent OnDestroyed;
 
 
 
@@ -45,7 +44,8 @@ public abstract class Block
     public void SetPosition(Vector2Int position)
     {
         this.position = position;
-        OnPositionChanged?.Invoke(this);
+        transform.position = GetWorldPosition();
+        OnInstantPosChanged?.Invoke();
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public abstract class Block
         // Set data of block self
         position = to;
         // Invoke block move event
-        OnMoved?.Invoke(this);
+        OnMoved?.Invoke();
     }
     /// <summary>
     /// Move the block, trigger move event
@@ -82,13 +82,14 @@ public abstract class Block
 
     public void Destroy()
     {
+        GameObject.Destroy(gameObject);
         OnDestroyed?.Invoke();
     }
 
     public void Land()
     {
         isLocked = true;
-        OnLanded?.Invoke(this);
+        OnLanded?.Invoke();
     }
 
 

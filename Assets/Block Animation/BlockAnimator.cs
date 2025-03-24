@@ -5,7 +5,7 @@ using UnityEngine;
 public class BlockAnimator : MonoBehaviour
 {
     // Reference of block
-    /*public Block block;*/
+    private Block block;
 
     public static AnimationCurveAsset MovingCurveAsset;   // *static: make it can be initialised at other places
     public static AnimationCurveAsset LandingCurveAsset;
@@ -20,37 +20,44 @@ public class BlockAnimator : MonoBehaviour
 
     private Coroutine currentCoroutine = null;
 
-    public delegate void OnFlagEvent();
-    public OnFlagEvent OnFinish;
+    /*public delegate void OnFlagEvent();
+    public OnFlagEvent OnFinish;*/
 
-    public void Initialise(Block block)
+    private void Awake()
     {
+        block = GetComponent<Block>();
 
+        block.OnInstantPosChanged += Finish;
+        block.OnMoved += MoveAnimationOnSet;
+        block.OnLanded += LandAnimationOnSet;
     }
 
-    public void Stop()
+    public void Finish()
     {
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
-        OnFinish?.Invoke();
-    }
 
-    public void MoveAnimationOnSet(Block block)
+        transform.position = block.GetWorldPosition();
+        block.isAnimating = false;
+    }
+    public void MoveAnimationOnSet()
     {
         // Stop current animation
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
         // Start moving animation
         currentCurveAsset = MovingCurveAsset;
+        block.isAnimating = true;
         currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
     }
-    public void LandAnimationOnSet(Block block)
+    public void LandAnimationOnSet()
     {
         // Stop current animation
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
         // Start landing animation
         currentCurveAsset = LandingCurveAsset;
+        block.isAnimating = true;
         currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
     }
 
@@ -63,6 +70,12 @@ public class BlockAnimator : MonoBehaviour
 
     private IEnumerator MoveTo(Vector3 to)
     {
+        if (transform.position == to)
+        {
+            block.isAnimating = false;
+            yield break;
+        }
+
         startPosition = transform.position;
         endPosition = to;
 
@@ -78,7 +91,6 @@ public class BlockAnimator : MonoBehaviour
         }
 
         // When finish
-        transform.position = endPosition;
-        OnFinish?.Invoke();
+        Finish();
     }
 }

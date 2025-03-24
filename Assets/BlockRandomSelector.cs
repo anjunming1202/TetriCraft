@@ -1,5 +1,5 @@
 ﻿
-public class BlockRandomiser
+public class BlockRandomSelector
 {
     public static BlockID GetRandomType()
     {

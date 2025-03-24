@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿/*using System.Collections.Generic;
 using System;
 using UnityEngine;
 
@@ -62,3 +62,4 @@ public static class BlockRegistry
     // Look-up dictionary for block metadata
     private static Dictionary<BlockID, BlockMetadata> registry = new Dictionary<BlockID, BlockMetadata>();
 }
+*/

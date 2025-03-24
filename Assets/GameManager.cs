@@ -37,11 +37,6 @@ public class GameManager : MonoBehaviour
     public static float SpeedDrop => Instance.speedDrop;
     public static float SpeedSoftDrop => Instance.speedDrop;
 
-    // Game Objects
-    private Transform MapBlocks;
-    private Transform FallingTetromino;
-    private Transform NextTetromino;
-
     [Header("Input")]
     // Input Key Mapping
     private KeyCode key_left = KeyCode.A;
@@ -67,11 +62,6 @@ public class GameManager : MonoBehaviour
         // Load static resources
         InitialiseResources();
 
-        // Get game objects
-        MapBlocks = GameObject.Find("Map").transform;
-        FallingTetromino = GameObject.Find("Falling Tetromino").transform;
-        NextTetromino = GameObject.Find("Next Tetromino").transform;
-
         // Singleton
         Instance = this;
     }
@@ -93,7 +83,7 @@ public class GameManager : MonoBehaviour
         interval = intervalNormal;
 
         // Spawn the first tetromino
-        nextTetromino = CreateRandomTetromino();
+        nextTetromino = TetrominoSpawner.Instance.NewRandomTetromino();
         SpawnTetromino();
     }
 
@@ -108,7 +98,7 @@ public class GameManager : MonoBehaviour
     {
         // debug
         int landedCount = 0;
-        landedCount = MapBlocks.GetComponentsInChildren<Transform>().Length - 1;      
+        landedCount = BlockSpawner.Instance.GetComponentsInChildren<Transform>().Length - 1;      
         Debug.Log($"blocks in map: {mapManager.blockCount}, blocks instantiated: {landedCount}");
 
         if (!gameover)
@@ -190,38 +180,16 @@ public class GameManager : MonoBehaviour
             return;
 
         // Set blocks children to the block pool
-        TetrominoFactory.ReparentBlocks(NextTetromino, MapBlocks);
-
-        // Instantiate the tetromino
-        TetrominoFactory.InstantiateTetromino(nextTetromino, NextTetromino);
+        BlockSpawner.Instance.Reparent(TetrominoSpawner.Instance.transform);
 
         // Spawn new tetromino in map
         mapManager.SpawnTetromino(nextTetromino);
 
-        // Create new tetromino
-        nextTetromino = CreateRandomTetromino();
-    }
-    private Tetromino CreateRandomTetromino()
-    {
-        // Random tetromino type
-        TetrominoType tetroType = (TetrominoType)UnityEngine.Random.Range(0, (int)TetrominoType.Count);
+        // Create next new tetromino
+        nextTetromino = TetrominoSpawner.Instance.NewRandomTetromino();
 
-        // Random blocks type
-        BlockID blockType = BlockRandomiser.GetRandomType();
+        // Display next tetromino
 
-        return CreateTetromino(tetroType, blockType);
-    }
-    private Tetromino CreateTetromino(TetrominoType tetroType, BlockID blockType)
-    {
-        // For intrinsic tetromino (same four blocks)
-        Block[] blocks = new Block[4];
-        for (int i = 0; i < 4; i++)
-        {
-            blocks[i] = BlockFactory.NewBlock(blockType);
-        }
-
-        // New a tetromino
-        return new Tetromino(tetroType, blocks[0], blocks[1], blocks[2], blocks[3]);
     }
 
 
@@ -278,13 +246,6 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void InitialiseResources()
     {
-        // Load block prefabs
-        BlockResourcesManager.RegisterBlocks();
-
-        // Initialise factories
-        BlockFactory.Initialise();
-        TetrominoFactory.Initialise();
-
         // Initialise boundary data
         MapBoundaryData.Create(boundaryRegion.transform);
 
