@@ -4,7 +4,6 @@ using UnityEngine;
 [Serializable]
 public class NullBlock : Block
 {
-    public override BlockType Type => BlockType.Null;
+    public override BlockID Type => BlockID.Null;
     public NullBlock() : base() { }
-    public NullBlock(string name) : base(name) { }
 }

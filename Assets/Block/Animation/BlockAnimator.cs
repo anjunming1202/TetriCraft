@@ -25,14 +25,14 @@ public class BlockAnimator : MonoBehaviour
 
     public void Initialise(Block block)
     {
-        // event
-        block.OnMoved += MoveAnimationOnSet;
-        block.OnLanded += LandAnimationOnSet;
+
     }
 
-    private void Reset()
+    public void Stop()
     {
-        elapsedTime = 0f;
+        if (currentCoroutine != null)
+            StopCoroutine(currentCoroutine);
+        OnFinish?.Invoke();
     }
 
     public void MoveAnimationOnSet(Block block)
@@ -52,6 +52,13 @@ public class BlockAnimator : MonoBehaviour
         // Start landing animation
         currentCurveAsset = LandingCurveAsset;
         currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
+    }
+
+
+
+    private void Reset()
+    {
+        elapsedTime = 0f;
     }
 
     private IEnumerator MoveTo(Vector3 to)

@@ -1,10 +1,10 @@
 ﻿
-public enum BlockType
+public enum BlockID
 {
     Null,
     Cobblestone,
     Dirt,
-    WoodenPlank,
+    WoodenPlanks,
     Stone,
 
 
