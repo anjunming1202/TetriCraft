@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static Unity.Collections.AllocatorManager;
 
 /// <summary>
@@ -16,6 +18,7 @@ public class Map
 
     // Blocks
     public Block[,] blockMap;
+    public List<Block> blocks = new List<Block>();
 
     // Map Boundary Data
     public int width => MapBoundaryData.Instance.width;
@@ -28,7 +31,7 @@ public class Map
     // Map recorded data
     public int lastClearLineCount = 0;
     public int combo = 0;
-        
+
     // Debugging
     public int blockCount
     {
@@ -52,7 +55,76 @@ public class Map
 
 
     // Block Data Editting API
-    // Ensure each change position for block syncs in both block and map data
+    // Update map & block data
+
+    // Add
+    public void Add(Block block, int x, int y)
+    {
+        // block can only be added once
+        if (block.isInMap)
+        {
+            Debug.LogError($"Try to add a block twice at {x}, {y}");
+            return;
+        }
+        else
+            block.isInMap = true;
+
+        // check for valid position
+        if (!CheckInside(x, y) || !CheckEmpty(x, y))
+        {
+            Debug.LogError($"Try to add a block to an invalid position {x}, {y}");
+            return;
+        }
+
+        // map data
+        blockMap[x, y] = block;
+        blocks.Add(block);
+
+        // block pos
+        block.position = new Vector2Int(x, y);
+    }
+
+    // Move
+    public bool MoveTo(Block block, int x, int y)
+    {
+        Vector2Int from = block.position;
+
+        // for debug
+        Debug.Assert(blockMap[from.x, from.y] == block, $"block position not consistent with the map, block position {from.x}, {from.y}");
+
+        if (!CheckInside(x, y) || !CheckEmpty(x, y))
+        {
+            return false;
+        }
+
+        blockMap[from.x, from.y] = null;
+        blockMap[x, y] = block;
+        block.position = new Vector2Int(x, y);
+        return true;
+    }
+
+    // Remove
+    public Block Remove(int x, int y)
+    {
+        Block block = blockMap[x, y];
+        if (block == null)
+            return null;
+        blockMap[x, y] = null;
+        block.isInMap = false;
+        return block;
+    }
+    public void Destroy(int x, int y)
+    {
+        // for debug
+        Debug.Assert(blockMap[x, y] != null, $"Try to destroy at an empty position {x}, {y}");
+
+        blockMap[x, y].Destroy();
+        blockMap[x, y] = null;
+    }
+
+
+
+    /*//
 
     // Set
     /// <summary>
@@ -96,7 +168,7 @@ public class Map
     /// <summary>
     /// Set tetromino blocks onto the map
     /// </summary>
-    public void SetTetromino(Tetromino tetromino, Vector2Int pos) => SetTetromino(tetromino, pos.x, pos.y);
+    public void SetTetromino(TetrominoManager tetromino, Vector2Int pos) => SetTetromino(tetromino, pos.x, pos.y);
     /// <summary>
     /// Place down the block onto the map according to its data position
     /// </summary>
@@ -204,30 +276,10 @@ public class Map
 
         // Place down tetromino blocks with moving
         PlaceTetrominoDown(tetromino);
-    }
+    }*/
 
 
 
-    // Destroy
-    /// <summary>
-    /// Destroy and remove a block
-    /// </summary>
-    public void Destroy(int x, int y)
-    {
-        blockMap[x, y].Destroy();
-        Remove(x, y);
-    }
-    /// <summary>
-    /// Destroy a row of blocks and leave it empty
-    /// </summary>
-    /// <param name="row"></param>
-    public void DestroyLine(int row)
-    {
-        for (int i = 0; i < width; i++)
-        {
-            Destroy(i, row);
-        }
-    }
 
 
 
@@ -235,15 +287,16 @@ public class Map
     /// <summary>
     /// Check for bottom, left, and right boundaries
     /// </summary>
-    public bool IsInside(int x, int y)
+    public bool CheckInside(int x, int y)
     {
         return x >= 0 && x < width && y >= 0;
     }
-    public bool IsEmpty(int x, int y)
+    public bool CheckEmpty(int x, int y)
     {
         return blockMap[x, y] == null;
     }
-    public bool IsRowFull(int row)
+
+    public bool CheckRowFull(int row)
     {
         for (int column = 0; column < width; column++)
         {
@@ -252,7 +305,7 @@ public class Map
         }
         return true;
     }
-    public bool IsRowEmpty(int row)
+    public bool CheckRowEmpty(int row)
     {
         for (int column = 0; column < width; column++)
         {
@@ -261,67 +314,17 @@ public class Map
         }
         return true;
     }
-
-    /// <summary>
-    /// Check for bottom, left, and right boundaries
-    /// </summary>
-    public bool CheckInside(Block block)
+    public bool CheckMapFull()
     {
-        return IsInside(block.MapPosition.x, block.MapPosition.y);
+        return !CheckRowEmpty(height);
     }
-    /// <summary>
-    /// Check for bottom, left, and right boundaries
-    /// </summary>
-    public bool CheckInside(Tetromino tetromino)
-    {
-        for (int r = 0; r < tetromino.size; r++)
-            for (int c = 0; c < tetromino.size; c++)
-            {
-                if (tetromino[r, c] != null)
-                {
-                    Vector2Int blockPos = tetromino.LocalToMap(r, c);
-                    if (!IsInside(blockPos.x, blockPos.y))
-                        return false;
-                }
-            }
-        return true;
-    }
-    public bool CheckCollide(Tetromino tetromino)
-    {
-        for (int r = 0; r < tetromino.size; r++)
-            for (int c = 0; c < tetromino.size; c++)
-            {
-                if (tetromino[r, c] != null)
-                {
-                    Vector2Int mapBlockPos = tetromino.LocalToMap(r, c);
-                    Block mapBlock = blockMap[mapBlockPos.x, mapBlockPos.y];
-                    if (mapBlock != null && mapBlock.isLocked)
-                    {
-                        Debug.Log("Collide");
-                        return true;
-                    }
-                }
-            }
-        return false;
-    }
-    public bool CheckValid(Tetromino tetromino)
-    {
-        // Check inside first, check not collide then
-        return (CheckInside(tetromino) && !CheckCollide(tetromino));
-    }
-
-    public bool CheckFull()
-    {
-        return !IsRowEmpty(height);
-    }
-    public bool CheckEmpty()
+    public bool CheckMapEmpty()
     {
         for (int row = 0; row < height - 1; row++)
         {
-            if (!IsRowEmpty(row))
+            if (!CheckRowEmpty(row))
                 return false;
         }
         return true;
     }
-
 }

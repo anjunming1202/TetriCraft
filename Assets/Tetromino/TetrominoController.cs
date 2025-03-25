@@ -2,7 +2,7 @@
 
 public class TetrominoController : MonoBehaviour
 {
-    private Tetromino tetromino;
+    private TetrominoManager tetromino;
     private MapManager mapManager;
 
     // Control
@@ -28,7 +28,7 @@ public class TetrominoController : MonoBehaviour
 
     }
 
-    public void Initialise(Tetromino tetromino, MapManager mapManager)
+    public void Initialise(TetrominoManager tetromino, MapManager mapManager)
     {
         this.tetromino = tetromino;
         this.mapManager = mapManager;

@@ -1,15 +1,27 @@
-// Four blocks are one tetromino
-using System;
-using System.Collections.Generic;
-using Unity.Mathematics;
-using Unity.VisualScripting;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
-using static Unity.Collections.AllocatorManager;
 
-// A tetromino stores 4 blocks, when falling
-[Serializable]
 public class Tetromino
 {
+    // Blocks data
+    public Block[,] shape;
+    public Block[] blocks = new Block[4];
+    public int size;
+
+    // Tetromino type
+    public TetrominoType Type { get; }
+
+    // Position data (in map)
+    public Vector2Int position;
+
+    // Rotation data
+    public int rotation = 0;
+    public int lastRotation = 0;
+
+    // Wallkick table
+    public Dictionary<Vector2Int, Vector2Int[]> wallkick;
+
     public Tetromino(TetrominoType type, Block block1, Block block2, Block block3, Block block4)
     {
         // Initialise tetromino data
@@ -75,14 +87,14 @@ public class Tetromino
         switch (type)
         {
             case TetrominoType.I:
-                wallkick[new Vector2Int(0, 1)] = new Vector2Int[5] { new(0, 0), new(-2, 0), new( 1, 0), new(-2,-1), new( 1, 2) };
-                wallkick[new Vector2Int(1, 0)] = new Vector2Int[5] { new(0, 0), new( 2, 0), new(-1, 0), new( 2, 1), new(-1,-2) };
-                wallkick[new Vector2Int(1, 2)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new( 2, 0), new(-1, 2), new( 2,-1) };
-                wallkick[new Vector2Int(2, 1)] = new Vector2Int[5] { new(0, 0), new( 1, 0), new(-2, 0), new( 1,-2), new(-2, 1) };
-                wallkick[new Vector2Int(2, 3)] = new Vector2Int[5] { new(0, 0), new( 2, 0), new(-1, 0), new( 2, 1), new(-1,-2) };
-                wallkick[new Vector2Int(3, 2)] = new Vector2Int[5] { new(0, 0), new(-2, 0), new( 1, 0), new(-2,-1), new( 1, 2) };
-                wallkick[new Vector2Int(3, 0)] = new Vector2Int[5] { new(0, 0), new( 1, 0), new(-2, 0), new( 1,-2), new(-2, 1) };
-                wallkick[new Vector2Int(0, 3)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new( 2, 0), new(-1, 2), new( 2,-1) };
+                wallkick[new Vector2Int(0, 1)] = new Vector2Int[5] { new(0, 0), new(-2, 0), new(1, 0), new(-2, -1), new(1, 2) };
+                wallkick[new Vector2Int(1, 0)] = new Vector2Int[5] { new(0, 0), new(2, 0), new(-1, 0), new(2, 1), new(-1, -2) };
+                wallkick[new Vector2Int(1, 2)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(2, 0), new(-1, 2), new(2, -1) };
+                wallkick[new Vector2Int(2, 1)] = new Vector2Int[5] { new(0, 0), new(1, 0), new(-2, 0), new(1, -2), new(-2, 1) };
+                wallkick[new Vector2Int(2, 3)] = new Vector2Int[5] { new(0, 0), new(2, 0), new(-1, 0), new(2, 1), new(-1, -2) };
+                wallkick[new Vector2Int(3, 2)] = new Vector2Int[5] { new(0, 0), new(-2, 0), new(1, 0), new(-2, -1), new(1, 2) };
+                wallkick[new Vector2Int(3, 0)] = new Vector2Int[5] { new(0, 0), new(1, 0), new(-2, 0), new(1, -2), new(-2, 1) };
+                wallkick[new Vector2Int(0, 3)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(2, 0), new(-1, 2), new(2, -1) };
                 break;
             case TetrominoType.O:
                 wallkick[new Vector2Int(0, 1)] = new Vector2Int[1] { new(0, 0) };
@@ -99,14 +111,14 @@ public class Tetromino
             case TetrominoType.L:
             case TetrominoType.S:
             case TetrominoType.Z:
-                wallkick[new Vector2Int(0, 1)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(-1, 1), new( 0,-2), new(-1,-2) };
-                wallkick[new Vector2Int(1, 0)] = new Vector2Int[5] { new(0, 0), new( 1, 0), new( 1,-1), new( 0, 2), new( 1, 2) };
-                wallkick[new Vector2Int(1, 2)] = new Vector2Int[5] { new(0, 0), new( 1, 0), new( 1,-1), new( 0, 2), new( 1, 2) };
-                wallkick[new Vector2Int(2, 1)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(-1, 1), new( 0,-2), new(-1,-2) };
-                wallkick[new Vector2Int(2, 3)] = new Vector2Int[5] { new(0, 0), new( 1, 0), new( 1, 1), new( 0,-2), new( 1,-2) };
-                wallkick[new Vector2Int(3, 2)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(-1,-1), new( 0, 2), new(-1, 2) };
-                wallkick[new Vector2Int(3, 0)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(-1,-1), new( 0, 2), new(-1, 2) };
-                wallkick[new Vector2Int(0, 3)] = new Vector2Int[5] { new(0, 0), new( 1, 0), new( 1, 1), new( 0,-2), new( 1,-2) };
+                wallkick[new Vector2Int(0, 1)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(-1, 1), new(0, -2), new(-1, -2) };
+                wallkick[new Vector2Int(1, 0)] = new Vector2Int[5] { new(0, 0), new(1, 0), new(1, -1), new(0, 2), new(1, 2) };
+                wallkick[new Vector2Int(1, 2)] = new Vector2Int[5] { new(0, 0), new(1, 0), new(1, -1), new(0, 2), new(1, 2) };
+                wallkick[new Vector2Int(2, 1)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(-1, 1), new(0, -2), new(-1, -2) };
+                wallkick[new Vector2Int(2, 3)] = new Vector2Int[5] { new(0, 0), new(1, 0), new(1, 1), new(0, -2), new(1, -2) };
+                wallkick[new Vector2Int(3, 2)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(-1, -1), new(0, 2), new(-1, 2) };
+                wallkick[new Vector2Int(3, 0)] = new Vector2Int[5] { new(0, 0), new(-1, 0), new(-1, -1), new(0, 2), new(-1, 2) };
+                wallkick[new Vector2Int(0, 3)] = new Vector2Int[5] { new(0, 0), new(1, 0), new(1, 1), new(0, -2), new(1, -2) };
                 break;
         }
 
@@ -118,129 +130,9 @@ public class Tetromino
         blocks[3] = block4;
     }
 
-
-
-    // Tetromino type
-    public TetrominoType Type { get; }
-
-    // Block data
-    private Block[,] shape;
-    public Block[] blocks = new Block[4];
-    public int size;
-
-    // Position data
-    private Vector2Int position = new Vector2Int(0, 0); // grid position
-
-    // Rotation data
-    public int rotation = 0;
-    public int lastRotation = 0;
-    private Dictionary<Vector2Int, Vector2Int[]> wallkick;
-
-    // State data
-    public bool isActive = false;       // inactive tetromino is not in the map
-    public bool isGrounded = false;     // grounded => lock delay => lockdown
-    public bool isLocked = false;       // lockdown
-
-    // Control recorded data
-    public int softDrop = 0;
-    public int hardDrop = 0;
-
-    // Lock Delay
-    public float lockDelay = 0.5f;
-    public Coroutine lockDelayCoroutine = null;
-
-
-
-    public Block this[int x, int y] => shape[x, y];
-    public Vector2Int[] Wallkick(int from, int to) => wallkick[new Vector2Int(from, to)];
-    public Vector2Int[] Wallkick() => wallkick[new Vector2Int(lastRotation, rotation)];
-    public bool IsBlock(int x, int y) => shape[x, y] != null;
-
-
-
-    public void SetPosition(Vector2Int position)
-    { 
-        this.position = position;
-    }
-    public Vector2Int MapPosition => position;
-
     public Vector2Int LocalToMap(int row, int column)
     {
         return position + new Vector2Int(column, size - 1 - row);
-    }
-
-    // 
-    /// <summary>
-    /// Move by x right and y up, only changes tetromino data, need MoveTo to update blocks
-    /// </summary>
-    public void MoveBy(int x, int y)
-    {
-        position += new Vector2Int(x, y);
-    }
-    /// <summary>
-    /// Rotate shape, only changes tetromino data, need MoveTo to update blocks
-    /// </summary>
-    public void Rotate(bool clockwise = true)
-    {
-        Block[,] rotated = new Block[size, size];
-
-        for (int i = 0; i < size; i++)
-        {
-            for (int j = 0; j < size; j++)
-            {
-                if (clockwise)
-                    rotated[j, size - 1 - i] = shape[i, j];
-                else
-                    rotated[size - 1 - j, i] = shape[i, j];
-            }
-        }
-
-        shape = rotated;
-        lastRotation = rotation;
-        rotation += clockwise ? -1 : 1;
-        rotation %= 4;
-        if (rotation < 0)
-            rotation += 4;
-    }
-
-    //
-    /// <summary>
-    /// Move the tetromino
-    /// </summary>
-    public void MoveTo(Vector2Int to)
-    {
-        // Set data of tetromino self
-        SetPosition(to);
-
-        // Move tetromino blocks
-        MoveBlocks();
-    }
-
-    /// <summary>
-    /// Lock down the tetromino and its blocks
-    /// </summary>
-    public void Lockdown()
-    {
-        isLocked = true;
-
-        foreach (var block in blocks)
-        {
-            block.Land();
-        }
-    }
-
-
-
-    //
-    private void MoveBlocks()
-    {
-        for (int r = 0; r < size; r++)
-            for (int c = 0; c < size; c++)
-            {
-                Block block = this[r, c];
-                if (block != null)
-                    block.MoveTo(LocalToMap(r, c));
-            }
     }
 }
 
@@ -255,3 +147,4 @@ public enum TetrominoType
     Z,
     Count
 }
+

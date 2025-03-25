@@ -16,7 +16,7 @@ public abstract class Block : MonoBehaviour
     public BlockID ID;
 
     // Data in the map
-    private Vector2Int position = Vector2Int.zero; // Block position in the map
+    public Vector2Int position = Vector2Int.zero; // Block position in the map
 
     // Block state flags
     public bool isInMap = false;        // is in the map data

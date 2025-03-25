@@ -9,7 +9,7 @@ public class TetrominoSpawner : MonoBehaviour
         Instance = this;
     }
 
-    public Tetromino NewRandomTetromino()
+    public TetrominoManager NewRandomTetromino()
     {
         // Random tetromino type
         TetrominoType tetroType = (TetrominoType)UnityEngine.Random.Range(0, (int)TetrominoType.Count);
@@ -20,7 +20,7 @@ public class TetrominoSpawner : MonoBehaviour
         return NewTetromino(tetroType, blockType);
     }
 
-    private Tetromino NewTetromino(TetrominoType tetroType, BlockID blockType)
+    private TetrominoManager NewTetromino(TetrominoType tetroType, BlockID blockType)
     {
         // For intrinsic tetromino (same four blocks)
         Block[] blocks = new Block[4];
@@ -31,6 +31,8 @@ public class TetrominoSpawner : MonoBehaviour
         }
 
         // New a tetromino
-        return new Tetromino(tetroType, blocks[0], blocks[1], blocks[2], blocks[3]);
+        Tetromino tetromino = new Tetromino(tetroType, blocks[0], blocks[1], blocks[2], blocks[3]);
+        GameManager.Instance.nextTetromino.tetromino = tetromino;
+        return GameManager.Instance.nextTetromino;
     }
 }

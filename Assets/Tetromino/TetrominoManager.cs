@@ -1,16 +1,288 @@
-﻿using Unity.VisualScripting;
+// Four blocks are one tetromino
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
-/// <summary>
-/// Tetromino manager for a tetromino
-/// </summary>
+// A tetromino stores 4 blocks, when falling
+[Serializable]
 public class TetrominoManager : MonoBehaviour
 {
-    public void Initialise(Tetromino tetromino)
-    {
+    // Tetromino data
+    public Tetromino tetromino;
+    private int size => tetromino.size;
 
+
+    // Wallkick data looked up
+    public Vector2Int[] Wallkick => tetromino.wallkick[new Vector2Int(tetromino.lastRotation, tetromino.rotation)];
+
+    // State data
+    public bool isActive = false;       // inactive tetromino is not in the map
+    public bool isGrounded = false;     // grounded => lock delay => lockdown
+    public bool isLocked = false;       // lockdown
+
+    // Control recorded data
+    public int softDrop = 0;
+    public int hardDrop = 0;
+
+    // Lock Delay
+    public float lockDelay = 0.5f;
+    public Coroutine lockDelayCoroutine = null;
+
+    // Event
+    public delegate void TetrominoEvent(TetrominoManager tetromino);
+    public TetrominoEvent OnTetrominoSoftDrop; // for player controlled drop: accelerate (soft drop)
+    public TetrominoEvent OnTetrominoHardDrop; // for player controlled drop: land (hard drop)
+    public Action OnLockdown;
+
+
+
+
+
+
+
+    // 
+    public void SetPosition(int x, int y)
+    {
+        tetromino.position = new Vector2Int(x, y);
+    }    
+
+    public void Shift(int x, int y)
+    {
+        tetromino.position += new Vector2Int(x, y);
     }
 
-    private Tetromino tetromino;
+    public void Rotate(bool clockwise = true)
+    {
+        Block[,] rotated = new Block[size, size];
 
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                if (clockwise)
+                    rotated[j, size - 1 - i] = tetromino.shape[i, j];
+                else
+                    rotated[size - 1 - j, i] = tetromino.shape[i, j];
+            }
+        }
+
+        tetromino.shape = rotated;
+        tetromino.lastRotation = tetromino.rotation;
+        tetromino.rotation += clockwise ? -1 : 1;
+        tetromino.rotation %= 4;
+        if (tetromino.rotation < 0)
+            tetromino.rotation += 4;
+    }
+
+    /// <summary>
+    /// Update blocks in the map according to this tetromino data
+    /// </summary>
+    public void UpdateMapBlocks(Map map)
+    {
+        for (int r = 0; r < size; r++)
+            for (int c = 0; c < size; c++)
+            {
+                Block block = tetromino.shape[r, c];
+                if (block == null || !block.isInMap)
+                    continue;
+                Vector2Int prevPosition = block.position;
+                map.Remove(prevPosition.x, prevPosition.y);
+            }
+        for (int r = 0; r < size; r++)
+            for (int c = 0; c < size; c++)
+            {
+                Block block = tetromino.shape[r, c];
+                if (block == null)
+                    continue;
+                Vector2Int currPosition = tetromino.LocalToMap(r, c);
+                map.Add(block, currPosition.x, currPosition.y);
+            }
+    }
+
+
+
+
+
+
+
+
+
+    public void Left(Map map)
+    {
+        TryShift(map, -1, 0);
+    }
+    public void Right(Map map)
+    {
+        TryShift(map, 1, 0);
+    }
+    public void Drop(Map map)
+    {
+        bool successful = TryShift(map, 0, -1);
+        if (!successful)
+        {
+            Lockdown();
+        }
+    }
+    public void SoftDrop(Map map)
+    {
+        softDrop++;
+        OnTetrominoSoftDrop?.Invoke(this);
+        bool successful = TryShift(map, 0, -1);
+        if (!successful)
+        {
+            Ground();
+        }
+    }
+    public void HardDrop(Map map)
+    {
+        while (TryShift(map, 0, -1))
+        {
+            hardDrop++;
+        }
+        OnTetrominoHardDrop?.Invoke(this);
+        hardDrop = 0;
+        Ground();
+    }
+    public void Rotate(Map map, bool clockwise = true)
+    {
+        TryRotate(map, clockwise);
+    }
+
+    public bool TryImmediateLockdown(Map map)
+    {
+        Shift(0, -1);
+        bool canLockdown = !CheckValid(map);
+        Shift(0, 1);
+
+        if (canLockdown)
+        {
+            Lockdown();
+        }
+        return canLockdown;
+    }
+
+
+    private bool TryShift(Map map, int x, int y)
+    {
+        Shift(x, y);
+        if (!CheckValid(map))
+        {
+            Shift( -x, -y);
+            return false;
+        }
+        UpdateMapBlocks(map);
+        return true;
+    }
+    private bool TryRotate(Map map, bool clockwise = true)
+    {
+        Rotate(clockwise);
+        // check for each wall kick position
+        foreach (Vector2Int kick in Wallkick)
+        {
+            Shift(kick.x, kick.y);
+            if (CheckValid(map))
+            {
+                UpdateMapBlocks(map);
+                Debug.Log("success rotation");
+                return true;
+            }
+            Shift(-kick.x, -kick.y);
+        }
+        Rotate(!clockwise);
+        Debug.Log("fail rotation");
+        return false;
+    }
+
+    /// <summary>
+    /// Tetromino grounding
+    /// </summary>
+    private void Ground()
+    {
+        // make sure only ground once *
+        if (isGrounded)
+            return;
+
+        // Grounding
+        isGrounded = true;
+
+        // Lock delay => lockdown
+        lockDelayCoroutine = StartCoroutine(DelayedLockOnSet(lockDelay));
+    }
+    /// <summary>
+    /// Tetromino lockdown
+    /// </summary>
+    private void Lockdown()
+    {
+        // make sure only lockdown once *
+        if (isLocked)
+            return;
+
+        // stop lock delay
+        if (lockDelayCoroutine != null)
+            StopCoroutine(lockDelayCoroutine);
+
+        // update tetromino & blocks data
+        isLocked = true;
+        foreach (var block in tetromino.blocks)
+        {
+            block.Land();
+        }
+
+        // invoke map tetromino landing event
+        OnLockdown?.Invoke();
+    }
+    private IEnumerator DelayedLockOnSet(float delay)
+    {
+        if (isLocked)
+            StopCoroutine(lockDelayCoroutine);
+        yield return new WaitForSeconds(delay);
+        Lockdown();
+    }
+
+
+
+    // Map checking
+    /// <summary>
+    /// Check for bottom, left, and right boundaries
+    /// </summary>
+    public bool CheckInside(Map map)
+    {
+        for (int r = 0; r < tetromino.size; r++)
+            for (int c = 0; c < tetromino.size; c++)
+            {
+                if (tetromino.shape[r, c] != null)
+                {
+                    Vector2Int blockPos = tetromino.LocalToMap(r, c);
+                    if (!map.CheckInside(blockPos.x, blockPos.y))
+                        return false;
+                }
+            }
+        return true;
+    }
+    public bool CheckCollide(Map map)
+    {
+        for (int r = 0; r < tetromino.size; r++)
+            for (int c = 0; c < tetromino.size; c++)
+            {
+                if (tetromino.shape[r, c] != null)
+                {
+                    Vector2Int mapBlockPos = tetromino.LocalToMap(r, c);
+                    Block mapBlock = map[mapBlockPos.x, mapBlockPos.y];
+                    if (mapBlock != null && mapBlock.isLocked)
+                    {
+                        Debug.Log("Collide");
+                        return true;
+                    }
+                }
+            }
+        return false;
+    }
+    public bool CheckValid(Map map)
+    {
+        return (CheckInside(map) && !CheckCollide(map));
+    }
 }
