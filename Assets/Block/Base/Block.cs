@@ -16,7 +16,8 @@ public abstract class Block : MonoBehaviour
     public BlockID ID;
 
     // Data in the map
-    public Vector2Int position = Vector2Int.zero; // Block position in the map
+    private Vector2Int position = Vector2Int.zero; // Block position in the map
+    public Vector2Int Position => position;
 
     // Block state flags
     public bool isInMap = false;        // is in the map data
@@ -35,50 +36,25 @@ public abstract class Block : MonoBehaviour
 
 
     // Position & Moving
-    public Vector2Int MapPosition => position;
     public Vector3 GetWorldPosition() => MapBoundaryData.GridToWorld(position);
 
-    /// <summary>
-    /// Set position directly
-    /// </summary>
-    public void SetPosition(Vector2Int position)
+    public void SetPosition(int x, int y, bool animation = false)
     {
-        this.position = position;
-        transform.position = GetWorldPosition();
-        OnInstantPosChanged?.Invoke();
-    }
+        position = new Vector2Int(x, y);
 
-    /// <summary>
-    /// Move the block, trigger move event
-    /// </summary>
-    public void MoveTo(Vector2Int to)
-    {
-        // Set data of block self
-        position = to;
-        // Invoke block move event
-        OnMoved?.Invoke();
-    }
-    /// <summary>
-    /// Move the block, trigger move event
-    /// </summary>
-    public void MoveBy(int x, int y)
-    {
-        MoveTo(position + new Vector2Int(x, y));
+        if (animation)
+        {
+            OnMoved?.Invoke();
+        }
+        else
+        {
+            transform.position = GetWorldPosition();
+            OnInstantPosChanged?.Invoke();
+        }
     }
 
 
 
-    // General Behaviour of Block
-    public void Spawn()
-    {
-        
-    }
-
-    public void SpawnFalling()
-    {
-        Spawn();
-        isLocked = false;
-    }
 
     public void Destroy()
     {
@@ -86,7 +62,7 @@ public abstract class Block : MonoBehaviour
         OnDestroyed?.Invoke();
     }
 
-    public void Land()
+    public void Lockdown()
     {
         isLocked = true;
         OnLanded?.Invoke();

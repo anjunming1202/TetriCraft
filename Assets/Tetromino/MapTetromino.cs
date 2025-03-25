@@ -9,18 +9,15 @@ using static Unity.Collections.AllocatorManager;
 
 // A tetromino stores 4 blocks, when falling
 [Serializable]
-public class TetrominoManager : MonoBehaviour
+public class MapTetromino : Tetromino
 {
-    // Tetromino data
-    public Tetromino tetromino;
-    private int size => tetromino.size;
-
+    // Map reference
+    Map map;
 
     // Wallkick data looked up
-    public Vector2Int[] Wallkick => tetromino.wallkick[new Vector2Int(tetromino.lastRotation, tetromino.rotation)];
+    public Vector2Int[] Wallkick => wallkick[new Vector2Int(lastRotation, rotation)];
 
     // State data
-    public bool isActive = false;       // inactive tetromino is not in the map
     public bool isGrounded = false;     // grounded => lock delay => lockdown
     public bool isLocked = false;       // lockdown
 
@@ -29,77 +26,74 @@ public class TetrominoManager : MonoBehaviour
     public int hardDrop = 0;
 
     // Lock Delay
-    public float lockDelay = 0.5f;
+    public static float lockDelay = 0.5f;
     public Coroutine lockDelayCoroutine = null;
 
     // Event
-    public delegate void TetrominoEvent(TetrominoManager tetromino);
+    public delegate void TetrominoEvent(MapTetromino tetromino);
     public TetrominoEvent OnTetrominoSoftDrop; // for player controlled drop: accelerate (soft drop)
     public TetrominoEvent OnTetrominoHardDrop; // for player controlled drop: land (hard drop)
     public Action OnLockdown;
 
+    public void New(Tetromino tetromino)
+    {
+        Block[] blocks = tetromino.blocks;
+        New(tetromino.Type, blocks[0], blocks[1], blocks[2], blocks[3]);
 
+        Reset();
+    }
+    protected override void Reset()
+    {
+        base.Reset();
+        isGrounded = false;
+        isLocked = false;
+        softDrop = 0;
+        hardDrop = 0;
+        lockDelayCoroutine = null;
+    }
 
+    public void SetMap(Map map)
+    {
+        this.map = map;
+    }
 
+    public Vector2Int LocalToMap(int row, int column)
+    {
+        return position + new Vector2Int(column, size - 1 - row);
+    }
 
-
-
-    // 
     public void SetPosition(int x, int y)
     {
-        tetromino.position = new Vector2Int(x, y);
+        position = new Vector2Int(x, y);
     }    
 
     public void Shift(int x, int y)
     {
-        tetromino.position += new Vector2Int(x, y);
-    }
-
-    public void Rotate(bool clockwise = true)
-    {
-        Block[,] rotated = new Block[size, size];
-
-        for (int i = 0; i < size; i++)
-        {
-            for (int j = 0; j < size; j++)
-            {
-                if (clockwise)
-                    rotated[j, size - 1 - i] = tetromino.shape[i, j];
-                else
-                    rotated[size - 1 - j, i] = tetromino.shape[i, j];
-            }
-        }
-
-        tetromino.shape = rotated;
-        tetromino.lastRotation = tetromino.rotation;
-        tetromino.rotation += clockwise ? -1 : 1;
-        tetromino.rotation %= 4;
-        if (tetromino.rotation < 0)
-            tetromino.rotation += 4;
+        position += new Vector2Int(x, y);
     }
 
     /// <summary>
     /// Update blocks in the map according to this tetromino data
     /// </summary>
-    public void UpdateMapBlocks(Map map)
+    public void UpdateMapBlocks(Map map, bool animation = true)
     {
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
             {
-                Block block = tetromino.shape[r, c];
+                Block block = shape[r, c];
                 if (block == null || !block.isInMap)
                     continue;
-                Vector2Int prevPosition = block.position;
+                Vector2Int prevPosition = block.Position;
                 map.Remove(prevPosition.x, prevPosition.y);
             }
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
             {
-                Block block = tetromino.shape[r, c];
+                Block block = shape[r, c];
                 if (block == null)
                     continue;
-                Vector2Int currPosition = tetromino.LocalToMap(r, c);
-                map.Add(block, currPosition.x, currPosition.y);
+                Vector2Int currPosition = LocalToMap(r, c);
+                map.Add(block, currPosition.x, currPosition.y, animation);
             }
     }
 
@@ -111,35 +105,35 @@ public class TetrominoManager : MonoBehaviour
 
 
 
-    public void Left(Map map)
+    public void Left()
     {
-        TryShift(map, -1, 0);
+        TryShift(-1, 0);
     }
-    public void Right(Map map)
+    public void Right()
     {
-        TryShift(map, 1, 0);
+        TryShift(1, 0);
     }
-    public void Drop(Map map)
+    public void Drop()
     {
-        bool successful = TryShift(map, 0, -1);
+        bool successful = TryShift(0, -1);
         if (!successful)
         {
             Lockdown();
         }
     }
-    public void SoftDrop(Map map)
+    public void SoftDrop()
     {
         softDrop++;
         OnTetrominoSoftDrop?.Invoke(this);
-        bool successful = TryShift(map, 0, -1);
+        bool successful = TryShift(0, -1);
         if (!successful)
         {
             Ground();
         }
     }
-    public void HardDrop(Map map)
+    public void HardDrop()
     {
-        while (TryShift(map, 0, -1))
+        while (TryShift(0, -1))
         {
             hardDrop++;
         }
@@ -147,26 +141,13 @@ public class TetrominoManager : MonoBehaviour
         hardDrop = 0;
         Ground();
     }
-    public void Rotate(Map map, bool clockwise = true)
+    public void Rotate(bool clockwise = true)
     {
-        TryRotate(map, clockwise);
-    }
-
-    public bool TryImmediateLockdown(Map map)
-    {
-        Shift(0, -1);
-        bool canLockdown = !CheckValid(map);
-        Shift(0, 1);
-
-        if (canLockdown)
-        {
-            Lockdown();
-        }
-        return canLockdown;
+        TryRotate(clockwise);
     }
 
 
-    private bool TryShift(Map map, int x, int y)
+    private bool TryShift(int x, int y)
     {
         Shift(x, y);
         if (!CheckValid(map))
@@ -177,9 +158,9 @@ public class TetrominoManager : MonoBehaviour
         UpdateMapBlocks(map);
         return true;
     }
-    private bool TryRotate(Map map, bool clockwise = true)
+    private bool TryRotate(bool clockwise = true)
     {
-        Rotate(clockwise);
+        RotateShape(clockwise);
         // check for each wall kick position
         foreach (Vector2Int kick in Wallkick)
         {
@@ -192,9 +173,21 @@ public class TetrominoManager : MonoBehaviour
             }
             Shift(-kick.x, -kick.y);
         }
-        Rotate(!clockwise);
+        RotateShape(!clockwise);
         Debug.Log("fail rotation");
         return false;
+    }
+    public bool TryImmediateLockdown()
+    {
+        Shift(0, -1);
+        bool canLockdown = !CheckValid(map);
+        Shift(0, 1);
+
+        if (canLockdown)
+        {
+            Lockdown();
+        }
+        return canLockdown;
     }
 
     /// <summary>
@@ -227,10 +220,13 @@ public class TetrominoManager : MonoBehaviour
 
         // update tetromino & blocks data
         isLocked = true;
-        foreach (var block in tetromino.blocks)
+        foreach (var block in blocks)
         {
-            block.Land();
+            block.Lockdown();
         }
+
+        // reparent blocks
+        ReparentBlocksToMap();
 
         // invoke map tetromino landing event
         OnLockdown?.Invoke();
@@ -245,18 +241,28 @@ public class TetrominoManager : MonoBehaviour
 
 
 
+    public void ReparentBlocksToMap()
+    {
+        foreach (Block block in blocks)
+        {
+            block.transform.SetParent(map.transform, true);
+        }
+    }
+
+
+
     // Map checking
     /// <summary>
     /// Check for bottom, left, and right boundaries
     /// </summary>
     public bool CheckInside(Map map)
     {
-        for (int r = 0; r < tetromino.size; r++)
-            for (int c = 0; c < tetromino.size; c++)
+        for (int r = 0; r < size; r++)
+            for (int c = 0; c < size; c++)
             {
-                if (tetromino.shape[r, c] != null)
+                if (shape[r, c] != null)
                 {
-                    Vector2Int blockPos = tetromino.LocalToMap(r, c);
+                    Vector2Int blockPos = LocalToMap(r, c);
                     if (!map.CheckInside(blockPos.x, blockPos.y))
                         return false;
                 }
@@ -265,12 +271,12 @@ public class TetrominoManager : MonoBehaviour
     }
     public bool CheckCollide(Map map)
     {
-        for (int r = 0; r < tetromino.size; r++)
-            for (int c = 0; c < tetromino.size; c++)
+        for (int r = 0; r < size; r++)
+            for (int c = 0; c < size; c++)
             {
-                if (tetromino.shape[r, c] != null)
+                if (shape[r, c] != null)
                 {
-                    Vector2Int mapBlockPos = tetromino.LocalToMap(r, c);
+                    Vector2Int mapBlockPos = LocalToMap(r, c);
                     Block mapBlock = map[mapBlockPos.x, mapBlockPos.y];
                     if (mapBlock != null && mapBlock.isLocked)
                     {

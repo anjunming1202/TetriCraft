@@ -14,7 +14,13 @@ using static UnityEditor.PlayerSettings;
 public class MapManager : MonoBehaviour
 {
     // Map Data
-    public Map map;
+    public Map map; // inspector
+
+    public MapTetromino fallingTetromino; // inspector
+    private TetrominoController controller;
+
+    // Updating
+    private bool isUpdating = false;
 
     // Readonly Data
     private MapBoundaryData boundary => MapBoundaryData.Instance; // Boundary Data
@@ -22,33 +28,95 @@ public class MapManager : MonoBehaviour
 
     // Events
     public delegate void MapEvent(Map map);
-    public MapEvent OnFinishTurn;
     public MapEvent OnLineClear;
+    public Action OnFinishTurn;
 
 
+
+    private void Awake()
+    {
+        fallingTetromino.SetMap(map);
+        controller = fallingTetromino.GetComponent<TetrominoController>();
+
+        fallingTetromino.OnLockdown += () => OnFinishTurn?.Invoke();
+    }
+    private void Update()
+    {
+        if (isUpdating)
+        {
+            // Try clear lines
+            TryClearLines();
+        }
+    }
 
     //================================//
-    //  Initialise Map
+    //  Map life cycle
     //================================//
     public void NewMap()
     {
         // New a map
-        map = new Map();
+        map.NewMap();
+
+        isUpdating = true;
+        controller.isActive = true;
     }
 
-
-
-    //================================//
-    //  Initialise Tetromino & Blocks
-    //================================//
-    
-    
-
-
+    public void UpdatingOver()
+    {
+        isUpdating = false;
+        controller.isActive = false;
+    }
 
     //================================//
-    //  Line Clear
+    //  Map game logic
     //================================//
+    public void SpawnTetromino(Tetromino newTetromino)
+    {
+        // Initialise next falling tetromino & its blocks
+        fallingTetromino.New(newTetromino);
+
+        // reset map data
+        map.lastClearLineCount = 0;
+        map.combo = 0;
+
+        // Set tetromino to the spawn position
+        Vector2Int spawnPosition = GetSpawnPosition();
+        fallingTetromino.SetPosition(spawnPosition.x, spawnPosition.y);
+        fallingTetromino.UpdateMapBlocks(map, false);
+    }
+
+    private Vector2Int GetSpawnPosition()
+    {
+        // x position
+        int x = (boundary.width - fallingTetromino.size) / 2;
+
+        // y position        
+        int distance = int.MaxValue; // distance tetromino need to move
+        for (int r = 0; r < fallingTetromino.size; r++)
+            for (int c = 0; c < fallingTetromino.size; c++)
+            {
+                if (fallingTetromino.shape[r, c] != null)
+                {
+                    int distance_new = fallingTetromino.LocalToMap(r, c).y - boundary.height;
+                    if (distance_new < distance)
+                        distance = distance_new;
+                }
+            }
+        int y = fallingTetromino.position.y - distance;
+
+        // spawn point position
+        return new Vector2Int(x, y);
+    }
+
+    public bool CheckGameover()
+    {
+        int deathline = map.height;
+        bool gameover = !map.CheckRowEmpty(deathline);
+        isUpdating = !gameover;
+        controller.isActive = !gameover;
+        return gameover;
+    }
+
     /// <summary>
     /// Try clear line for tetromino when landing
     /// </summary>

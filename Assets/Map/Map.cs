@@ -9,9 +9,9 @@ using static Unity.Collections.AllocatorManager;
 /// <summary>
 /// Data of blocks in the game
 /// </summary>
-public class Map
+public class Map : MonoBehaviour
 {
-    public Map()
+    public void NewMap()
     {
         blockMap = new Block[width, height + 5]; // all null
     }
@@ -58,7 +58,7 @@ public class Map
     // Update map & block data
 
     // Add
-    public void Add(Block block, int x, int y)
+    public void Add(Block block, int x, int y, bool animation = false)
     {
         // block can only be added once
         if (block.isInMap)
@@ -81,16 +81,22 @@ public class Map
         blocks.Add(block);
 
         // block pos
-        block.position = new Vector2Int(x, y);
+        block.SetPosition(x, y, animation);
     }
 
     // Move
-    public bool MoveTo(Block block, int x, int y)
+    public bool MoveTo(Block block, int x, int y, bool animation = true)
     {
-        Vector2Int from = block.position;
+        if (!block.isInMap)
+        {
+            Debug.LogError("Try to move a block before adding it");
+            return false;
+        }
+
+        Vector2Int from = block.Position;
 
         // for debug
-        Debug.Assert(blockMap[from.x, from.y] == block, $"block position not consistent with the map, block position {from.x}, {from.y}");
+        Debug.Assert(blockMap[from.x, from.y] == block, $"Block position not consistent with the map, block position {from.x}, {from.y}");
 
         if (!CheckInside(x, y) || !CheckEmpty(x, y))
         {
@@ -99,7 +105,7 @@ public class Map
 
         blockMap[from.x, from.y] = null;
         blockMap[x, y] = block;
-        block.position = new Vector2Int(x, y);
+        block.SetPosition(x, y, animation);
         return true;
     }
 
@@ -314,10 +320,7 @@ public class Map
         }
         return true;
     }
-    public bool CheckMapFull()
-    {
-        return !CheckRowEmpty(height);
-    }
+
     public bool CheckMapEmpty()
     {
         for (int row = 0; row < height - 1; row++)

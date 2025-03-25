@@ -2,7 +2,7 @@
 using System.Drawing;
 using UnityEngine;
 
-public class Tetromino
+public class Tetromino : MonoBehaviour
 {
     // Blocks data
     public Block[,] shape;
@@ -10,9 +10,9 @@ public class Tetromino
     public int size;
 
     // Tetromino type
-    public TetrominoType Type { get; }
+    public TetrominoType Type;
 
-    // Position data (in map)
+    // Position data
     public Vector2Int position;
 
     // Rotation data
@@ -22,7 +22,7 @@ public class Tetromino
     // Wallkick table
     public Dictionary<Vector2Int, Vector2Int[]> wallkick;
 
-    public Tetromino(TetrominoType type, Block block1, Block block2, Block block3, Block block4)
+    public void New(TetrominoType type, Block block1, Block block2, Block block3, Block block4)
     {
         // Initialise tetromino data
         Type = type;
@@ -123,16 +123,50 @@ public class Tetromino
         }
 
 
-        // Bcase TetrominoType.S:lock array
+        // Block array
         blocks[0] = block1;
         blocks[1] = block2;
         blocks[2] = block3;
         blocks[3] = block4;
+
+        // Reset data
+        Reset();
+
+        // Block objects reparent
+        block1.transform.SetParent(transform);
+        block2.transform.SetParent(transform);
+        block3.transform.SetParent(transform);
+        block4.transform.SetParent(transform);
     }
 
-    public Vector2Int LocalToMap(int row, int column)
+    protected virtual void Reset()
     {
-        return position + new Vector2Int(column, size - 1 - row);
+        position = new Vector2Int(0, 0);
+        rotation = 0;
+        lastRotation = 0;
+    }
+
+    public void RotateShape(bool clockwise = true)
+    {
+        Block[,] rotated = new Block[size, size];
+
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                if (clockwise)
+                    rotated[j, size - 1 - i] = shape[i, j];
+                else
+                    rotated[size - 1 - j, i] = shape[i, j];
+            }
+        }
+
+        shape = rotated;
+        lastRotation = rotation;
+        rotation += clockwise ? -1 : 1;
+        rotation %= 4;
+        if (rotation < 0)
+            rotation += 4;
     }
 }
 
