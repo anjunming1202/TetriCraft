@@ -22,9 +22,11 @@ public class GameManager : MonoBehaviour
     private int height => MapBoundaryData.Instance.height;
     private MapBoundaryData boundary => MapBoundaryData.Instance;
 
-    [Header("Game Logic")]
+    [Header("Score")]
+    public ScoreManager scoreManager; // inspector
+
+    [Header("Game State")]
     [SerializeField, ReadOnly] private bool gameover = false; // Game over flag
-    [SerializeField, ReadOnly] private int score = 0;
 
     // Visual
     [Header("Visual")]
@@ -41,15 +43,14 @@ public class GameManager : MonoBehaviour
         // Initialise map
         mapManager.NewMap();
 
-        mapManager.OnLineClear += ScoreLineClear;
         mapManager.OnFinishTurn += OnNextTurn;
 
-        mapManager.fallingTetromino.OnTetrominoSoftDrop += ScoreSoftDrop;
-        mapManager.fallingTetromino.OnTetrominoHardDrop += ScoreHardDrop;
-
-        // Initialise game logic
+        // Initialise game state
         gameover = false;
-        score = 0;
+
+        // Initialise scorer
+        scoreManager.LinkToGame(mapManager);
+        scoreManager.Reset();
 
         // Spawn the first tetromino
         TetrominoGenerator.NewRandomTetromino(nextTetromino);
@@ -111,39 +112,6 @@ public class GameManager : MonoBehaviour
         nextTetromino.Display();
     }
 
-
-
-    private void ScoreSoftDrop(MapTetromino tetromino)
-    {
-        score += 1;
-    }
-    private void ScoreHardDrop(MapTetromino tetromino)
-    {
-        score += tetromino.hardDrop * 2;
-    }
-    private void ScoreLineClear(Map map)
-    {
-        // for clearing multiple lines
-        switch (map.lastClearLineCount)
-        {
-            case 0:
-                break;
-            case 1:
-                score += 400;
-                break;
-            case 2:
-                score += 1000;
-                break;
-            case 3:
-                score += 2500;
-                break;
-            case 4:
-                score += 8000;
-                break;
-        }
-        // for combo of clearing
-        score += map.combo * 500;
-    }
 
 
 

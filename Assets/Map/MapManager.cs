@@ -127,7 +127,7 @@ public class MapManager : MonoBehaviour
     /// </summary>
     public void TryClearLines()
     {
-        int lineCount = 0;
+        uint lineCount = 0;
         for (int i = 0; i < map.height; i++)
         {
             bool successful = TryClearLine(i);
