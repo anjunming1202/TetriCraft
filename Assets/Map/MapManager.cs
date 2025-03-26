@@ -19,6 +19,8 @@ public class MapManager : MonoBehaviour
     public MapTetromino fallingTetromino; // inspector
     private TetrominoController controller;
 
+    public DummyTetromino ghostTetromino; // inspector
+
     // Updating
     private bool isUpdating = false;
 
@@ -46,6 +48,9 @@ public class MapManager : MonoBehaviour
         {
             // Try clear lines
             TryClearLines();
+
+            // Display ghost tetromino
+            SetGhostTetromino();
         }
     }
 
@@ -81,7 +86,7 @@ public class MapManager : MonoBehaviour
 
         // Set tetromino to the spawn position
         Vector2Int spawnPosition = GetSpawnPosition();
-        fallingTetromino.SetPosition(spawnPosition.x, spawnPosition.y);
+        fallingTetromino.SetPosition(spawnPosition);
         fallingTetromino.UpdateMapBlocks(map, false);
     }
 
@@ -165,5 +170,25 @@ public class MapManager : MonoBehaviour
                     map.MoveTo(map[x, y], x, y - 1);
                 }
             }
+    }
+
+    private void SetGhostTetromino()
+    {
+        bool reachedBottom = false;
+        Vector2Int fallingTetrominoPosition = fallingTetromino.position;
+        int iter = 0;
+        while (!reachedBottom)
+        {
+            iter++;
+            Debug.Assert(iter < 10000, "infinite while");
+
+            fallingTetromino.Shift(0, -1);
+            reachedBottom = !fallingTetromino.CheckValid(map);
+        }
+
+        ghostTetromino.Transform(fallingTetromino);
+        ghostTetromino.SetPosition(fallingTetromino.position);
+
+        fallingTetromino.SetPosition(fallingTetrominoPosition);
     }
 }

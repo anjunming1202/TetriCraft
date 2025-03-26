@@ -5,17 +5,20 @@ using UnityEngine;
 public class Tetromino : MonoBehaviour
 {
     // Blocks data
-    public Block[,] shape;
+    public Block[,] shape = null;
     public Block[] blocks = new Block[4];
     public int size;
 
     // Tetromino type
-    public TetrominoType Type;
+    public TetrominoType type = TetrominoType.None;
 
     // Position data
     public Vector2Int position;
 
     // Rotation data
+    /// <summary>
+    /// clockwise: -1
+    /// </summary>
     public int rotation = 0;
     public int lastRotation = 0;
 
@@ -25,7 +28,7 @@ public class Tetromino : MonoBehaviour
     public void New(TetrominoType type, Block block1, Block block2, Block block3, Block block4)
     {
         // Initialise tetromino data
-        Type = type;
+        this.type = type;
         switch (type)
         {
             // * origin [0,0] at left bottom, but when defining [,] array the upper row of code should be the lower row in tetromino
@@ -139,7 +142,13 @@ public class Tetromino : MonoBehaviour
         block4.transform.SetParent(transform);
     }
 
-    protected virtual void Reset()
+    public void New(Tetromino tetromino)
+    {
+        Block[] blocks = tetromino.blocks;
+        New(tetromino.type, blocks[0], blocks[1], blocks[2], blocks[3]);
+    }
+
+    public virtual void Reset()
     {
         position = new Vector2Int(0, 0);
         rotation = 0;
@@ -168,10 +177,16 @@ public class Tetromino : MonoBehaviour
         if (rotation < 0)
             rotation += 4;
     }
+
+    public Vector3 GetWorldPosition()
+    {
+        return MapBoundaryData.GridToWorld((Vector2)position + Vector2.one * ((float)size / 2 - 0.5f));
+    }
 }
 
 public enum TetrominoType
 {
+    None = -1,
     I = 0,
     O,
     T,

@@ -39,6 +39,10 @@ public class MapBoundaryData : ScriptableObject
     {
         return (Vector3)((Vector2)posGrid * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
     }
+    public static Vector3 GridToWorld(Vector2 posGrid)
+    {
+        return (Vector3)(posGrid * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
+    }
     // Check inside
     /// <summary>
     /// Check for top, bottom, left, and right boundaries

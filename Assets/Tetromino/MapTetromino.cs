@@ -35,14 +35,7 @@ public class MapTetromino : Tetromino
     public TetrominoEvent OnTetrominoHardDrop; // for player controlled drop: land (hard drop)
     public Action OnLockdown;
 
-    public void New(Tetromino tetromino)
-    {
-        Block[] blocks = tetromino.blocks;
-        New(tetromino.Type, blocks[0], blocks[1], blocks[2], blocks[3]);
-
-        Reset();
-    }
-    protected override void Reset()
+    public override void Reset()
     {
         base.Reset();
         isGrounded = false;
@@ -62,9 +55,9 @@ public class MapTetromino : Tetromino
         return position + new Vector2Int(column, size - 1 - row);
     }
 
-    public void SetPosition(int x, int y)
+    public void SetPosition(Vector2Int position)
     {
-        position = new Vector2Int(x, y);
+        this.position = position;
     }    
 
     public void Shift(int x, int y)
@@ -152,7 +145,7 @@ public class MapTetromino : Tetromino
         Shift(x, y);
         if (!CheckValid(map))
         {
-            Shift( -x, -y);
+            Shift(-x, -y);
             return false;
         }
         UpdateMapBlocks(map);
@@ -226,7 +219,10 @@ public class MapTetromino : Tetromino
         }
 
         // reparent blocks
-        ReparentBlocksToMap();
+        blocks[0].transform.SetParent(map.transform, true);
+        blocks[1].transform.SetParent(map.transform, true);
+        blocks[2].transform.SetParent(map.transform, true);
+        blocks[3].transform.SetParent(map.transform, true);
 
         // invoke map tetromino landing event
         OnLockdown?.Invoke();
@@ -238,17 +234,6 @@ public class MapTetromino : Tetromino
         yield return new WaitForSeconds(delay);
         Lockdown();
     }
-
-
-
-    public void ReparentBlocksToMap()
-    {
-        foreach (Block block in blocks)
-        {
-            block.transform.SetParent(map.transform, true);
-        }
-    }
-
 
 
     // Map checking

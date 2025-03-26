@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     public MapManager mapManager; // inspector
 
     // Tetrominos
-    public Tetromino nextTetromino; // inspector
+    public DummyTetromino nextTetromino; // inspector
 
     [Header("Map")]
     // Map Region
@@ -108,7 +108,7 @@ public class GameManager : MonoBehaviour
         TetrominoGenerator.NewRandomTetromino(nextTetromino);
 
         // Display next tetromino
-
+        nextTetromino.Display();
     }
 
 
