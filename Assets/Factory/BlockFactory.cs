@@ -1,4 +1,4 @@
-﻿using System;
+﻿/*using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,11 +25,11 @@ public static class BlockFactory
     public static GameObject InstantiateBlock(Block block, Transform parent)
     {
         // Instantiate block prefab
-        GameObject blockObject = Instantiate(block.Type);
+        GameObject blockObject = Instantiate(block.ID);
 
         // Initialise block manager
-        BlockManager blockManager = blockObject.GetComponent<BlockManager>();
-        blockManager.Initialise(block);
+        //BlockManager blockManager = blockObject.GetComponent<BlockManager>();
+        //blockManager.Initialise(block);
 
         // Temperarily put into block pool
         blockObject.transform.SetParent(parent);
@@ -53,7 +53,7 @@ public static class BlockFactory
         spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; // only seen in the map region
 
         // Add component BlockManager
-        BlockManager blockManager = block.AddComponent<BlockManager>();
+        //BlockManager blockManager = block.AddComponent<BlockManager>();
 
         // Add component BlockRenderer
         BlockRenderer blockRenderer = block.AddComponent<BlockRenderer>();
@@ -65,3 +65,4 @@ public static class BlockFactory
         return block;
     }
 }
+*/

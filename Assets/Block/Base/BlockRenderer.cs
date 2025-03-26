@@ -6,28 +6,24 @@ using static Unity.Collections.AllocatorManager;
 // Manage the rendering of the instantiated block
 public class BlockRenderer : MonoBehaviour
 {
+    // Block Reference
+    private Block block;
+
     // Block Texture
     public Sprite texture;
 
     // Renderer
     private SpriteRenderer spriteRenderer;
 
-    private void Start()
+    void Awake()
     {
+        block = GetComponent<Block>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-    }
-    public void Initialise(Block block)
-    {
-        // Initialise texture renderer
-        /*this.block = block;*/
-
-        // Subscribe the block "change" events - render by updating block object when block data changes
-        //block.OnMove += Render;
     }
 
     void Update()
     {
-        /*RenderAnimation();*/   // if want animation, animation update here
+        
     }
 
 

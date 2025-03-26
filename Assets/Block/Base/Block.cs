@@ -2,21 +2,22 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
 [Serializable]
-public abstract class Block
+public abstract class Block : MonoBehaviour
 {
-    public Block()
+    private void Awake()
     {
-        this.Name = BlockRegistry.GetMetadata(Type).Name;
+
     }
 
     // Identity
-    public virtual string Name { get; }
-    public abstract BlockID Type { get; }
+    public BlockID ID;
 
     // Data in the map
     private Vector2Int position = Vector2Int.zero; // Block position in the map
+    public Vector2Int Position => position;
 
     // Block state flags
     public bool isInMap = false;        // is in the map data
@@ -24,71 +25,47 @@ public abstract class Block
     public bool isAnimating = false;    // is moving with animation
 
     // Events
-    public delegate void OnChangedEvent(Block block);
-    public event OnChangedEvent OnPositionChanged;
+    public delegate void OnChangedEvent();
+    public event OnChangedEvent OnInstantPosChanged;
     public event OnChangedEvent OnMoved;
     public event OnChangedEvent OnLanded;
 
-    public delegate void OnInstantiatedEvent();
 //  public event OnChangedEvent OnSpawned;
-    public event OnInstantiatedEvent OnDestroyed;
+    public event OnChangedEvent OnDestroyed;
 
 
 
     // Position & Moving
-    public Vector2Int MapPosition => position;
     public Vector3 GetWorldPosition() => MapBoundaryData.GridToWorld(position);
 
-    /// <summary>
-    /// Set position directly
-    /// </summary>
-    public void SetPosition(Vector2Int position)
+    public void SetPosition(int x, int y, bool animation = false)
     {
-        this.position = position;
-        OnPositionChanged?.Invoke(this);
-    }
+        position = new Vector2Int(x, y);
 
-    /// <summary>
-    /// Move the block, trigger move event
-    /// </summary>
-    public void MoveTo(Vector2Int to)
-    {
-        // Set data of block self
-        position = to;
-        // Invoke block move event
-        OnMoved?.Invoke(this);
-    }
-    /// <summary>
-    /// Move the block, trigger move event
-    /// </summary>
-    public void MoveBy(int x, int y)
-    {
-        MoveTo(position + new Vector2Int(x, y));
+        if (animation)
+        {
+            OnMoved?.Invoke();
+        }
+        else
+        {
+            transform.position = GetWorldPosition();
+            OnInstantPosChanged?.Invoke();
+        }
     }
 
 
 
-    // General Behaviour of Block
-    public void Spawn()
-    {
-        
-    }
-
-    public void SpawnFalling()
-    {
-        Spawn();
-        isLocked = false;
-    }
 
     public void Destroy()
     {
+        GameObject.Destroy(gameObject);
         OnDestroyed?.Invoke();
     }
 
-    public void Land()
+    public void Lockdown()
     {
         isLocked = true;
-        OnLanded?.Invoke(this);
+        OnLanded?.Invoke();
     }
 
 
