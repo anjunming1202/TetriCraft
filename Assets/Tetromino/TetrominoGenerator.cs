@@ -1,14 +1,7 @@
 ﻿using UnityEngine;
 
-public class TetrominoGenerator : MonoBehaviour
+public class TetrominoGenerator
 {
-    private static BlockSpawner blockSpawner;
-
-    private void Awake()
-    {
-        blockSpawner = GetComponent<BlockSpawner>();
-    }
-
     public static void NewRandomTetromino(Tetromino tetromino)
     {
         // Random tetromino type
@@ -25,7 +18,7 @@ public class TetrominoGenerator : MonoBehaviour
         Block[] blocks = new Block[4];
         for (int i = 0; i < 4; i++)
         {
-            blocks[i] = blockSpawner.NewBlock(src.blocks[i].ID);
+            blocks[i] = BlockSpawner.NewBlock(src.blocks[i].ID);
         }
 
         dst.New(src.type, blocks[0], blocks[1], blocks[2], blocks[3]);
@@ -37,7 +30,7 @@ public class TetrominoGenerator : MonoBehaviour
         Block[] blocks = new Block[4];
         for (int i = 0; i < 4; i++)
         {
-            blocks[i] = blockSpawner.NewBlock(blockType);
+            blocks[i] = BlockSpawner.NewBlock(blockType);
         }
 
         // New a tetromino

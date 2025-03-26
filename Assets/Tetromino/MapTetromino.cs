@@ -22,8 +22,8 @@ public class MapTetromino : Tetromino
     public bool isLocked = false;       // lockdown
 
     // Control recorded data
-    public int softDrop = 0;
-    public int hardDrop = 0;
+    public uint softDrop = 0;
+    public uint hardDrop = 0;
 
     // Lock Delay
     public static float lockDelay = 0.5f;

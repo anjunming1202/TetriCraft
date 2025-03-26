@@ -29,8 +29,8 @@ public class Map : MonoBehaviour
     }
 
     // Map recorded data
-    public int lastClearLineCount = 0;
-    public int combo = 0;
+    public uint lastClearLineCount = 0;
+    public uint combo = 0;
 
     // Debugging
     public int blockCount
