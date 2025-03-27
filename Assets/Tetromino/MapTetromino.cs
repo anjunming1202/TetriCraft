@@ -216,7 +216,7 @@ public class MapTetromino : Tetromino
         isLocked = true;
         foreach (var block in blocks)
         {
-            block.Lockdown();
+            block.OnLockdown();
         }
 
         // reparent blocks

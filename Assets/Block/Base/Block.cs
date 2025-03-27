@@ -59,19 +59,7 @@ public abstract class Block : MonoBehaviour
 
 
 
-
-    public void Destroy()
-    {
-        GameObject.Destroy(gameObject);
-        OnDestroyed?.Invoke(this);
-    }
-
-    public void Remove()
-    {
-        GameObject.Destroy(gameObject);
-    }
-
-    public void Lockdown()
+    public virtual void OnLockdown()
     {
         isLocked = true;
         OnLockedDown?.Invoke();
@@ -80,6 +68,17 @@ public abstract class Block : MonoBehaviour
     public virtual void OnUpdate(Map map)
     {
 
+    }
+
+    public void Destroy()
+    {
+        OnDestroyed?.Invoke(this);
+        GameObject.Destroy(gameObject);
+    }
+
+    public void Remove()
+    {
+        GameObject.Destroy(gameObject);
     }
 
 

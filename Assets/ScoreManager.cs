@@ -32,10 +32,10 @@ public class ScoreManager : MonoBehaviour
         score += tetromino.hardDrop * 2;
         UpdateScoreBoard();
     }
-    private void ScoreLineClear(Map map)
+    private void ScoreLineClear(MapManager mapManager)
     {
         // for clearing multiple lines
-        switch (map.lastClearLineCount)
+        switch (mapManager.lastClearLineCount)
         {
             case 0:
                 break;
@@ -53,7 +53,7 @@ public class ScoreManager : MonoBehaviour
                 break;
         }
         // for combo of clearing
-        score += map.combo * 500;
+        score += mapManager.combo * 500;
 
         UpdateScoreBoard();
     }

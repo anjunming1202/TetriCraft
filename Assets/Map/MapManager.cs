@@ -21,6 +21,12 @@ public class MapManager : MonoBehaviour
 
     public DummyTetromino ghostTetromino; // inspector
 
+    public DummyTetromino nextTetromino; // inspector
+
+    // Line clear data
+    public uint lastClearLineCount = 0;
+    public uint combo = 0;
+
     // Updating
     private bool isUpdating = false;
 
@@ -28,7 +34,7 @@ public class MapManager : MonoBehaviour
     public int blockCount => map.blockCount;    // debug
 
     // Events
-    public delegate void MapEvent(Map map);
+    public delegate void MapEvent(MapManager mapManager);
     public MapEvent OnLineClear;
     public Action OnFinishTurn;
 
@@ -38,7 +44,8 @@ public class MapManager : MonoBehaviour
     {
         controller = fallingTetromino.GetComponent<TetrominoController>();
 
-        fallingTetromino.OnLockdown += () => OnFinishTurn?.Invoke();
+        fallingTetromino.OnLockdown += OnLockdown;
+        OnFinishTurn += OnNextTurn;
     }
     private void Update()
     {
@@ -52,9 +59,6 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    //================================//
-    //  Map life cycle
-    //================================//
     public void NewMap(int Width, int height)
     {
         // New a map
@@ -62,6 +66,10 @@ public class MapManager : MonoBehaviour
 
         isUpdating = true;
         controller.isActive = true;
+
+        // Spawn the first tetromino
+        TetrominoGenerator.NewRandomTetromino(nextTetromino);
+        OnNextTurn();
     }
 
     public void UpdatingOver()
@@ -70,17 +78,26 @@ public class MapManager : MonoBehaviour
         controller.isActive = false;
     }
 
+    public bool CheckGameover()
+    {
+        int deathline = map.Height;
+        bool gameover = !map.CheckRowEmpty(deathline);
+        isUpdating = !gameover;
+        controller.isActive = !gameover;
+        return gameover;
+    }
+
     //================================//
     //  Map game logic
     //================================//
-    public void SpawnTetromino(Tetromino newTetromino)
+    private void SpawnTetromino(Tetromino newTetromino)
     {
         // Initialise next falling tetromino & its blocks
         fallingTetromino.New(newTetromino);
 
         // reset map data
-        map.lastClearLineCount = 0;
-        map.combo = 0;
+        lastClearLineCount = 0;
+        combo = 0;
 
         // Set tetromino to the spawn position
         Vector2Int spawnPosition = GetSpawnPosition();
@@ -111,19 +128,32 @@ public class MapManager : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
-    public bool CheckGameover()
+    private void OnLockdown()
     {
-        int deathline = map.Height;
-        bool gameover = !map.CheckRowEmpty(deathline);
-        isUpdating = !gameover;
-        controller.isActive = !gameover;
-        return gameover;
+        TryClearLines();
+        OnFinishTurn?.Invoke();
+    }
+
+    private void OnNextTurn()
+    {
+        // Stop when game over
+        if (!isUpdating)
+            return;
+
+        // Spawn new tetromino in map
+        SpawnTetromino(nextTetromino);
+
+        // Create next new tetromino
+        TetrominoGenerator.NewRandomTetromino(nextTetromino);
+
+        // Display next tetromino
+        nextTetromino.Display();
     }
 
     /// <summary>
     /// Try clear line for tetromino when landing
     /// </summary>
-    public void TryClearLines()
+    private void TryClearLines()
     {
         uint lineCount = 0;
         for (int i = 0; i < map.Height; i++)
@@ -134,13 +164,13 @@ public class MapManager : MonoBehaviour
         }
         if (lineCount > 0)
         {
-            map.lastClearLineCount = lineCount;
-            map.combo++;
-            OnLineClear?.Invoke(map);
+            lastClearLineCount = lineCount;
+            combo++;
+            OnLineClear?.Invoke(this);
         }
         else
         {
-            map.combo = 0;
+            combo = 0;
         }
     }
     private bool TryClearLine(int row)
@@ -173,6 +203,12 @@ public class MapManager : MonoBehaviour
 
     private void SetGhostTetromino()
     {
+        if (fallingTetromino.type == TetrominoType.None)
+        {
+            Debug.LogError("missing falling tetromino");
+            return;
+        }
+
         bool reachedBottom = false;
         Vector2Int fallingTetrominoPosition = fallingTetromino.position;
         int iter = 0;

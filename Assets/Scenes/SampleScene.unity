@@ -152,10 +152,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapManager: {fileID: 310913972}
-  nextTetromino: {fileID: 453907042}
   boundaryRegion: {fileID: 1631176127}
   scoreManager: {fileID: 1365539526}
-  gameover: 0
   blockMovementCurve: {fileID: 11400000, guid: 175ca8d13feb6744885bbae30b9d5cdd, type: 2}
   blockLandCurve: {fileID: 11400000, guid: 4173132a645dac9489e29b5abcfc9058, type: 2}
 --- !u!4 &2464639
@@ -221,6 +219,9 @@ MonoBehaviour:
   map: {fileID: 763784240}
   fallingTetromino: {fileID: 591777106}
   ghostTetromino: {fileID: 1328682410}
+  nextTetromino: {fileID: 453907042}
+  lastClearLineCount: 0
+  combo: 0
 --- !u!4 &310913973
 Transform:
   m_ObjectHideFlags: 0
@@ -237,6 +238,7 @@ Transform:
   - {fileID: 763784239}
   - {fileID: 591777105}
   - {fileID: 1328682409}
+  - {fileID: 453907041}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &329727403
@@ -366,12 +368,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 453907040}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 13.78, y: 15, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 310913973}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &453907042
 MonoBehaviour:
@@ -882,8 +884,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87d370ecb0e1074429d81ddc9d96d716, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lastClearLineCount: 0
-  combo: 0
 --- !u!1001 &772495809
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1922,7 +1922,6 @@ SceneRoots:
   - {fileID: 757604693}
   - {fileID: 2098479939}
   - {fileID: 310913973}
-  - {fileID: 453907041}
   - {fileID: 1050138633}
   - {fileID: 827601248}
   - {fileID: 329727407}

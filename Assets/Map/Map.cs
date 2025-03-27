@@ -80,12 +80,6 @@ public class Map : MonoBehaviour
 
 
 
-    // Map recorded data
-    public uint lastClearLineCount = 0;
-    public uint combo = 0;
-
-
-
 
     // Check map data
     /// <summary>

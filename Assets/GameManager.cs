@@ -7,13 +7,10 @@ using UnityEngine;
 // Game Manager for managing the whole game
 public class GameManager : MonoBehaviour
 {
+    [Header("Map")]
     // Map Manager
     public MapManager mapManager; // inspector
 
-    // Tetrominos
-    public DummyTetromino nextTetromino; // inspector
-
-    [Header("Map")]
     // Map Region
     public SpriteMask boundaryRegion; // inspector
 
@@ -21,9 +18,8 @@ public class GameManager : MonoBehaviour
     public ScoreManager scoreManager; // inspector
 
     [Header("Game State")]
-    [SerializeField, ReadOnly] private bool gameover = false; // Game over flag
+    [SerializeField] private static bool gameover = false; // Game over flag
 
-    // Visual
     [Header("Visual")]
     public AnimationCurveAsset blockMovementCurve;
     public AnimationCurveAsset blockLandCurve;
@@ -38,18 +34,12 @@ public class GameManager : MonoBehaviour
         // Initialise map
         mapManager.NewMap(MapBoundaryData.Instance.width, MapBoundaryData.Instance.height);
 
-        mapManager.OnFinishTurn += OnNextTurn;
-
         // Initialise game state
         gameover = false;
 
         // Initialise scorer
         scoreManager.LinkToGame(mapManager);
         scoreManager.Reset();
-
-        // Spawn the first tetromino
-        TetrominoGenerator.NewRandomTetromino(nextTetromino);
-        OnNextTurn();
     }
 
     void Start()
@@ -78,33 +68,8 @@ public class GameManager : MonoBehaviour
     private void Gameover()
     {
         gameover = true;
+        mapManager.UpdatingOver();
         Debug.Log("Now Game Over!");
-    }
-
-    void UpdateGame()
-    {
-
-    }
-
-
-    //================================//
-    // Map Control Logic
-    //================================//
-
-    private void OnNextTurn()
-    {
-        // Stop when game over
-        if (gameover)
-            return;
-
-        // Spawn new tetromino in map
-        mapManager.SpawnTetromino(nextTetromino);
-
-        // Create next new tetromino
-        TetrominoGenerator.NewRandomTetromino(nextTetromino);
-
-        // Display next tetromino
-        nextTetromino.Display();
     }
 
 
