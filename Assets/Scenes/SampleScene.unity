@@ -711,6 +711,7 @@ MonoBehaviour:
   gravity: 1
   speedDrop: 1
   speedSoftDrop: 8
+  keyInputInterval: 0.2
 --- !u!1 &608315204
 GameObject:
   m_ObjectHideFlags: 0

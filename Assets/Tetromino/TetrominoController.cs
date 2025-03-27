@@ -11,12 +11,15 @@ public class TetrominoController : MonoBehaviour
     public float gravity = 1;
     public float speedDrop = 1;
     public float speedSoftDrop = 2;
+    public float keyInputInterval = 0.2f;
 
-    float timer = 0;
+    private float dropTimer = 0;
     private bool isAccelerating = false;
     private float interval;
     private float intervalNormal => 1 / (gravity * speedDrop);
     private float intervalAccelerating => 1 / (gravity * speedSoftDrop);
+
+    private float keyInputTimer = 0;
 
     // Key
     private KeyCode key_left = KeyCode.A;
@@ -36,20 +39,34 @@ public class TetrominoController : MonoBehaviour
     private void Update()
     {
         // Timer
-        timer += Time.deltaTime;
+        dropTimer += Time.deltaTime;
 
         // Control
-        if (Input.GetKeyDown(key_left)) // Left
+        if (Input.anyKeyDown)
         {
-            tetromino.Left();
+            keyInputTimer = keyInputInterval;
         }
-        if (Input.GetKeyDown(key_right)) // Right
+        if (Input.anyKey)
         {
-            tetromino.Right();
+            keyInputTimer += Time.deltaTime;
+        }
+        if (Input.GetKey(key_left)) // Left
+        {
+            if (keyInputTimer > keyInputInterval)
+            { 
+                tetromino.Left();
+            }
+        }
+        if (Input.GetKey(key_right)) // Right
+        {
+            if (keyInputTimer > keyInputInterval)
+            {
+                tetromino.Right();
+            }
         }
         if (Input.GetKeyDown(key_accelerate)) // Accelerating
         {
-            timer = 0;
+            dropTimer = 0;
             if (tetromino.TryImmediateLockdown()) // down key => skip delay and lockdown directly
                 return;
             tetromino.SoftDrop();  // drop immediately
@@ -63,26 +80,39 @@ public class TetrominoController : MonoBehaviour
         }
         if (Input.GetKeyDown(key_land)) // Hard drop
         {
-            timer = 0;
+            dropTimer = 0;
             tetromino.HardDrop();
         }
-        if (Input.GetKeyDown(key_rotateCW)) // Rotate clockwise
+        if (Input.GetKey(key_rotateCW)) // Rotate clockwise
         {
-            tetromino.Rotate(true);
+            if (keyInputTimer > keyInputInterval)
+            {
+                tetromino.Rotate(true);
+            }
         }
-        if (Input.GetKeyDown(key_rotateCCW)) // Rotate anticlockwise
+        if (Input.GetKey(key_rotateCCW)) // Rotate anticlockwise
         {
-            tetromino.Rotate(false);
+            if (keyInputTimer > keyInputInterval)
+            {
+                tetromino.Rotate(false);
+            }
+        }
+        if (Input.anyKey)
+        {   
+            if (keyInputTimer > keyInputInterval)
+            {
+                keyInputTimer = 0;
+            }
         }
 
         // Drop of tetromino
-        if (timer >= interval)
+        if (dropTimer >= interval)
         {
             if (isAccelerating)
                 tetromino.SoftDrop(); // Soft drop
             else
                 tetromino.Drop(); // Normal drop
-            timer = 0;
+            dropTimer = 0;
         }
     }
 }
