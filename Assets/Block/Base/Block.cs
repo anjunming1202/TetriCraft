@@ -1,8 +1,6 @@
 // Block, the most basic unit, one block occupies one grid
 using System;
-using System.Collections;
 using UnityEngine;
-using static Unity.Collections.AllocatorManager;
 
 [Serializable]
 public abstract class Block : MonoBehaviour
@@ -13,11 +11,12 @@ public abstract class Block : MonoBehaviour
     }
 
     // Identity
-    public BlockID ID;
+    public abstract BlockID ID { get; }
 
     // Data in the map
-    private Vector2Int position = Vector2Int.zero; // Block position in the map
-    public Vector2Int Position => position;
+    private Vector2 position = Vector2.zero;            // Block position in the map
+    public Vector2 Position => position;
+    public Vector2Int GridPosition => new Vector2Int((int)position.x, (int)position.y);
 
     // Block state flags
     public bool isInMap = false;        // is in the map data
@@ -25,31 +24,36 @@ public abstract class Block : MonoBehaviour
     public bool isAnimating = false;    // is moving with animation
 
     // Events
-    public delegate void OnChangedEvent();
-    public event OnChangedEvent OnInstantPosChanged;
-    public event OnChangedEvent OnMoved;
-    public event OnChangedEvent OnLanded;
-
-//  public event OnChangedEvent OnSpawned;
+    public delegate void OnChangedEvent(Block block);
+    public event OnChangedEvent OnPositionChanged;
     public event OnChangedEvent OnDestroyed;
 
+    public delegate void OnAnimationUpdateEvent();
+    public event OnAnimationUpdateEvent OnInstantMove;
+    public event OnAnimationUpdateEvent OnAnimatedMove;
+    public event OnAnimationUpdateEvent OnLockedDown;
 
 
-    // Position & Moving
-    public Vector3 GetWorldPosition() => MapBoundaryData.GridToWorld(position);
+
+    // GridPosition & Moving
+    public Vector3 GetWorldPosition()
+    {
+        return MapBoundaryData.MapToWorld(position);
+    }
 
     public void SetPosition(int x, int y, bool animation = false)
     {
         position = new Vector2Int(x, y);
+        OnPositionChanged?.Invoke(this);
 
         if (animation)
         {
-            OnMoved?.Invoke();
+            OnAnimatedMove?.Invoke();
         }
         else
         {
             transform.position = GetWorldPosition();
-            OnInstantPosChanged?.Invoke();
+            OnInstantMove?.Invoke();
         }
     }
 
@@ -59,13 +63,23 @@ public abstract class Block : MonoBehaviour
     public void Destroy()
     {
         GameObject.Destroy(gameObject);
-        OnDestroyed?.Invoke();
+        OnDestroyed?.Invoke(this);
+    }
+
+    public void Remove()
+    {
+        GameObject.Destroy(gameObject);
     }
 
     public void Lockdown()
     {
         isLocked = true;
-        OnLanded?.Invoke();
+        OnLockedDown?.Invoke();
+    }
+
+    public virtual void OnUpdate(Map map)
+    {
+
     }
 
 

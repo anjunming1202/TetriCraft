@@ -27,9 +27,9 @@ public class BlockAnimator : MonoBehaviour
     {
         block = GetComponent<Block>();
 
-        block.OnInstantPosChanged += Finish;
-        block.OnMoved += MoveAnimationOnSet;
-        block.OnLanded += LandAnimationOnSet;
+        block.OnInstantMove += Finish;
+        block.OnAnimatedMove += MoveAnimationOnSet;
+        block.OnLockedDown += LandAnimationOnSet;
     }
 
     public void Finish()

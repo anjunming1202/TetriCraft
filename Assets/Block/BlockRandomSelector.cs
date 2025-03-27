@@ -5,7 +5,7 @@ public class BlockRandomSelector
     {
         int typeNumber = UnityEngine.Random.Range(0, (int)BlockID.Count);
 
-        if (typeNumber == (int)BlockID.Null)
+        if (typeNumber == (int)BlockID.Missing)
             return GetRandomType();
 
         return (BlockID)typeNumber;

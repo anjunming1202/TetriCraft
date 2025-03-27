@@ -12,7 +12,7 @@ public class Tetromino : MonoBehaviour
     // Tetromino type
     public TetrominoType type = TetrominoType.None;
 
-    // Position data
+    // GridPosition data
     public Vector2Int position;
 
     // Rotation data
@@ -180,7 +180,7 @@ public class Tetromino : MonoBehaviour
 
     public Vector3 GetWorldPosition()
     {
-        return MapBoundaryData.GridToWorld((Vector2)position + Vector2.one * ((float)size / 2 - 0.5f));
+        return MapBoundaryData.MapToWorld((Vector2)position + Vector2.one * ((float)size / 2 - 0.5f));
     }
 }
 

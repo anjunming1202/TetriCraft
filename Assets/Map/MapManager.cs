@@ -25,8 +25,7 @@ public class MapManager : MonoBehaviour
     private bool isUpdating = false;
 
     // Readonly Data
-    private MapBoundaryData boundary => MapBoundaryData.Instance; // Boundary Data
-    public int blockCount => map.blockCount;
+    public int blockCount => map.blockCount;    // debug
 
     // Events
     public delegate void MapEvent(Map map);
@@ -37,7 +36,6 @@ public class MapManager : MonoBehaviour
 
     private void Awake()
     {
-        fallingTetromino.SetMap(map);
         controller = fallingTetromino.GetComponent<TetrominoController>();
 
         fallingTetromino.OnLockdown += () => OnFinishTurn?.Invoke();
@@ -57,10 +55,10 @@ public class MapManager : MonoBehaviour
     //================================//
     //  Map life cycle
     //================================//
-    public void NewMap()
+    public void NewMap(int Width, int height)
     {
         // New a map
-        map.NewMap();
+        map.NewMap(Width, height);
 
         isUpdating = true;
         controller.isActive = true;
@@ -87,13 +85,13 @@ public class MapManager : MonoBehaviour
         // Set tetromino to the spawn position
         Vector2Int spawnPosition = GetSpawnPosition();
         fallingTetromino.SetPosition(spawnPosition);
-        fallingTetromino.UpdateMapBlocks(map, false);
+        fallingTetromino.SpawnToMap(map);
     }
 
     private Vector2Int GetSpawnPosition()
     {
         // x position
-        int x = (boundary.width - fallingTetromino.size) / 2;
+        int x = (map.Width - fallingTetromino.size) / 2;
 
         // y position        
         int distance = int.MaxValue; // distance tetromino need to move
@@ -102,7 +100,7 @@ public class MapManager : MonoBehaviour
             {
                 if (fallingTetromino.shape[r, c] != null)
                 {
-                    int distance_new = fallingTetromino.LocalToMap(r, c).y - boundary.height;
+                    int distance_new = fallingTetromino.LocalToMap(r, c).y - map.Height;
                     if (distance_new < distance)
                         distance = distance_new;
                 }
@@ -115,7 +113,7 @@ public class MapManager : MonoBehaviour
 
     public bool CheckGameover()
     {
-        int deathline = map.height;
+        int deathline = map.Height;
         bool gameover = !map.CheckRowEmpty(deathline);
         isUpdating = !gameover;
         controller.isActive = !gameover;
@@ -128,7 +126,7 @@ public class MapManager : MonoBehaviour
     public void TryClearLines()
     {
         uint lineCount = 0;
-        for (int i = 0; i < map.height; i++)
+        for (int i = 0; i < map.Height; i++)
         {
             bool successful = TryClearLine(i);
             if (successful)
@@ -157,19 +155,20 @@ public class MapManager : MonoBehaviour
     private void ClearLine(int row)
     {
         // clear row
-        for (int i = 0; i < map.width; i++)
+        for (int i = 0; i < map.Width; i++)
         {
-            map.Destroy(i, row);
+            map.DestroyBlock(map[i, row]);
         }
         // move above rows down
-        for (int x = 0; x < map.width; x++)
-            for (int y = row + 1; y < map.height; y++)  // * must from bottom to top
+        for (int x = 0; x < map.Width; x++)
+            for (int y = row + 1; y < map.Height; y++)  // * must from bottom to top
             {
                 if (!map.CheckEmpty(x, y))
                 {
-                    map.MoveTo(map[x, y], x, y - 1);
+                    map[x, y].SetPosition(x, y - 1, true);
                 }
             }
+        map.BatchUpdateBlocks();
     }
 
     private void SetGhostTetromino()

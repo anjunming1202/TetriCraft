@@ -3,7 +3,7 @@
 [Serializable]
 public enum BlockID
 {
-    Null,
+    Missing,
     Cobblestone,
     Dirt,
     WoodenPlanks,

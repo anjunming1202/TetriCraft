@@ -17,11 +17,6 @@ public class GameManager : MonoBehaviour
     // Map Region
     public SpriteMask boundaryRegion; // inspector
 
-    // Map Data (readonly)
-    private int width => MapBoundaryData.Instance.width;
-    private int height => MapBoundaryData.Instance.height;
-    private MapBoundaryData boundary => MapBoundaryData.Instance;
-
     [Header("Score")]
     public ScoreManager scoreManager; // inspector
 
@@ -41,7 +36,7 @@ public class GameManager : MonoBehaviour
     public void NewGame()
     {
         // Initialise map
-        mapManager.NewMap();
+        mapManager.NewMap(MapBoundaryData.Instance.width, MapBoundaryData.Instance.height);
 
         mapManager.OnFinishTurn += OnNextTurn;
 

@@ -35,24 +35,16 @@ public class MapBoundaryData : ScriptableObject
         return instance;
     }
     // Coordinate conversion
-    public static Vector3 GridToWorld(Vector2Int posGrid)
+    public static Vector3 MapToWorld(Vector2Int posMap)
     {
-        return (Vector3)((Vector2)posGrid * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
+        return (Vector3)((Vector2)posMap * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
     }
-    public static Vector3 GridToWorld(Vector2 posGrid)
+    public static Vector3 MapToWorld(Vector2 posMap)
     {
-        return (Vector3)(posGrid * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
+        return (Vector3)(posMap * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
     }
-    // Check inside
-    /// <summary>
-    /// Check for top, bottom, left, and right boundaries
-    /// </summary>
-    public static bool CheckInside(float x, float y)
+    public static Vector2 WorldToMap(Vector3 posWorld)
     {
-        return x >= 0 && x < Instance.width && y >= 0 && y < Instance.height;
-    }
-    public static bool CheckInside(Vector2 pos)
-    {
-        return CheckInside(pos.x, pos.y);
+        return (Vector2)(posWorld - instance.origin - Vector3.one * unitSize * 0.5f) / unitSize;
     }
 }

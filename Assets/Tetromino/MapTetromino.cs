@@ -12,7 +12,7 @@ using static Unity.Collections.AllocatorManager;
 public class MapTetromino : Tetromino
 {
     // Map reference
-    Map map;
+    private Map map;
 
     // Wallkick data looked up
     public Vector2Int[] Wallkick => wallkick[new Vector2Int(lastRotation, rotation)];
@@ -45,9 +45,35 @@ public class MapTetromino : Tetromino
         lockDelayCoroutine = null;
     }
 
-    public void SetMap(Map map)
+    public void SpawnToMap(Map map)
     {
         this.map = map;
+        for (int r = 0; r < size; r++)
+            for (int c = 0; c < size; c++)
+            {
+                Block block = shape[r, c];
+                if (block == null)
+                    continue;
+                Vector2Int currPosition = LocalToMap(r, c);
+                map.SpawnBlock(block, currPosition.x, currPosition.y);
+            }
+    }
+
+    /// <summary>
+    /// Update blocks in the map according to this tetromino data
+    /// </summary>
+    public void UpdateBlocks(Map map, bool animation = true)
+    {
+        for (int r = 0; r < size; r++)
+            for (int c = 0; c < size; c++)
+            {
+                Block block = shape[r, c];
+                if (block == null)
+                    continue;
+                Vector2Int currPosition = LocalToMap(r, c);
+                block.SetPosition(currPosition.x, currPosition.y, animation);
+            }
+        map.BatchUpdateBlocks();
     }
 
     public Vector2Int LocalToMap(int row, int column)
@@ -63,31 +89,6 @@ public class MapTetromino : Tetromino
     public void Shift(int x, int y)
     {
         position += new Vector2Int(x, y);
-    }
-
-    /// <summary>
-    /// Update blocks in the map according to this tetromino data
-    /// </summary>
-    public void UpdateMapBlocks(Map map, bool animation = true)
-    {
-        for (int r = 0; r < size; r++)
-            for (int c = 0; c < size; c++)
-            {
-                Block block = shape[r, c];
-                if (block == null || !block.isInMap)
-                    continue;
-                Vector2Int prevPosition = block.Position;
-                map.Remove(prevPosition.x, prevPosition.y);
-            }
-        for (int r = 0; r < size; r++)
-            for (int c = 0; c < size; c++)
-            {
-                Block block = shape[r, c];
-                if (block == null)
-                    continue;
-                Vector2Int currPosition = LocalToMap(r, c);
-                map.Add(block, currPosition.x, currPosition.y, animation);
-            }
     }
 
 
@@ -148,7 +149,7 @@ public class MapTetromino : Tetromino
             Shift(-x, -y);
             return false;
         }
-        UpdateMapBlocks(map);
+        UpdateBlocks(map, true);
         return true;
     }
     private bool TryRotate(bool clockwise = true)
@@ -160,7 +161,7 @@ public class MapTetromino : Tetromino
             Shift(kick.x, kick.y);
             if (CheckValid(map))
             {
-                UpdateMapBlocks(map);
+                UpdateBlocks(map, true);
                 Debug.Log("success rotation");
                 return true;
             }
