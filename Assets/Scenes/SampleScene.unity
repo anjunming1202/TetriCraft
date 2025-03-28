@@ -520,8 +520,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 39.77295}
-  m_SizeDelta: {x: 0, y: -1100}
+  m_AnchoredPosition: {x: 0, y: 25.471436}
+  m_SizeDelta: {x: 0, y: -1071.3971}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &509887421
 CanvasRenderer:
@@ -951,7 +951,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 827601248}
-  - component: {fileID: 827601247}
+  - component: {fileID: 827601249}
   m_Layer: 0
   m_Name: Block Selector
   m_TagString: Untagged
@@ -959,23 +959,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &827601247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 827601246}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd5aac1c5ba9e5249a335fc10176560a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pool:
-  - blockID: 1
-    weight: 1
-  - blockID: 3
-    weight: 1
 --- !u!4 &827601248
 Transform:
   m_ObjectHideFlags: 0
@@ -991,6 +974,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &827601249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827601246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6440fc9d12f2e09449421e31b8a09165, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  list: {fileID: 11400000, guid: fafd0cb1fe4d0bb4c97bd82278419b8e, type: 2}
 --- !u!4 &937640288 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 9079800203541379973, guid: ffb5340e1f0990441897ac10bc39ac1b, type: 3}
