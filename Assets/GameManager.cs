@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
-using Unity.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
 // Game Manager for managing the whole game
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
     [Header("Map")]
     // Map Manager
     public MapManager mapManager; // inspector
@@ -18,16 +16,33 @@ public class GameManager : MonoBehaviour
     public ScoreManager scoreManager; // inspector
 
     [Header("Game State")]
-    [SerializeField] private static bool gameover = false; // Game over flag
+    public bool gameover = false; // Game over flag
 
     [Header("Visual")]
     public AnimationCurveAsset blockMovementCurve;
     public AnimationCurveAsset blockLandCurve;
 
+    [Header("Debug")]
+    public bool debug = true;
+    public MapDebugger mapDebugger; // inspector
+
     void Awake()
     {
+        // Singleton
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         // Load static resources
         InitialiseResources();
+
+        // Debugger
+        mapDebugger.DebugMap(mapManager.map);
     }
     public void NewGame()
     {
@@ -51,11 +66,6 @@ public class GameManager : MonoBehaviour
     ////////////////////////////////////////////////////
     void Update()
     {
-        // debug
-        int landedCount = 0;
-        landedCount = mapManager.GetComponentsInChildren<Block>().Length;      
-        Debug.Log($"blocks in map: {mapManager.blockCount}, blocks instantiated: {landedCount}");
-
         if (!gameover)
         {
             if (mapManager.CheckGameover())
