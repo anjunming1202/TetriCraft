@@ -4,16 +4,23 @@ using UnityEngine;
 [Serializable]
 public class GravityBlock : GeneralBlock
 {
-    private Vector2 entityPosition;
-    private float velocity;
+    private Vector2 lastPosition; 
+    private float speed;
     private bool isFalling = false;
-    private static float gravity = 1;
+    private static float gravity = 15f;
+    private static float maxSpeed = 20;
 
     public override void OnUpdate(Map map)
     {
         if (isFalling)
-            return;
-        if (CheckFloating(map))
+        {
+            UpdateFalling(Time.deltaTime);
+            if (CheckCollide(map))
+            {
+                OnCollide();
+            }
+        }
+        else if (isLocked && CheckFloating(map))
         {
             StartFall();
         }
@@ -30,18 +37,34 @@ public class GravityBlock : GeneralBlock
 
     private void StartFall()
     {
+        lastPosition = Position;
+        speed = 0;
         isFalling = true;
-        velocity = 0;
+        isLocked = false;
     }
 
     private bool CheckCollide(Map map)
     {
-        return true;
+        bool collide = !map.CheckInside(GridPosition.x, GridPosition.y) || (!map.CheckEmpty(GridPosition.x, GridPosition.y) && map[GridPosition.x, GridPosition.y] != this);
+        Debug.Log(collide);
+        return collide;
     }
 
     private void UpdateFalling(float dt)
     {
-        entityPosition += Vector2.down * velocity * dt;
-        velocity += gravity * dt;
+        lastPosition = Position;
+        Vector2 newPosition = lastPosition + Vector2.down * speed * dt;
+        SetPosition(newPosition.x, newPosition.y);
+        speed += gravity * dt;
+        if (speed > maxSpeed)
+            speed = maxSpeed;
+    }
+
+    private void OnCollide()
+    {
+        Vector2Int finalPosition = GetGridPosition(lastPosition);
+        SetPosition(finalPosition.x, finalPosition.y);
+        isFalling = false;
+        OnLockdown();
     }
 }

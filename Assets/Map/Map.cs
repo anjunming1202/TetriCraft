@@ -16,6 +16,7 @@ public class Map : MonoBehaviour
         this.width = width;
         this.height = height;
         blockGrid = new BlockGrid(width, height); // all null
+        blockList = new List<Block>();
         blockUpdateBatch = new List<Block>();
     }
     public Block this[int x, int y] => blockGrid[x, y];
@@ -28,18 +29,29 @@ public class Map : MonoBehaviour
         block.SetPosition(x, y);
         blockGrid.Add(block);
         block.OnPositionChanged += AddToUpdateBatch;
+        blockList.Add(block);
     }
 
     public void DestroyBlock(Block block)
     {
         blockGrid.Remove(block);
         block.Destroy();
+        blockList.Remove(block);
     }
 
     public void RemoveBlock(Block block)
     {
         blockGrid.Remove(block);
         block.Remove();
+        blockList.Remove(block);
+    }
+
+    public void OnUpdateBlocks()
+    {
+        foreach (Block block in blockList)
+        {
+            block.OnUpdate(this);
+        }
     }
 
     public void BatchUpdateBlocks()
@@ -65,7 +77,8 @@ public class Map : MonoBehaviour
 
     private void AddToUpdateBatch(Block block)
     {
-        blockUpdateBatch.Add(block);
+        if (!blockUpdateBatch.Contains(block))
+            blockUpdateBatch.Add(block);
     }
 
     // Blocks
@@ -76,6 +89,7 @@ public class Map : MonoBehaviour
     private int height;
 
     // Map update
+    private List<Block> blockList;
     private List<Block> blockUpdateBatch;
 
 

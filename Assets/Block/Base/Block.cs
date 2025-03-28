@@ -15,8 +15,6 @@ public abstract class Block : MonoBehaviour
 
     // Data in the map
     private Vector2 position = Vector2.zero;            // Block position in the map
-    public Vector2 Position => position;
-    public Vector2Int GridPosition => new Vector2Int((int)position.x, (int)position.y);
 
     // Block state flags
     public bool isInMap = false;        // is in the map data
@@ -35,7 +33,8 @@ public abstract class Block : MonoBehaviour
 
 
 
-    // GridPosition & Moving
+    public Vector2 Position => position;
+    public Vector2Int GridPosition => GetGridPosition(position);
     public Vector3 GetWorldPosition()
     {
         return MapBoundaryData.MapToWorld(position);
@@ -43,21 +42,8 @@ public abstract class Block : MonoBehaviour
 
     public void SetPosition(int x, int y, bool animation = false)
     {
-        position = new Vector2Int(x, y);
-        OnPositionChanged?.Invoke(this);
-
-        if (animation)
-        {
-            OnAnimatedMove?.Invoke();
-        }
-        else
-        {
-            transform.position = GetWorldPosition();
-            OnInstantMove?.Invoke();
-        }
+        SetPosition((float)x, (float)y, animation);
     }
-
-
 
     public virtual void OnLockdown()
     {
@@ -83,4 +69,24 @@ public abstract class Block : MonoBehaviour
 
 
 
+    protected void SetPosition(float x, float y, bool animation = false)
+    {
+        position = new Vector2(x, y);
+        OnPositionChanged?.Invoke(this);
+
+        if (animation)
+        {
+            OnAnimatedMove?.Invoke();
+        }
+        else
+        {
+            transform.position = GetWorldPosition();
+            OnInstantMove?.Invoke();
+        }
+    }
+
+    protected Vector2Int GetGridPosition(Vector2 position)
+    {
+        return new Vector2Int(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.y));
+    }
 }

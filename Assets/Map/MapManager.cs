@@ -56,6 +56,9 @@ public class MapManager : MonoBehaviour
 
             // Display ghost tetromino
             SetGhostTetromino();
+
+            // Update blocks
+            map.OnUpdateBlocks();
         }
     }
 

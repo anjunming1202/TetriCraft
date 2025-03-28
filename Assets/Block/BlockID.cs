@@ -8,6 +8,7 @@ public enum BlockID
     Dirt,
     WoodenPlanks,
     Stone,
+    Sand,
 
 
     Count
