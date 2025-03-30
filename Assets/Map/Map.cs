@@ -23,13 +23,28 @@ public class Map : MonoBehaviour
     public int Width => width;
     public int Height => height;
     public int blockCount => blockGrid.blockCount;  // debug
+    public BlockGrid grid => blockGrid;
+    public List<Block> blocks => blockList;
+    public List<Block> batchBlocks => blockUpdateBatch;
+
+    public void SpawnTetromino(MapTetromino tetromino)
+    {
+        for (int r = 0; r < tetromino.size; r++)
+            for (int c = 0; c < tetromino.size; c++)
+            {
+                Block block = tetromino.shape[r, c];
+                if (block == null)
+                    continue;
+                Vector2Int gridPosition = tetromino.LocalToMap(r, c);
+                AddBlock(block, gridPosition.x, gridPosition.y, false);
+                block.transform.SetParent(tetromino.transform);
+            }
+    }
 
     public void SpawnBlock(Block block, int x, int y)
     {
-        block.SetPosition(x, y);
-        blockGrid.Add(block);
-        block.OnPositionChanged += AddToUpdateBatch;
-        blockList.Add(block);
+        AddBlock(block, x, y, true);
+        block.transform.SetParent(transform);
     }
 
     public void DestroyBlock(Block block)
@@ -81,6 +96,19 @@ public class Map : MonoBehaviour
             blockUpdateBatch.Add(block);
     }
 
+    /// <summary>
+    /// Add new block into the map
+    /// </summary>
+    private void AddBlock(Block block, int x, int y, bool lockdownState)
+    {
+        block.SetPosition(x, y);
+        blockGrid.Add(block);
+        block.OnPositionChanged += AddToUpdateBatch;
+        blockList.Add(block);
+        if (lockdownState)
+            block.OnLockdown();
+    }
+
     // Blocks
     private BlockGrid blockGrid;
 
@@ -112,7 +140,7 @@ public class Map : MonoBehaviour
     {
         for (int column = 0; column < width; column++)
         {
-            if (blockGrid[column, row] == null || !blockGrid[column, row].isLocked)
+            if (blockGrid[column, row] == null || !blockGrid[column, row].isClearable)
                 return false;
         }
         return true;

@@ -11,9 +11,6 @@ using static Unity.Collections.AllocatorManager;
 [Serializable]
 public class MapTetromino : Tetromino
 {
-    // Map reference
-    private Map map;
-
     // Wallkick data looked up
     public Vector2Int[] Wallkick => wallkick[new Vector2Int(lastRotation, rotation)];
 
@@ -31,8 +28,8 @@ public class MapTetromino : Tetromino
 
     // Event
     public delegate void TetrominoEvent(MapTetromino tetromino);
-    public TetrominoEvent OnTetrominoSoftDrop; // for player controlled drop: accelerate (soft drop)
-    public TetrominoEvent OnTetrominoHardDrop; // for player controlled drop: land (hard drop)
+    public TetrominoEvent OnSoftDrop; // for player controlled drop: accelerate (soft drop)
+    public TetrominoEvent OnHardDrop; // for player controlled drop: land (hard drop)
     public Action OnLockdown;
 
     public override void Reset()
@@ -43,20 +40,6 @@ public class MapTetromino : Tetromino
         softDrop = 0;
         hardDrop = 0;
         lockDelayCoroutine = null;
-    }
-
-    public void SpawnToMap(Map map)
-    {
-        this.map = map;
-        for (int r = 0; r < size; r++)
-            for (int c = 0; c < size; c++)
-            {
-                Block block = shape[r, c];
-                if (block == null)
-                    continue;
-                Vector2Int currPosition = LocalToMap(r, c);
-                map.SpawnBlock(block, currPosition.x, currPosition.y);
-            }
     }
 
     /// <summary>
@@ -99,49 +82,49 @@ public class MapTetromino : Tetromino
 
 
 
-    public void Left()
+    public void Left(Map map)
     {
-        TryShift(-1, 0);
+        TryShift(map, - 1, 0);
     }
-    public void Right()
+    public void Right(Map map)
     {
-        TryShift(1, 0);
+        TryShift(map, 1, 0);
     }
-    public void Drop()
+    public void Drop(Map map)
     {
-        bool successful = TryShift(0, -1);
+        bool successful = TryShift(map, 0, -1);
         if (!successful)
         {
             Lockdown();
         }
     }
-    public void SoftDrop()
+    public void SoftDrop(Map map)
     {
         softDrop++;
-        OnTetrominoSoftDrop?.Invoke(this);
-        bool successful = TryShift(0, -1);
+        OnSoftDrop?.Invoke(this);
+        bool successful = TryShift(map, 0, -1);
         if (!successful)
         {
             Ground();
         }
     }
-    public void HardDrop()
+    public void HardDrop(Map map)
     {
-        while (TryShift(0, -1))
+        while (TryShift(map, 0, -1))
         {
             hardDrop++;
         }
-        OnTetrominoHardDrop?.Invoke(this);
+        OnHardDrop?.Invoke(this);
         hardDrop = 0;
         Ground();
     }
-    public void Rotate(bool clockwise = true)
+    public void Rotate(Map map, bool clockwise = true)
     {
-        TryRotate(clockwise);
+        TryRotate(map, clockwise);
     }
 
 
-    private bool TryShift(int x, int y)
+    private bool TryShift(Map map, int x, int y)
     {
         Shift(x, y);
         if (!CheckValid(map))
@@ -152,7 +135,7 @@ public class MapTetromino : Tetromino
         UpdateBlocks(map, true);
         return true;
     }
-    private bool TryRotate(bool clockwise = true)
+    private bool TryRotate(Map map, bool clockwise = true)
     {
         RotateShape(clockwise);
         // check for each wall kick position
@@ -171,7 +154,7 @@ public class MapTetromino : Tetromino
         Debug.Log("fail rotation");
         return false;
     }
-    public bool TryImmediateLockdown()
+    public bool TryImmediateLockdown(Map map)
     {
         Shift(0, -1);
         bool canLockdown = !CheckValid(map);
@@ -218,12 +201,6 @@ public class MapTetromino : Tetromino
         {
             block.OnLockdown();
         }
-
-        // reparent blocks
-        blocks[0].transform.SetParent(map.transform, true);
-        blocks[1].transform.SetParent(map.transform, true);
-        blocks[2].transform.SetParent(map.transform, true);
-        blocks[3].transform.SetParent(map.transform, true);
 
         // invoke map tetromino landing event
         OnLockdown?.Invoke();

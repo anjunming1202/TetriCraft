@@ -5,6 +5,7 @@ using System.Drawing;
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
 using static UnityEditor.PlayerSettings;
+using static UnityEngine.GraphicsBuffer;
 
 /*// Control the lifecycles of data in the map;
 // Control logic of data (How but not When)
@@ -14,21 +15,21 @@ using static UnityEditor.PlayerSettings;
 public class MapManager : MonoBehaviour
 {
     // Map Data
-    public Map map; // inspector
+    [SerializeField] private Map map;
 
-    public MapTetromino fallingTetromino; // inspector
-    private TetrominoController controller;
+    [SerializeField] private MapTetromino fallingTetromino;
+    [SerializeField] private TetrominoController controller;
 
-    public DummyTetromino ghostTetromino; // inspector
+    [SerializeField] private DummyTetromino ghostTetromino;
 
-    public DummyTetromino nextTetromino; // inspector
+    [SerializeField] private DummyTetromino nextTetromino;
 
     // Line clear data
     public uint lastClearLineCount = 0;
     public uint combo = 0;
 
     // Updating
-    private bool isUpdating = false;
+    public bool isUpdating = false;
 
     // Readonly Data
     public int blockCount => map.blockCount;    // debug
@@ -37,14 +38,16 @@ public class MapManager : MonoBehaviour
     public delegate void MapEvent(MapManager mapManager);
     public MapEvent OnLineClear;
     public Action OnFinishTurn;
+    public MapTetromino.TetrominoEvent OnTetrominoSoftDrop;
+    public MapTetromino.TetrominoEvent OnTetrominoHardDrop;
 
 
 
     private void Awake()
     {
-        controller = fallingTetromino.GetComponent<TetrominoController>();
-
         fallingTetromino.OnLockdown += OnLockdown;
+        fallingTetromino.OnSoftDrop += (MapTetromino tetromino) => OnTetrominoSoftDrop?.Invoke(tetromino);
+        fallingTetromino.OnHardDrop += (MapTetromino tetromino) => OnTetrominoHardDrop?.Invoke(tetromino);
         OnFinishTurn += OnNextTurn;
     }
     private void Update()
@@ -67,18 +70,23 @@ public class MapManager : MonoBehaviour
         // New a map
         map.NewMap(Width, height);
 
-        isUpdating = true;
-        controller.isActive = true;
+        // Initialise controller
+        controller.Initialise(map, fallingTetromino);
+    }
 
-        // Spawn the first tetromino
+    public void StartUpdating()
+    {
+        isUpdating = true;
+        controller.Activate();
+        // Start first turn
         TetrominoGenerator.NewRandomTetromino(nextTetromino);
         OnNextTurn();
     }
 
-    public void UpdatingOver()
+    public void FinishUpdating()
     {
         isUpdating = false;
-        controller.isActive = false;
+        controller.Deactivate();
     }
 
     public bool CheckGameover()
@@ -86,7 +94,6 @@ public class MapManager : MonoBehaviour
         int deathline = map.Height;
         bool gameover = !map.CheckRowEmpty(deathline);
         isUpdating = !gameover;
-        controller.isActive = !gameover;
         return gameover;
     }
 
@@ -105,7 +112,7 @@ public class MapManager : MonoBehaviour
         // Set tetromino to the spawn position
         Vector2Int spawnPosition = GetSpawnPosition();
         fallingTetromino.SetPosition(spawnPosition);
-        fallingTetromino.SpawnToMap(map);
+        map.SpawnTetromino(fallingTetromino);
     }
 
     private Vector2Int GetSpawnPosition()
@@ -133,6 +140,10 @@ public class MapManager : MonoBehaviour
 
     private void OnLockdown()
     {
+        foreach(Block block in fallingTetromino.GetComponentsInChildren<Block>())
+        {
+            block.transform.SetParent(map.transform, true);
+        }
         TryClearLines();
         OnFinishTurn?.Invoke();
     }
@@ -196,10 +207,11 @@ public class MapManager : MonoBehaviour
         for (int x = 0; x < map.Width; x++)
             for (int y = row + 1; y < map.Height; y++)  // * must from bottom to top
             {
-                if (!map.CheckEmpty(x, y))
-                {
-                    map[x, y].SetPosition(x, y - 1, true);
-                }
+                if (map.CheckEmpty(x, y) || !map[x, y].isLocked)
+                    continue;
+                if (!map.CheckEmpty(x, y - 1))
+                    continue;
+                map[x, y].SetPosition(x, y - 1, true);
             }
         map.BatchUpdateBlocks();
     }

@@ -3,9 +3,10 @@
 public class TetrominoController : MonoBehaviour
 {
     private MapTetromino tetromino;
+    private Map map;
 
     // Active
-    public bool isActive = false;
+    private bool isActive = false;
 
     // Control
     public float gravity = 1;
@@ -31,13 +32,29 @@ public class TetrominoController : MonoBehaviour
 
 
 
-    private void Awake()
+    public void Initialise(Map map, MapTetromino tetromino)
     {
-        tetromino = GetComponent<MapTetromino>();
+        this.map = map;
+        this.tetromino = tetromino;
         interval = intervalNormal;
+        Deactivate();
     }
+
+    public void Activate()
+    {
+        isActive = true;
+    }
+
+    public void Deactivate()
+    {
+        isActive = false;
+    }
+
     private void Update()
     {
+        if (!isActive)
+            return;
+
         // Timer
         dropTimer += Time.deltaTime;
 
@@ -54,22 +71,22 @@ public class TetrominoController : MonoBehaviour
         {
             if (keyInputTimer > keyInputInterval)
             { 
-                tetromino.Left();
+                tetromino.Left(map);
             }
         }
         if (Input.GetKey(key_right)) // Right
         {
             if (keyInputTimer > keyInputInterval)
             {
-                tetromino.Right();
+                tetromino.Right(map);
             }
         }
         if (Input.GetKeyDown(key_accelerate)) // Accelerating
         {
             dropTimer = 0;
-            if (tetromino.TryImmediateLockdown()) // down key => skip delay and lockdown directly
+            if (tetromino.TryImmediateLockdown(map)) // down key => skip delay and lockdown directly
                 return;
-            tetromino.SoftDrop();  // drop immediately
+            tetromino.SoftDrop(map);  // drop immediately
             isAccelerating = true;
             interval = intervalAccelerating;
         }
@@ -81,20 +98,20 @@ public class TetrominoController : MonoBehaviour
         if (Input.GetKeyDown(key_land)) // Hard drop
         {
             dropTimer = 0;
-            tetromino.HardDrop();
+            tetromino.HardDrop(map);
         }
         if (Input.GetKey(key_rotateCW)) // Rotate clockwise
         {
             if (keyInputTimer > keyInputInterval)
             {
-                tetromino.Rotate(true);
+                tetromino.Rotate(map, true);
             }
         }
         if (Input.GetKey(key_rotateCCW)) // Rotate anticlockwise
         {
             if (keyInputTimer > keyInputInterval)
             {
-                tetromino.Rotate(false);
+                tetromino.Rotate(map, false);
             }
         }
         if (Input.anyKey)
@@ -109,9 +126,9 @@ public class TetrominoController : MonoBehaviour
         if (dropTimer >= interval)
         {
             if (isAccelerating)
-                tetromino.SoftDrop(); // Soft drop
+                tetromino.SoftDrop(map); // Soft drop
             else
-                tetromino.Drop(); // Normal drop
+                tetromino.Drop(map); // Normal drop
             dropTimer = 0;
         }
     }

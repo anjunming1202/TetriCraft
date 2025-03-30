@@ -24,7 +24,6 @@ public class GameManager : MonoBehaviour
 
     [Header("Debug")]
     public bool debug = true;
-    public MapDebugger mapDebugger; // inspector
 
     void Awake()
     {
@@ -40,9 +39,6 @@ public class GameManager : MonoBehaviour
 
         // Load static resources
         InitialiseResources();
-
-        // Debugger
-        mapDebugger.DebugMap(mapManager.map);
     }
     public void NewGame()
     {
@@ -56,11 +52,16 @@ public class GameManager : MonoBehaviour
         scoreManager.LinkToGame(mapManager);
         scoreManager.Reset();
     }
+    public void StartGame()
+    {
+        mapManager.StartUpdating();
+    }
 
     void Start()
     {
         // New game
         NewGame();
+        StartGame();
     }
 
     ////////////////////////////////////////////////////
@@ -69,16 +70,16 @@ public class GameManager : MonoBehaviour
         if (!gameover)
         {
             if (mapManager.CheckGameover())
-                Gameover();
+                OnGameover();
         }
         else
             Debug.Log("Game Over");
     }
 
-    private void Gameover()
+    private void OnGameover()
     {
         gameover = true;
-        mapManager.UpdatingOver();
+        mapManager.FinishUpdating();
         Debug.Log("Now Game Over!");
     }
 

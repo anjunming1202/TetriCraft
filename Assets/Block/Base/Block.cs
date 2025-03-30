@@ -19,6 +19,7 @@ public abstract class Block : MonoBehaviour
     // Block state flags
     public bool isInMap = false;        // is in the map data
     public bool isLocked = false;       // is locked => ready to be cleared
+    public bool isClearable = false;    // can be cleared
     public bool isAnimating = false;    // is moving with animation
 
     // Events
@@ -45,15 +46,16 @@ public abstract class Block : MonoBehaviour
         SetPosition((float)x, (float)y, animation);
     }
 
-    public virtual void OnLockdown()
-    {
-        isLocked = true;
-        OnLockedDown?.Invoke();
-    }
-
     public virtual void OnUpdate(Map map)
     {
 
+    }
+
+    public virtual void OnLockdown()
+    {
+        isLocked = true;
+        isClearable = true;
+        OnLockedDown?.Invoke();
     }
 
     public void Destroy()
@@ -89,4 +91,13 @@ public abstract class Block : MonoBehaviour
     {
         return new Vector2Int(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.y));
     }
+}
+
+public enum BlockMapState
+{
+    NotInMap = -1,
+    InTetromino,
+    Grounding,
+    Locked,
+    NotClearable
 }

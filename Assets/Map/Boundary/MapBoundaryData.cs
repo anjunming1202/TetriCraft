@@ -9,7 +9,7 @@ public class MapBoundaryData : ScriptableObject
     public int height => (int)boundary.height;
 
     // World coords data
-    public const int unitSize = 1;
+    public const float unitSize = 1f;
     public Vector3 origin => boundary.min;
 
     // Use as static resource
@@ -43,8 +43,9 @@ public class MapBoundaryData : ScriptableObject
     {
         return (Vector3)(posMap * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
     }
-    public static Vector2 WorldToMap(Vector3 posWorld)
+    public static Vector2Int WorldToGrid(Vector3 posWorld)
     {
-        return (Vector2)(posWorld - instance.origin - Vector3.one * unitSize * 0.5f) / unitSize;
+        Vector2 mapPosition = (posWorld - instance.origin) / unitSize;
+        return new Vector2Int(Mathf.FloorToInt(mapPosition.x), Mathf.FloorToInt(mapPosition.y));
     }
 }

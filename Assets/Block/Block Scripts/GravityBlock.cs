@@ -40,7 +40,7 @@ public class GravityBlock : GeneralBlock
         lastPosition = Position;
         speed = 0;
         isFalling = true;
-        isLocked = false;
+        isClearable = false;
     }
 
     private bool CheckCollide(Map map)

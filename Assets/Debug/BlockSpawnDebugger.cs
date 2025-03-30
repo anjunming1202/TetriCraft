@@ -6,7 +6,9 @@ public class BlockSpawnDebugger : MonoBehaviour
 {
     private static BlockSpawnDebugger _instance;
 
+    public Map debuggedMap;
     public BlockID blockSpawned;
+    public Color selectedGridColor;
 
     private void Awake()
     {
@@ -25,14 +27,17 @@ public class BlockSpawnDebugger : MonoBehaviour
         if (!GameManager.Instance.debug)
             return;
 
-        Debug.Assert(debuggedMap != null, "Debugger not set to map!");
+        if (debuggedMap == null)
+        {
+            Debug.LogWarning("Debugger not set to a map.");
+        }
+
+        GetSelectedPosition();
 
         if (Input.GetMouseButton(0))
         {
-            Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 gridPosition = MapBoundaryData.WorldToMap(cursorPosition);
-            int x = (int)gridPosition.x;
-            int y = (int)gridPosition.y;
+            int x = selectedGridPosition.x;
+            int y = selectedGridPosition.y;
             if (!debuggedMap.CheckInside(x, y) || !debuggedMap.CheckEmpty(x, y))
                 return;
             else
@@ -43,10 +48,8 @@ public class BlockSpawnDebugger : MonoBehaviour
         }
         if (Input.GetMouseButton(1))
         {
-            Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 gridPosition = MapBoundaryData.WorldToMap(cursorPosition);
-            int x = (int)gridPosition.x;
-            int y = (int)gridPosition.y;
+            int x = selectedGridPosition.x;
+            int y = selectedGridPosition.y;
             if (!debuggedMap.CheckInside(x, y) || debuggedMap.CheckEmpty(x, y))
                 return;
             else
@@ -56,5 +59,23 @@ public class BlockSpawnDebugger : MonoBehaviour
         }
     }
 
-    private Map debuggedMap => MapDebugger.Instance.debuggedMap;
+    private void OnDrawGizmos()
+    {
+        Vector3 centre = MapBoundaryData.MapToWorld(selectedGridPosition);
+        float width = MapBoundaryData.unitSize;
+        Gizmos.color = selectedGridColor;
+        Gizmos.DrawWireCube(centre, Vector3.one * width);
+    }
+
+    private void GetSelectedPosition()
+    {
+        Vector3 cursorScreenPosition = Input.mousePosition;
+        cursorScreenPosition.z = Mathf.Abs(Camera.main.transform.position.z);
+
+        cursorPosition = Camera.main.ScreenToWorldPoint(cursorScreenPosition);
+        selectedGridPosition = MapBoundaryData.WorldToGrid(cursorPosition);        
+    }
+
+    private Vector3 cursorPosition;
+    private Vector2Int selectedGridPosition;
 }

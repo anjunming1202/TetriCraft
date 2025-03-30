@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [Serializable]
@@ -34,6 +35,16 @@ public class BlockGrid
         positions.Remove(block);
 
         block.isInMap = false;
+    }
+
+    public bool Contains(Block block)
+    {
+        foreach (Block gridBlock in grid)
+        {
+            if (gridBlock == block) 
+                return true;
+        }
+        return false;
     }
 
     private int width;

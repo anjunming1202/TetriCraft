@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Default Block List
   m_EditorClassIdentifier: 
   list:
-  - blockID: 1
+  - blockID: 5
     weight: 1
-  - blockID: 3
+  - blockID: 5
     weight: 1
   - blockID: 5
     weight: 1

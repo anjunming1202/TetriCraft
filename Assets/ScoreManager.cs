@@ -19,8 +19,8 @@ public class ScoreManager : MonoBehaviour
     public void LinkToGame(MapManager mapManager)
     {
         mapManager.OnLineClear += ScoreLineClear;
-        mapManager.fallingTetromino.OnTetrominoSoftDrop += ScoreSoftDrop;
-        mapManager.fallingTetromino.OnTetrominoHardDrop += ScoreHardDrop;
+        mapManager.OnTetrominoSoftDrop += ScoreSoftDrop;
+        mapManager.OnTetrominoHardDrop += ScoreHardDrop;
     }
     private void ScoreSoftDrop(MapTetromino tetromino)
     {
