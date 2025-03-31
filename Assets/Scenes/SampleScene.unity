@@ -188,6 +188,7 @@ GameObject:
   m_Component:
   - component: {fileID: 310913973}
   - component: {fileID: 310913972}
+  - component: {fileID: 310913974}
   m_Layer: 0
   m_Name: Map Manager
   m_TagString: Untagged
@@ -233,6 +234,20 @@ Transform:
   - {fileID: 453907041}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &310913974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 310913971}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba15ab68a7f3ef94b949ba275ad9f004, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clearLine: {fileID: 8300000, guid: 532e22d2847272b40be7f77845865773, type: 3}
+  clearLineFour: {fileID: 8300000, guid: b9654012fc3e9a847b71c55bf742b84f, type: 3}
 --- !u!1 &329727403
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,6 +508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e57ae5e7a8c230340a7a8fcdf7b887a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  initialPoolSize: 5
 --- !u!4 &493148362
 Transform:
   m_ObjectHideFlags: 0
@@ -1084,7 +1100,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debuggedMap: {fileID: 763784240}
-  blockSpawned: 6
+  blockSpawned: 3
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
 --- !u!114 &1036024157
 MonoBehaviour:

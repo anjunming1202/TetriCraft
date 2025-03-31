@@ -42,7 +42,7 @@ public class ScoreManager : MonoBehaviour
             case 0:
                 break;
             case 1:
-                score += 400;
+                score += 500;
                 break;
             case 2:
                 score += 1000;
@@ -52,6 +52,9 @@ public class ScoreManager : MonoBehaviour
                 break;
             case 4:
                 score += 8000;
+                break;
+            case > 4:
+                score += 8000 + (mapManager.lastClearLineCount - 4) * 2000;                
                 break;
         }
         // for combo of clearing

@@ -72,6 +72,11 @@ public class MapManager : MonoBehaviour
 
         // Initialise controller
         controller.Initialise(map, fallingTetromino);
+
+        // Initialise data
+        isUpdating = false;
+        lastClearLineCount = 0;
+        combo = 0;
     }
 
     public void StartUpdating()
@@ -104,10 +109,6 @@ public class MapManager : MonoBehaviour
     {
         // Initialise next falling tetromino & its blocks
         fallingTetromino.New(newTetromino);
-
-        // reset map data
-        lastClearLineCount = 0;
-        combo = 0;
 
         // Set tetromino to the spawn position
         Vector2Int spawnPosition = GetSpawnPosition();
@@ -144,7 +145,20 @@ public class MapManager : MonoBehaviour
         {
             block.transform.SetParent(map.transform, true);
         }
-        TryClearLines();
+
+        // Clear line & line-clear data logic
+        lastClearLineCount = 0;
+        bool successfulClear = TryClearLines();
+        if (successfulClear)
+        {
+            combo++;
+        }
+        else
+        {
+            combo = 0;
+        }
+
+        // Finish this turn
         OnFinishTurn?.Invoke();
     }
 
@@ -167,25 +181,22 @@ public class MapManager : MonoBehaviour
     /// <summary>
     /// Try clear line for tetromino when landing
     /// </summary>
-    private void TryClearLines()
+    private bool TryClearLines()
     {
-        uint lineCount = 0;
+        uint newLineCount = 0;
         for (int i = 0; i < map.Height; i++)
         {
             bool successful = TryClearLine(i);
             if (successful)
-                lineCount++;
+                newLineCount++;
         }
-        if (lineCount > 0)
+        if (newLineCount > 0)
         {
-            lastClearLineCount = lineCount;
-            combo++;
+            lastClearLineCount += newLineCount;
             OnLineClear?.Invoke(this);
+            return true;
         }
-        else
-        {
-            combo = 0;
-        }
+        return false;
     }
     private bool TryClearLine(int row)
     {
