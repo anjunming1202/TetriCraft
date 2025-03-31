@@ -2,7 +2,6 @@
 using System;
 using UnityEngine;
 
-[Serializable]
 public abstract class Block : MonoBehaviour
 {
     private void Awake()
@@ -57,6 +56,11 @@ public abstract class Block : MonoBehaviour
         isLocked = true;
         isClearable = true;
         OnLockedDown?.Invoke();
+    }
+
+    public virtual bool CanReplacedBy(Block block)
+    {
+        return false;
     }
 
     public void Destroy()

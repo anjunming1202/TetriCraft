@@ -9,6 +9,7 @@ public enum BlockID
     WoodenPlanks,
     Stone,
     Sand,
+    Glass,
 
 
     Count

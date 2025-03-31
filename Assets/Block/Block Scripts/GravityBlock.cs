@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 
-[Serializable]
 public class GravityBlock : GeneralBlock
 {
     private Vector2 lastPosition; 
@@ -54,7 +53,7 @@ public class GravityBlock : GeneralBlock
     {
         lastPosition = Position;
         Vector2 newPosition = lastPosition + Vector2.down * speed * dt;
-        SetPosition(newPosition.x, newPosition.y);
+        SetPosition(newPosition.x, newPosition.y, false);
         speed += gravity * dt;
         if (speed > maxSpeed)
             speed = maxSpeed;

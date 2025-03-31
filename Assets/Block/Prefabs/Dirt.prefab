@@ -144,7 +144,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95365e6b7b8e2f44d9fde19b1808768e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  digSounds:
+  placedSounds:
+  - {fileID: 8300000, guid: 937240f184b2308498482b68e87363ef, type: 3}
+  - {fileID: 8300000, guid: c37062a0ef49a1b44a0540c3ff510577, type: 3}
+  - {fileID: 8300000, guid: c606b3d27741fa044a55c2807b168657, type: 3}
+  - {fileID: 8300000, guid: c87a31b214eae144681f4791c2ee081b, type: 3}
+  destroyedSounds:
   - {fileID: 8300000, guid: 937240f184b2308498482b68e87363ef, type: 3}
   - {fileID: 8300000, guid: c37062a0ef49a1b44a0540c3ff510577, type: 3}
   - {fileID: 8300000, guid: c606b3d27741fa044a55c2807b168657, type: 3}

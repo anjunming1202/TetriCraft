@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 9079800203541379973}
   - component: {fileID: 2692196136773849335}
+  - component: {fileID: 4396330326333870755}
   - component: {fileID: 671932412832912740}
   - component: {fileID: 9028015919182796587}
-  - component: {fileID: 4396330326333870755}
   - component: {fileID: -4112071912644774665}
   m_Layer: 0
   m_Name: Sand
@@ -88,6 +88,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
+--- !u!114 &4396330326333870755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72aed37f8a8405d49a641d6dd19f0794, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isInMap: 0
+  isLocked: 0
+  isClearable: 0
+  isAnimating: 0
+  id: 5
 --- !u!114 &671932412832912740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -115,23 +132,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startPosition: {x: 0, y: 0, z: 0}
   endPosition: {x: 0, y: 0, z: 0}
---- !u!114 &4396330326333870755
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6118796901473174655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72aed37f8a8405d49a641d6dd19f0794, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isInMap: 0
-  isLocked: 0
-  isClearable: 0
-  isAnimating: 0
-  id: 5
 --- !u!114 &-4112071912644774665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,7 +144,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95365e6b7b8e2f44d9fde19b1808768e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  digSounds:
+  placedSounds:
+  - {fileID: 8300000, guid: e898168ebb6d8cd43ac8fff3d323d0f7, type: 3}
+  - {fileID: 8300000, guid: cffc6881a637aa344a785dc9503ea5f1, type: 3}
+  - {fileID: 8300000, guid: 91798d2cbe21ee343bf256dbf87f9156, type: 3}
+  - {fileID: 8300000, guid: a1bb586552684584081b405572dc1a81, type: 3}
+  destroyedSounds:
   - {fileID: 8300000, guid: e898168ebb6d8cd43ac8fff3d323d0f7, type: 3}
   - {fileID: 8300000, guid: cffc6881a637aa344a785dc9503ea5f1, type: 3}
   - {fileID: 8300000, guid: 91798d2cbe21ee343bf256dbf87f9156, type: 3}

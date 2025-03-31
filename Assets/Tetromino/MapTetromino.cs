@@ -53,21 +53,21 @@ public class MapTetromino : Tetromino
                 Block block = shape[r, c];
                 if (block == null)
                     continue;
+
                 Vector2Int currPosition = LocalToMap(r, c);
-                block.SetPosition(currPosition.x, currPosition.y, animation);
+                Block mapBlock = map[currPosition.x, currPosition.y];
+                if (mapBlock != null && mapBlock.CanReplacedBy(block))
+                    map.DestroyBlock(map[currPosition.x, currPosition.y]);
+
+                block.SetPosition(currPosition.x, currPosition.y, true);
             }
         map.BatchUpdateBlocks();
-    }
-
-    public Vector2Int LocalToMap(int row, int column)
-    {
-        return position + new Vector2Int(column, size - 1 - row);
     }
 
     public void SetPosition(Vector2Int position)
     {
         this.position = position;
-    }    
+    }
 
     public void Shift(int x, int y)
     {
@@ -237,12 +237,17 @@ public class MapTetromino : Tetromino
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
             {
-                if (shape[r, c] != null)
+                Block tetrominoBlock = shape[r, c];
+                if (tetrominoBlock != null)
                 {
                     Vector2Int mapBlockPos = LocalToMap(r, c);
                     Block mapBlock = map[mapBlockPos.x, mapBlockPos.y];
                     if (mapBlock != null && mapBlock.isLocked)
                     {
+                        // if can be replaced => ignore
+                        if (mapBlock.CanReplacedBy(tetrominoBlock))
+                            continue;
+
                         Debug.Log("Collide");
                         return true;
                     }

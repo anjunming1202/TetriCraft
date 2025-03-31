@@ -178,6 +178,11 @@ public class Tetromino : MonoBehaviour
             rotation += 4;
     }
 
+    public Vector2Int LocalToMap(int row, int column)
+    {
+        return position + new Vector2Int(column, size - 1 - row);
+    }
+
     public Vector3 GetWorldPosition()
     {
         return MapBoundaryData.MapToWorld((Vector2)position + Vector2.one * ((float)size / 2 - 0.5f));

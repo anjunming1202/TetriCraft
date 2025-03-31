@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class BlockSoundManager : MonoBehaviour
 {
-    public AudioClip[] digSounds;
+    public AudioClip[] placedSounds;
+    public AudioClip[] destroyedSounds;
 
     private void Awake()
     {
         block = GetComponent<Block>();
-        placedSounds = digSounds;
-        destroyedSounds = digSounds;
 
         block.OnLockedDown += PlaySoundOnPlaced;
         block.OnDestroyed += PlaySoundOnDestroyed;
@@ -37,7 +36,4 @@ public class BlockSoundManager : MonoBehaviour
     }
 
     private Block block;
-
-    private AudioClip[] placedSounds;
-    private AudioClip[] destroyedSounds;
 }

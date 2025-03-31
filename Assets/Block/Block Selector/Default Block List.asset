@@ -21,3 +21,5 @@ MonoBehaviour:
     weight: 1
   - blockID: 5
     weight: 1
+  - blockID: 6
+    weight: 1

@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class ScoreManager : MonoBehaviour
 {
+    public static ScoreManager Instance;
+
     private uint score;
     public Text scoreText; // inspector
     public uint digit = 8;
@@ -58,6 +60,18 @@ public class ScoreManager : MonoBehaviour
         UpdateScoreBoard();
     }
 
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     private void UpdateScoreBoard()
     {
         string output = $"{score}";

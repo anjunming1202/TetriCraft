@@ -6,7 +6,7 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance == null)
         {
