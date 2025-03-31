@@ -10,6 +10,8 @@ public enum BlockID
     Stone,
     Sand,
     Glass,
+    Log,
+    Leaf,
 
 
     Count

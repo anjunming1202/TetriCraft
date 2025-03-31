@@ -51,14 +51,12 @@ public abstract class Block : MonoBehaviour
 
     }
 
-    public virtual void OnLockdown()
+    public virtual void OnLockdown(Map map)
     {
-        isLocked = true;
-        isClearable = true;
-        OnLockedDown?.Invoke();
+        OnLockdown();
     }
 
-    public virtual bool CanReplacedBy(Block block)
+    public virtual bool IsReplaceableBy(Block block)
     {
         return false;
     }
@@ -95,6 +93,13 @@ public abstract class Block : MonoBehaviour
     protected Vector2Int GetGridPosition(Vector2 position)
     {
         return new Vector2Int(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.y));
+    }
+
+    protected void OnLockdown()
+    {
+        isLocked = true;
+        isClearable = true;
+        OnLockedDown?.Invoke();
     }
 }
 

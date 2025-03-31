@@ -106,7 +106,7 @@ public class Map : MonoBehaviour
         block.OnPositionChanged += AddToUpdateBatch;
         blockList.Add(block);
         if (lockdownState)
-            block.OnLockdown();
+            block.OnLockdown(this);
     }
 
     // Blocks

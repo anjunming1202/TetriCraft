@@ -56,7 +56,7 @@ public class MapTetromino : Tetromino
 
                 Vector2Int currPosition = LocalToMap(r, c);
                 Block mapBlock = map[currPosition.x, currPosition.y];
-                if (mapBlock != null && mapBlock.CanReplacedBy(block))
+                if (mapBlock != null && mapBlock.IsReplaceableBy(block))
                     map.DestroyBlock(map[currPosition.x, currPosition.y]);
 
                 block.SetPosition(currPosition.x, currPosition.y, true);
@@ -95,7 +95,7 @@ public class MapTetromino : Tetromino
         bool successful = TryShift(map, 0, -1);
         if (!successful)
         {
-            Lockdown();
+            Lockdown(map);
         }
     }
     public void SoftDrop(Map map)
@@ -105,7 +105,7 @@ public class MapTetromino : Tetromino
         bool successful = TryShift(map, 0, -1);
         if (!successful)
         {
-            Ground();
+            Ground(map);
         }
     }
     public void HardDrop(Map map)
@@ -116,7 +116,7 @@ public class MapTetromino : Tetromino
         }
         OnHardDrop?.Invoke(this);
         hardDrop = 0;
-        Ground();
+        Ground(map);
     }
     public void Rotate(Map map, bool clockwise = true)
     {
@@ -162,7 +162,7 @@ public class MapTetromino : Tetromino
 
         if (canLockdown)
         {
-            Lockdown();
+            Lockdown(map);
         }
         return canLockdown;
     }
@@ -170,7 +170,7 @@ public class MapTetromino : Tetromino
     /// <summary>
     /// Tetromino grounding
     /// </summary>
-    private void Ground()
+    private void Ground(Map map)
     {
         // make sure only ground once *
         if (isGrounded)
@@ -180,12 +180,12 @@ public class MapTetromino : Tetromino
         isGrounded = true;
 
         // Lock delay => lockdown
-        lockDelayCoroutine = StartCoroutine(DelayedLockOnSet(lockDelay));
+        lockDelayCoroutine = StartCoroutine(DelayedLockOnSet(map, lockDelay));
     }
     /// <summary>
     /// Tetromino lockdown
     /// </summary>
-    private void Lockdown()
+    private void Lockdown(Map map)
     {
         // make sure only lockdown once *
         if (isLocked)
@@ -199,18 +199,18 @@ public class MapTetromino : Tetromino
         isLocked = true;
         foreach (var block in blocks)
         {
-            block.OnLockdown();
+            block.OnLockdown(map);
         }
 
         // invoke map tetromino landing event
         OnLockdown?.Invoke();
     }
-    private IEnumerator DelayedLockOnSet(float delay)
+    private IEnumerator DelayedLockOnSet(Map map, float delay)
     {
         if (isLocked)
             StopCoroutine(lockDelayCoroutine);
         yield return new WaitForSeconds(delay);
-        Lockdown();
+        Lockdown(map);
     }
 
 
@@ -245,7 +245,7 @@ public class MapTetromino : Tetromino
                     if (mapBlock != null && mapBlock.isLocked)
                     {
                         // if can be replaced => ignore
-                        if (mapBlock.CanReplacedBy(tetrominoBlock))
+                        if (mapBlock.IsReplaceableBy(tetrominoBlock))
                             continue;
 
                         Debug.Log("Collide");
