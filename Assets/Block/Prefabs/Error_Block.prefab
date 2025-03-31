@@ -99,10 +99,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36be716d95dfee344bad6168dc3cbcb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ID: 0
   isInMap: 0
   isLocked: 0
+  isClearable: 0
   isAnimating: 0
+  id: 0
 --- !u!114 &671932412832912740
 MonoBehaviour:
   m_ObjectHideFlags: 0

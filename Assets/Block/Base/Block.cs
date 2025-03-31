@@ -25,12 +25,13 @@ public abstract class Block : MonoBehaviour
     // Events
     public delegate void OnChangedEvent(Block block);
     public event OnChangedEvent OnPositionChanged;
-    public event OnChangedEvent OnDestroyed;
 
     public delegate void OnAnimationUpdateEvent();
     public event OnAnimationUpdateEvent OnInstantMove;
     public event OnAnimationUpdateEvent OnAnimatedMove;
-    public event OnAnimationUpdateEvent OnLockedDown;
+
+    public event Action OnLockedDown;
+    public event Action OnDestroyed;
 
 
 
@@ -60,7 +61,7 @@ public abstract class Block : MonoBehaviour
 
     public void Destroy()
     {
-        OnDestroyed?.Invoke(this);
+        OnDestroyed?.Invoke();
         GameObject.Destroy(gameObject);
     }
 
