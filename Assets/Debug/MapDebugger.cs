@@ -19,6 +19,7 @@ public class MapDebugger : MonoBehaviour
     public Map debuggedMap;
     public Color lockedColor;
     public Color tetrominoColor;
+    public Color unclearableColor;
     [Header("Options")]
     public bool displayFrame = true;
     public bool displayPosition = true;
@@ -58,7 +59,10 @@ public class MapDebugger : MonoBehaviour
                 continue;
             if (block.isLocked)
             {
-                MarkBlock(block, lockedColor);
+                if (block.isClearable)
+                    MarkBlock(block, lockedColor);
+                else
+                    MarkBlock(block, unclearableColor);
                 continue;
             }
             if (block.isInMap)

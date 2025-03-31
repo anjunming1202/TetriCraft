@@ -204,8 +204,9 @@ public class MapManager : MonoBehaviour
             map.DestroyBlock(map[i, row]);
         }
         // move above rows down
-        for (int x = 0; x < map.Width; x++)
-            for (int y = row + 1; y < map.Height; y++)  // * must from bottom to top
+        for (int y = row + 1; y < map.Height; y++)
+        {
+            for (int x = 0; x < map.Width; x++)  // * must from bottom to top
             {
                 if (map.CheckEmpty(x, y) || !map[x, y].isLocked)
                     continue;
@@ -213,7 +214,8 @@ public class MapManager : MonoBehaviour
                     continue;
                 map[x, y].SetPosition(x, y - 1, true);
             }
-        map.BatchUpdateBlocks();
+            map.BatchUpdateBlocks(); // update once for each row
+        }
     }
 
     private void SetGhostTetromino()
