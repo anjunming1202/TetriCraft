@@ -10,7 +10,8 @@ public class BlockRenderer : MonoBehaviour
     private Block block;
 
     // Block Texture
-    public Sprite texture;
+    public Sprite mainTexture;
+    public Texture2D Texture => spriteRenderer.sprite.texture;
 
     // Renderer
     private SpriteRenderer spriteRenderer;
@@ -19,6 +20,7 @@ public class BlockRenderer : MonoBehaviour
     {
         block = GetComponent<Block>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        Render(block);
     }
 
     void Update()
@@ -32,6 +34,6 @@ public class BlockRenderer : MonoBehaviour
     /// </summary>
     private void Render(Block block)
     {
-        spriteRenderer.sprite = texture;
+        spriteRenderer.sprite = mainTexture;
     }
 }

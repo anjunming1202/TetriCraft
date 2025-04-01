@@ -10,11 +10,13 @@ GameObject:
   m_Component:
   - component: {fileID: 9079800203541379973}
   - component: {fileID: 2692196136773849335}
-  - component: {fileID: -5904725354346959492}
+  - component: {fileID: 7660411316468776585}
   - component: {fileID: 671932412832912740}
   - component: {fileID: 9028015919182796587}
+  - component: {fileID: -7379516122890073690}
+  - component: {fileID: -1011197009319129431}
   m_Layer: 0
-  m_Name: Error_Block
+  m_Name: Stone
   m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -76,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 5722d8a0194d139478c1ada64d9a71a6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c28fa92ffc526f148a0412a4417a6a4b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -87,7 +89,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
---- !u!114 &-5904725354346959492
+--- !u!114 &7660411316468776585
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -96,13 +98,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 6118796901473174655}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8aa2a1de8ee670e4eb3861a5533f3473, type: 3}
+  m_Script: {fileID: 11500000, guid: 36be716d95dfee344bad6168dc3cbcb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isInMap: 0
   isLocked: 0
   isClearable: 0
   isAnimating: 0
+  id: 4
 --- !u!114 &671932412832912740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -115,7 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16bdf98159c6a344cbc5ea1dba9fba4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 21300000, guid: 5722d8a0194d139478c1ada64d9a71a6, type: 3}
+  mainTexture: {fileID: 21300000, guid: c28fa92ffc526f148a0412a4417a6a4b, type: 3}
 --- !u!114 &9028015919182796587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,3 +133,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startPosition: {x: 0, y: 0, z: 0}
   endPosition: {x: 0, y: 0, z: 0}
+--- !u!114 &-7379516122890073690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95365e6b7b8e2f44d9fde19b1808768e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  placedSounds:
+  - {fileID: 8300000, guid: 3cda5ddc40b6bcc4a9d3e404b2b06611, type: 3}
+  - {fileID: 8300000, guid: 7c787eded87b61347bd511bfd1dc4233, type: 3}
+  - {fileID: 8300000, guid: d92969c14d64a4842adedca3250289e2, type: 3}
+  - {fileID: 8300000, guid: 6d871d558047fe24abffb686dd53bee7, type: 3}
+  destroyedSounds:
+  - {fileID: 8300000, guid: 3cda5ddc40b6bcc4a9d3e404b2b06611, type: 3}
+  - {fileID: 8300000, guid: 7c787eded87b61347bd511bfd1dc4233, type: 3}
+  - {fileID: 8300000, guid: d92969c14d64a4842adedca3250289e2, type: 3}
+  - {fileID: 8300000, guid: 6d871d558047fe24abffb686dd53bee7, type: 3}
+--- !u!114 &-1011197009319129431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c64fff6d2c61293468fdf8af9bbab426, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  breakingParticles: {fileID: 7021957719075297926, guid: 8b40618432a6d2d428f4acdcc47c12c0, type: 3}

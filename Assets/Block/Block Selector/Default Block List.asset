@@ -20,8 +20,8 @@ MonoBehaviour:
   - blockID: 3
     weight: 1
   - blockID: 5
-    weight: 5
+    weight: 1
   - blockID: 6
     weight: 1
   - blockID: 7
-    weight: 5
+    weight: 1

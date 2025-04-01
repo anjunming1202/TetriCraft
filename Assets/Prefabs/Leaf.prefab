@@ -10,12 +10,13 @@ GameObject:
   m_Component:
   - component: {fileID: 9079800203541379973}
   - component: {fileID: 2692196136773849335}
-  - component: {fileID: 288950562228351269}
+  - component: {fileID: 8523685011601873968}
   - component: {fileID: 671932412832912740}
   - component: {fileID: 9028015919182796587}
   - component: {fileID: 2341808955676992956}
+  - component: {fileID: 274486215118484443}
   m_Layer: 0
-  m_Name: Log
+  m_Name: Leaf
   m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -77,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: f830d7435f7beb04da9f8ba3f0d3941d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3f4914de4a506d44b9cd60333249b769, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -88,7 +89,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
---- !u!114 &288950562228351269
+--- !u!114 &8523685011601873968
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -97,7 +98,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6118796901473174655}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e07e867a1d70c9d489e558f6fd077e26, type: 3}
+  m_Script: {fileID: 11500000, guid: c24771d9d9035d844a26f06e82a5969f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isInMap: 0
@@ -116,7 +117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16bdf98159c6a344cbc5ea1dba9fba4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 21300000, guid: f830d7435f7beb04da9f8ba3f0d3941d, type: 3}
+  mainTexture: {fileID: 21300000, guid: 3f4914de4a506d44b9cd60333249b769, type: 3}
 --- !u!114 &9028015919182796587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,12 +145,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placedSounds:
-  - {fileID: 8300000, guid: ce84190f9dd925d429014c8ad1e574ac, type: 3}
-  - {fileID: 8300000, guid: 40488cec5c0295c4c9e60c1fecd23a9c, type: 3}
-  - {fileID: 8300000, guid: dbf15e25194f59f44bec080746aba4c4, type: 3}
-  - {fileID: 8300000, guid: ed408c77fd89ba742ad9e7101211da9c, type: 3}
+  - {fileID: 8300000, guid: 937240f184b2308498482b68e87363ef, type: 3}
+  - {fileID: 8300000, guid: c37062a0ef49a1b44a0540c3ff510577, type: 3}
+  - {fileID: 8300000, guid: c606b3d27741fa044a55c2807b168657, type: 3}
+  - {fileID: 8300000, guid: c87a31b214eae144681f4791c2ee081b, type: 3}
   destroyedSounds:
-  - {fileID: 8300000, guid: ce84190f9dd925d429014c8ad1e574ac, type: 3}
-  - {fileID: 8300000, guid: 40488cec5c0295c4c9e60c1fecd23a9c, type: 3}
-  - {fileID: 8300000, guid: dbf15e25194f59f44bec080746aba4c4, type: 3}
-  - {fileID: 8300000, guid: ed408c77fd89ba742ad9e7101211da9c, type: 3}
+  - {fileID: 8300000, guid: 937240f184b2308498482b68e87363ef, type: 3}
+  - {fileID: 8300000, guid: c37062a0ef49a1b44a0540c3ff510577, type: 3}
+  - {fileID: 8300000, guid: c606b3d27741fa044a55c2807b168657, type: 3}
+  - {fileID: 8300000, guid: c87a31b214eae144681f4791c2ee081b, type: 3}
+--- !u!114 &274486215118484443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c64fff6d2c61293468fdf8af9bbab426, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  breakingParticles: {fileID: 7021957719075297926, guid: 8b40618432a6d2d428f4acdcc47c12c0, type: 3}
