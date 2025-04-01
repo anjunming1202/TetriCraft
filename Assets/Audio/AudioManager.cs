@@ -7,7 +7,7 @@ public class AudioManager : MonoBehaviour
     public static AudioManager Instance;
 
     [SerializeField] private int initialPoolSize = 5;
-    private List<AudioSource> audioSourcePool;
+    private List<AudioSource> audioSourcePool; // globle audio sources
 
     private void Awake()
     {
