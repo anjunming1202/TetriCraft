@@ -12,6 +12,8 @@ public enum BlockID
     Glass,
     Log,
     Leaf,
+    Water,
+    Lava,
 
 
     Count

@@ -4,11 +4,6 @@ using UnityEngine;
 
 public abstract class Block : MonoBehaviour
 {
-    private void Awake()
-    {
-
-    }
-
     // Identity
     public abstract BlockID ID { get; }
 
@@ -46,6 +41,11 @@ public abstract class Block : MonoBehaviour
         SetPosition((float)x, (float)y, animation);
     }
 
+    public virtual void OnInstantiated()
+    {
+
+    }
+
     public virtual void OnUpdate(Map map)
     {
 
@@ -56,7 +56,7 @@ public abstract class Block : MonoBehaviour
         OnLockdown();
     }
 
-    public virtual bool IsReplaceableBy(Block block)
+    public virtual bool OnTryReplacedBy(Block block)
     {
         return false;
     }
@@ -100,6 +100,11 @@ public abstract class Block : MonoBehaviour
         isLocked = true;
         isClearable = true;
         OnLockedDown?.Invoke();
+    }
+
+    private void Awake()
+    {
+        OnInstantiated();
     }
 }
 

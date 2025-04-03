@@ -50,15 +50,24 @@ public class MapTetromino : Tetromino
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
             {
+                // block in tetromino
                 Block block = shape[r, c];
                 if (block == null)
                     continue;
 
+                // block in map at the position should be updated by tetromino
                 Vector2Int currPosition = LocalToMap(r, c);
                 Block mapBlock = map[currPosition.x, currPosition.y];
-                if (mapBlock != null && mapBlock.IsReplaceableBy(block))
-                    map.DestroyBlock(map[currPosition.x, currPosition.y]);
 
+                // check for replacing
+                if (mapBlock != null)
+                {
+                    bool replaceable = mapBlock.OnTryReplacedBy(block);
+                    if (replaceable)
+                        map.DestroyBlock(map[currPosition.x, currPosition.y]);
+                }
+
+                // update the block
                 block.SetPosition(currPosition.x, currPosition.y, true);
             }
         map.BatchUpdateBlocks();
@@ -245,7 +254,8 @@ public class MapTetromino : Tetromino
                     if (mapBlock != null && mapBlock.isLocked)
                     {
                         // if can be replaced => ignore
-                        if (mapBlock.IsReplaceableBy(tetrominoBlock))
+                        bool collide = !mapBlock.OnTryReplacedBy(tetrominoBlock);
+                        if (!collide)
                             continue;
 
                         Debug.Log("Collide");

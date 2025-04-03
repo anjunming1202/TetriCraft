@@ -3,7 +3,7 @@
 public class Glass : Block
 {
     [HideInInspector] public override BlockID ID => BlockID.Glass;
-    public override bool IsReplaceableBy(Block block)
+    public override bool OnTryReplacedBy(Block block)
     {
         if (!isLocked || block.isLocked)
             return false;

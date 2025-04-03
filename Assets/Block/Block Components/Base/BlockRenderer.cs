@@ -6,15 +6,16 @@ using static Unity.Collections.AllocatorManager;
 // Manage the rendering of the instantiated block
 public class BlockRenderer : MonoBehaviour
 {
-    // Block Reference
-    private Block block;
-
-    // Block Texture
-    public Sprite mainTexture;
     public Texture2D Texture => spriteRenderer.sprite.texture;
 
+    // Block Texture
+    [SerializeField] protected Sprite mainTexture;
+
     // Renderer
-    private SpriteRenderer spriteRenderer;
+    protected SpriteRenderer spriteRenderer;
+
+    // Block Reference
+    private Block block;
 
     void Awake()
     {

@@ -17,6 +17,9 @@ public class BlockParticleManager : MonoBehaviour
 
     private void SpawnBreakingParticles()
     {
+        if (breakingParticles == null)
+            return;
+
         breakingParticlesInstance = Instantiate(breakingParticles, transform.position, Quaternion.identity);
         breakingParticlesRenderer = breakingParticlesInstance.GetComponent<ParticleSystemRenderer>();
         Material material = new Material(breakingParticlesRenderer.material);
