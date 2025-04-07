@@ -11,6 +11,9 @@ using static Unity.Collections.AllocatorManager;
 /// </summary>
 public class Map : MonoBehaviour
 {
+    // Fluid system
+    public FluidSystem fluidSystem;
+
     public void NewMap(int width, int height)
     {
         this.width = width;
@@ -18,6 +21,8 @@ public class Map : MonoBehaviour
         blockGrid = new BlockGrid(width, height); // all null
         blockList = new List<Block>();
         blockUpdateBatch = new List<Block>();
+        blockDestroyBatch = new List<Block>();
+        fluidSystem = new FluidSystem();
     }
     public Block this[int x, int y] => blockGrid[x, y];
     public int Width => width;
@@ -50,23 +55,33 @@ public class Map : MonoBehaviour
     public void DestroyBlock(Block block)
     {
         blockGrid.Remove(block);
-        block.Destroy();
+        block.Destroy(this);
         blockList.Remove(block);
     }
 
     public void RemoveBlock(Block block)
     {
         blockGrid.Remove(block);
-        block.Remove();
+        block.Remove(this);
         blockList.Remove(block);
     }
 
     public void OnUpdateBlocks()
     {
-        foreach (Block block in blockList)
+        fluidSystem.Reset();
+
+        for (int i = 0; i < blockList.Count; i++)
         {
-            block.OnUpdate(this);
+            blockList[i].OnUpdate(this);
         }
+
+        // debug for fluid
+        float totalAmount = 0f;
+        foreach (FluidBlock block in fluidSystem.fluidBlocks)
+        {
+            totalAmount += block.totalAmount;
+        }
+        Debug.Log($"Total amount of fluid {totalAmount}");
     }
 
     public void BatchUpdateBlocks()
@@ -119,6 +134,7 @@ public class Map : MonoBehaviour
     // Map update
     private List<Block> blockList;
     private List<Block> blockUpdateBatch;
+    private List<Block> blockDestroyBatch;
 
 
 

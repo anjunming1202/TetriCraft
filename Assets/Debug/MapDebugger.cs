@@ -46,9 +46,9 @@ public class MapDebugger : MonoBehaviour
             Debug.LogWarning("Debugger not set to a map.");
         }
 
-        int mapBlockCount = debuggedMap.blockCount;
+        /*int mapBlockCount = debuggedMap.blockCount;
         int instantiatedBlockCount = GameObject.FindObjectsOfType<Block>().Length;
-        Debug.Log($"Block in map: {mapBlockCount}, Block instantiated: {instantiatedBlockCount}");
+        Debug.Log($"Block in map: {mapBlockCount}, Block instantiated: {instantiatedBlockCount}");*/
     }
 
     private void OnDrawGizmos()

@@ -57,7 +57,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 967afd4d131312a47821dbe5db99211d, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -78,8 +78,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
-  m_Color: {r: 0.24842751, g: 0.4108812, b: 1, a: 1}
+  m_Sprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
+  m_Color: {r: 0, g: 0.73046374, b: 1, a: 0.09411765}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -105,8 +105,10 @@ MonoBehaviour:
   isLocked: 0
   isClearable: 0
   isAnimating: 0
+  elementPrefab: {fileID: 1767523962583349396, guid: 5f55d0b41fc68c948ae062c12e30b169, type: 3}
   elements: []
-  flowSpeed: 10
+  flowUpdatingRate: 10
+  flowSpeed: 1
 --- !u!114 &4349535679017231681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,7 +121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95b4dfb9fdc6a734a8e5b2517ecad3ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainTexture: {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
+  stillTexture: {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
 --- !u!114 &9028015919182796587
 MonoBehaviour:
   m_ObjectHideFlags: 0

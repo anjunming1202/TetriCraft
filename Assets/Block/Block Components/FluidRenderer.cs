@@ -20,7 +20,7 @@ public class FluidRenderer : MonoBehaviour
 
     void Update()
     {
-
+        Render();
     }
 
 

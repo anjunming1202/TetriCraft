@@ -100,7 +100,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ID: 9
   lowerLevel: 0
-  upperLevel: 0
+  upperLevel: 1
+  hasUpdated: 0
 --- !u!114 &-2438817398194952673
 MonoBehaviour:
   m_ObjectHideFlags: 0

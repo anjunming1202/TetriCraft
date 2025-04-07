@@ -26,6 +26,7 @@ public class FluidElementRenderer : MonoBehaviour
 
         // Set material
         spriteRenderer.GetPropertyBlock(props);
+        props.SetColor("_Color", spriteRenderer.color); //
         props.SetFloat("_UpperLevel", fluidElement.upperLevel);
         props.SetFloat("_LowerLevel", fluidElement.lowerLevel);
         spriteRenderer.SetPropertyBlock(props);

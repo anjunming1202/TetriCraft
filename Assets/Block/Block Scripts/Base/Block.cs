@@ -46,14 +46,14 @@ public abstract class Block : MonoBehaviour
 
     }
 
-    public virtual void OnUpdate(Map map)
-    {
-
-    }
-
     public virtual void OnLockdown(Map map)
     {
         OnLockdown();
+    }
+
+    public virtual void OnUpdate(Map map)
+    {
+
     }
 
     public virtual bool OnTryReplacedBy(Block block)
@@ -61,13 +61,13 @@ public abstract class Block : MonoBehaviour
         return false;
     }
 
-    public void Destroy()
+    public virtual void Destroy(Map map)
     {
         OnDestroyed?.Invoke();
         GameObject.Destroy(gameObject);
     }
 
-    public void Remove()
+    public virtual void Remove(Map map)
     {
         GameObject.Destroy(gameObject);
     }
