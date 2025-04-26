@@ -6,7 +6,7 @@ public class BlockSpawnDebugger : MonoBehaviour
 {
     private static BlockSpawnDebugger _instance;
 
-    public Map debuggedMap;
+    public MapManager debuggedMap;
     public BlockID blockSpawned;
     public Color selectedGridColor;
 

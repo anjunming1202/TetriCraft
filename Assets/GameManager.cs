@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Map")]
     // Map Manager
-    public MapManager mapManager; // inspector
+    public TetrisManager mapManager; // inspector
 
     // Map Region
     public SpriteMask boundaryRegion; // inspector

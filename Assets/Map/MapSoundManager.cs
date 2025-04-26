@@ -9,12 +9,12 @@ public class MapSoundManager : MonoBehaviour
 
     private void Awake()
     {
-        mapManager = GetComponent<MapManager>();
+        mapManager = GetComponent<TetrisManager>();
 
         mapManager.OnLineClear += PlayLineClearSound;
     }
 
-    private void PlayLineClearSound(MapManager mapManager)
+    private void PlayLineClearSound(TetrisManager mapManager)
     {
         if (mapManager.lastClearLineCount < 4)
             AudioManager.Instance.PlaySound(clearLine);
@@ -22,5 +22,5 @@ public class MapSoundManager : MonoBehaviour
             AudioManager.Instance.PlaySound(clearLineFour);
     }
 
-    private MapManager mapManager;
+    private TetrisManager mapManager;
 }

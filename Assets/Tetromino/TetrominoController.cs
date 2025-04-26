@@ -3,7 +3,7 @@
 public class TetrominoController : MonoBehaviour
 {
     private MapTetromino tetromino;
-    private Map map;
+    private MapManager map;
 
     // Active
     private bool isActive = false;
@@ -32,7 +32,7 @@ public class TetrominoController : MonoBehaviour
 
 
 
-    public void Initialise(Map map, MapTetromino tetromino)
+    public void Initialise(MapManager map, MapTetromino tetromino)
     {
         this.map = map;
         this.tetromino = tetromino;

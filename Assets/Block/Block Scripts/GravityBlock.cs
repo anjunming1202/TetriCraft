@@ -9,7 +9,7 @@ public class GravityBlock : GeneralBlock
     private static float gravity = 15f;
     private static float maxSpeed = 20;
 
-    public override void OnUpdate(Map map)
+    public override void OnUpdate(MapManager map)
     {
         if (isFalling)
         {
@@ -25,7 +25,7 @@ public class GravityBlock : GeneralBlock
         }
     }
 
-    private bool CheckFloating(Map map)
+    private bool CheckFloating(MapManager map)
     {
         if (!map.CheckInside(GridPosition.x, GridPosition.y - 1))
             return false;
@@ -42,7 +42,7 @@ public class GravityBlock : GeneralBlock
         isClearable = false;
     }
 
-    private bool CheckCollide(Map map)
+    private bool CheckCollide(MapManager map)
     {
         bool collide = !map.CheckInside(GridPosition.x, GridPosition.y) || (!map.CheckEmpty(GridPosition.x, GridPosition.y) && map[GridPosition.x, GridPosition.y] != this);
         Debug.Log(collide);

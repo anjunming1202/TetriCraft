@@ -46,12 +46,12 @@ public abstract class Block : MonoBehaviour
 
     }
 
-    public virtual void OnLockdown(Map map)
+    public virtual void OnLockdown(MapManager map)
     {
         OnLockdown();
     }
 
-    public virtual void OnUpdate(Map map)
+    public virtual void OnUpdate(MapManager map)
     {
 
     }
@@ -61,13 +61,16 @@ public abstract class Block : MonoBehaviour
         return false;
     }
 
-    public virtual void Destroy(Map map)
+    /// <summary>
+    /// Removed with breaking
+    /// </summary>
+    public virtual void Destroy(MapManager map)
     {
         OnDestroyed?.Invoke();
         GameObject.Destroy(gameObject);
     }
 
-    public virtual void Remove(Map map)
+    public virtual void Remove(MapManager map)
     {
         GameObject.Destroy(gameObject);
     }

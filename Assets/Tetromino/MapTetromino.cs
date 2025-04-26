@@ -45,7 +45,7 @@ public class MapTetromino : Tetromino
     /// <summary>
     /// Update blocks in the map according to this tetromino data
     /// </summary>
-    public void UpdateBlocks(Map map, bool animation = true)
+    public void UpdateBlocks(MapManager map, bool animation = true)
     {
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
@@ -91,15 +91,15 @@ public class MapTetromino : Tetromino
 
 
 
-    public void Left(Map map)
+    public void Left(MapManager map)
     {
         TryShift(map, - 1, 0);
     }
-    public void Right(Map map)
+    public void Right(MapManager map)
     {
         TryShift(map, 1, 0);
     }
-    public void Drop(Map map)
+    public void Drop(MapManager map)
     {
         bool successful = TryShift(map, 0, -1);
         if (!successful)
@@ -107,7 +107,7 @@ public class MapTetromino : Tetromino
             Lockdown(map);
         }
     }
-    public void SoftDrop(Map map)
+    public void SoftDrop(MapManager map)
     {
         softDrop++;
         OnSoftDrop?.Invoke(this);
@@ -117,7 +117,7 @@ public class MapTetromino : Tetromino
             Ground(map);
         }
     }
-    public void HardDrop(Map map)
+    public void HardDrop(MapManager map)
     {
         while (TryShift(map, 0, -1))
         {
@@ -127,13 +127,13 @@ public class MapTetromino : Tetromino
         hardDrop = 0;
         Ground(map);
     }
-    public void Rotate(Map map, bool clockwise = true)
+    public void Rotate(MapManager map, bool clockwise = true)
     {
         TryRotate(map, clockwise);
     }
 
 
-    private bool TryShift(Map map, int x, int y)
+    private bool TryShift(MapManager map, int x, int y)
     {
         Shift(x, y);
         if (!CheckValid(map))
@@ -144,7 +144,7 @@ public class MapTetromino : Tetromino
         UpdateBlocks(map, true);
         return true;
     }
-    private bool TryRotate(Map map, bool clockwise = true)
+    private bool TryRotate(MapManager map, bool clockwise = true)
     {
         RotateShape(clockwise);
         // check for each wall kick position
@@ -163,7 +163,7 @@ public class MapTetromino : Tetromino
         Debug.Log("fail rotation");
         return false;
     }
-    public bool TryImmediateLockdown(Map map)
+    public bool TryImmediateLockdown(MapManager map)
     {
         Shift(0, -1);
         bool canLockdown = !CheckValid(map);
@@ -179,7 +179,7 @@ public class MapTetromino : Tetromino
     /// <summary>
     /// Tetromino grounding
     /// </summary>
-    private void Ground(Map map)
+    private void Ground(MapManager map)
     {
         // make sure only ground once *
         if (isGrounded)
@@ -194,7 +194,7 @@ public class MapTetromino : Tetromino
     /// <summary>
     /// Tetromino lockdown
     /// </summary>
-    private void Lockdown(Map map)
+    private void Lockdown(MapManager map)
     {
         // make sure only lockdown once *
         if (isLocked)
@@ -214,7 +214,7 @@ public class MapTetromino : Tetromino
         // invoke map tetromino landing event
         OnLockdown?.Invoke();
     }
-    private IEnumerator DelayedLockOnSet(Map map, float delay)
+    private IEnumerator DelayedLockOnSet(MapManager map, float delay)
     {
         if (isLocked)
             StopCoroutine(lockDelayCoroutine);
@@ -227,7 +227,7 @@ public class MapTetromino : Tetromino
     /// <summary>
     /// Check for bottom, left, and right boundaries
     /// </summary>
-    public bool CheckInside(Map map)
+    public bool CheckInside(MapManager map)
     {
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
@@ -241,7 +241,7 @@ public class MapTetromino : Tetromino
             }
         return true;
     }
-    public bool CheckCollide(Map map)
+    public bool CheckCollide(MapManager map)
     {
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
@@ -265,7 +265,7 @@ public class MapTetromino : Tetromino
             }
         return false;
     }
-    public bool CheckValid(Map map)
+    public bool CheckValid(MapManager map)
     {
         return (CheckInside(map) && !CheckCollide(map));
     }

@@ -16,7 +16,7 @@ public class MapDebugger : MonoBehaviour
         }
     }
 
-    public Map debuggedMap;
+    public MapManager debuggedMap;
     public Color lockedColor;
     public Color tetrominoColor;
     public Color unclearableColor;

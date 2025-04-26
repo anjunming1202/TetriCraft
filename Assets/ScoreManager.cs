@@ -18,7 +18,7 @@ public class ScoreManager : MonoBehaviour
         score = 0;
         UpdateScoreBoard();
     }
-    public void LinkToGame(MapManager mapManager)
+    public void LinkToGame(TetrisManager mapManager)
     {
         mapManager.OnLineClear += ScoreLineClear;
         mapManager.OnTetrominoSoftDrop += ScoreSoftDrop;
@@ -34,7 +34,7 @@ public class ScoreManager : MonoBehaviour
         score += tetromino.hardDrop * 2;
         UpdateScoreBoard();
     }
-    private void ScoreLineClear(MapManager mapManager)
+    private void ScoreLineClear(TetrisManager mapManager)
     {
         // for clearing multiple lines
         switch (mapManager.lastClearLineCount)

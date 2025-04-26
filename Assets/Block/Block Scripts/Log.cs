@@ -4,7 +4,7 @@ public class Log : Block
 {
     [HideInInspector] public override BlockID ID => BlockID.Log;
 
-    public override void OnLockdown(Map map)
+    public override void OnLockdown(MapManager map)
     {
         OnLockdown();
  
@@ -14,7 +14,7 @@ public class Log : Block
         TrySpawnLeaf(map, 0, -1);
     }
 
-    private void TrySpawnLeaf(Map map, int dirX, int dirY)
+    private void TrySpawnLeaf(MapManager map, int dirX, int dirY)
     {
         int x = GridPosition.x + dirX;
         int y = GridPosition.y + dirY;
