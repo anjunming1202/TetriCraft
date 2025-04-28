@@ -76,7 +76,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
-  m_Color: {r: 0.24842751, g: 0.4108812, b: 1, a: 1}
+  m_Color: {r: 0, g: 0.5058824, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -99,8 +99,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ID: 9
+  position: {x: 0, y: 0}
   lowerLevel: 0
   upperLevel: 1
+  isFlowing: 0
   hasUpdated: 0
 --- !u!114 &-2438817398194952673
 MonoBehaviour:
@@ -114,3 +116,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 400bb8a87cf2c254ab158d93864794be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stillTexture: {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
+  flowingTexture: {fileID: 21300000, guid: 7617833c22c391e4995daa902b3df427, type: 3}
+  stillMaterial: {fileID: 2100000, guid: 967afd4d131312a47821dbe5db99211d, type: 2}
+  flowingMaterial: {fileID: 2100000, guid: 75904d479753e7f4ead0b1ed777a2ddf, type: 2}

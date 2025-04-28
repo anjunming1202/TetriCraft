@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static Unity.Collections.AllocatorManager;
@@ -10,15 +11,10 @@ using static Unity.Collections.AllocatorManager;
 /// Data of blocks in the game
 /// </summary>
 public class MapManager : MonoBehaviour
-{    public void NewMap(int width, int height)
-    {
-        this.width = width;
-        this.height = height;
-        blockGrid = new BlockGrid(width, height); // all null
-        blockList = new List<Block>();
-        blockUpdateBatch = new List<Block>();
-        blockDestroyBatch = new List<Block>();
-    }
+{ 
+    static public FluidManager WaterManager;
+    static public FluidManager LavaManager;
+
     public Block this[int x, int y] => blockGrid[x, y];
     public int Width => width;
     public int Height => height;
@@ -27,6 +23,21 @@ public class MapManager : MonoBehaviour
     public BlockGrid grid => blockGrid;
     public List<Block> blocks => blockList;
     public List<Block> batchBlocks => blockUpdateBatch;
+
+
+
+    public void NewMap(int width, int height)
+    {
+        this.width = width;
+        this.height = height;
+        blockGrid = new BlockGrid(width, height); // all null
+        blockList = new List<Block>();
+        blockUpdateBatch = new List<Block>();
+        blockDestroyBatch = new List<Block>();
+
+        WaterManager = waterManager;
+        LavaManager = lavaManager;
+    }
 
     public void SpawnTetromino(MapTetromino tetromino)
     {
@@ -68,8 +79,8 @@ public class MapManager : MonoBehaviour
         {
             blockList[i].OnUpdate(this);
         }
-        waterManager.OnUpdate();
-        lavaManager.OnUpdate();
+        waterManager.OnUpdate(this);
+        lavaManager.OnUpdate(this);
     }
 
     public void BatchUpdateBlocks()
@@ -120,8 +131,8 @@ public class MapManager : MonoBehaviour
     private BlockGrid blockGrid;
 
     // Fluid
-    public FluidManager waterManager;
-    public FluidManager lavaManager;
+    [SerializeField] private FluidManager waterManager;
+    [SerializeField] private FluidManager lavaManager;
 
     // Map Boundary Data
     private int width;

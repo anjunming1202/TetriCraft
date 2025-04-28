@@ -48,4 +48,9 @@ public class MapBoundaryData : ScriptableObject
         Vector2 mapPosition = (posWorld - instance.origin) / unitSize;
         return new Vector2Int(Mathf.FloorToInt(mapPosition.x), Mathf.FloorToInt(mapPosition.y));
     }
+    public static Vector2 WorldToMap(Vector3 posWorld)
+    {
+        Vector2 mapPosition = (posWorld - instance.origin) / unitSize;
+        return mapPosition;
+    }
 }

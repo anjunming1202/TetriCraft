@@ -24,6 +24,10 @@ public class MapDebugger : MonoBehaviour
     public bool displayFrame = true;
     public bool displayPosition = true;
 
+    private Vector3 cursorPosition;
+    private Vector2 cursorMapPosition;
+    private Vector2Int cursorGridPosition;
+
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -46,9 +50,9 @@ public class MapDebugger : MonoBehaviour
             Debug.LogWarning("Debugger not set to a map.");
         }
 
-        /*int mapBlockCount = debuggedMap.blockCount;
-        int instantiatedBlockCount = GameObject.FindObjectsOfType<Block>().Length;
-        Debug.Log($"Block in map: {mapBlockCount}, Block instantiated: {instantiatedBlockCount}");*/
+        // cursor debugging
+        GetMousePositions();
+        MousePositionsDebug();
     }
 
     private void OnDrawGizmos()
@@ -103,5 +107,20 @@ public class MapDebugger : MonoBehaviour
         Gizmos.color = color;
         Gizmos.DrawLine(centrePosition + new Vector3(1, 1, 0) * width / 2, centrePosition + new Vector3(-1, -1, 0) * width / 2);
         Gizmos.DrawLine(centrePosition + new Vector3(-1, 1, 0) * width / 2, centrePosition + new Vector3(1, -1, 0) * width / 2);
+    }
+
+    private void GetMousePositions()
+    {
+        Vector3 cursorScreenPosition = Input.mousePosition;
+        cursorScreenPosition.z = Mathf.Abs(Camera.main.transform.position.z);
+        cursorPosition = Camera.main.ScreenToWorldPoint(cursorScreenPosition);
+        cursorGridPosition = MapBoundaryData.WorldToGrid(cursorPosition);
+        cursorMapPosition = MapBoundaryData.WorldToMap(cursorPosition);
+    }
+
+    private void MousePositionsDebug()
+    {
+        bool isFluid = MapManager.WaterManager.fluidSystem.IsFluid(cursorGridPosition.x, cursorGridPosition.y);
+        Debug.Log($"{isFluid}");
     }
 }
