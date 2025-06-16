@@ -58,8 +58,7 @@ public abstract class StillFluidBlock : Block
 
         if (!map.CheckEmpty(positionX, positionY))
         {
-            if (map[positionX, positionY].ID != ID)
-                return false;
+            return false;
         }
 
         return true;

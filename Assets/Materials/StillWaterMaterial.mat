@@ -30,6 +30,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _BUILTIN_QueueControl: 0
+    - _Column: 1
     - _Reversed: 1
     m_Colors: []
   m_BuildTextureStacks: []

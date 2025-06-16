@@ -37,7 +37,7 @@ public class FluidElementRenderer : MonoBehaviour
     public void Render()
     {
         // Set sprite
-        if (fluidElement.isFlowing)
+        if (fluidElement.isFlowingDown)
         {
             spriteRenderer.sprite = flowingTexture;
             spriteRenderer.material = flowingMaterial;

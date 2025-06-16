@@ -7,6 +7,8 @@ using UnityEngine;
 [Serializable]
 public class FluidSystem
 {
+    //static public float InfinitesimalAmount = 0.1f;
+
     public List<FluidElement> elements;
 
     public FluidSystem()

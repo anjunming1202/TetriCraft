@@ -120,7 +120,6 @@ public class MapDebugger : MonoBehaviour
 
     private void MousePositionsDebug()
     {
-        bool isFluid = MapManager.WaterManager.fluidSystem.IsFluid(cursorGridPosition.x, cursorGridPosition.y);
-        Debug.Log($"{isFluid}");
+
     }
 }

@@ -2,6 +2,7 @@
 using System.Numerics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using static UnityEditor.Rendering.FilterWindow;
 using static UnityEngine.InputManagerEntry;
@@ -68,6 +69,29 @@ public class FluidManager : MonoBehaviour
                 lazyDeletedElements.RemoveAt(i);
             }
 
+            /*// check overlapped elements
+            foreach (FluidElement element in fluidSystem.elements)
+            {
+                // check if overlapped with other element
+                if (fluidSystem.IsOverlapped(element))
+                {
+                    FluidElement elementOther = fluidSystem.GetOverlappedFluid(element);
+
+                    Debug.Assert(elementOther != null);
+
+                    if (elementOther.absoluteLowerLevel <= element.absoluteLowerLevel)
+                    {
+                        element.updatingState = FluidUpdatingState.Finished;
+                        LazyMergeFluid(element, elementOther);
+                    }
+                    else if (elementOther.absoluteLowerLevel > element.absoluteLowerLevel)
+                    {
+                        element.updatingState = FluidUpdatingState.Finished;
+                        LazyMergeFluid(elementOther, element);
+                    }
+                }
+            }*/
+
             // lazily merge elements
             for (int i = lazyMergedElementPairs.Count - 1; i >= 0; i--)
             {
@@ -77,7 +101,16 @@ public class FluidManager : MonoBehaviour
         }
     }
 
-    public void UpdateFluidSystem(MapManager map, float amount)
+    public FluidElement SpawnFluid(int x, int y, float lowerLevel, float height)
+    {
+        FluidElement element = GenerateFluidElement(x, y, lowerLevel, height);
+
+        fluidSystem.Add(element);
+
+        return element;
+    }
+
+    private void UpdateFluidSystem(MapManager map, float amount)
     {
         // update flow
         foreach (FluidElement element in fluidSystem.elements)
@@ -85,30 +118,45 @@ public class FluidManager : MonoBehaviour
             if (element.updatingState == FluidUpdatingState.Finished)
                 continue;
 
-            TryFlow(map, element, amount);
+            bool successfulFlew = TryFlow(map, element, amount);
+
+            if (!successfulFlew)
+            {
+                element.isStill = true;
+            }
         }
 
-        // delete empty elements
+        // after updating flow
         foreach (FluidElement element in fluidSystem.elements)
         {
+            // convert full still fluid element into block
+            if (!element.isFlowingDown)
+            {
+                SpawnFluidBlock(map, element);  // if no remaining fluid => delete
+            }
+
+            // delete empty elements
             if (element.height <= 0)
                 LazyDeleteFluid(element);
         }
     }
 
-    public FluidElement SpawnFluid(int x, int y, float lowerLevel, float height)
+    private void SpawnFluidBlock(MapManager map, FluidElement stillElement)
     {
-        FluidElement element = GameObject.Instantiate(elementPrefab);
-        element.transform.SetParent(this.transform);
+        while (stillElement.height >= 1f)
+        {
+            Debug.Assert(stillElement.lowerLevel == 0f, $"Wrongly converting fluid element into block {stillElement.position}, {stillElement.lowerLevel}, {stillElement.upperLevel}");
 
-        element.position = new Vector2Int(x, y);
-        element.lowerLevel = lowerLevel;
-        element.height = height;
-        element.isFlowing = true;
+            // spawn 1 fluid block from bottom
+            int x = stillElement.position.x;
+            int y = stillElement.position.y;
+            Block fluidBlock = BlockSpawner.NewBlock(elementPrefab.ID);
+            map.SpawnBlock(fluidBlock, x, y);
 
-        fluidSystem.Add(element);
-
-        return element;
+            // chop off 1 grid of fluid from bottom
+            stillElement.position.y += 1;
+            stillElement.height -= 1;
+        }
     }
 
     private bool TryFlow(MapManager map, FluidElement element, float amount)
@@ -118,61 +166,12 @@ public class FluidManager : MonoBehaviour
         int x = element.position.x;
         int y = element.position.y;
 
-        // check if overlapped with other element
-        if (fluidSystem.IsOverlapped(element))
-        {
-            FluidElement elementOther = fluidSystem.GetOverlappedFluid(element);
-
-            Debug.Assert(elementOther != null);
-
-            if (elementOther.updatingState == FluidUpdatingState.Finished)
-            {
-                if (elementOther.lowerLevel < element.lowerLevel)
-                {
-                    element.updatingState = FluidUpdatingState.Finished;
-                    LazyMergeFluid(element, elementOther);
-                    return true;
-                }
-                else if (elementOther.lowerLevel > element.lowerLevel)
-                {
-                    element.updatingState = FluidUpdatingState.Finished;
-                    LazyMergeFluid(elementOther, element);
-                    return true;
-                }
-            }
-        }
-
         // flowing inside the grid
         if (element.lowerLevel - amount >= 0)
         {
-            float targetLowerLevel = element.lowerLevel - amount;
-
-            // if will be colliding with another element
-            if (fluidSystem.IsFluid(x, y, targetLowerLevel))
+            bool successful = TryFlowDownwardsAt(map, x, y, element, amount);
+            if (successful)
             {
-                FluidElement elementOverlap = fluidSystem.GetFluid(x, y, targetLowerLevel);
-
-                // try update the other element first
-                TryFlowAnotherFirst(map, elementOverlap, amount);
-
-                // then try flow the current element
-                if (elementOverlap.updatingState == FluidUpdatingState.Finished)
-                {
-                    float limitedAmount = element.absoluteLowerLevel - elementOverlap.absoluteUpperLevel;
-                    element.FlowsDownwards(limitedAmount);
-
-                    // finish flow
-                    element.updatingState = FluidUpdatingState.Finished;
-                    LazyMergeFluid(element, elementOverlap);
-                    return true;
-                }
-            }
-
-            // if will not collide
-            else
-            {
-                element.FlowsDownwards(amount);
-
                 // finish flow
                 element.updatingState = FluidUpdatingState.Finished;
                 return true;
@@ -182,48 +181,24 @@ public class FluidManager : MonoBehaviour
         // if will be flowing out of a grid
         else
         {
-            // try flowing downwards            
+            // try flowing downwards
             if (fluidSystem.IsFlowableTo(map, x, y - 1)) // if can flow out
             {
-                int toX = x;
-                int toY = y - 1;
-                float targetLowerLevel = element.lowerLevel - amount + 1;
-
-                // if will be colliding with another element
-                if (fluidSystem.IsFluid(toX, toY, targetLowerLevel))
+                bool successful = TryFlowDownwardsAt(map, x, y - 1, element, amount);
+                if (successful)
                 {
-                    FluidElement elementOverlap = fluidSystem.GetFluid(toX, toY, targetLowerLevel);
-
-                    // try update the other element first
-                    TryFlowAnotherFirst(map, elementOverlap, amount);
-
-                    // then try flow the current element
-                    if (elementOverlap.updatingState == FluidUpdatingState.Finished)
-                    {
-                        float limitedAmount = element.absoluteLowerLevel - elementOverlap.absoluteUpperLevel;
-                        element.FlowsDownwards(limitedAmount);
-
-                        // finish flow
-                        element.updatingState = FluidUpdatingState.Finished;
-                        LazyMergeFluid(element, elementOverlap);
-                        return true;
-                    }
-                }
-
-                // if will not collide
-                else
-                {
-                    element.FlowsDownwards(amount);
-
                     // finish flow
                     element.updatingState = FluidUpdatingState.Finished;
                     return true;
                 }
             }
-
-            else if (element.lowerLevel > 0) // if cannot flow out, but hasn't reached the bottom
+            
+            // if cannot flow out, but hasn't reached the bottom
+            else if (element.lowerLevel > 0) 
             {
+                // reach the ground => stop flowing downwards
                 element.FlowsDownwards(element.lowerLevel);
+                element.isFlowingDown = false;
 
                 // finish flow
                 element.updatingState = FluidUpdatingState.Finished;
@@ -269,10 +244,45 @@ public class FluidManager : MonoBehaviour
         return false;
     }
 
-    /*private void FlowsDownwards(FluidElement element, float amount)
+    private bool TryFlowDownwardsAt(MapManager map, int toX, int toY, FluidElement element, float amount)
     {
-        element.FlowsDownwards(amount);
-    }*/
+        float targetLowerLevel = ((element.lowerLevel - amount) % 1 + 1) % 1;
+
+        // if will be colliding with another element
+        if (fluidSystem.IsFluid(toX, toY, targetLowerLevel))
+        {
+            FluidElement elementOverlap = fluidSystem.GetFluid(toX, toY, targetLowerLevel);
+
+            // try update the other element first
+            TryFlowAnotherFirst(map, elementOverlap, amount);
+
+            if (elementOverlap.updatingState == FluidUpdatingState.Finished)
+            {
+                // then try flow the current element            
+                float limitedAmount = element.absoluteLowerLevel - elementOverlap.absoluteUpperLevel;
+                limitedAmount = Mathf.Min(limitedAmount, amount);
+                element.FlowsDownwards(limitedAmount);
+
+                // finish flow
+                element.updatingState = FluidUpdatingState.Finished;
+                LazyMergeFluid(element, elementOverlap);
+                return true;
+            }
+        }
+
+        // if will not collide
+        else
+        {
+            element.FlowsDownwards(amount);
+
+            // finish flow
+            element.updatingState = FluidUpdatingState.Finished;
+            return true;
+        }
+
+        element.updatingState = FluidUpdatingState.Finished;
+        return false;
+    }
 
     private bool TryFlowHorizontallyInto(MapManager map, int toX, int toY, FluidElement element, float amount)
     {
@@ -282,7 +292,7 @@ public class FluidManager : MonoBehaviour
         // if meet fluid
         if (fluidSystem.IsFluid(toX, toY))
         {
-            // fluid at the bottom
+            // fluid at the bottom => pressure flow
             if (fluidSystem.IsFluid(toX, toY, 0))
             {
                 FluidElement elementTo = fluidSystem.GetFluid(toX, toY, 0);
@@ -290,20 +300,24 @@ public class FluidManager : MonoBehaviour
                 // try update the other element first
                 TryFlowAnotherFirst(map, elementTo, amount);
 
-                //if (elementTo.updatingState == FluidUpdatingState.Finished)
+                // then try flow the current element                            
+                float upperLevelTo = elementTo.upperLevel + elementTo.position.y - toY;
+                float heightDifference = element.height - upperLevelTo;
+                if (heightDifference > 0)
                 {
-                    // then try flow the current element                            
-                    float upperLevelTo = elementTo.upperLevel + elementTo.position.y - toY;
-                    float heightDifference = element.height - upperLevelTo;
-                    if (heightDifference > 0)
-                    {
-                        // amount by height difference
-                        float pressurisedAmount = CalculatePressureAmount(heightDifference);
-                        float limitedAmount = Mathf.Min(amount, pressurisedAmount);
-                        element.FlowsInto(elementTo, limitedAmount);
+                    // amount by height difference
+                    float pressurisedAmount = CalculatePressureAmount(heightDifference);
+                    float limitedAmount = Mathf.Min(amount, pressurisedAmount);
 
-                        return true;
+                    // cannot partial flow if the element is too small
+                    if (element.height < amount)
+                    {
+                        limitedAmount = element.height;
                     }
+
+                    element.FlowsInto(elementTo, limitedAmount);
+
+                    return true;
                 }
             }
             // fluid above ground
@@ -316,25 +330,34 @@ public class FluidManager : MonoBehaviour
                 bool isOtherChanged = TryFlowAnotherFirst(map, elementOther, amount);
 
                 // then try flow the current element
-                if (elementOther.updatingState == FluidUpdatingState.Finished)
-                {
-                    if (isOtherChanged)
-                        levelLimit = fluidSystem.GetLowestLevel(toX, toY);
+                if (isOtherChanged)
+                    levelLimit = fluidSystem.GetLowestLevel(toX, toY);
 
-                    levelLimit = Mathf.Min(levelLimit, amount);
+                levelLimit = Mathf.Min(levelLimit, amount);
 
-                    FluidElement elementTo = LazySpawnFluid(toX, toY, 0, 0);
-                    element.FlowsInto(elementTo, levelLimit);
+                FluidElement elementTo = LazySpawnFluid(toX, toY, 0, 0);
+                element.FlowsInto(elementTo, levelLimit);
 
-                    return true;
-                }
+                return true;
             }
         }
         // if empty grid
         else
         {
             FluidElement elementTo = LazySpawnFluid(toX, toY, 0, 0);
-            element.FlowsInto(elementTo, amount);
+
+            float upperLevelTo = elementTo.upperLevel + elementTo.position.y - toY;
+            float heightDifference = element.height - upperLevelTo;
+            // amount by height difference
+            float pressurisedAmount = CalculatePressureAmount(heightDifference);
+            float limitedAmount = Mathf.Min(amount, pressurisedAmount);
+            // cannot partial flow if the element is too small
+            if (element.height < amount)
+            {
+                limitedAmount = element.height;
+            }
+
+            element.FlowsInto(elementTo, limitedAmount);
 
             return true;
         }
@@ -344,27 +367,23 @@ public class FluidManager : MonoBehaviour
 
     private float CalculatePressureAmount(float heightDifference)
     {
-        return heightDifference * 0.8f;
+        return heightDifference * 0.6f;
     }
 
     private FluidElement LazySpawnFluid(int x, int y, float lowerLevel, float height)
     {
-        FluidElement element = GameObject.Instantiate(elementPrefab);
-        element.transform.SetParent(this.transform);
+        FluidElement element = GenerateFluidElement(x, y, lowerLevel, height);
 
-        element.position = new Vector2Int(x, y);
-        element.lowerLevel = lowerLevel;
-        element.height = height;
-        element.isFlowing = true;
-
-        lazySpawnedElements.Add(element);
+        if (!lazySpawnedElements.Contains(element))
+            lazySpawnedElements.Add(element);
 
         return element;
     }
 
     private void LazyDeleteFluid(FluidElement element)
     {
-        lazyDeletedElements.Add(element);
+        if (!lazyDeletedElements.Contains(element))
+            lazyDeletedElements.Add(element);
     }
 
     private void LazyMergeFluid(FluidElement topElement, FluidElement bottomElement)
@@ -374,6 +393,21 @@ public class FluidManager : MonoBehaviour
         Debug.Assert(bottomElement.height > 0, $"Merging empty fluid element {bottomElement.position} (bottom)");
         Debug.Assert(topElement.updatingState == FluidUpdatingState.Finished && bottomElement.updatingState == FluidUpdatingState.Finished, $"Wrongly merging before updating {topElement.position}(top) & {bottomElement.position}(bottom)");
 
-        lazyMergedElementPairs.Add((topElement, bottomElement));
+        if (!lazyMergedElementPairs.Contains((topElement, bottomElement)))
+            lazyMergedElementPairs.Add((topElement, bottomElement));
+    }
+
+    private FluidElement GenerateFluidElement(int x, int y, float lowerLevel, float height)
+    {
+        FluidElement element = GameObject.Instantiate(elementPrefab);
+        element.transform.SetParent(this.transform);
+
+        element.position = new Vector2Int(x, y);
+        element.lowerLevel = lowerLevel;
+        element.height = height;
+        element.isFlowingDown = false;
+        element.isStill = true;
+
+        return element;
     }
 }
