@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: FlowingWaterMaterial
   m_Shader: {fileID: -6465566751694194690, guid: 87730a5056d7ebd4497c0cfec8fda1f9, type: 3}
-  m_Parent: {fileID: -876546973899608171, guid: 87730a5056d7ebd4497c0cfec8fda1f9, type: 3}
+  m_Parent: {fileID: 2100000, guid: 967afd4d131312a47821dbe5db99211d, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []

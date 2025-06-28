@@ -892,6 +892,7 @@ GameObject:
   m_Component:
   - component: {fileID: 718323502}
   - component: {fileID: 718323503}
+  - component: {fileID: 718323504}
   m_Layer: 0
   m_Name: Water
   m_TagString: Untagged
@@ -926,11 +927,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d39247e287c5b8c4a863f594de1e7cff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fluidSystem:
-    elements: []
   elementPrefab: {fileID: 1767523962583349396, guid: 5f55d0b41fc68c948ae062c12e30b169, type: 3}
-  unitAmount: 0.1
-  flowSpeed: 32
+  fluidSystem: {fileID: 718323504}
+--- !u!114 &718323504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 718323501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b64e62c08aa3474fba10469862901e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elements: []
 --- !u!1 &757604691
 GameObject:
   m_ObjectHideFlags: 0
@@ -1212,6 +1223,7 @@ MonoBehaviour:
   - {fileID: 6118796901473174655, guid: 05c59adb0ca03b84590ba052d6902533, type: 3}
   - {fileID: 6118796901473174655, guid: 76f2f37835960854aae28c91388682cc, type: 3}
   - {fileID: 6118796901473174655, guid: cb34e9cffbe37754c91d34613fbfd2e3, type: 3}
+  - {fileID: 6118796901473174655, guid: 34bbde5f8ac730043bee465993c70ce0, type: 3}
 --- !u!4 &1050138633
 Transform:
   m_ObjectHideFlags: 0
@@ -1256,11 +1268,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d39247e287c5b8c4a863f594de1e7cff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fluidSystem:
-    elements: []
   elementPrefab: {fileID: 0}
-  unitAmount: 0.1
-  flowSpeed: 8
+  fluidSystem: {fileID: 0}
 --- !u!4 &1152869740
 Transform:
   m_ObjectHideFlags: 0

@@ -19,11 +19,14 @@ public class FluidElementRenderer : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         material = GetComponent<Material>();
         props = new MaterialPropertyBlock();
+
+        spriteRenderer.enabled = false;
     }
 
     private void Start()
     {
         Render();
+        spriteRenderer.enabled = true;
     }
 
     private void Update()
@@ -37,7 +40,7 @@ public class FluidElementRenderer : MonoBehaviour
     public void Render()
     {
         // Set sprite
-        if (fluidElement.isFlowingDown)
+        if (fluidElement.isFalling)
         {
             spriteRenderer.sprite = flowingTexture;
             spriteRenderer.material = flowingMaterial;
@@ -57,13 +60,10 @@ public class FluidElementRenderer : MonoBehaviour
 
         // Set transform size
         Vector2 currentSize = spriteRenderer.bounds.size;
-        Vector2 targetSize = new Vector2(1f, fluidElement.height);
+        Vector2 targetSize = new Vector2(fluidElement.width, fluidElement.height);
         transform.localScale = transform.localScale * targetSize / currentSize;
 
         // Set transform position
-        float midLevel = (fluidElement.upperLevel + fluidElement.lowerLevel) / 2;
-        float gridX = fluidElement.position.x;
-        float gridY = fluidElement.position.y - 0.5f + midLevel;
-        transform.position = MapBoundaryData.MapToWorld(new Vector2(gridX, gridY));
+        transform.position = MapBoundaryData.MapToWorld(fluidElement.mapPosition);
     }
 }

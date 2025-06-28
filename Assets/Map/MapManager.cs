@@ -15,6 +15,8 @@ public class MapManager : MonoBehaviour
     static public FluidManager WaterManager;
     static public FluidManager LavaManager;
 
+    public int updateRate = 20; // blocks, fluids
+
     public Block this[int x, int y] => blockGrid[x, y];
     public int Width => width;
     public int Height => height;
@@ -75,12 +77,20 @@ public class MapManager : MonoBehaviour
 
     public void OnUpdateBlocks()
     {
-        for (int i = 0; i < blockList.Count; i++)
+        timer += Time.deltaTime;
+
+        if (timer >= (1f / updateRate))
         {
-            blockList[i].OnUpdate(this);
+            timer = 0f;
+
+            for (int i = 0; i < blockList.Count; i++)
+            {
+                blockList[i].OnUpdate(this);
+            }
+
+            waterManager.OnUpdate(this);
+            lavaManager.OnUpdate(this);
         }
-        waterManager.OnUpdate(this);
-        lavaManager.OnUpdate(this);
     }
 
     public void BatchUpdateBlocks()
@@ -142,6 +152,7 @@ public class MapManager : MonoBehaviour
     private List<Block> blockList;
     private List<Block> blockUpdateBatch;
     private List<Block> blockDestroyBatch;
+    private float timer;
 
 
 

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9079800203541379973}
   - component: {fileID: 2692196136773849335}
   - component: {fileID: 1767523962583349396}
-  - component: {fileID: -2438817398194952673}
+  - component: {fileID: 3458528884425792302}
   m_Layer: 0
   m_Name: WaterElement
   m_TagString: Block
@@ -101,10 +101,11 @@ MonoBehaviour:
   ID: 9
   position: {x: 0, y: 0}
   lowerLevel: 0
-  upperLevel: 1
-  isFlowing: 0
-  hasUpdated: 0
---- !u!114 &-2438817398194952673
+  height: 0
+  isFlowingDown: 0
+  isStill: 0
+  updatingState: 0
+--- !u!114 &3458528884425792302
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

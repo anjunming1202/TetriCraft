@@ -13,8 +13,9 @@ public enum BlockID
     Log,
     Leaf,
     Water,
+    WaterDummy,
     Lava,
-
+    LavaDummy,
 
     Count
 }

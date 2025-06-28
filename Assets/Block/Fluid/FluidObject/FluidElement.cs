@@ -5,67 +5,19 @@ public class FluidElement : MonoBehaviour
 {
     public BlockID ID;
 
-    public Vector2Int position;
-    public float lowerLevel; // 0 ~ 1
-    public float height;
-    public float upperLevel => lowerLevel + height;
+    public int column;
+    public float upperLevel;
+    public float lowerLevel;
+    public float midLevel => (upperLevel + lowerLevel) / 2;
+    public Vector2 mapPosition => new Vector2(column, midLevel - 0.5f);
+    public float height => upperLevel - lowerLevel;
+    public float width => 1f;
 
-    public bool isFlowingDown;  // flowing downwards
-    public bool isStill;    // neither flowing downwards or horizontally
-
-    public FluidUpdatingState updatingState;
+    public bool isFalling;
 
 
-    public float absoluteLowerLevel => lowerLevel + position.y;
-    public float absoluteUpperLevel => upperLevel + position.y;
-
-    public void FlowsDownwards(float amount)
+    public float Local2Map(int y, float localLevel)
     {
-        lowerLevel -= amount;
-        if (lowerLevel < 0)
-        {
-            position.y--;
-            lowerLevel++;
-        }
-        isFlowingDown = true;
-        isStill = false;
+        return y + localLevel;
     }
-
-    public void FlowsInto(FluidElement elementTo, float amount)
-    {
-        // Debug.Assert(elementTo.lowerLevel == 0, $"Wrongly flowing horizontally at {position}");
-
-        if (height - amount <= 0)
-        {
-            elementTo.height += height;
-            height = 0;
-        }
-        else
-        {
-            elementTo.height += amount;
-            height -= amount;
-        }
-    }
-
-    public bool CheckCollide(float level)
-    {
-        return level >= lowerLevel && level <= upperLevel;
-    }
-
-    public bool CheckCollide(FluidElement element)
-    {
-        return element.absoluteUpperLevel >= absoluteLowerLevel && element.absoluteLowerLevel <= absoluteUpperLevel;
-    }
-
-    public void Delete()
-    {
-        GameObject.Destroy(gameObject);
-    }
-}
-
-public enum FluidUpdatingState
-{
-    Waiting,
-    Updating,
-    Finished
 }
