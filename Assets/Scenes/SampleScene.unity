@@ -929,6 +929,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementPrefab: {fileID: 1767523962583349396, guid: 5f55d0b41fc68c948ae062c12e30b169, type: 3}
   fluidSystem: {fileID: 718323504}
+  unitFlowingAmount: 0.1
+  flowingSpeed: 20
 --- !u!114 &718323504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1249,6 +1251,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1152869740}
   - component: {fileID: 1152869739}
+  - component: {fileID: 1152869741}
   m_Layer: 0
   m_Name: Lava
   m_TagString: Untagged
@@ -1269,7 +1272,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elementPrefab: {fileID: 0}
-  fluidSystem: {fileID: 0}
+  fluidSystem: {fileID: 1152869741}
+  unitFlowingAmount: 0.1
+  flowingSpeed: 10
 --- !u!4 &1152869740
 Transform:
   m_ObjectHideFlags: 0
@@ -1285,6 +1290,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 310913973}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1152869741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152869738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b64e62c08aa3474fba10469862901e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  elements: []
 --- !u!1 &1155508541
 GameObject:
   m_ObjectHideFlags: 0

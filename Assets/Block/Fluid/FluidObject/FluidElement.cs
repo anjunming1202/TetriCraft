@@ -12,8 +12,14 @@ public class FluidElement : MonoBehaviour
     public Vector2 mapPosition => new Vector2(column, midLevel - 0.5f);
     public float height => upperLevel - lowerLevel;
     public float width => 1f;
+    public int lowerGridPosition => Mathf.FloorToInt(lowerLevel);
+    public int upperGridPosition => Mathf.FloorToInt(upperLevel);
+    public float localLowerLevel => lowerLevel % 1f;
+    public float localUpperLevel => upperLevel % 1f;
+
 
     public bool isFalling;
+
 
 
     public float Local2Map(int y, float localLevel)
