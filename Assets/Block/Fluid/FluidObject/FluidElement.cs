@@ -20,4 +20,10 @@ public class FluidElement : MonoBehaviour
     {
         return y + localLevel;
     }
+
+    public void FlowDownwards(float amount)
+    {
+        upperLevel -= amount;
+        lowerLevel -= amount;
+    }
 }

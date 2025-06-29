@@ -12,7 +12,7 @@ public class FluidManager : MonoBehaviour
     {
         timer += Time.deltaTime;
 
-        if (timer >= (1 / flowingSpeed))
+        if (timer >= (1f / flowingSpeed))
         {
             timer = 0;
 
@@ -36,7 +36,10 @@ public class FluidManager : MonoBehaviour
 
     public void Flow(MapManager mapManager)
     {
-
+        foreach (FluidElement element in fluidSystem.elements)
+        {
+            element.FlowDownwards(unitFlowingAmount);
+        }
     }
 
     private float timer;
