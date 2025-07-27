@@ -25,8 +25,7 @@ public class FluidElementRenderer : MonoBehaviour
 
     private void Start()
     {
-        Render();
-        spriteRenderer.enabled = true;
+
     }
 
     private void Update()
@@ -39,6 +38,13 @@ public class FluidElementRenderer : MonoBehaviour
     /// </summary>
     public void Render()
     {
+        if (fluidElement.amount == 0)
+        {
+            spriteRenderer.enabled = false;
+            //return;
+        }
+        else spriteRenderer.enabled = true;
+
         // Set sprite
         if (fluidElement.isFalling)
         {
@@ -54,14 +60,17 @@ public class FluidElementRenderer : MonoBehaviour
         // Set material
         spriteRenderer.GetPropertyBlock(props);
         props.SetColor("_Color", spriteRenderer.color); //
-        props.SetFloat("_UpperLevel", fluidElement.upperLevel);
-        props.SetFloat("_LowerLevel", fluidElement.lowerLevel);
+        props.SetFloat("_UpperLevel", (float)fluidElement.upperLevel / FluidElement.BlockAmount);
+        props.SetFloat("_LowerLevel", (float)fluidElement.lowerLevel / FluidElement.BlockAmount);
         spriteRenderer.SetPropertyBlock(props);
 
         // Set transform size
-        Vector2 currentSize = spriteRenderer.bounds.size;
-        Vector2 targetSize = new Vector2(fluidElement.width, fluidElement.height);
-        transform.localScale = transform.localScale * targetSize / currentSize;
+        if (fluidElement.height > 0)
+        {
+            Vector2 currentSize = spriteRenderer.bounds.size;
+            Vector2 targetSize = new Vector2(fluidElement.width, fluidElement.height);
+            transform.localScale = transform.localScale * targetSize / currentSize;
+        }
 
         // Set transform position
         transform.position = MapBoundaryData.MapToWorld(fluidElement.mapPosition);

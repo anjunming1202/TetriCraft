@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static Unity.Collections.AllocatorManager;
+using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// Data of blocks in the game
@@ -24,6 +25,8 @@ public class MapManager : MonoBehaviour
     public List<Block> blocks => blockList;
     public List<Block> batchBlocks => blockUpdateBatch;
 
+    public Action<MapManager, Vector2Int> OnGridPlace;
+
 
 
     public void NewMap(int width, int height)
@@ -37,6 +40,9 @@ public class MapManager : MonoBehaviour
 
         WaterManager = waterManager;
         LavaManager = lavaManager;
+
+        OnGridPlace += waterManager.BlockSqueeze;
+        OnGridPlace += lavaManager.BlockSqueeze;
     }
 
     public void SpawnTetromino(MapTetromino tetromino)
@@ -94,6 +100,10 @@ public class MapManager : MonoBehaviour
         {
             blockGrid.Add(block);
         }
+        foreach (Block block in blockUpdateBatch)
+        {
+            OnGridPlace?.Invoke(this, block.GridPosition);
+        }
         blockUpdateBatch.Clear();
     }
 
@@ -119,6 +129,7 @@ public class MapManager : MonoBehaviour
         block.SetPosition(x, y);
 
         blockGrid.Add(block);
+        OnGridPlace?.Invoke(this, block.GridPosition);
 
         block.OnPositionChanged += AddToUpdateBatch;
 
@@ -177,6 +188,11 @@ public class MapManager : MonoBehaviour
                 return false;
         }
         return true;
+    }
+
+    public bool IsBlocked(int x, int y)
+    {
+        return !CheckInside(x, y) || !CheckEmpty(x, y);
     }
 
     public bool CheckMapEmpty()

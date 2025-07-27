@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 
-public class Water : FluidBlock
+public class WaterBlock : FluidBlock
 {
     [HideInInspector] public override BlockID ID => BlockID.Water;
 
     public override void OnLockdown(MapManager map)
     {
         base.OnLockdown(map);
-        MapManager.WaterManager.SpawnElement(GridPosition.x, GridPosition.y, 0f, 1f);
+        MapManager.WaterManager.SpawnElement(GridPosition.x, FluidElement.Local2Level(GridPosition.y, 0));
         Remove(map);
     }
 }

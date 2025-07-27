@@ -98,7 +98,7 @@ public class TetrisManager : MonoBehaviour
     {
         int deathline = map.Height;
         bool gameover = !map.CheckRowEmpty(deathline);
-        isUpdating = !gameover;
+        isUpdating = gameover ? false : isUpdating;
         return gameover;
     }
 
