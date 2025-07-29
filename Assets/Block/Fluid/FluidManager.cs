@@ -92,15 +92,16 @@ public class FluidManager : MonoBehaviour
         {
             FluidElement elementSqueezed = element;
 
+            // chop down the squeezed element
             if (elementSqueezed.upperLevel > gridUpperLevel)
             {
                 SplitElement(elementSqueezed, gridUpperLevel);
             }
 
-            /*if (gridLowerLevel > elementSqueezed.lowerLevel && elementSqueezed.upperLevel > gridUpperLevel)
+            if (elementSqueezed.lowerLevel < gridLowerLevel)
             {
                 elementSqueezed = SplitElement(elementSqueezed, gridLowerLevel);
-            }*/
+            }
 
             // downward squeeze
             int targetY = y - 1;
@@ -134,6 +135,7 @@ public class FluidManager : MonoBehaviour
                         // put squeezed element beneath y + 1 block bottom
                         elementSqueezed.lowerLevel = ceilingLevel - elementSqueezed.amount;
                         elementSqueezed.column = targetX;
+                        fluidSystem.UpdateColumnListElement(elementSqueezed);
 
                         // check whether colliding elements
                         List<FluidElement> collidedElements = fluidSystem.GetCollidedElements(elementSqueezed);
@@ -143,7 +145,7 @@ public class FluidManager : MonoBehaviour
                         FluidElement firstCollidedElement = isCollidingFluid ? collidedElements[^1] : null;
                         int fluidCollidingLevel = isCollidingFluid ? firstCollidedElement.upperLevel : -1;
 
-                        if (fluidCollidingLevel > elementSqueezed.upperLevel) // case for side overflow colliding taller element
+                        if (fluidCollidingLevel > elementSqueezed.upperLevel) // case that side overflow colliding taller element
                             fluidCollidingLevel = elementSqueezed.upperLevel;
 
                         // check whether colliding ground
@@ -154,7 +156,7 @@ public class FluidManager : MonoBehaviour
                         Block firstCollidedBlock = isCollidingGround ? collidedBlocks[^1] : null;
                         int blockCollidingLevel = isCollidingGround ? FluidElement.Local2Level(firstCollidedBlock.GridPosition.y + 1, 0) : -1;
 
-                        if (!mapManager.CheckInside(elementSqueezed.column, elementSqueezed.lowerGridPosition)) // case for overflow at y = 0
+                        if (!mapManager.CheckInside(elementSqueezed.column, elementSqueezed.lowerGridPosition)) // case that overflow at y = 0
                         {
                             isCollidingGround = true;
                             blockCollidingLevel = 0;
@@ -183,14 +185,112 @@ public class FluidManager : MonoBehaviour
                         break;
                     }                    
                 }
-
                 offsetX++;
             }
 
             // upward squeeze
-            if (elementSqueezed != null)
-                fluidSystem.Remove(elementSqueezed);
+            targetY = y;
+            while (elementSqueezed != null)
+            {
+                Debug.Assert(targetY < mapManager.Height, "iterate upwards exceeding the map");
 
+                offsetX = 0;
+                isCollidingWall = new bool[2] { false, false };
+                while (elementSqueezed != null && (!isCollidingWall[0] || !isCollidingWall[1]) || offsetX <= 1)
+                {
+                    // upwards squeeze: can be sidely squeezed by one block
+                    if (offsetX == 1)
+                        isCollidingWall = new bool[2] { false, false };
+
+                    for (int i = 0; i < 2; i++)
+                    {
+                        // if finished overflowing
+                        if (elementSqueezed == null)
+                            break;
+
+                        // avoid calculate twice for the central column
+                        if (offsetX == 0 && i == 1)
+                        {
+                            isCollidingWall[1] = isCollidingWall[0];
+                            continue;
+                        }
+
+                        // current target column
+                        targetX = i == 0 ? x - offsetX : x + offsetX;
+
+                        // check whether colliding wall => continue to next column
+                        isCollidingWall[i] = isCollidingWall[i] || mapManager.IsBlocked(targetX, targetY);
+                        if (isCollidingWall[i])
+                            continue;
+                        
+                        // fill the column space maximisely
+                        int groundLevel = FluidElement.Local2Level(targetY, 0);
+                        bool isCollidingCeiling = false;
+                        bool isCollidingFluid = false;
+                        while (!isCollidingCeiling)
+                        {
+                            // put squeezed element on the y + 1 block bottom
+                            elementSqueezed.lowerLevel = groundLevel;
+                            elementSqueezed.column = targetX;
+                            fluidSystem.UpdateColumnListElement(elementSqueezed);
+
+                            // check whether colliding elements
+                            List<FluidElement> collidedElements = fluidSystem.GetCollidedElements(elementSqueezed);
+
+                            isCollidingFluid = collidedElements != null && collidedElements.Count > 0;
+
+                            FluidElement firstCollidedElement = isCollidingFluid ? collidedElements[0] : null;
+                            int fluidCollidingLevel = isCollidingFluid ? firstCollidedElement.lowerLevel : int.MaxValue;
+
+                            if (fluidCollidingLevel < elementSqueezed.lowerLevel) // case that side overflow colliding lower element
+                                fluidCollidingLevel = elementSqueezed.lowerLevel;
+
+                            // check whether colliding ceiling
+                            List<Block> collidedBlocks = fluidSystem.GetCollidedBlocks(elementSqueezed, mapManager);
+
+                            isCollidingCeiling = collidedBlocks != null && collidedBlocks.Count > 0;
+
+                            Block firstCollidedBlock = isCollidingCeiling ? collidedBlocks[0] : null;
+                            int blockCollidingLevel = isCollidingCeiling ? FluidElement.Local2Level(firstCollidedBlock.GridPosition.y, 0) : int.MaxValue; /*no need for the case for overflow at y = 0*/
+
+                            // deal with colliding fluid first
+                            if (isCollidingFluid && fluidCollidingLevel < blockCollidingLevel)
+                            {
+                                elementSqueezed = SplitElement(elementSqueezed, fluidCollidingLevel);
+                                if (elementSqueezed == null)
+                                    break;
+
+                                groundLevel = firstCollidedElement.upperLevel;
+
+                                isCollidingCeiling = false;
+                                continue;
+                            }
+
+                            // deal with colliding ceiling first
+                            else if (isCollidingCeiling && blockCollidingLevel < fluidCollidingLevel)
+                            {
+                                elementSqueezed = SplitElement(elementSqueezed, blockCollidingLevel);
+                                if (elementSqueezed == null)
+                                    break;
+
+                                continue;
+                            }
+
+                            // not colliding anything => finish overflowing
+                            elementSqueezed = null;
+                            break;
+                        }
+                    }
+                    offsetX++;
+                }
+                targetY++;
+            }
+
+
+
+
+            /*if (elementSqueezed != null)
+                fluidSystem.Remove(elementSqueezed);*/
         }
     }
 
@@ -203,8 +303,11 @@ public class FluidManager : MonoBehaviour
 
         }
 
-        if (splitLevel == element.lowerLevel || splitLevel == element.upperLevel)
+        if (splitLevel == element.upperLevel)
             return null;
+
+        if (splitLevel == element.lowerLevel)
+            return element;
 
         FluidElement elementSplitted = SpawnElement(element.column, splitLevel, 0);
         element.FlowTo(elementSplitted, element.upperLevel - splitLevel);
@@ -224,7 +327,7 @@ public class FluidManager : MonoBehaviour
 
     private void ResetFlowUpdates()
     {
-        fluidSystem.StructuriseElements();
+        fluidSystem.OrganiseElements();
 
         foreach (FluidElement element in fluidSystem.elements)
         {
@@ -319,7 +422,7 @@ public class FluidManager : MonoBehaviour
         // try flow downwards
         int targetLevel = element.lowerLevel - unitFlowingAmount;
         Vector2Int targetPositionDown = fluidSystem.GetGridPosition(element.column, targetLevel);
-        bool isTouchingGround = !mapManager.CheckInside(targetPositionDown.x, targetPositionDown.y) || !mapManager.CheckEmpty(targetPositionDown.x, targetPositionDown.y);
+        bool isTouchingGround = mapManager.IsBlocked(targetPositionDown.x, targetPositionDown.y);
         if (!isTouchingGround) // fall above the ground
         {
             FluidElement elementDown = fluidSystem.GetCollidedFluid(element.column, targetLevel);
@@ -360,8 +463,8 @@ public class FluidManager : MonoBehaviour
                 int referenceGroundLevel = referenceLevel - element.localLowerLevel;
 
                 bool[] isWall = {
-                    !mapManager.CheckInside(targetPositions[0].x, targetPositions[0].y) || !mapManager.CheckEmpty(targetPositions[0].x, targetPositions[0].y),
-                    !mapManager.CheckInside(targetPositions[1].x, targetPositions[1].y) || !mapManager.CheckEmpty(targetPositions[1].x, targetPositions[1].y)
+                    mapManager.IsBlocked(targetPositions[0].x, targetPositions[0].y),
+                    mapManager.IsBlocked(targetPositions[1].x, targetPositions[1].y)
                 };
 
                 FluidElement[] elementsNext = {
@@ -528,6 +631,14 @@ public class FluidManager : MonoBehaviour
             }
         }
         lazilyMergedLists.Add(new List<FluidElement> { lower, upper });
+    }
+
+    private void GenerateDummyBlocks()
+    {
+        foreach (FluidElement element in fluidSystem.elements)
+        {
+
+        }
     }
 
     private void OnDrawGizmos()

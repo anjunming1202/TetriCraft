@@ -168,6 +168,9 @@ public class MapManager : MonoBehaviour
     }
     public bool CheckEmpty(int x, int y)
     {
+        if (y >= height)
+            return true;
+
         return blockGrid[x, y] == null;
     }
 

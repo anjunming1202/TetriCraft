@@ -16,10 +16,7 @@ public class FluidSystem : MonoBehaviour
         if (index < 0) elements.Add(element);
         else elements.Insert(index, element);
 
-        List<FluidElement> columnList = columnElementLists[element.column];
-        index = columnList.FindIndex(e => e.lowerLevel > element.lowerLevel);
-        if (index < 0) columnList.Add(element);
-        else columnList.Insert(index, element);
+        AddToColumnLists(element);
     }
 
     public void Remove(FluidElement element)
@@ -68,7 +65,7 @@ public class FluidSystem : MonoBehaviour
         return elementList;
     }
 
-    public void StructuriseElements()
+    public void OrganiseElements()
     {
         elements.Sort((e1, e2) => e1.lowerLevel.CompareTo(e2.lowerLevel));
         elements.Sort((e1, e2) => e1.column.CompareTo(e2.column));
@@ -82,6 +79,12 @@ public class FluidSystem : MonoBehaviour
         {
             columnElementLists[element.column].Add(element);
         }
+    }
+
+    public void UpdateColumnListElement(FluidElement element)
+    {
+        columnElementLists[element.column].Remove(element);
+        AddToColumnLists(element);
     }
 
     public List<FluidElement> GetCollidedElements(FluidElement element)
@@ -104,8 +107,8 @@ public class FluidSystem : MonoBehaviour
         List<Block> blockList = new List<Block>();
         for (int y = element.lowerGridPosition; y <= element.upperGridPosition; y++)
         {
-            if (y == element.upperGridPosition && element.localUpperLevel == 0)
-                continue;
+            /*if (y == element.upperGridPosition && element.localUpperLevel == 0)
+                continue;*/
 
             if (mapManager.CheckInside(element.column, y) && !mapManager.CheckEmpty(element.column, y))
                 blockList.Add(mapManager[element.column, y]);
@@ -131,6 +134,14 @@ public class FluidSystem : MonoBehaviour
         {
             columnElementLists[i] = new List<FluidElement>();
         }
+    }
+
+    private void AddToColumnLists(FluidElement element)
+    {
+        List<FluidElement> columnList = columnElementLists[element.column];
+        int index = columnList.FindIndex(e => e.lowerLevel > element.lowerLevel);
+        if (index < 0) columnList.Add(element);
+        else columnList.Insert(index, element);
     }
 
     private List<FluidElement>[] columnElementLists = new List<FluidElement>[10];

@@ -8,7 +8,7 @@ public class BlockAnimator : MonoBehaviour
     private Block block;
 
     public static AnimationCurveAsset MovingCurveAsset;   // *static: make it can be initialised at other places
-    public static AnimationCurveAsset LandingCurveAsset;
+    public static AnimationCurveAsset FastMovingCurveAsset;
 
     private AnimationCurveAsset currentCurveAsset;
     private AnimationCurve movementCurve => currentCurveAsset.curve;
@@ -56,7 +56,7 @@ public class BlockAnimator : MonoBehaviour
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
         // Start landing animation
-        currentCurveAsset = LandingCurveAsset;
+        currentCurveAsset = FastMovingCurveAsset;
         block.isAnimating = true;
         currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
     }

@@ -27,9 +27,7 @@ public class GravityBlock : GeneralBlock
 
     private bool CheckFloating(MapManager map)
     {
-        if (!map.CheckInside(GridPosition.x, GridPosition.y - 1))
-            return false;
-        if (!map.CheckEmpty(GridPosition.x, GridPosition.y - 1))
+        if (map.IsBlocked(GridPosition.x, GridPosition.y - 1))
             return false;
         return true;
     }

@@ -18,7 +18,7 @@ public class Log : Block
     {
         int x = GridPosition.x + dirX;
         int y = GridPosition.y + dirY;
-        if (map.CheckInside(x, y) && map.CheckEmpty(x, y))
+        if (!map.IsBlocked(x, y))
         {
             Block leaf = BlockSpawner.NewBlock(BlockID.Leaf);
             map.SpawnBlock(leaf, x, y);

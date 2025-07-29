@@ -16,7 +16,7 @@ public class FluidElement : MonoBehaviour
     public float width => 1f;
     public float height => (float)amount / BlockAmount;
     public int lowerGridPosition => (lowerLevel >= 0 || lowerLevel % BlockAmount == 0) ? lowerLevel / BlockAmount : lowerLevel / BlockAmount - 1;
-    public int upperGridPosition => (upperLevel >= 0 || upperLevel % BlockAmount == 0) ? upperLevel / BlockAmount : upperLevel / BlockAmount - 1;
+    public int upperGridPosition => (upperLevel <= 0 || upperLevel % BlockAmount == 0) ? upperLevel / BlockAmount - 1 : upperLevel / BlockAmount;
     public int localLowerLevel => (lowerLevel % BlockAmount + BlockAmount) % BlockAmount;
     public int localUpperLevel => (upperLevel % BlockAmount + BlockAmount) % BlockAmount;
 

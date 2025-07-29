@@ -39,7 +39,7 @@ public class BlockSpawnDebugger : MonoBehaviour
         {
             int x = selectedGridPosition.x;
             int y = selectedGridPosition.y;
-            if (!debuggedMap.CheckInside(x, y) || !debuggedMap.CheckEmpty(x, y))
+            if (debuggedMap.IsBlocked(x, y))
                 return;
             else if (hasSpawnedGrids.Contains(new Vector2Int(x, y)))
                 return;

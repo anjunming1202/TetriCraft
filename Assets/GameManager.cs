@@ -100,6 +100,6 @@ public class GameManager : MonoBehaviour
 
         // Initialise block animator
         BlockAnimator.MovingCurveAsset = blockMovementCurve;
-        BlockAnimator.LandingCurveAsset = blockLandCurve;
+        BlockAnimator.FastMovingCurveAsset = blockLandCurve;
     }
 }
