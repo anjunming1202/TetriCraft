@@ -8,7 +8,7 @@ public class TetrominoGenerator
         TetrominoType tetroType = (TetrominoType)UnityEngine.Random.Range(0, (int)TetrominoType.Count);
 
         // Random blocks type
-        BlockID blockType = BlockID.Water /*BlockRandomSelector.GetRandomBlockID()*/;
+        BlockID blockType = BlockRandomSelector.GetRandomBlockID();
 
         NewTetromino(tetromino, tetroType, blockType);
     }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Glass : Block
 {
@@ -7,7 +8,7 @@ public class Glass : Block
     {
         if (!isLocked || block.isLocked)
             return false;
-        if (block.ID == BlockID.Glass)
+        if (supportableBlock.Contains(block.ID))
             return false;
         return true;
     }
@@ -16,4 +17,11 @@ public class Glass : Block
     {
         map.DestroyBlock(this);
     }
+
+    private List<BlockID> supportableBlock = new List<BlockID>()
+    {
+        BlockID.Glass,
+        BlockID.Water,
+        BlockID.Lava,
+    };
 }
