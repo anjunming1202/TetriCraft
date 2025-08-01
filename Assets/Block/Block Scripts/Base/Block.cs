@@ -113,7 +113,7 @@ public abstract class Block : MonoBehaviour
         OnLockedDown?.Invoke();
     }
 
-    private void Awake()
+    protected void Awake()
     {
         OnInstantiated();
     }

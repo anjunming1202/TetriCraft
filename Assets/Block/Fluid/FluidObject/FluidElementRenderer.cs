@@ -36,7 +36,7 @@ public class FluidElementRenderer : MonoBehaviour
     }
 
     /// <summary>
-    /// Render fluidBlock: set position, set texture
+    /// Render fluid element: set position, set texture
     /// </summary>
     public void Render()
     {
@@ -62,8 +62,8 @@ public class FluidElementRenderer : MonoBehaviour
         // Set animation
         if (fluidElement.isFalling || fluidElement.hasFlown)
             isAnimating = true;
-        else
-            isAnimating = false;
+        /*else
+            isAnimating = false;*/
 
         // Set material
         spriteRenderer.GetPropertyBlock(props);

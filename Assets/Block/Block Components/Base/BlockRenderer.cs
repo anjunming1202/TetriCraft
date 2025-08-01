@@ -15,16 +15,16 @@ public class BlockRenderer : MonoBehaviour
     protected SpriteRenderer spriteRenderer;
 
     // Block Reference
-    private Block block;
+    protected Block block;
 
-    void Awake()
+    protected void Awake()
     {
         block = GetComponent<Block>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         Render(block);
     }
 
-    void Update()
+    protected void Update()
     {
         
     }
@@ -33,7 +33,7 @@ public class BlockRenderer : MonoBehaviour
     /// <summary>
     /// Render block: set position, set texture
     /// </summary>
-    private void Render(Block block)
+    protected virtual void Render(Block block)
     {
         spriteRenderer.sprite = mainTexture;
     }

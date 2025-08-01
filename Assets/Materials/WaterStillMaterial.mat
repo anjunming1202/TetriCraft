@@ -30,6 +30,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _Animating: 0
+    - _Animation: 0
     - _BUILTIN_QueueControl: 0
     - _Column: 1
     - _Reversed: 1
