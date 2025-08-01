@@ -13,6 +13,8 @@ public class FluidElementRenderer : MonoBehaviour
     [SerializeField] private Material stillMaterial;
     [SerializeField] private Material flowingMaterial;
 
+    private bool isAnimating;
+
     void Awake()
     {
         fluidElement = GetComponent<FluidElement>();
@@ -57,11 +59,18 @@ public class FluidElementRenderer : MonoBehaviour
             spriteRenderer.material = stillMaterial;
         }
 
+        // Set animation
+        if (fluidElement.isFalling || fluidElement.hasFlown)
+            isAnimating = true;
+        else
+            isAnimating = false;
+
         // Set material
         spriteRenderer.GetPropertyBlock(props);
         props.SetColor("_Color", spriteRenderer.color); //
         props.SetFloat("_UpperLevel", (float)fluidElement.upperLevel / FluidElement.BlockAmount);
         props.SetFloat("_LowerLevel", (float)fluidElement.lowerLevel / FluidElement.BlockAmount);
+        props.SetFloat("_Animation", isAnimating ? 1 : 0);
         spriteRenderer.SetPropertyBlock(props);
 
         // Set transform size

@@ -8,6 +8,6 @@ public class WaterBlock : FluidBlock
     {
         base.OnLockdown(map);
         MapManager.WaterManager.SpawnElement(GridPosition.x, FluidElement.Local2Level(GridPosition.y, 0));
-        Remove(map);
+        map.RemoveBlock(this);
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public abstract class FluidBlock : Block
 {
-    public override bool OnTryReplacedBy(Block block)
+    public override bool CanBeReplacedBy(Block block)
     {
         return true;
     }

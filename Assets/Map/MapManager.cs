@@ -54,14 +54,17 @@ public class MapManager : MonoBehaviour
                 if (block == null)
                     continue;
                 Vector2Int gridPosition = tetromino.LocalToMap(r, c);
-                AddBlock(block, gridPosition.x, gridPosition.y, false);
+                AddNewBlock(block, gridPosition.x, gridPosition.y, false);
                 block.transform.SetParent(tetromino.transform);
             }
     }
 
     public void SpawnBlock(Block block, int x, int y)
     {
-        AddBlock(block, x, y, true);
+        if (blockGrid[x, y] != null)
+            blockGrid[x, y].OnReplacedBy(this, block);
+
+        AddNewBlock(block, x, y, true);
         block.transform.SetParent(transform);
     }
 
@@ -98,6 +101,13 @@ public class MapManager : MonoBehaviour
         }
         foreach (Block block in blockUpdateBatch)
         {
+            // if dummy
+            int x = block.GridPosition.x;
+            int y = block.GridPosition.y;
+            if (blockGrid[x, y] != null && blockGrid[x, y].IsDummy)
+            {
+                RemoveBlock(blockGrid[x, y]);
+            }
             blockGrid.Add(block);
         }
         foreach (Block block in blockUpdateBatch)
@@ -124,7 +134,7 @@ public class MapManager : MonoBehaviour
     /// <summary>
     /// Add new block into the map
     /// </summary>
-    private void AddBlock(Block block, int x, int y, bool lockdownState)
+    private void AddNewBlock(Block block, int x, int y, bool lockdownState)
     {
         block.SetPosition(x, y);
 
@@ -171,7 +181,7 @@ public class MapManager : MonoBehaviour
         if (y >= height)
             return true;
 
-        return blockGrid[x, y] == null;
+        return blockGrid[x, y] == null || blockGrid[x, y].IsDummy;
     }
 
     public bool CheckRowFull(int row)
@@ -196,6 +206,11 @@ public class MapManager : MonoBehaviour
     public bool IsBlocked(int x, int y)
     {
         return !CheckInside(x, y) || !CheckEmpty(x, y);
+    }
+
+    public bool IsInsideGrid(int x, int y)
+    {
+        return x >= 0 && x < width && y >= 0 && y < height;
     }
 
     public bool CheckMapEmpty()

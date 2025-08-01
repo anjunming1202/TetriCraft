@@ -929,10 +929,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementPrefab: {fileID: 1767523962583349396, guid: 5f55d0b41fc68c948ae062c12e30b169, type: 3}
   fluidSystem: {fileID: 718323504}
+  dummyFluid: {fileID: 7742082380615453442, guid: 34bbde5f8ac730043bee465993c70ce0, type: 3}
   unitFlowingAmount: 10
   flowingSpeed: 20
   wobbleTime: 0.1
   useWobbling: 1
+  dummyBlockPositions: []
   isDebugging: 0
 --- !u!114 &718323504
 MonoBehaviour:
@@ -1276,10 +1278,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementPrefab: {fileID: 0}
   fluidSystem: {fileID: 1152869741}
+  dummyFluid: {fileID: 0}
   unitFlowingAmount: 0
   flowingSpeed: 10
   wobbleTime: 1
   useWobbling: 1
+  dummyBlockPositions: []
   isDebugging: 0
 --- !u!4 &1152869740
 Transform:

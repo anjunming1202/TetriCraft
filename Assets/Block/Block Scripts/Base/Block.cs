@@ -10,6 +10,9 @@ public abstract class Block : MonoBehaviour
     // Data in the map
     private Vector2 position = Vector2.zero;            // Block position in the map
 
+    // Block properties
+    public virtual bool IsDummy => false;
+
     // Block state flags
     public bool isInMap = false;        // is in the map data
     public bool isLocked = false;       // is locked => ready to be cleared
@@ -56,9 +59,14 @@ public abstract class Block : MonoBehaviour
 
     }
 
-    public virtual bool OnTryReplacedBy(Block block)
+    public virtual bool CanBeReplacedBy(Block block)
     {
         return false;
+    }
+
+    public virtual void OnReplacedBy(MapManager map, Block block)
+    {
+        Debug.LogError($"block {this} at {position} wrongly replaced");
     }
 
     /// <summary>
@@ -67,7 +75,7 @@ public abstract class Block : MonoBehaviour
     public virtual void Destroy(MapManager map)
     {
         OnDestroyed?.Invoke();
-        GameObject.Destroy(gameObject);
+        Remove(map);
     }
 
     public virtual void Remove(MapManager map)
@@ -109,13 +117,4 @@ public abstract class Block : MonoBehaviour
     {
         OnInstantiated();
     }
-}
-
-public enum BlockMapState
-{
-    NotInMap = -1,
-    InTetromino,
-    Grounding,
-    Locked,
-    NotClearable
 }

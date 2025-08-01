@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEditor.Rendering.FilterWindow;
 
 public class FluidManager : MonoBehaviour
 {
+    public BlockID ID => elementPrefab.ID;
+    public BlockID DummyID => dummyFluid.ID;
+
     public FluidElement elementPrefab;
     public FluidSystem fluidSystem;
+    public Block dummyFluid;
 
     public int unitFlowingAmount = 10;
     public float flowingSpeed = 10f;
 
     public float wobbleTime = 1f;
     public bool useWobbling = true;
+
+    public List<Vector2Int> dummyBlockPositions = new List<Vector2Int>();
 
     public void OnUpdate(MapManager mapManager)
     {
@@ -33,8 +39,12 @@ public class FluidManager : MonoBehaviour
 
             UpdateFlow(mapManager);
 
-            UpdateElementList();
+            MergeElements();
+            DeleteEmptyElements();
 
+            GenerateDummyBlocks(mapManager);
+
+            //
             double totalAmountUpdated = MonitorTotalFluidAmount();
             Debug.Assert(totalAmountUpdated - totalAmountOriginal < Mathf.Epsilon, $"total fluid amount error: {totalAmountOriginal} to {totalAmountUpdated}");
             Debug.Log($"total fluid amount: {totalAmountUpdated}");
@@ -84,6 +94,8 @@ public class FluidManager : MonoBehaviour
     {
         int x = position.x;
         int y = position.y;
+        if (!mapManager.IsBlocked(x, y))
+            return;
 
         int gridUpperLevel = FluidElement.Local2Level(y + 1, 0);
         int gridLowerLevel = FluidElement.Local2Level(y, 0);
@@ -183,7 +195,7 @@ public class FluidManager : MonoBehaviour
                         // not colliding anything => finish overflowing
                         elementSqueezed = null;
                         break;
-                    }                    
+                    }
                 }
                 offsetX++;
             }
@@ -222,7 +234,7 @@ public class FluidManager : MonoBehaviour
                         isCollidingWall[i] = isCollidingWall[i] || mapManager.IsBlocked(targetX, targetY);
                         if (isCollidingWall[i])
                             continue;
-                        
+
                         // fill the column space maximisely
                         int groundLevel = FluidElement.Local2Level(targetY, 0);
                         bool isCollidingCeiling = false;
@@ -285,23 +297,12 @@ public class FluidManager : MonoBehaviour
                 }
                 targetY++;
             }
-
-
-
-
-            /*if (elementSqueezed != null)
-                fluidSystem.Remove(elementSqueezed);*/
         }
     }
 
-    private FluidElement SplitElement(FluidElement element, int splitLevel)
+    public FluidElement SplitElement(FluidElement element, int splitLevel)
     {
         Debug.Assert(splitLevel <= element.upperLevel && splitLevel >= element.lowerLevel, $"element splitting error {element} {splitLevel}");
-
-        if (!(splitLevel <= element.upperLevel && splitLevel >= element.lowerLevel))
-        {
-
-        }
 
         if (splitLevel == element.upperLevel)
             return null;
@@ -323,7 +324,7 @@ public class FluidManager : MonoBehaviour
     private List<FluidElement> entrainmentElements = new List<FluidElement>();
 
     private float wobbleTimer;
-    private bool isWobbleTriggered;
+    private bool isWobbleTriggered; 
 
     private void ResetFlowUpdates()
     {
@@ -336,7 +337,7 @@ public class FluidManager : MonoBehaviour
         }
     }
 
-    private void UpdateElementList()
+    private void MergeElements()
     {
         foreach (var mergeList in lazilyMergedLists)
         {
@@ -351,7 +352,10 @@ public class FluidManager : MonoBehaviour
             }
         }
         lazilyMergedLists.Clear();
+    }
 
+    private void DeleteEmptyElements()
+    {
         // remove empty elements
         for (int i = fluidSystem.elements.Count - 1; i >= 0; i--)
         {
@@ -633,12 +637,59 @@ public class FluidManager : MonoBehaviour
         lazilyMergedLists.Add(new List<FluidElement> { lower, upper });
     }
 
-    private void GenerateDummyBlocks()
+    private void GenerateDummyBlocks(MapManager mapManager)
     {
-        foreach (FluidElement element in fluidSystem.elements)
-        {
+        int pointer = 0;
 
+        // spawn dummy blocks
+        List<Vector2Int> positions = fluidSystem.CalculateBlockPositions();
+
+        foreach (Vector2Int position in positions)
+        {
+            Debug.Assert(!mapManager.IsBlocked(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
+
+            if (!mapManager.IsInsideGrid(position.x,position.y))
+            {
+                continue;
+            }
+
+            if (dummyBlockPositions.Contains(position))
+            {
+                dummyBlockPositions.Remove(position);
+                dummyBlockPositions.Insert(pointer, position);
+                pointer++;
+            }
+            else
+            {
+                SpawnDummyBlock(mapManager, position);
+                dummyBlockPositions.Remove(position);
+                dummyBlockPositions.Insert(pointer, position);
+                pointer++;
+            }
         }
+
+        // remove other invalid dummy blocks
+        for (int i = dummyBlockPositions.Count - 1; i >= pointer; i--)
+        {
+            RemoveDummyBlock(mapManager, dummyBlockPositions[i]);
+        }
+    }
+
+    private void SpawnDummyBlock(MapManager mapManager, Vector2Int position)
+    {
+        Block newDummyBlock = BlockSpawner.NewBlock(DummyID);
+        mapManager.SpawnBlock(newDummyBlock, position.x, position.y);
+    }
+
+    private void RemoveDummyBlock(MapManager mapManager, Vector2Int position)
+    {
+        if (mapManager[position.x, position.y] != null && mapManager[position.x, position.y].IsDummy)
+        {
+            mapManager.RemoveBlock(mapManager[position.x, position.y]);
+            return;
+        }
+        else
+            dummyBlockPositions.Remove(position);
     }
 
     private void OnDrawGizmos()

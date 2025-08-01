@@ -6,8 +6,6 @@ using UnityEngine;
 
 public class FluidSystem : MonoBehaviour
 {
-    //static public float InfinitesimalAmount = 0.1f;
-
     public List<FluidElement> elements;
 
     public void Add(FluidElement element)
@@ -22,6 +20,9 @@ public class FluidSystem : MonoBehaviour
     public void Remove(FluidElement element)
     {
         elements.Remove(element);
+
+        RemoveFromColumnLists(element);
+
         GameObject.Destroy(element.gameObject);
     }
 
@@ -83,7 +84,7 @@ public class FluidSystem : MonoBehaviour
 
     public void UpdateColumnListElement(FluidElement element)
     {
-        columnElementLists[element.column].Remove(element);
+        RemoveFromColumnLists(element);
         AddToColumnLists(element);
     }
 
@@ -110,10 +111,37 @@ public class FluidSystem : MonoBehaviour
             /*if (y == element.upperGridPosition && element.localUpperLevel == 0)
                 continue;*/
 
-            if (mapManager.CheckInside(element.column, y) && !mapManager.CheckEmpty(element.column, y))
+            if (mapManager.CheckInside(element.column, y) && mapManager.IsBlocked(element.column, y))
                 blockList.Add(mapManager[element.column, y]);
         }
         return blockList;
+    }
+
+    public List<Vector2Int> CalculateBlockPositions()
+    {
+        List<Vector2Int> blockPositions = new List<Vector2Int>();
+
+        foreach (FluidElement element in elements)
+        {
+            for (int y = element.lowerGridPosition; y <= element.upperGridPosition; y++)
+            {
+                // only clearable when reach the ground
+                if (element.isFalling)
+                    continue;
+
+                if (element.lowerLevel <= FluidElement.Local2Level(y, 0) && element.upperLevel >= FluidElement.Local2Level(y + 1, 0))
+                {
+                    Vector2Int position = new Vector2Int(element.column, y);
+
+                    // TODO: repeated means overlapped, which is a bug
+                    if (blockPositions.Contains(position))
+                        continue;
+
+                    blockPositions.Add(position);
+                }
+            }
+        }
+        return blockPositions;
     }
 
     public bool ContainsFluid(int x, int y)
@@ -142,6 +170,11 @@ public class FluidSystem : MonoBehaviour
         int index = columnList.FindIndex(e => e.lowerLevel > element.lowerLevel);
         if (index < 0) columnList.Add(element);
         else columnList.Insert(index, element);
+    }
+
+    private void RemoveFromColumnLists(FluidElement element)
+    {
+        columnElementLists[element.column].Remove(element);
     }
 
     private List<FluidElement>[] columnElementLists = new List<FluidElement>[10];

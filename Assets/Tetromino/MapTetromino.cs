@@ -62,9 +62,9 @@ public class MapTetromino : Tetromino
                 // check for replacing
                 if (mapBlock != null)
                 {
-                    bool replaceable = mapBlock.OnTryReplacedBy(block);
+                    bool replaceable = mapBlock.CanBeReplacedBy(block);
                     if (replaceable)
-                        map.DestroyBlock(map[currPosition.x, currPosition.y]);
+                        mapBlock.OnReplacedBy(map, block);
                 }
 
                 // update the block
@@ -254,7 +254,7 @@ public class MapTetromino : Tetromino
                     if (mapBlock != null && mapBlock.isLocked)
                     {
                         // if can be replaced => ignore
-                        bool collide = !mapBlock.OnTryReplacedBy(tetrominoBlock);
+                        bool collide = !mapBlock.CanBeReplacedBy(tetrominoBlock);
                         if (!collide)
                             continue;
 

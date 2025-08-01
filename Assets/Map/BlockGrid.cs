@@ -18,8 +18,11 @@ public class BlockGrid
 
     public void Add(Block block)
     {
-        Debug.Assert(grid[block.GridPosition.x, block.GridPosition.y] == null, "Block position overlap!");
-        grid[block.GridPosition.x, block.GridPosition.y] = block;
+        int x = block.GridPosition.x;
+        int y = block.GridPosition.y;
+
+        Debug.Assert(grid[x, y] == null, "Block position overlap!");
+        grid[x, y] = block;
 
         positions.Add(block, block.GridPosition);
 

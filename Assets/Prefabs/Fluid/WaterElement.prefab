@@ -99,12 +99,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ID: 9
-  position: {x: 0, y: 0}
+  column: 0
+  amount: 0
   lowerLevel: 0
-  height: 0
-  isFlowingDown: 0
-  isStill: 0
+  isFalling: 0
   updatingState: 0
+  hasFlown: 0
+  entrainmentDirection: -1
 --- !u!114 &3458528884425792302
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: StillWaterMaterial
+  m_Name: WaterFlowingMaterial
   m_Shader: {fileID: -6465566751694194690, guid: 87730a5056d7ebd4497c0cfec8fda1f9, type: 3}
-  m_Parent: {fileID: -876546973899608171, guid: 87730a5056d7ebd4497c0cfec8fda1f9, type: 3}
+  m_Parent: {fileID: 2100000, guid: 967afd4d131312a47821dbe5db99211d, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -24,15 +24,18 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 7617833c22c391e4995daa902b3df427, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Animating: 1
     - _BUILTIN_QueueControl: 0
-    - _Column: 1
+    - _Column: 2
     - _Reversed: 1
-    m_Colors: []
+    - _Speed: 1
+    m_Colors:
+    - _Color: {r: 0, g: 0.5063281, b: 1, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &6279799293275643451
 MonoBehaviour:
