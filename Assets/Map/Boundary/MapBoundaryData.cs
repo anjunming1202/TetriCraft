@@ -9,7 +9,7 @@ public class MapBoundaryData : ScriptableObject
     public int height => (int)boundary.height;
 
     // World coords data
-    public const int unitSize = 1;
+    public const float unitSize = 1f;
     public Vector3 origin => boundary.min;
 
     // Use as static resource
@@ -35,20 +35,22 @@ public class MapBoundaryData : ScriptableObject
         return instance;
     }
     // Coordinate conversion
-    public static Vector3 GridToWorld(Vector2Int posGrid)
+    public static Vector3 MapToWorld(Vector2Int posMap)
     {
-        return (Vector3)((Vector2)posGrid * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
+        return (Vector3)((Vector2)posMap * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
     }
-    // Check inside
-    /// <summary>
-    /// Check for top, bottom, left, and right boundaries
-    /// </summary>
-    public static bool CheckInside(float x, float y)
+    public static Vector3 MapToWorld(Vector2 posMap)
     {
-        return x >= 0 && x < Instance.width && y >= 0 && y < Instance.height;
+        return (Vector3)(posMap * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
     }
-    public static bool CheckInside(Vector2 pos)
+    public static Vector2Int WorldToGrid(Vector3 posWorld)
     {
-        return CheckInside(pos.x, pos.y);
+        Vector2 mapPosition = (posWorld - instance.origin) / unitSize;
+        return new Vector2Int(Mathf.FloorToInt(mapPosition.x), Mathf.FloorToInt(mapPosition.y));
+    }
+    public static Vector2 WorldToMap(Vector3 posWorld)
+    {
+        Vector2 mapPosition = (posWorld - instance.origin) / unitSize;
+        return mapPosition;
     }
 }
