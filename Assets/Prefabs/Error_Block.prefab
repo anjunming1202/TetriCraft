@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 671932412832912740}
   - component: {fileID: 9028015919182796587}
   - component: {fileID: -8600588115597379792}
+  - component: {fileID: 3632011394255181162}
   m_Layer: 0
   m_Name: Error_Block
   m_TagString: Block
@@ -144,3 +145,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   breakingParticles: {fileID: 7021957719075297926, guid: 8b40618432a6d2d428f4acdcc47c12c0, type: 3}
+--- !u!114 &3632011394255181162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95365e6b7b8e2f44d9fde19b1808768e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  placedSounds: []
+  destroyedSounds: []

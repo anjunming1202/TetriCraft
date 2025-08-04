@@ -25,7 +25,7 @@ public class MapManager : MonoBehaviour
     public List<Block> blocks => blockList;
     public List<Block> batchBlocks => blockUpdateBatch;
 
-    public Action<MapManager, Vector2Int> OnGridPlace;
+    public Action<MapManager, Block> OnGridPlace;
 
 
 
@@ -84,13 +84,16 @@ public class MapManager : MonoBehaviour
 
     public void OnUpdateBlocks()
     {
+        // Block map
         for (int i = 0; i < blockList.Count; i++)
         {
             blockList[i].OnUpdate(this);
         }
 
+        // Fluid map
         waterManager.OnUpdate(this);
         lavaManager.OnUpdate(this);
+        SpawnFluidConcretion();
     }
 
     public void BatchUpdateBlocks()
@@ -112,7 +115,7 @@ public class MapManager : MonoBehaviour
         }
         foreach (Block block in blockUpdateBatch)
         {
-            OnGridPlace?.Invoke(this, block.GridPosition);
+            OnGridPlace?.Invoke(this, block);
         }
         blockUpdateBatch.Clear();
     }
@@ -139,7 +142,6 @@ public class MapManager : MonoBehaviour
         block.SetPosition(x, y);
 
         blockGrid.Add(block);
-        OnGridPlace?.Invoke(this, block.GridPosition);
 
         block.OnPositionChanged += AddToUpdateBatch;
 
@@ -147,6 +149,36 @@ public class MapManager : MonoBehaviour
 
         if (lockdownState)
             block.OnLockdown(this);
+
+        //OnGridPlace?.Invoke(this, block);
+    }
+
+    private void SpawnFluidConcretion()
+    {
+        for (int i =  waterManager.fluidSystem.elements.Count - 1; i >= 0; i--)
+        {
+            FluidElement waterElement = waterManager.fluidSystem.elements[i];
+            List<FluidElement> collidedLavaElements = lavaManager.fluidSystem.GetCollidedElements(waterElement);
+            FluidElement lavaElement = collidedLavaElements.Count > 0 ? collidedLavaElements[0] : null;
+            if (lavaElement != null && lavaElement.amount > 0 && waterElement.amount > 0)
+            {
+                // Spawn block
+                int concretionAmount = Mathf.Min(waterElement.upperLevel, lavaElement.upperLevel) - Mathf.Max(waterElement.lowerLevel, lavaElement.lowerLevel);
+                waterElement.amount -= concretionAmount;
+                lavaElement.amount -= concretionAmount;
+
+                Block spawnedBlock;
+                if (waterElement.hasFlown)
+                    spawnedBlock = BlockSpawner.NewBlock(waterToLava);
+                else if (lavaElement.hasFlown)
+                    spawnedBlock = BlockSpawner.NewBlock(lavaToWater);
+                else //
+                    spawnedBlock = BlockSpawner.NewBlock(waterToLava);
+
+                spawnedBlock.GetComponent<BlockSoundManager>().placedSounds = new AudioClip[] { fizzSound };
+                SpawnBlock(spawnedBlock, waterElement.column, waterElement.lowerGridPosition);
+            }
+        }
     }
 
     // Blocks
@@ -155,6 +187,10 @@ public class MapManager : MonoBehaviour
     // Fluid
     [SerializeField] private FluidManager waterManager;
     [SerializeField] private FluidManager lavaManager;
+
+    [SerializeField] private AudioClip fizzSound;
+    private BlockID waterToLava = BlockID.Obsidian;
+    private BlockID lavaToWater = BlockID.Cobblestone;
 
     // Map Boundary Data
     private int width;

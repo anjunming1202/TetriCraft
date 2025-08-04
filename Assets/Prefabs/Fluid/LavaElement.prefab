@@ -10,12 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 9079800203541379973}
   - component: {fileID: 2692196136773849335}
-  - component: {fileID: -140977082897033341}
-  - component: {fileID: 9028015919182796587}
-  - component: {fileID: -4112071912644774665}
-  - component: {fileID: 1747300778872766148}
+  - component: {fileID: 1767523962583349396}
+  - component: {fileID: 3458528884425792302}
   m_Layer: 0
-  m_Name: LavaDummy
+  m_Name: LavaElement
   m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56,7 +54,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 53bd987eea059074582bc5480504e68f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -77,8 +75,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
-  m_Color: {r: 1, g: 1, b: 0, a: 0}
+  m_Sprite: {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
+  m_Color: {r: 1, g: 1, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -88,7 +86,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
---- !u!114 &-140977082897033341
+--- !u!114 &1767523962583349396
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -97,14 +95,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 6118796901473174655}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07bd1044c3dfe2040b4fafa2897f47e2, type: 3}
+  m_Script: {fileID: 11500000, guid: b3a4133e0a060ec40b39dbfbb36620d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isInMap: 0
-  isLocked: 0
-  isClearable: 0
-  isAnimating: 0
---- !u!114 &9028015919182796587
+  ID: 10
+  column: 0
+  amount: 0
+  lowerLevel: 0
+  isFalling: 0
+  updatingState: 0
+  hasFlown: 0
+  entrainmentDirection: -1
+--- !u!114 &3458528884425792302
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -113,35 +115,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6118796901473174655}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83cde78856fb25741acdccb7ca2d5758, type: 3}
+  m_Script: {fileID: 11500000, guid: 400bb8a87cf2c254ab158d93864794be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startPosition: {x: 0, y: 0, z: 0}
-  endPosition: {x: 0, y: 0, z: 0}
---- !u!114 &-4112071912644774665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6118796901473174655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95365e6b7b8e2f44d9fde19b1808768e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  placedSounds: []
-  destroyedSounds: []
---- !u!114 &1747300778872766148
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6118796901473174655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c64fff6d2c61293468fdf8af9bbab426, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  breakingParticles: {fileID: 0}
+  stillTexture: {fileID: 21300000, guid: 7e293fdfa0cca25499a8d498d0473de7, type: 3}
+  flowingTexture: {fileID: 21300000, guid: 6cdaa76670351c545a244980d7fa6cd4, type: 3}
+  stillMaterial: {fileID: 2100000, guid: 53bd987eea059074582bc5480504e68f, type: 2}
+  flowingMaterial: {fileID: 2100000, guid: d6a6b75a82c186b44bf2e8669df3734d, type: 2}

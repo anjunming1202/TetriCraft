@@ -677,7 +677,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BackGroundColor: {r: 0.1254902, g: 0.1254902, b: 0.1254902, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -930,7 +930,6 @@ MonoBehaviour:
   elementPrefab: {fileID: 1767523962583349396, guid: 5f55d0b41fc68c948ae062c12e30b169, type: 3}
   fluidSystem: {fileID: 718323504}
   dummyFluid: {fileID: 7742082380615453442, guid: 34bbde5f8ac730043bee465993c70ce0, type: 3}
-  unitFlowingAmount: 10
   flowingSpeed: 20
   wobbleTime: 0.1
   useWobbling: 1
@@ -1079,6 +1078,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waterManager: {fileID: 718323503}
   lavaManager: {fileID: 1152869739}
+  fizzSound: {fileID: 8300000, guid: 3f00901b26a863f44a01d5437be52f62, type: 3}
 --- !u!1 &827601246
 GameObject:
   m_ObjectHideFlags: 0
@@ -1155,7 +1155,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debuggedMap: {fileID: 763784240}
-  blockSpawned: 9
+  blockSpawned: 10
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
 --- !u!114 &1036024157
 MonoBehaviour:
@@ -1231,6 +1231,9 @@ MonoBehaviour:
   - {fileID: 6118796901473174655, guid: 76f2f37835960854aae28c91388682cc, type: 3}
   - {fileID: 6118796901473174655, guid: cb34e9cffbe37754c91d34613fbfd2e3, type: 3}
   - {fileID: 6118796901473174655, guid: 34bbde5f8ac730043bee465993c70ce0, type: 3}
+  - {fileID: 6118796901473174655, guid: d34ad8be5aed41a4c9709ac6ffe065d9, type: 3}
+  - {fileID: 6118796901473174655, guid: b311c5aa62e88ec479c84f6d40457f85, type: 3}
+  - {fileID: 6118796901473174655, guid: 7bb75fccfc19ee0488ee3dd09240973c, type: 3}
 --- !u!4 &1050138633
 Transform:
   m_ObjectHideFlags: 0
@@ -1276,12 +1279,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d39247e287c5b8c4a863f594de1e7cff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  elementPrefab: {fileID: 0}
+  elementPrefab: {fileID: 1767523962583349396, guid: d846fc19895732343ad8d3aba3de93e7, type: 3}
   fluidSystem: {fileID: 1152869741}
-  dummyFluid: {fileID: 0}
-  unitFlowingAmount: 0
+  dummyFluid: {fileID: -140977082897033341, guid: b311c5aa62e88ec479c84f6d40457f85, type: 3}
   flowingSpeed: 10
-  wobbleTime: 1
+  wobbleTime: 0.4
   useWobbling: 1
   dummyBlockPositions: []
   isDebugging: 0
