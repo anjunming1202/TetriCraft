@@ -661,6 +661,9 @@ public class FluidManager : MonoBehaviour
             }
             else
             {
+                if (mapManager[position.x, position.y] != null && mapManager[position.x, position.y].IsFluid)
+                    continue;
+
                 SpawnDummyBlock(mapManager, position);
                 dummyBlockPositions.Remove(position);
                 dummyBlockPositions.Insert(pointer, position);
@@ -677,9 +680,6 @@ public class FluidManager : MonoBehaviour
 
     private void SpawnDummyBlock(MapManager mapManager, Vector2Int position)
     {
-        if (mapManager[position.x, position.y] != null && mapManager[position.x, position.y].IsFluid)
-            return;
-
         Debug.Assert(!mapManager.IsBlocked(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
 
         Block newDummyBlock = BlockSpawner.NewBlock(DummyID);
