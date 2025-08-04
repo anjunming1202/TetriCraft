@@ -12,6 +12,7 @@ public abstract class Block : MonoBehaviour
 
     // Block properties
     public virtual bool IsDummy => false;
+    public virtual bool IsFluid => false;
 
     // Block state flags
     public bool isInMap = false;        // is in the map data
@@ -52,6 +53,7 @@ public abstract class Block : MonoBehaviour
     public virtual void OnLockdown(MapManager map)
     {
         OnLockdown();
+        map.OnGridPlace?.Invoke(map, this);
     }
 
     public virtual void OnUpdate(MapManager map)

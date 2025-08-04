@@ -14,7 +14,7 @@ public class FluidManager : MonoBehaviour
     public FluidSystem fluidSystem;
     public Block dummyFluid;
 
-    public int unitFlowingAmount = 10;
+    public const int unitFlowingAmount = 10;
     public float flowingSpeed = 10f;
 
     public float wobbleTime = 1f;
@@ -90,12 +90,14 @@ public class FluidManager : MonoBehaviour
         return element;
     }*/
 
-    public void BlockSqueeze(MapManager mapManager, Vector2Int position)
+    public void BlockSqueeze(MapManager mapManager, Block block)
     {
-        int x = position.x;
-        int y = position.y;
-        if (!mapManager.IsBlocked(x, y))
+        // dummy / unlocked fluid => can't squeeze
+        if (block.IsDummy || (block.IsFluid && !block.isLocked))
             return;
+
+        int x = block.GridPosition.x;
+        int y = block.GridPosition.y;
 
         int gridUpperLevel = FluidElement.Local2Level(y + 1, 0);
         int gridLowerLevel = FluidElement.Local2Level(y, 0);
@@ -646,8 +648,6 @@ public class FluidManager : MonoBehaviour
 
         foreach (Vector2Int position in positions)
         {
-            Debug.Assert(!mapManager.IsBlocked(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
-
             if (!mapManager.IsInsideGrid(position.x,position.y))
             {
                 continue;
@@ -661,6 +661,9 @@ public class FluidManager : MonoBehaviour
             }
             else
             {
+                if (mapManager[position.x, position.y] != null && mapManager[position.x, position.y].IsFluid)
+                    continue;
+
                 SpawnDummyBlock(mapManager, position);
                 dummyBlockPositions.Remove(position);
                 dummyBlockPositions.Insert(pointer, position);
@@ -677,6 +680,8 @@ public class FluidManager : MonoBehaviour
 
     private void SpawnDummyBlock(MapManager mapManager, Vector2Int position)
     {
+        Debug.Assert(!mapManager.IsBlocked(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
+
         Block newDummyBlock = BlockSpawner.NewBlock(DummyID);
         mapManager.SpawnBlock(newDummyBlock, position.x, position.y);
     }
@@ -702,12 +707,12 @@ public class FluidManager : MonoBehaviour
             if (!element.isFalling)
             {
                 Gizmos.color = Color.green;
-                Gizmos.DrawWireCube(element.transform.position, element.GetComponent<SpriteRenderer>().size * element.transform.localScale);
+                Gizmos.DrawWireCube(element.transform.position, element.GetComponent<SpriteRenderer>().bounds.size);
             }
             else
             {
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawWireCube(element.transform.position, 2 * element.GetComponent<SpriteRenderer>().size * element.transform.localScale);
+                Gizmos.DrawWireCube(element.transform.position, element.GetComponent<SpriteRenderer>().bounds.size);
             }
         }
     }

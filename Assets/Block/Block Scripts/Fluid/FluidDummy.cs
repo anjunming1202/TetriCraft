@@ -3,8 +3,6 @@ using UnityEngine;
 
 public abstract class FluidDummy : Block
 {
-    public abstract FluidManager FluidManager { get; }
-
     public override bool IsDummy => true;
 
     public override bool CanBeReplacedBy(Block block)
@@ -47,4 +45,6 @@ public abstract class FluidDummy : Block
 
         base.Destroy(map);
     }
+
+    protected abstract FluidManager FluidManager { get; }
 }

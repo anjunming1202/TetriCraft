@@ -7,6 +7,7 @@ using UnityEngine;
 public class FluidSystem : MonoBehaviour
 {
     public List<FluidElement> elements;
+    public List<FluidElement> ColumnElements(int column) => columnElementLists[column];
 
     public void Add(FluidElement element)
     {

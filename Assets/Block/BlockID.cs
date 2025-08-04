@@ -16,6 +16,7 @@ public enum BlockID
     Lava,
     WaterDummy,
     LavaDummy,
+    Obsidian,
 
     Count
 }

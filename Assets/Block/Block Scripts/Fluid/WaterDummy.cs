@@ -2,6 +2,6 @@
 
 public class WaterDummy : FluidDummy
 {
-    public override BlockID ID => BlockID.WaterDummy;
-    public override FluidManager FluidManager => MapManager.WaterManager;
+    [HideInInspector] public override BlockID ID => BlockID.WaterDummy;
+    protected override FluidManager FluidManager => MapManager.WaterManager;
 }
