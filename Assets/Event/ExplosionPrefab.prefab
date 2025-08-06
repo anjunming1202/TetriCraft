@@ -46,10 +46,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   position: {x: 0, y: 0}
   radius: 0
-  blastIntensity: 50
-  damagePerHit: 0.1
+  blastIntensity: 200
+  minDamagePerHit: 0.1
+  maxDamagePerHit: 0.5
   minRayLength: 1
-  useRandomLength: 1
   explodeSounds:
   - {fileID: 8300000, guid: fd4e6cdbeea95cb438335798d7371006, type: 3}
   - {fileID: 8300000, guid: 4cae32d0b412fb340b58f5932ccb01af, type: 3}

@@ -4,9 +4,9 @@ public class Log : Block
 {
     [HideInInspector] public override BlockID ID => BlockID.Log;
 
-    public override void OnLockdown(MapManager map)
+    public override void OnLockdown()
     {
-        OnLockdown();
+        base.OnLockdown();
  
         TrySpawnLeaf(map, 1, 0); 
         TrySpawnLeaf(map, 0, 1);

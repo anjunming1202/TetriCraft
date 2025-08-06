@@ -54,6 +54,7 @@ public class MapManager : MonoBehaviour
                 if (block == null)
                     continue;
                 Vector2Int gridPosition = tetromino.LocalToMap(r, c);
+                block.OnSpawn(this);
                 AddNewBlock(block, gridPosition.x, gridPosition.y, false);
                 block.transform.SetParent(tetromino.transform);
             }
@@ -62,10 +63,10 @@ public class MapManager : MonoBehaviour
     public void SpawnBlock(Block block, int x, int y)
     {
         if (blockGrid[x, y] != null)
-            blockGrid[x, y].OnReplacedBy(this, block);
+            blockGrid[x, y].OnReplacedBy(block);
 
+        block.OnSpawn(this);
         AddNewBlock(block, x, y, true);
-        block.transform.SetParent(transform);
     }
 
     public void DestroyBlock(Block block)
@@ -87,7 +88,7 @@ public class MapManager : MonoBehaviour
         // Block map
         for (int i = 0; i < blockList.Count; i++)
         {
-            blockList[i].OnUpdate(this);
+            blockList[i].OnUpdate();
         }
 
         // Fluid map
@@ -148,7 +149,7 @@ public class MapManager : MonoBehaviour
         blockList.Add(block);
 
         if (lockdownState)
-            block.OnLockdown(this);
+            block.OnLockdown();
 
         //OnGridPlace?.Invoke(this, block);
     }

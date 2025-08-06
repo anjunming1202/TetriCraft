@@ -8,9 +8,9 @@ public class GravityBlock : GeneralBlock
     private bool isFalling = false;
     private static float maxSpeed = 20;
 
-    public override void OnUpdate(MapManager map)
+    public override void OnUpdate()
     {
-        base.OnUpdate(map);
+        base.OnUpdate();
 
         if (isFalling)
         {
@@ -63,6 +63,6 @@ public class GravityBlock : GeneralBlock
         Vector2Int finalPosition = GetGridPosition(lastPosition);
         SetPosition(finalPosition.x, finalPosition.y);
         isFalling = false;
-        OnLockdown();
+        Lockdown();
     }
 }

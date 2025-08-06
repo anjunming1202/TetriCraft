@@ -10,15 +10,15 @@ public abstract class FluidDummy : Block
         return true;
     }
 
-    public override void OnReplacedBy(MapManager map, Block block)
+    public override void OnReplacedBy(Block block)
     {
         map.RemoveBlock(this);
     }
 
-    public override void OnLockdown(MapManager map)
+    public override void OnLockdown()
     {
         FluidManager.dummyBlockPositions.Add(GridPosition);
-        base.OnLockdown(map);
+        base.OnLockdown();
     }
 
     public override void Remove()

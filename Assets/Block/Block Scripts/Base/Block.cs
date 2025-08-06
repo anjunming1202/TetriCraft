@@ -1,6 +1,7 @@
 // Block, the most basic unit, one block occupies one grid
 using System;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
 public abstract class Block : MonoBehaviour
 {
@@ -34,11 +35,12 @@ public abstract class Block : MonoBehaviour
 
 
     public Vector2 Position => position;
+    public Vector2 CentrePosition => position + Vector2.one * 0.5f;
     public Vector2Int GridPosition => GetGridPosition(position);
 
     public Vector3 GetWorldPosition()
     {
-        return MapBoundaryData.MapToWorld(position + Vector2.one * 0.5f);
+        return MapBoundaryData.MapToWorld(CentrePosition);
     }
 
     public void SetPosition(int x, int y, bool animation = false)
@@ -48,18 +50,28 @@ public abstract class Block : MonoBehaviour
 
     private void Awake()
     {
-        ExplosionTarget explosionTarget = GetComponent<ExplosionTarget>();
+        // set explosion responses
+        explosionTarget = GetComponent<ExplosionTarget>();
         if (explosionTarget != null)
-            explosionTarget.OnExplosionDestroy += Remove;
+        {
+            explosionTarget.OnExplosionDestroy += Exploded;
+            explosionTarget.isUnbreakable = true; // unlocked block is unbreakable
+        }
     }
 
-    public virtual void OnLockdown(MapManager map)
+    public virtual void OnSpawn(MapManager map)
     {
-        OnLockdown();
+        this.map = map;
+        this.transform.SetParent(map.transform);
+    }
+
+    public virtual void OnLockdown()
+    {
+        Lockdown();
         map.OnGridPlace?.Invoke(map, this);
     }
 
-    public virtual void OnUpdate(MapManager map)
+    public virtual void OnUpdate()
     {
         if (this == null) return;
     }
@@ -69,13 +81,13 @@ public abstract class Block : MonoBehaviour
         return false;
     }
 
-    public virtual void OnReplacedBy(MapManager map, Block block)
+    public virtual void OnReplacedBy(Block block)
     {
         Debug.LogError($"block {this} at {position} wrongly replaced");
     }
 
     /// <summary>
-    /// Removed with breaking
+    /// Removed with breaking, don't use directly
     /// </summary>
     public virtual void Destroy()
     {
@@ -83,6 +95,9 @@ public abstract class Block : MonoBehaviour
         Remove();
     }
 
+    /// <summary>
+    /// Romove, don't use directly
+    /// </summary>
     public virtual void Remove()
     {
         GameObject.Destroy(gameObject);
@@ -111,10 +126,22 @@ public abstract class Block : MonoBehaviour
         return new Vector2Int(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.y));
     }
 
-    protected void OnLockdown()
+    protected virtual void Exploded()
+    {
+        map.RemoveBlock(this);
+    }
+
+    protected void Lockdown()
     {
         isLocked = true;
         isClearable = true;
         OnLockedDown?.Invoke();
+
+        if (explosionTarget != null)
+            explosionTarget.isUnbreakable = false;
     }
+
+    protected MapManager map;
+
+    private ExplosionTarget explosionTarget;
 }

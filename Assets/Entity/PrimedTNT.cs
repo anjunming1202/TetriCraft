@@ -18,22 +18,12 @@ public class PrimedTNT : Entity
         spriteRenderer = GetComponent<SpriteRenderer>();
         material = GetComponent<Material>();
         props = new MaterialPropertyBlock();
-
-        OnSpawned(FindObjectOfType<MapManager>(), new Vector2(5.5f, 10.5f));
-        AddVelocity(RandomVelocity());
+        map = FindObjectOfType<MapManager>();
     }
 
-    //
-    protected override void Update()
+    protected void Start()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector2 mousePosition = MapBoundaryData.WorldToMap(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-            OnSpawned(FindObjectOfType<MapManager>(), mousePosition);
-            AddVelocity(RandomVelocity());
-        }
-
-        base.Update();
+        AddVelocity(RandomVelocity());        
     }
 
     private IEnumerator FuseCountdown()

@@ -2,16 +2,19 @@
 
 public class FluidElementRenderer : MonoBehaviour
 {
-    private FluidElement fluidElement;
-    private SpriteRenderer spriteRenderer;
-
-    private Material material;
-    private MaterialPropertyBlock props;
+    public Vector2Int flowingTexSheetSize;
+    public Vector2Int stillTexSheetSize;
 
     [SerializeField] private Sprite stillTexture;
     [SerializeField] private Sprite flowingTexture;
     [SerializeField] private Material stillMaterial;
     [SerializeField] private Material flowingMaterial;
+
+    private FluidElement fluidElement;
+    private SpriteRenderer spriteRenderer;
+
+    private Material material;
+    private MaterialPropertyBlock props;
 
     private bool isAnimating;
 
@@ -33,6 +36,10 @@ public class FluidElementRenderer : MonoBehaviour
     private void Update()
     {
         Render();
+
+        // change collider size
+        BoxCollider2D collider = GetComponent<BoxCollider2D>();
+        collider.size = fluidElement.isFalling ? flowingTexSheetSize : stillTexSheetSize;
     }
 
     /// <summary>

@@ -4,6 +4,7 @@ using UnityEngine;
 public class ExplosionTarget : MonoBehaviour
 {
     public float blastResistance;
+    public bool isUnbreakable = false;
 
     public Action OnExplosionDestroy;
 
@@ -14,6 +15,9 @@ public class ExplosionTarget : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
+        if (isUnbreakable)
+            return;
+
         health -= amount;
 
         if (health <= 0)
@@ -27,5 +31,10 @@ public class ExplosionTarget : MonoBehaviour
         return health <= 0;
     }
 
-    private float health;
+    public void ResetHealth()
+    {
+        health = blastResistance;
+    }
+
+    [SerializeField] private float health;
 }

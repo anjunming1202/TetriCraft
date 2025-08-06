@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
 using static UnityEngine.UI.Image;
@@ -8,7 +9,8 @@ public class Explosion : MonoBehaviour
     public Vector2 position;
     public float radius;
     public int blastIntensity = 50;
-    public float damagePerHit = 0.1f;
+    public float minDamagePerHit = 0.1f;
+    public float maxDamagePerHit = 1f;
     public float minRayLength = 1f;
 
     public void Set(MapManager map, Vector2 position, float radius)
@@ -45,8 +47,14 @@ public class Explosion : MonoBehaviour
 
     private void Destruction()
     {
+        List<ExplosionTarget> allHits = new List<ExplosionTarget>();
+
+        // destroy targets
         for (int i = 0; i < blastIntensity; i++)
         {
+            // random damage per hit
+            float damagePerHit = Random.Range(minDamagePerHit, maxDamagePerHit);
+
             // random direction
             Vector2 direction = Random.insideUnitCircle.normalized;
 
@@ -63,9 +71,11 @@ public class Explosion : MonoBehaviour
             {
                 // get target component
                 ExplosionTarget target = hit.collider.GetComponent<ExplosionTarget>();
+                if (!allHits.Contains(target))
+                    allHits.Add(target);
 
                 if (target != null)
-                {
+                {                    
                     target.TakeDamage(damagePerHit);
 
                     // if still alive => block the ray
@@ -77,9 +87,21 @@ public class Explosion : MonoBehaviour
             }
 
             // visualisation
-            Debug.DrawRay(position, direction * rayLength, Color.red, 2f);
+            Debug.DrawRay(position, direction * rayLength, Color32.Lerp(Color.blue, Color.red, (damagePerHit - minDamagePerHit) / (maxDamagePerHit - minDamagePerHit)), 2f);
+        }
+
+        // reset alived targets
+        foreach (var hit in allHits)
+        {
+            if (hit != null && !hit.IsDead())
+                hit.ResetHealth();
         }
     }
+
+    /*private float GetLocalIntensity(float distance, float rayLength)
+    {
+        return Mathf.Lerp(blastIntensity, 0, )
+    }  */  
 
     private void SpawnExplosionParticles()
     {
