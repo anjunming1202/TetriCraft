@@ -13,8 +13,10 @@ using static UnityEngine.GraphicsBuffer;
 /// </summary>
 public class MapManager : MonoBehaviour
 { 
-    static public FluidManager WaterManager;
-    static public FluidManager LavaManager;
+    public static float gravity = 15f;
+
+    public static FluidManager WaterManager;
+    public static FluidManager LavaManager;
 
     public Block this[int x, int y] => blockGrid[x, y];
     public int Width => width;
@@ -26,8 +28,6 @@ public class MapManager : MonoBehaviour
     public List<Block> batchBlocks => blockUpdateBatch;
 
     public Action<MapManager, Block> OnGridPlace;
-
-
 
     public void NewMap(int width, int height)
     {
@@ -71,14 +71,14 @@ public class MapManager : MonoBehaviour
     public void DestroyBlock(Block block)
     {
         blockGrid.Remove(block);
-        block.Destroy(this);
+        block.Destroy();
         blockList.Remove(block);
     }
 
     public void RemoveBlock(Block block)
     {
         blockGrid.Remove(block);
-        block.Remove(this);
+        block.Remove();
         blockList.Remove(block);
     }
 

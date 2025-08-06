@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class AudioManager : MonoBehaviour
 {
@@ -26,9 +27,9 @@ public class AudioManager : MonoBehaviour
     /// <summary>
     /// Play sound in the world
     /// </summary>
-    public void PlaySoundAtPoint(AudioClip clip, Vector3 position)
+    public void PlaySoundAtPoint(AudioClip clip, Vector3 position, float volume = 1f)
     {
-        AudioSource.PlayClipAtPoint(clip, position);
+        AudioSource.PlayClipAtPoint(clip, position, volume);
     }
 
     /// <summary>
@@ -41,6 +42,24 @@ public class AudioManager : MonoBehaviour
         source.volume = volume;
         source.loop = loop;
         source.Play();
+    }
+
+    /// <summary>
+    /// Play sound following an object
+    /// </summary>
+    public void PlaySoundFollowed(AudioClip clip, Transform target, float volume = 1f)
+    {
+        GameObject tempGO = new GameObject("TempAudio");
+        tempGO.transform.position = target.position;
+        tempGO.transform.parent = target;
+
+        AudioSource aSource = tempGO.AddComponent<AudioSource>();
+        aSource.clip = clip;
+        aSource.volume = volume;
+        aSource.spatialBlend = 0f; // 2D audio
+        aSource.Play();
+
+        GameObject.Destroy(tempGO, clip.length);
     }
 
     private void InitializePool()

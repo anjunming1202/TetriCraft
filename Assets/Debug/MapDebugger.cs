@@ -88,21 +88,21 @@ public class MapDebugger : MonoBehaviour
         // Block frame
         if (displayFrame)
         {
-            Vector3 centrePosition = MapBoundaryData.MapToWorld(block.GridPosition);
+            Vector3 centrePosition = MapBoundaryData.GridToWorld(block.GridPosition);
             float width = MapBoundaryData.unitSize;
             Gizmos.DrawWireCube(centrePosition, Vector3.one * width);
         }
         // Block map position
         if (displayPosition)
         {
-            Vector3 centrePosition = MapBoundaryData.MapToWorld(block.Position);
+            Vector3 centrePosition = MapBoundaryData.GridToWorld(block.GridPosition);
             Gizmos.DrawSphere(centrePosition, 0.1f);
         }
     }
 
     private void CrossBlock(Block block, Color color)
     {
-        Vector3 centrePosition = MapBoundaryData.MapToWorld(block.GridPosition);
+        Vector3 centrePosition = MapBoundaryData.GridToWorld(block.GridPosition);
         float width = MapBoundaryData.unitSize;
         Gizmos.color = color;
         Gizmos.DrawLine(centrePosition + new Vector3(1, 1, 0) * width / 2, centrePosition + new Vector3(-1, -1, 0) * width / 2);

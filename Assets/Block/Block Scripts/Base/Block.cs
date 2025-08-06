@@ -35,9 +35,10 @@ public abstract class Block : MonoBehaviour
 
     public Vector2 Position => position;
     public Vector2Int GridPosition => GetGridPosition(position);
+
     public Vector3 GetWorldPosition()
     {
-        return MapBoundaryData.MapToWorld(position);
+        return MapBoundaryData.MapToWorld(position + Vector2.one * 0.5f);
     }
 
     public void SetPosition(int x, int y, bool animation = false)
@@ -45,9 +46,11 @@ public abstract class Block : MonoBehaviour
         SetPosition((float)x, (float)y, animation);
     }
 
-    public virtual void OnInstantiated()
+    private void Awake()
     {
-
+        ExplosionTarget explosionTarget = GetComponent<ExplosionTarget>();
+        if (explosionTarget != null)
+            explosionTarget.OnExplosionDestroy += Remove;
     }
 
     public virtual void OnLockdown(MapManager map)
@@ -58,7 +61,7 @@ public abstract class Block : MonoBehaviour
 
     public virtual void OnUpdate(MapManager map)
     {
-
+        if (this == null) return;
     }
 
     public virtual bool CanBeReplacedBy(Block block)
@@ -74,13 +77,13 @@ public abstract class Block : MonoBehaviour
     /// <summary>
     /// Removed with breaking
     /// </summary>
-    public virtual void Destroy(MapManager map)
+    public virtual void Destroy()
     {
         OnDestroyed?.Invoke();
-        Remove(map);
+        Remove();
     }
 
-    public virtual void Remove(MapManager map)
+    public virtual void Remove()
     {
         GameObject.Destroy(gameObject);
     }
@@ -113,10 +116,5 @@ public abstract class Block : MonoBehaviour
         isLocked = true;
         isClearable = true;
         OnLockedDown?.Invoke();
-    }
-
-    protected void Awake()
-    {
-        OnInstantiated();
     }
 }

@@ -9,9 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9079800203541379973}
+  - component: {fileID: -2519145355082085384}
   - component: {fileID: 2692196136773849335}
   - component: {fileID: 1767523962583349396}
   - component: {fileID: 3458528884425792302}
+  - component: {fileID: -97716001651559788}
   m_Layer: 0
   m_Name: WaterElement
   m_TagString: Block
@@ -34,6 +36,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &-2519145355082085384
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 32, z: 0.2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!212 &2692196136773849335
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -122,3 +145,16 @@ MonoBehaviour:
   flowingTexture: {fileID: 21300000, guid: 7617833c22c391e4995daa902b3df427, type: 3}
   stillMaterial: {fileID: 2100000, guid: 967afd4d131312a47821dbe5db99211d, type: 2}
   flowingMaterial: {fileID: 2100000, guid: 75904d479753e7f4ead0b1ed777a2ddf, type: 2}
+--- !u!114 &-97716001651559788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d721f7a934a19c40a99e894bce49369, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blastResistance: 100

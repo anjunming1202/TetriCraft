@@ -72,7 +72,7 @@ public class BlockSpawnDebugger : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Vector3 centre = MapBoundaryData.MapToWorld(selectedGridPosition);
+        Vector3 centre = MapBoundaryData.GridToWorld(selectedGridPosition);
         float width = MapBoundaryData.unitSize;
         Gizmos.color = selectedGridColor;
         Gizmos.DrawWireCube(centre, Vector3.one * width);

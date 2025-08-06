@@ -6,11 +6,12 @@ public class GravityBlock : GeneralBlock
     private Vector2 lastPosition; 
     private float speed;
     private bool isFalling = false;
-    private static float gravity = 15f;
     private static float maxSpeed = 20;
 
     public override void OnUpdate(MapManager map)
     {
+        base.OnUpdate(map);
+
         if (isFalling)
         {
             UpdateFalling(Time.deltaTime);
@@ -52,7 +53,7 @@ public class GravityBlock : GeneralBlock
         lastPosition = Position;
         Vector2 newPosition = lastPosition + Vector2.down * speed * dt;
         SetPosition(newPosition.x, newPosition.y, false);
-        speed += gravity * dt;
+        speed += MapManager.gravity * dt;
         if (speed > maxSpeed)
             speed = maxSpeed;
     }

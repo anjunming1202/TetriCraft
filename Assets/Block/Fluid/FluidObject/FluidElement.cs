@@ -12,7 +12,7 @@ public class FluidElement : MonoBehaviour
     public int lowerLevel;
     public int upperLevel => lowerLevel + amount;
     public int midLevel => (upperLevel + lowerLevel) / 2;
-    public Vector2 mapPosition => new Vector2(column, (float)midLevel / BlockAmount - 0.5f);
+    public Vector2 mapPosition => new Vector2(column + 0.5f, (float)midLevel / BlockAmount);
     public float width => 1f;
     public float height => (float)amount / BlockAmount;
     public int lowerGridPosition => (lowerLevel >= 0 || lowerLevel % BlockAmount == 0) ? lowerLevel / BlockAmount : lowerLevel / BlockAmount - 1;
