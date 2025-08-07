@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class FluidElement : MonoBehaviour
+public class FluidElement : MapObject
 {
     public const int BlockAmount = 100;
 
@@ -33,6 +33,11 @@ public class FluidElement : MonoBehaviour
         return y * BlockAmount + localLevel;
     }
 
+    public static int PositionToLevel(float y)
+    {
+        return (int)(y * BlockAmount);
+    }
+
     public void FlowDownwards(int amount)
     {
         lowerLevel -= amount;
@@ -62,8 +67,6 @@ public class FluidElement : MonoBehaviour
     {
 
     }
-
-    protected MapManager map;
 }
 
 public enum FluidUpdatingState

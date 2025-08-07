@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public abstract class Entity : MonoBehaviour
+public abstract class Entity : MapObject
 {
     public virtual void OnSpawned(MapManager map, Vector2 position)
     {
@@ -89,8 +89,6 @@ public abstract class Entity : MonoBehaviour
     {
         return MapBoundaryData.MapToWorld(position);
     }
-
-    protected MapManager map;
 
     protected virtual Vector2 size => Vector2.one;
     protected Rect collisionBox => new Rect(position - size / 2, size);

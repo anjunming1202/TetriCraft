@@ -3,7 +3,7 @@ using System;
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
 
-public abstract class Block : MonoBehaviour
+public abstract class Block : MapObject
 {
     // Identity
     public abstract BlockID ID { get; }
@@ -140,8 +140,6 @@ public abstract class Block : MonoBehaviour
         if (explosionTarget != null)
             explosionTarget.isUnbreakable = false;
     }
-
-    protected MapManager map;
 
     private ExplosionBlocker explosionTarget;
 }

@@ -19,16 +19,16 @@ public class ExplosionBlocker : MonoBehaviour
             return;
 
         health -= amount;
-
-        if (health <= 0)
-        {
-            OnExplosionDestroy?.Invoke();
-        }
     }
 
     public bool IsDead()
     {
         return health <= 0;
+    }
+
+    public void Die()
+    {
+        OnExplosionDestroy?.Invoke();
     }
 
     public void ResetHealth()

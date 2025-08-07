@@ -99,10 +99,15 @@ public class Explosion : MonoBehaviour
             Debug.DrawRay(position, direction * rayLength, Color32.Lerp(Color.blue, Color.red, (damagePerHit - minDamagePerHit) / (maxDamagePerHit - minDamagePerHit)), 2f);
         }
 
-        // reset alived targets
+        // kill dead targets & reset alived targets
         foreach (var hit in allHits)
         {
-            if (hit != null && !hit.IsDead())
+            if (hit == null)
+                continue;
+
+            if (hit.IsDead())
+                hit.Die();
+            else
                 hit.ResetHealth();
         }
     }

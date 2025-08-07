@@ -56,6 +56,16 @@ public class FluidSystem : MonoBehaviour
         return false;
     }
 
+    public FluidElement GetFluid(int x, int level)
+    {
+        foreach (FluidElement element in elements)
+        {
+            if (element.column == x && element.lowerLevel <= level && element.upperLevel > level)
+                return element;
+        }
+        return null;
+    }
+
     public List<FluidElement> GetFluidElements(int x, int y)
     {
         List<FluidElement> elementList = new List<FluidElement>();
