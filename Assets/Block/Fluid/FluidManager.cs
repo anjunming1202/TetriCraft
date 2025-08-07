@@ -102,7 +102,7 @@ public class FluidManager : MonoBehaviour
     public void BlockSqueeze(MapManager mapManager, Block block)
     {
         // dummy / unlocked fluid => can't squeeze
-        if (block.IsDummy || (block.IsFluid && !block.isLocked))
+        if (block.IsDummy || (block.IsFluid && (!block.isLocked || block.ID != ID)))
             return;
 
         int x = block.GridPosition.x;

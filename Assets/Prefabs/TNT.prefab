@@ -193,11 +193,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placedSounds:
-  - {fileID: 8300000, guid: ce84190f9dd925d429014c8ad1e574ac, type: 3}
-  - {fileID: 8300000, guid: 40488cec5c0295c4c9e60c1fecd23a9c, type: 3}
-  - {fileID: 8300000, guid: dbf15e25194f59f44bec080746aba4c4, type: 3}
-  - {fileID: 8300000, guid: ed408c77fd89ba742ad9e7101211da9c, type: 3}
-  destroyedSounds: []
+  - {fileID: 8300000, guid: 937240f184b2308498482b68e87363ef, type: 3}
+  - {fileID: 8300000, guid: c37062a0ef49a1b44a0540c3ff510577, type: 3}
+  - {fileID: 8300000, guid: c606b3d27741fa044a55c2807b168657, type: 3}
+  - {fileID: 8300000, guid: c87a31b214eae144681f4791c2ee081b, type: 3}
+  destroyedSounds:
+  - {fileID: 8300000, guid: 937240f184b2308498482b68e87363ef, type: 3}
+  - {fileID: 8300000, guid: c37062a0ef49a1b44a0540c3ff510577, type: 3}
+  - {fileID: 8300000, guid: c606b3d27741fa044a55c2807b168657, type: 3}
+  - {fileID: 8300000, guid: c87a31b214eae144681f4791c2ee081b, type: 3}
 --- !u!114 &-8376783949710103400
 MonoBehaviour:
   m_ObjectHideFlags: 0

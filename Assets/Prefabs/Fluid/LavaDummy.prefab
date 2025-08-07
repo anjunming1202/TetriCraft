@@ -131,7 +131,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placedSounds: []
-  destroyedSounds: []
+  destroyedSounds:
+  - {fileID: 8300000, guid: 7b0001bf049cb3e4dba8fd20e753c519, type: 3}
+  - {fileID: 8300000, guid: 9091438bb86d61745adea129007113f1, type: 3}
+  - {fileID: 8300000, guid: f6dce77c822086c46803e626eea6e7ff, type: 3}
 --- !u!114 &1747300778872766148
 MonoBehaviour:
   m_ObjectHideFlags: 0

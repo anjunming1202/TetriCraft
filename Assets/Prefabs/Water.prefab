@@ -190,8 +190,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95365e6b7b8e2f44d9fde19b1808768e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  placedSounds: []
-  destroyedSounds: []
+  placedSounds:
+  - {fileID: 8300000, guid: 514133a675e9c394d82800e88af14525, type: 3}
+  - {fileID: 8300000, guid: d6f82d95420a29b49a7c6a0bdf9b0c4d, type: 3}
+  - {fileID: 8300000, guid: a80ac686249ac0544905bad2d697359c, type: 3}
+  destroyedSounds:
+  - {fileID: 8300000, guid: 29c9c2b234307de45a5071a73470d3df, type: 3}
+  - {fileID: 8300000, guid: 86f41c3b1bcdd7a48bf83708edf71c19, type: 3}
+  - {fileID: 8300000, guid: d1245dfe726a7434ca7c2155745e66d5, type: 3}
 --- !u!114 &1747300778872766148
 MonoBehaviour:
   m_ObjectHideFlags: 0
