@@ -7,6 +7,7 @@ using static UnityEditor.Rendering.FilterWindow;
 
 public class FluidManager : MonoBehaviour
 {
+    public MapManager mapManager;
     public BlockID ID => elementPrefab.ID;
     public BlockID DummyID => dummyFluid.ID;
 
@@ -22,13 +23,14 @@ public class FluidManager : MonoBehaviour
 
     public List<Vector2Int> dummyBlockPositions = new List<Vector2Int>();
 
-    public void OnUpdate(MapManager mapManager)
+    public void OnUpdate()
     {
         timer += Time.deltaTime;
 
         wobbleTimer += Time.deltaTime;
         isWobbleTriggered = false;
 
+        // element flow
         if (timer >= (1f / flowingSpeed))
         {
             timer = 0;
@@ -37,12 +39,12 @@ public class FluidManager : MonoBehaviour
 
             ResetFlowUpdates();
 
-            UpdateFlow(mapManager);
+            UpdateFlow();
 
             MergeElements();
             DeleteEmptyElements();
 
-            GenerateDummyBlocks(mapManager);
+            GenerateDummyBlocks();
 
             //
             double totalAmountUpdated = MonitorTotalFluidAmount();
@@ -54,12 +56,19 @@ public class FluidManager : MonoBehaviour
         {
             wobbleTimer = 0;
         }
+
+        // element customised update
+        foreach (var element in fluidSystem.elements)
+        {
+            element.OnUpdate();
+        }
     }
 
     int elementCount = 0;
     public FluidElement SpawnElement(int x, int lowerLevel, int amount = FluidElement.BlockAmount)
     {
         FluidElement element = GameObject.Instantiate(elementPrefab);
+        element.OnSpawn(mapManager);
         element.transform.SetParent(fluidSystem.transform);
         elementCount++;
         element.name = element.name + elementCount.ToString();
@@ -368,7 +377,7 @@ public class FluidManager : MonoBehaviour
         }
     }
 
-    private void UpdateFlow(MapManager mapManager)
+    private void UpdateFlow()
     {
         elementUpdateList = new List<FluidElement>(fluidSystem.elements);
         elementUpdateList.Sort((e1, e2) => e1.column.CompareTo(e2.column));
@@ -377,7 +386,7 @@ public class FluidManager : MonoBehaviour
         // interate from top to bottom
         for (int i = elementUpdateList.Count - 1; i >= 0; i--)
         {
-            Flow(elementUpdateList[i], mapManager, 0);
+            Flow(elementUpdateList[i], 0);
         }
 
         // entrainment flow
@@ -419,7 +428,7 @@ public class FluidManager : MonoBehaviour
         entrainmentElements.Clear();
     }
 
-    private void Flow(FluidElement element, MapManager mapManager, int highestLevel)
+    private void Flow(FluidElement element, int highestLevel)
     {
         // boundary conditions
         if (element.updatingState == FluidUpdatingState.Updated)
@@ -435,7 +444,7 @@ public class FluidManager : MonoBehaviour
 
             if (elementDown != null && elementDown.updatingState == FluidUpdatingState.Unupdated)
             {
-                Flow(elementDown, mapManager, 0);
+                Flow(elementDown, 0);
             }
 
             if (elementDown == null)
@@ -496,12 +505,12 @@ public class FluidManager : MonoBehaviour
                         if (adjacentHeads[dir] <= head)
                         {
                             element.updatingState = FluidUpdatingState.Waiting;
-                            Flow(elementsNext[dir], mapManager, highestLevel);
+                            Flow(elementsNext[dir], highestLevel);
                         }
                         else
                         {
                             element.updatingState = FluidUpdatingState.Unupdated;
-                            Flow(elementsNext[dir], mapManager, 0);
+                            Flow(elementsNext[dir], 0);
                         }
                     }
                 }
@@ -532,7 +541,7 @@ public class FluidManager : MonoBehaviour
                         if (head > unitFlowingAmount || (head == unitFlowingAmount && highestHead > head))
                         {
                             elementsNext[dir] = SpawnElement(targetPositions[dir].x, FluidElement.Local2Level(targetPositions[dir].y, 0), 0);
-                            FlowHorizontallyFromTo(element, elementsNext[dir], unitFlowingAmount, mapManager);
+                            FlowHorizontallyFromTo(element, elementsNext[dir], unitFlowingAmount);
                         }
                         /*else if (previousAdjacentHead > 0)
                         {
@@ -551,7 +560,7 @@ public class FluidManager : MonoBehaviour
                         int headDifference = head - adjacentHeads[dir];
                         if (headDifference > unitFlowingAmount /*|| (headDifference == unitFlowingAmount && highestHead > headDifference)*/)
                         {
-                            FlowHorizontallyFromTo(element, elementsNext[dir], unitFlowingAmount, mapManager);
+                            FlowHorizontallyFromTo(element, elementsNext[dir], unitFlowingAmount);
                         }
 
                         // wobble
@@ -560,7 +569,7 @@ public class FluidManager : MonoBehaviour
                             if (wobbleTimer >= wobbleTime || !useWobbling)
                             {
                                 isWobbleTriggered = true;
-                                FlowHorizontallyFromTo(element, elementsNext[dir], unitFlowingAmount, mapManager);
+                                FlowHorizontallyFromTo(element, elementsNext[dir], unitFlowingAmount);
                             }
                         }
                     }
@@ -612,7 +621,7 @@ public class FluidManager : MonoBehaviour
         }
     }
 
-    private void FlowHorizontallyFromTo(FluidElement from, FluidElement to, int amount, MapManager mapManager)
+    private void FlowHorizontallyFromTo(FluidElement from, FluidElement to, int amount)
     {
         Debug.Assert(amount > 0);
 
@@ -639,7 +648,7 @@ public class FluidManager : MonoBehaviour
         lazilyMergedLists.Add(new List<FluidElement> { lower, upper });
     }
 
-    private void GenerateDummyBlocks(MapManager mapManager)
+    private void GenerateDummyBlocks()
     {
         int pointer = 0;
 
@@ -664,7 +673,7 @@ public class FluidManager : MonoBehaviour
                 if (mapManager[position.x, position.y] != null && mapManager[position.x, position.y].IsFluid)
                     continue;
 
-                SpawnDummyBlock(mapManager, position);
+                SpawnDummyBlock(position);
                 dummyBlockPositions.Remove(position);
                 dummyBlockPositions.Insert(pointer, position);
                 pointer++;
@@ -674,11 +683,11 @@ public class FluidManager : MonoBehaviour
         // remove other invalid dummy blocks
         for (int i = dummyBlockPositions.Count - 1; i >= pointer; i--)
         {
-            RemoveDummyBlock(mapManager, dummyBlockPositions[i]);
+            RemoveDummyBlock(dummyBlockPositions[i]);
         }
     }
 
-    private void SpawnDummyBlock(MapManager mapManager, Vector2Int position)
+    private void SpawnDummyBlock(Vector2Int position)
     {
         Debug.Assert(!mapManager.IsBlocked(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
 
@@ -686,7 +695,7 @@ public class FluidManager : MonoBehaviour
         mapManager.SpawnBlock(newDummyBlock, position.x, position.y);
     }
 
-    private void RemoveDummyBlock(MapManager mapManager, Vector2Int position)
+    private void RemoveDummyBlock(Vector2Int position)
     {
         if (mapManager[position.x, position.y] != null && mapManager[position.x, position.y].IsDummy)
         {

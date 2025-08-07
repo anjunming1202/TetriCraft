@@ -45,6 +45,18 @@ public class MapManager : MonoBehaviour
         OnGridPlace += lavaManager.BlockSqueeze;
     }
 
+    public Block GetBlock(int x, int y)
+    {
+        if (CheckInsideGrid(x, y))
+            return blockGrid[x, y];
+        return null;
+    }
+
+    public bool IsBlocked(int x, int y)
+    {
+        return !CheckInside(x, y) || !CheckEmpty(x, y);
+    }
+
     public void SpawnTetromino(MapTetromino tetromino)
     {
         for (int r = 0; r < tetromino.size; r++)
@@ -83,7 +95,7 @@ public class MapManager : MonoBehaviour
         blockList.Remove(block);
     }
 
-    public void OnUpdateBlocks()
+    public void OnUpdate()
     {
         // Block map
         for (int i = 0; i < blockList.Count; i++)
@@ -92,8 +104,8 @@ public class MapManager : MonoBehaviour
         }
 
         // Fluid map
-        waterManager.OnUpdate(this);
-        lavaManager.OnUpdate(this);
+        waterManager.OnUpdate();
+        lavaManager.OnUpdate();
         SpawnFluidConcretion();
     }
 
@@ -220,6 +232,10 @@ public class MapManager : MonoBehaviour
 
         return blockGrid[x, y] == null || blockGrid[x, y].IsDummy;
     }
+    public bool CheckInsideGrid(int x, int y)
+    {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
 
     public bool CheckRowFull(int row)
     {
@@ -238,11 +254,6 @@ public class MapManager : MonoBehaviour
                 return false;
         }
         return true;
-    }
-
-    public bool IsBlocked(int x, int y)
-    {
-        return !CheckInside(x, y) || !CheckEmpty(x, y);
     }
 
     public bool IsInsideGrid(int x, int y)

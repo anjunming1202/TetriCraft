@@ -927,6 +927,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d39247e287c5b8c4a863f594de1e7cff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapManager: {fileID: 763784240}
   elementPrefab: {fileID: 1767523962583349396, guid: 5f55d0b41fc68c948ae062c12e30b169, type: 3}
   fluidSystem: {fileID: 718323504}
   dummyFluid: {fileID: 7742082380615453442, guid: 34bbde5f8ac730043bee465993c70ce0, type: 3}
@@ -1280,7 +1281,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d39247e287c5b8c4a863f594de1e7cff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  elementPrefab: {fileID: 1767523962583349396, guid: d846fc19895732343ad8d3aba3de93e7, type: 3}
+  mapManager: {fileID: 763784240}
+  elementPrefab: {fileID: 4999045374287984657, guid: d846fc19895732343ad8d3aba3de93e7, type: 3}
   fluidSystem: {fileID: 1152869741}
   dummyFluid: {fileID: -140977082897033341, guid: b311c5aa62e88ec479c84f6d40457f85, type: 3}
   flowingSpeed: 10

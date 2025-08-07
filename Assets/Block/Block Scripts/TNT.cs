@@ -6,13 +6,10 @@ public class TNT : Block
 
     public override BlockID ID => BlockID.TNT;
 
-    private void Update()
+    public void Ignite()
     {
-        Ignite();
-    }
-
-    protected void Ignite()
-    {
+        if (!isLocked)
+            return;
         PrimedTNT primedTNTInstance = Instantiate(primedTNTPrefab, transform.position, Quaternion.identity);
         primedTNTInstance.OnSpawned(map, CentrePosition);
         map.RemoveBlock(this);

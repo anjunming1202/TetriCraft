@@ -52,6 +52,18 @@ public class FluidElement : MonoBehaviour
         hasFlown = false;
         entrainmentDirection = -1;
     }
+
+    public virtual void OnSpawn(MapManager map)
+    {
+        this.map = map;
+    }
+
+    public virtual void OnUpdate()
+    {
+
+    }
+
+    protected MapManager map;
 }
 
 public enum FluidUpdatingState
