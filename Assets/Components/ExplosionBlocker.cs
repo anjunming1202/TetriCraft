@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class ExplosionTarget : MonoBehaviour
+public class ExplosionBlocker : MonoBehaviour
 {
     public float blastResistance;
     public bool isUnbreakable = false;

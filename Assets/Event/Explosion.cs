@@ -13,6 +13,8 @@ public class Explosion : MonoBehaviour
     public float maxDamagePerHit = 1f;
     public float minRayLength = 1f;
 
+    public float repellingStrength = 5f;
+
     public void Set(MapManager map, Vector2 position, float radius)
     {
         this.map = map;
@@ -32,8 +34,8 @@ public class Explosion : MonoBehaviour
 
     private void Blast()
     {
-        // explosion destruction
-        Destruction();
+        // explosion logic
+        RaycastExplosion();
 
         // explosion sound
         int random = UnityEngine.Random.Range(0, explodeSounds.Length);
@@ -45,9 +47,9 @@ public class Explosion : MonoBehaviour
         GameObject.Destroy(this.gameObject);
     }
 
-    private void Destruction()
+    private void RaycastExplosion()
     {
-        List<ExplosionTarget> allHits = new List<ExplosionTarget>();
+        List<ExplosionBlocker> allHits = new List<ExplosionBlocker>();
 
         // destroy targets
         for (int i = 0; i < blastIntensity; i++)
@@ -69,20 +71,27 @@ public class Explosion : MonoBehaviour
 
             foreach (var hit in hits)
             {
-                // get target component
-                ExplosionTarget target = hit.collider.GetComponent<ExplosionTarget>();
-                if (!allHits.Contains(target))
-                    allHits.Add(target);
-
+                // for block/fluid
+                ExplosionBlocker target = hit.collider.GetComponent<ExplosionBlocker>();
                 if (target != null)
-                {                    
-                    target.TakeDamage(damagePerHit);
+                {           
+                    if (!allHits.Contains(target))
+                        allHits.Add(target);   
+                    
+                    target.TakeDamage(damagePerHit * GetRayIntensityFactor(hit));
 
                     // if still alive => block the ray
                     if (!target.IsDead())
                     {
                         break;
                     }
+                }
+
+                // for entity
+                Entity entityTarget = hit.collider.GetComponent<Entity>();
+                if (entityTarget != null)
+                {
+                    entityTarget.AddVelocity(GetRadiusIntensityFactor(hit) * repellingStrength * direction);
                 }
             }
 
@@ -98,10 +107,15 @@ public class Explosion : MonoBehaviour
         }
     }
 
-    /*private float GetLocalIntensity(float distance, float rayLength)
+    private float GetRayIntensityFactor(RaycastHit2D hit)
     {
-        return Mathf.Lerp(blastIntensity, 0, )
-    }  */  
+        return 1f - hit.fraction;
+    }
+
+    private float GetRadiusIntensityFactor(RaycastHit2D hit)
+    {
+        return Mathf.Lerp(1, 0, hit.distance / radius);
+    }
 
     private void SpawnExplosionParticles()
     {

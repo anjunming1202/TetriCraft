@@ -48,8 +48,9 @@ MonoBehaviour:
   radius: 0
   blastIntensity: 200
   minDamagePerHit: 0.1
-  maxDamagePerHit: 0.5
+  maxDamagePerHit: 1
   minRayLength: 1
+  repellingStrength: 2.5
   explodeSounds:
   - {fileID: 8300000, guid: fd4e6cdbeea95cb438335798d7371006, type: 3}
   - {fileID: 8300000, guid: 4cae32d0b412fb340b58f5932ccb01af, type: 3}

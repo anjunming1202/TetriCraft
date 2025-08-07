@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class FluidBlockRenderer : BlockRenderer
 {
-    private void Awake()
-    {
-        base.Awake();
-    }
-
     protected override void Render(Block block)
     {
         // Set transform size

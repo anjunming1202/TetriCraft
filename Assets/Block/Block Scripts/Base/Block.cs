@@ -51,7 +51,7 @@ public abstract class Block : MonoBehaviour
     private void Awake()
     {
         // set explosion responses
-        explosionTarget = GetComponent<ExplosionTarget>();
+        explosionTarget = GetComponent<ExplosionBlocker>();
         if (explosionTarget != null)
         {
             explosionTarget.OnExplosionDestroy += Exploded;
@@ -128,7 +128,7 @@ public abstract class Block : MonoBehaviour
 
     protected virtual void Exploded()
     {
-        map.RemoveBlock(this);
+        map.DestroyBlock(this);
     }
 
     protected void Lockdown()
@@ -143,5 +143,5 @@ public abstract class Block : MonoBehaviour
 
     protected MapManager map;
 
-    private ExplosionTarget explosionTarget;
+    private ExplosionBlocker explosionTarget;
 }
