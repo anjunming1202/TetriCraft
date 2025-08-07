@@ -35,13 +35,13 @@ public class MapBoundaryData : ScriptableObject
         return instance;
     }
     // Coordinate conversion
-    public static Vector3 MapToWorld(Vector2Int posMap)
+    public static Vector3 GridToWorld(Vector2Int posMap)
     {
         return (Vector3)((Vector2)posMap * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
     }
     public static Vector3 MapToWorld(Vector2 posMap)
     {
-        return (Vector3)(posMap * unitSize) + instance.origin + Vector3.one * unitSize * 0.5f;
+        return (Vector3)(posMap * unitSize) + instance.origin;
     }
     public static Vector2Int WorldToGrid(Vector3 posWorld)
     {

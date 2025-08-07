@@ -9,14 +9,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9079800203541379973}
+  - component: {fileID: 2844034189045692187}
   - component: {fileID: 2692196136773849335}
-  - component: {fileID: 7543129225113994881}
+  - component: {fileID: -4861258053570325399}
   - component: {fileID: 5886102563572143990}
   - component: {fileID: 9028015919182796587}
   - component: {fileID: -4112071912644774665}
   - component: {fileID: 1747300778872766148}
   m_Layer: 0
-  m_Name: Lava
+  m_Name: Water
   m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37,6 +38,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &2844034189045692187
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 32}
+    newSize: {x: 1, y: 32}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 32}
+  m_EdgeRadius: 0
 --- !u!212 &2692196136773849335
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -57,7 +103,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 53bd987eea059074582bc5480504e68f, type: 2}
+  - {fileID: 2100000, guid: 967afd4d131312a47821dbe5db99211d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -78,8 +124,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 7e293fdfa0cca25499a8d498d0473de7, type: 3}
-  m_Color: {r: 1, g: 1, b: 0, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
+  m_Color: {r: 0, g: 0.5058824, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -89,7 +135,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
---- !u!114 &7543129225113994881
+--- !u!114 &-4861258053570325399
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -98,7 +144,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6118796901473174655}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 836c40d9ead3b594abb068ca777f59c4, type: 3}
+  m_Script: {fileID: 11500000, guid: 6ac0418832246784abc894f328f891d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isInMap: 0
@@ -117,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95b4dfb9fdc6a734a8e5b2517ecad3ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainTexture: {fileID: 21300000, guid: 7e293fdfa0cca25499a8d498d0473de7, type: 3}
+  mainTexture: {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
 --- !u!114 &9028015919182796587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,8 +190,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95365e6b7b8e2f44d9fde19b1808768e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  placedSounds: []
-  destroyedSounds: []
+  placedSounds:
+  - {fileID: 8300000, guid: 514133a675e9c394d82800e88af14525, type: 3}
+  - {fileID: 8300000, guid: d6f82d95420a29b49a7c6a0bdf9b0c4d, type: 3}
+  - {fileID: 8300000, guid: a80ac686249ac0544905bad2d697359c, type: 3}
+  destroyedSounds:
+  - {fileID: 8300000, guid: 29c9c2b234307de45a5071a73470d3df, type: 3}
+  - {fileID: 8300000, guid: 86f41c3b1bcdd7a48bf83708edf71c19, type: 3}
+  - {fileID: 8300000, guid: d1245dfe726a7434ca7c2155745e66d5, type: 3}
 --- !u!114 &1747300778872766148
 MonoBehaviour:
   m_ObjectHideFlags: 0

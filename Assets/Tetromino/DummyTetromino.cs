@@ -11,7 +11,7 @@ public class DummyTetromino : Tetromino
                 Block block = shape[r, c];
                 if (block == null)
                     continue;
-                block.transform.position = transform.position + MapBoundaryData.MapToWorld(new Vector2(c - (float)size / 2, -r + (float)size / 2));
+                block.transform.position = transform.position + MapBoundaryData.MapToWorld(new Vector2(c + 0.5f - (float)size / 2, -r + 0.5f + (float)size / 2));
             }
     }
 

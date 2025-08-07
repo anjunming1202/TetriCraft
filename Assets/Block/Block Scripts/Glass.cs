@@ -13,7 +13,7 @@ public class Glass : Block
         return true;
     }
 
-    public override void OnReplacedBy(MapManager map, Block block)
+    public override void OnReplacedBy(Block block)
     {
         map.DestroyBlock(this);
     }

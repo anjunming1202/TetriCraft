@@ -64,7 +64,7 @@ public class MapTetromino : Tetromino
                 {
                     bool replaceable = mapBlock.CanBeReplacedBy(block);
                     if (replaceable)
-                        mapBlock.OnReplacedBy(map, block);
+                        mapBlock.OnReplacedBy(block);
                 }
 
                 // update the block
@@ -208,7 +208,7 @@ public class MapTetromino : Tetromino
         isLocked = true;
         foreach (var block in blocks)
         {
-            block.OnLockdown(map);
+            block.OnLockdown();
         }
 
         // invoke map tetromino landing event

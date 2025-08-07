@@ -10,24 +10,24 @@ public abstract class FluidDummy : Block
         return true;
     }
 
-    public override void OnReplacedBy(MapManager map, Block block)
+    public override void OnReplacedBy(Block block)
     {
         map.RemoveBlock(this);
     }
 
-    public override void OnLockdown(MapManager map)
+    public override void OnLockdown()
     {
         FluidManager.dummyBlockPositions.Add(GridPosition);
-        base.OnLockdown(map);
+        base.OnLockdown();
     }
 
-    public override void Remove(MapManager map)
+    public override void Remove()
     {
         FluidManager.dummyBlockPositions.Remove(GridPosition);
-        base.Remove(map);
+        base.Remove();
     }
 
-    public override void Destroy(MapManager map)
+    public override void Destroy()
     {
         int x = GridPosition.x;
         int y = GridPosition.y;
@@ -43,7 +43,7 @@ public abstract class FluidDummy : Block
 
         FluidManager.fluidSystem.Remove(parentElement);
 
-        base.Destroy(map);
+        base.Destroy();
     }
 
     protected abstract FluidManager FluidManager { get; }

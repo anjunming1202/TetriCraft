@@ -61,7 +61,7 @@ public class TetrisManager : MonoBehaviour
             SetGhostTetromino();
 
             // Update blocks
-            map.OnUpdateBlocks();
+            map.OnUpdate();
         }
     }
 
