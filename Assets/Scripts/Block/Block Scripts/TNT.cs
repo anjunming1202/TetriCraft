@@ -16,7 +16,7 @@ public class TNT : Block
         map.RemoveBlock(this);
     }
 
-    protected override void Exploded()
+    protected override void OnExploded()
     {
         Ignite(0.5f);
     }

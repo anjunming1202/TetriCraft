@@ -28,6 +28,16 @@ public class FluidElement : MapObject
 
     public int entrainmentDirection = -1;
 
+    public virtual void OnSpawn(MapManager map)
+    {
+        this.map = map;
+    }
+
+    public virtual void OnUpdate()
+    {
+
+    }
+
     public static int Local2Level(int y, int localLevel)
     {
         return y * BlockAmount + localLevel;
@@ -56,16 +66,6 @@ public class FluidElement : MapObject
         isFalling = false;
         hasFlown = false;
         entrainmentDirection = -1;
-    }
-
-    public virtual void OnSpawn(MapManager map)
-    {
-        this.map = map;
-    }
-
-    public virtual void OnUpdate()
-    {
-
     }
 }
 

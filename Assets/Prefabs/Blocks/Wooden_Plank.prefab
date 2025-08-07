@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: -8426619234048717057}
   - component: {fileID: -8376783949710103400}
   - component: {fileID: 1350953311302521810}
+  - component: {fileID: 2492058197359230136}
   m_Layer: 0
   m_Name: Wooden_Plank
   m_TagString: Block
@@ -224,3 +225,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blastResistance: 3
+  isUnbreakable: 0
+  health: 0
+--- !u!114 &2492058197359230136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fb38d4577e533e498e4dd23155c8194, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  igniteAbility: 5
+  burnAbility: 20
+  canBurnAway: 1

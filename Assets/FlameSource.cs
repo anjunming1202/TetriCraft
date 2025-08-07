@@ -4,18 +4,19 @@ using UnityEngine;
 
 public class FlameSource : MonoBehaviour
 {
-    public Flame flamePrefab;
+    public Flame sideFlamePrefab;
+    public Flame topFlamePrefab;
     public RectInt spreadableArea;
     public Vector2Int position => MapBoundaryData.WorldToGrid(transform.position);
 
-    private void Awake()
+    private void Start()
     {
         map = GetComponent<MapObject>().GetMap();  
     }
 
     private void Update()
     {
-        
+        TrySpreadFlame();
     }
 
     private void TrySpreadFlame()
@@ -27,8 +28,28 @@ public class FlameSource : MonoBehaviour
         {
             int x = targetX + offset.x;
             int y = targetY + offset.y;
-            Block attacthedBlock = map.GetBlock(x, y);
+            Block attachedBlock = map.GetBlock(x, y);
+            if (attachedBlock != null)
+            {
+                if (attachedBlock.GetComponent<FlammableObject>() is FlammableObject target)
+                {
+                    if (!target.isFlammable)
+                        return;
+
+                    if (!target.IsBurningAt(-offset))
+                        SetFire(target, -offset);
+                    else
+                        target.GetFlame(-offset).Reset();
+                }                
+                return;
+            }
         }
+    }
+
+    private void SetFire(FlammableObject attachedTarget, Vector2Int offset)
+    {
+        Flame flame = Instantiate(offset == Vector2Int.zero ? sideFlamePrefab : topFlamePrefab);
+        flame.Init(map, attachedTarget, offset);
     }
 
     private MapManager map;

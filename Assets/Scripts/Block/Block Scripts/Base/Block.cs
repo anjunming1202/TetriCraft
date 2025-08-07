@@ -54,8 +54,15 @@ public abstract class Block : MapObject
         explosionTarget = GetComponent<ExplosionBlocker>();
         if (explosionTarget != null)
         {
-            explosionTarget.OnExplosionDestroy += Exploded;
+            explosionTarget.OnExplosionDestroy += OnExploded;
             explosionTarget.isUnbreakable = true; // unlocked block is unbreakable
+        }
+        // set flame responses
+        flammableObject = GetComponent<FlammableObject>();
+        if (flammableObject != null)
+        {
+            flammableObject.OnBurnAway += OnBurnAway;
+            flammableObject.isFlammable = false; // unlocked block is unflammable
         }
     }
 
@@ -126,11 +133,6 @@ public abstract class Block : MapObject
         return new Vector2Int(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.y));
     }
 
-    protected virtual void Exploded()
-    {
-        map.DestroyBlock(this);
-    }
-
     protected void Lockdown()
     {
         isLocked = true;
@@ -139,7 +141,20 @@ public abstract class Block : MapObject
 
         if (explosionTarget != null)
             explosionTarget.isUnbreakable = false;
+        if (flammableObject != null)
+            flammableObject.isFlammable = true;
+    }
+
+    protected virtual void OnExploded()
+    {
+        map.DestroyBlock(this);
+    }
+
+    protected virtual void OnBurnAway()
+    {
+        map.RemoveBlock(this);
     }
 
     private ExplosionBlocker explosionTarget;
+    private FlammableObject flammableObject;
 }
