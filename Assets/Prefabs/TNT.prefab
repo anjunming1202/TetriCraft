@@ -227,6 +227,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d721f7a934a19c40a99e894bce49369, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blastResistance: 3
+  blastResistance: 0
   isUnbreakable: 0
   health: 0

@@ -4,6 +4,7 @@ using UnityEngine;
 public class PrimedTNT : Entity
 {
     public Explosion explosionPrefab;
+    public float fuseTime = 4f;
 
     public override void OnSpawned(MapManager map, Vector2 position)
     {
@@ -31,8 +32,9 @@ public class PrimedTNT : Entity
         float timer = 0f;
         bool isBlinking = false;
 
-        while (timer < fuseTime)
+        while (timer < fuseTime - expansionTime)
         {
+            // blink
             isBlinking = !isBlinking;
             Render(isBlinking);
 
@@ -76,9 +78,7 @@ public class PrimedTNT : Entity
         props.SetFloat("_Blink", blink ? 1 : 0);
         spriteRenderer.SetPropertyBlock(props);
     }
-
-    private float fuseTime = 4f;
-    private float blinkInterval = 0.5f;
+    private float blinkInterval = 0.25f;
 
     private float blastRadius = 3f;
 
