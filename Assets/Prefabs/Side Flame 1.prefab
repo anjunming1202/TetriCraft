@@ -136,7 +136,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sideFlamePrefab: {fileID: 2300860983251322440}
   topFlamePrefab: {fileID: 2300860983251322440, guid: 5d01ad8a17a648149b406625d94abab5, type: 3}
-  strength: 1
+  sourceStrength: 1
   spreadableArea:
     x: -1
     y: -1

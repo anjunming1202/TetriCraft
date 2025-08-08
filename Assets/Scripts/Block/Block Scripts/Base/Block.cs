@@ -30,6 +30,7 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     public event Action OnLockedDown;
     public event Action OnDestroyed;
+    public event Action<Block> OnRemoved;
 
 
 
@@ -111,6 +112,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     /// </summary>
     public virtual void Remove()
     {
+        OnRemoved?.Invoke(this);
         GameObject.Destroy(gameObject);
     }
 

@@ -151,7 +151,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isInMap: 0
   isLocked: 0
-  isClearable: 0
   isAnimating: 0
 --- !u!114 &671932412832912740
 MonoBehaviour:
@@ -242,6 +241,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fb38d4577e533e498e4dd23155c8194, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  igniteAbility: 5
+  isFlammable: 1
+  flammability: 5
   burnAbility: 5
   canBurnAway: 1
+  igniteProgress: 0
+  burningHealth: 0

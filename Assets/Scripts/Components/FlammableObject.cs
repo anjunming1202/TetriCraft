@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FlammableObject : MonoBehaviour
 {
-    public static int ignitePoint = 60;
+    public static int ignitePoint = 100;
     public static int burningDurability = 100;
     public bool isFlammable = true;
     public int flammability;
@@ -19,9 +19,12 @@ public class FlammableObject : MonoBehaviour
         ResetHealth();
     }
 
-    public bool TryIgnite(float distance, float sourceStrength)
+    public bool TryIgnite(float distance, float sourceStrength, List<FlammableObject> adjacents)
     {
-        igniteProgress += flammability * Mathf.Lerp(4, 1, (distance - 1) / 4) * sourceStrength;
+        foreach (FlammableObject adjacent in adjacents)
+        {
+            igniteProgress += adjacent.flammability * Mathf.Lerp(2, 1, (distance - 1) / 4) * sourceStrength;
+        }
 
         if (igniteProgress >= ignitePoint)
             return true;

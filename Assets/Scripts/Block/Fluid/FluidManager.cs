@@ -698,6 +698,8 @@ public class FluidManager : MonoBehaviour
     private void SpawnDummyBlock(Vector2Int position, FluidElement element)
     {
         Debug.Assert(!mapManager.IsBlocked(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
+        if (mapManager.IsBlocked(position.x, position.y))
+            return;
 
         Block newBlock = BlockSpawner.NewBlock(DummyID);
         FluidDummy newDummyBlock = newBlock as FluidDummy;
