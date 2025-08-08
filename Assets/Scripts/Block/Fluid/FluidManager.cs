@@ -16,24 +16,28 @@ public class FluidManager : MonoBehaviour
     public Block dummyFluid;
 
     public const int unitFlowingAmount = 10;
-    public float flowingSpeed = 10f;
+    public int flowUpdateTick = 1;
 
-    public float wobbleTime = 1f;
+    public int wobbleTick = 2;
     public bool useWobbling = true;
 
     public List<Vector2Int> dummyBlockPositions = new List<Vector2Int>();
 
     public void OnUpdate()
     {
-        timer += Time.deltaTime;
+        // update tickwisely
+        if (!TickManager.IsGameTickUpdate)
+            return;
 
-        wobbleTimer += Time.deltaTime;
+        ticker += TickManager.deltaTick;
+
+        wobbleTicker += TickManager.deltaTick;
         isWobbleTriggered = false;
 
         // element flow
-        if (timer >= (1f / flowingSpeed))
+        if (ticker >= flowUpdateTick)
         {
-            timer = 0;
+            ticker = 0;
 
             double totalAmountOriginal = MonitorTotalFluidAmount();
 
@@ -54,7 +58,7 @@ public class FluidManager : MonoBehaviour
 
         if (isWobbleTriggered)
         {
-            wobbleTimer = 0;
+            wobbleTicker = 0;
         }
 
         // element customised update
@@ -329,12 +333,12 @@ public class FluidManager : MonoBehaviour
 
 
 
-    private float timer;
+    private int ticker;
     private List<FluidElement> elementUpdateList = new List<FluidElement>();
     private List<List<FluidElement>> lazilyMergedLists = new List<List<FluidElement>>();
     private List<FluidElement> entrainmentElements = new List<FluidElement>();
 
-    private float wobbleTimer;
+    private int wobbleTicker;
     private bool isWobbleTriggered; 
 
     private void ResetFlowUpdates()
@@ -566,7 +570,7 @@ public class FluidManager : MonoBehaviour
                         // wobble
                         else if (headDifference == unitFlowingAmount && highestHead > headDifference)
                         {
-                            if (wobbleTimer >= wobbleTime || !useWobbling)
+                            if (wobbleTicker >= wobbleTick || !useWobbling)
                             {
                                 isWobbleTriggered = true;
                                 FlowHorizontallyFromTo(element, elementsNext[dir], unitFlowingAmount);
@@ -653,9 +657,9 @@ public class FluidManager : MonoBehaviour
         int pointer = 0;
 
         // spawn dummy blocks
-        List<Vector2Int> positions = fluidSystem.CalculateBlockPositions();
+        Dictionary<Vector2Int, FluidElement> positions = fluidSystem.CalculateBlockPositions();
 
-        foreach (Vector2Int position in positions)
+        foreach (var (position, element) in positions)
         {
             if (!mapManager.IsInsideGrid(position.x,position.y))
             {
@@ -664,6 +668,9 @@ public class FluidManager : MonoBehaviour
 
             if (dummyBlockPositions.Contains(position))
             {
+                FluidDummy dummyBlock = mapManager[position.x, position.y] as FluidDummy;
+                dummyBlock.SetSourceElement(element);
+
                 dummyBlockPositions.Remove(position);
                 dummyBlockPositions.Insert(pointer, position);
                 pointer++;
@@ -673,7 +680,8 @@ public class FluidManager : MonoBehaviour
                 if (mapManager[position.x, position.y] != null && mapManager[position.x, position.y].IsFluid)
                     continue;
 
-                SpawnDummyBlock(position);
+                SpawnDummyBlock(position, element);
+
                 dummyBlockPositions.Remove(position);
                 dummyBlockPositions.Insert(pointer, position);
                 pointer++;
@@ -687,11 +695,13 @@ public class FluidManager : MonoBehaviour
         }
     }
 
-    private void SpawnDummyBlock(Vector2Int position)
+    private void SpawnDummyBlock(Vector2Int position, FluidElement element)
     {
         Debug.Assert(!mapManager.IsBlocked(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
 
-        Block newDummyBlock = BlockSpawner.NewBlock(DummyID);
+        Block newBlock = BlockSpawner.NewBlock(DummyID);
+        FluidDummy newDummyBlock = newBlock as FluidDummy;
+        newDummyBlock.SetSourceElement(element);
         mapManager.SpawnBlock(newDummyBlock, position.x, position.y);
     }
 

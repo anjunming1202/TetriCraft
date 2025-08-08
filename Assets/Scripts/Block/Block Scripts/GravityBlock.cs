@@ -26,6 +26,11 @@ public class GravityBlock : GeneralBlock
         }
     }
 
+    public override bool IsClearable()
+    {
+        return isLocked && !isFalling;
+    }
+
     private bool CheckFloating(MapManager map)
     {
         if (map.IsBlocked(GridPosition.x, GridPosition.y - 1))
@@ -38,7 +43,6 @@ public class GravityBlock : GeneralBlock
         lastPosition = Position;
         speed = 0;
         isFalling = true;
-        isClearable = false;
     }
 
     private bool CheckCollide(MapManager map)

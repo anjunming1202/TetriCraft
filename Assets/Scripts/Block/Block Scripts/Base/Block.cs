@@ -3,7 +3,7 @@ using System;
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
 
-public abstract class Block : MapObject
+public abstract class Block : MapRandomTickBehaviourObject
 {
     // Identity
     public abstract BlockID ID { get; }
@@ -18,7 +18,6 @@ public abstract class Block : MapObject
     // Block state flags
     public bool isInMap = false;        // is in the map data
     public bool isLocked = false;       // is locked => ready to be cleared
-    public bool isClearable = false;    // can be cleared
     public bool isAnimating = false;    // is moving with animation
 
     // Events
@@ -93,6 +92,11 @@ public abstract class Block : MapObject
         Debug.LogError($"block {this} at {position} wrongly replaced");
     }
 
+    public virtual bool IsClearable()
+    {
+        return isLocked;
+    }
+
     /// <summary>
     /// Removed with breaking, don't use directly
     /// </summary>
@@ -136,7 +140,6 @@ public abstract class Block : MapObject
     protected void Lockdown()
     {
         isLocked = true;
-        isClearable = true;
         OnLockedDown?.Invoke();
 
         if (explosionTarget != null)

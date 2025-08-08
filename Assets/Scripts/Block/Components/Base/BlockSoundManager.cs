@@ -17,7 +17,6 @@ public class BlockSoundManager : MonoBehaviour
 
     private void PlaySoundOnPlaced()
     {
-        Debug.Log("Placed sound on played!");
         if (placedSounds.Length > 0)
         {
             int random = UnityEngine.Random.Range(0, placedSounds.Length);
@@ -27,7 +26,6 @@ public class BlockSoundManager : MonoBehaviour
 
     private void PlaySoundOnDestroyed()
     {
-        Debug.Log("Destroyed sound on played!");
         if (destroyedSounds.Length > 0)
         {
             int random = UnityEngine.Random.Range(0, destroyedSounds.Length);

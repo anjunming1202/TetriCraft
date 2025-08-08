@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 
 public class FlammableObject : MonoBehaviour
 {
-    public static float burningDurability = 100f;
+    public static int ignitePoint = 60;
+    public static int burningDurability = 100;
     public bool isFlammable = true;
-    public int igniteAbility;
+    public int flammability;
     public int burnAbility;
     public bool canBurnAway = true;
 
@@ -14,7 +16,16 @@ public class FlammableObject : MonoBehaviour
 
     private void Start()
     {
-        health = burningDurability;
+        ResetHealth();
+    }
+
+    public bool TryIgnite(float distance, float sourceStrength)
+    {
+        igniteProgress += flammability * Mathf.Lerp(4, 1, (distance - 1) / 4) * sourceStrength;
+
+        if (igniteProgress >= ignitePoint)
+            return true;
+        return false;
     }
 
     public void SetBurningAt(Vector2Int offset, Flame flame)
@@ -37,24 +48,25 @@ public class FlammableObject : MonoBehaviour
         if (!canBurnAway)
             return;
 
-        health -= amount * burnAbility;
+        burningHealth -= amount * burnAbility;
     }
 
     public bool IsDead()
     {
-        return health < 0;
+        return burningHealth <= 0;
     }
 
     public void BurnAway()
     {
         OnBurnAway?.Invoke();
+        OnBurnAway = null;
     }
 
     public void StopBurningAt(Vector2Int offset)
     {
         flamePositions.Remove(offset);
 
-        if (flamePositions.Count == 0)
+        if (!isBurning)
         {
             ResetHealth();
         }
@@ -62,9 +74,13 @@ public class FlammableObject : MonoBehaviour
 
     private void ResetHealth()
     {
-        health = burningDurability;
+        burningHealth = burningDurability;
+        igniteProgress = 0;
     }
 
-    private float health;
+    [SerializeField, ReadOnly] private float igniteProgress;
+    [SerializeField, ReadOnly] private float burningHealth;
     private Dictionary<Vector2Int, Flame> flamePositions = new Dictionary<Vector2Int, Flame>();
+
+    private bool isBurning => flamePositions.Count > 0;
 }

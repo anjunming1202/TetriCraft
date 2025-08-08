@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -140977082897033341}
   - component: {fileID: 9028015919182796587}
   - component: {fileID: -4112071912644774665}
-  - component: {fileID: 1747300778872766148}
+  - component: {fileID: 3858786572365789785}
   m_Layer: 0
   m_Name: LavaDummy
   m_TagString: Block
@@ -102,7 +102,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isInMap: 0
   isLocked: 0
-  isClearable: 0
   isAnimating: 0
 --- !u!114 &9028015919182796587
 MonoBehaviour:
@@ -135,7 +134,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 7b0001bf049cb3e4dba8fd20e753c519, type: 3}
   - {fileID: 8300000, guid: 9091438bb86d61745adea129007113f1, type: 3}
   - {fileID: 8300000, guid: f6dce77c822086c46803e626eea6e7ff, type: 3}
---- !u!114 &1747300778872766148
+--- !u!114 &3858786572365789785
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -144,7 +143,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 6118796901473174655}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c64fff6d2c61293468fdf8af9bbab426, type: 3}
+  m_Script: {fileID: 11500000, guid: cbb504292555aaa459e22036f6f89e44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  breakingParticles: {fileID: 0}
+  sideFlamePrefab: {fileID: 2300860983251322440, guid: 73e7fd8e3f758774590c6c871597eb4a, type: 3}
+  topFlamePrefab: {fileID: 0}
+  strength: 2
+  spreadableArea:
+    x: -1
+    y: -1
+    width: 2
+    height: 2

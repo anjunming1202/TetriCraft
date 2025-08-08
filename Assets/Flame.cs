@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Flame : MapObject
+public class Flame : MapRandomTickBehaviourObject
 {
     public Vector2Int position => MapBoundaryData.WorldToGrid(transform.position);
     public int age;
@@ -27,16 +27,21 @@ public class Flame : MapObject
     public void Extinguish()
     {
         attachedTarget.StopBurningAt(offset);
+        GameObject.Destroy(this);
     }
 
-    private void Update()
+    public override void RandomTickUpdate(int randomTick)
     {
-        Burn();
+        if (randomTick % 5 == 0)
+            Burn();
+        if (randomTick % 3 == 0)
+            AgeGrow();
+
+        base.RandomTickUpdate(randomTick);
     }
 
-    private void Burn()
+    public void Burn()
     {
-        age++;
         attachedTarget.TakeBurnDamage(damage);
 
         // target burns away
@@ -44,6 +49,11 @@ public class Flame : MapObject
         {
             attachedTarget.BurnAway();
         }
+    }
+
+    private void AgeGrow()
+    {
+        age++;
 
         // flame dies
         if (age > maxAge)

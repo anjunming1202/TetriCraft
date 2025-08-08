@@ -63,7 +63,7 @@ public class MapDebugger : MonoBehaviour
                 continue;
             if (block.isLocked)
             {
-                if (block.isClearable)
+                if (block.IsClearable())
                     MarkBlock(block, lockedColor);
                 else
                     MarkBlock(block, unclearableColor);

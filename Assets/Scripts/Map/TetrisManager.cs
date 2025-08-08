@@ -60,7 +60,8 @@ public class TetrisManager : MonoBehaviour
             // Display ghost tetromino
             SetGhostTetromino();
 
-            // Update blocks
+            // Update map
+            TickManager.Update();
             map.OnUpdate();
         }
     }
@@ -77,6 +78,9 @@ public class TetrisManager : MonoBehaviour
         isUpdating = false;
         lastClearLineCount = 0;
         combo = 0;
+
+        // Initialise map ticks
+        TickManager.Init();
     }
 
     public void StartUpdating()

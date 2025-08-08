@@ -1,9 +1,15 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Rendering.FilterWindow;
 
 public abstract class FluidDummy : Block
 {
     public override bool IsDummy => true;
+
+    public void SetSourceElement(FluidElement element)
+    {
+        sourceElement = element;
+    }
 
     public override bool CanBeReplacedBy(Block block)
     {
@@ -13,6 +19,17 @@ public abstract class FluidDummy : Block
     public override void OnReplacedBy(Block block)
     {
         map.RemoveBlock(this);
+    }
+
+    public override bool IsClearable()
+    {
+        if (sourceElement.isFalling)
+            return false;
+
+        if (sourceElement.lowerLevel > FluidElement.Local2Level(GridPosition.y, 0) || sourceElement.upperLevel < FluidElement.Local2Level(GridPosition.y + 1, 0))
+            return false;
+
+        return true;
     }
 
     public override void OnLockdown()
@@ -47,4 +64,5 @@ public abstract class FluidDummy : Block
     }
 
     protected abstract FluidManager FluidManager { get; }
+    protected FluidElement sourceElement;
 }

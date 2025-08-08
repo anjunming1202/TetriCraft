@@ -18,6 +18,9 @@ public class MapManager : MonoBehaviour
     public static FluidManager WaterManager;
     public static FluidManager LavaManager;
 
+    public List<MapRandomTickBehaviourObject> mapRandomTickObjects;
+    public int randomTickSelectionCount => width * height;
+
     public Block this[int x, int y] => blockGrid[x, y];
     public int Width => width;
     public int Height => height;
@@ -107,6 +110,9 @@ public class MapManager : MonoBehaviour
         waterManager.OnUpdate();
         lavaManager.OnUpdate();
         SpawnFluidConcretion();
+
+        // Random tick behaviours
+        RandomTick.InvokeRandomBehaviours(this);
     }
 
     public void BatchUpdateBlocks()
@@ -241,7 +247,7 @@ public class MapManager : MonoBehaviour
     {
         for (int column = 0; column < width; column++)
         {
-            if (blockGrid[column, row] == null || !blockGrid[column, row].isClearable)
+            if (blockGrid[column, row] == null || !blockGrid[column, row].IsClearable())
                 return false;
         }
         return true;

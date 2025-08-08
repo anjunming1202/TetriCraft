@@ -154,13 +154,11 @@ public class MapTetromino : Tetromino
             if (CheckValid(map))
             {
                 UpdateBlocks(map, true);
-                Debug.Log("success rotation");
                 return true;
             }
             Shift(-kick.x, -kick.y);
         }
         RotateShape(!clockwise);
-        Debug.Log("fail rotation");
         return false;
     }
     public bool TryImmediateLockdown(MapManager map)
@@ -258,7 +256,6 @@ public class MapTetromino : Tetromino
                         if (!collide)
                             continue;
 
-                        Debug.Log("Collide");
                         return true;
                     }
                 }

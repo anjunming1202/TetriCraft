@@ -128,28 +128,28 @@ public class FluidSystem : MonoBehaviour
         return blockList;
     }
 
-    public List<Vector2Int> CalculateBlockPositions()
+    public Dictionary<Vector2Int, FluidElement> CalculateBlockPositions()
     {
-        List<Vector2Int> blockPositions = new List<Vector2Int>();
+        Dictionary<Vector2Int, FluidElement> blockPositions = new Dictionary<Vector2Int, FluidElement>();
 
         foreach (FluidElement element in elements)
         {
             for (int y = element.lowerGridPosition; y <= element.upperGridPosition; y++)
             {
                 // only clearable when reach the ground
-                if (element.isFalling)
+                /*if (element.isFalling)
+                    continue;*/
+
+                /*if (element.lowerLevel <= FluidElement.Local2Level(y, 0) && element.upperLevel >= FluidElement.Local2Level(y + 1, 0))
+                { }*/
+
+                Vector2Int position = new Vector2Int(element.column, y);
+
+                // TODO: repeated means overlapped, which is a bug
+                if (blockPositions.ContainsKey(position))
                     continue;
 
-                if (element.lowerLevel <= FluidElement.Local2Level(y, 0) && element.upperLevel >= FluidElement.Local2Level(y + 1, 0))
-                {
-                    Vector2Int position = new Vector2Int(element.column, y);
-
-                    // TODO: repeated means overlapped, which is a bug
-                    if (blockPositions.Contains(position))
-                        continue;
-
-                    blockPositions.Add(position);
-                }
+                blockPositions.Add(position, element);
             }
         }
         return blockPositions;

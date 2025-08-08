@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class LavaElement : FluidElement
@@ -14,8 +15,6 @@ public class LavaElement : FluidElement
         }
         if (localUpperLevel == 0)
             TryIgniteTNT(column, upperGridPosition + 1);
-
-        // try set flame
     }
 
     private void TryIgniteTNT(int x, int y)
