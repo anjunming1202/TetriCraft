@@ -49,7 +49,7 @@ public class Flame : MapRandomTickBehaviourObject
         int i = 0;
         foreach (FlammableObject targetBlock in adjacentFlammableBlocks)
         {
-            if (randomTick % Mathf.Min(blockCount, 2) == 0)
+            if (randomTick % 3 == i || targetBlock == attachedBlock)
                 targetBlock.TakeBurnDamage(damage);
 
             // target burns away
@@ -91,7 +91,7 @@ public class Flame : MapRandomTickBehaviourObject
         }
     }
 
-    private int maxAge = 15;
+    private int maxAge = 3;
     private FlammableObject attachedBlock;
     private Vector2Int offset;
 

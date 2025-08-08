@@ -23,7 +23,7 @@ public class FlammableObject : MonoBehaviour
     {
         foreach (FlammableObject adjacent in adjacents)
         {
-            igniteProgress += adjacent.flammability * Mathf.Lerp(2, 1, (distance - 1) / 4) * sourceStrength;
+            igniteProgress += adjacent.flammability * Mathf.Lerp(2, 1, (distance - 1) / 3) * sourceStrength;
         }
 
         if (igniteProgress >= ignitePoint)

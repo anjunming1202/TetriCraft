@@ -18,6 +18,11 @@ public class TNT : Block
 
     protected override void OnExploded()
     {
-        Ignite(0.5f);
+        Ignite(Random.Range(0.5f, 1f));
+    }
+
+    protected override void OnBurnAway()
+    {
+        Ignite(4f);
     }
 }
