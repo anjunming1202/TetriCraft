@@ -674,6 +674,10 @@ public class FluidManager : MonoBehaviour
                 dummyBlockPositions.Remove(position);
                 dummyBlockPositions.Insert(pointer, position);
                 pointer++;
+
+                // reupdate dummy block when fluid touching floor/ceiling
+                if (element.localLowerLevel == 0 || element.localUpperLevel == 0)
+                    mapManager.OnGridPlace?.Invoke(mapManager, dummyBlock);
             }
             else
             {

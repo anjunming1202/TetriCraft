@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 using static UnityEngine.GraphicsBuffer;
 
 public class Flame : MapRandomTickBehaviourObject
@@ -37,8 +38,13 @@ public class Flame : MapRandomTickBehaviourObject
 
     public void Extinguish()
     {
+        Die();
+    }
+
+    public void Die()
+    {
         attachedBlock.StopBurningAt(offset);
-        GameObject.Destroy(this);
+        GameObject.Destroy(this.gameObject);
     }
 
     public void Burn(int randomTick)
@@ -62,6 +68,56 @@ public class Flame : MapRandomTickBehaviourObject
         }
     }
 
+    public static void TryExtinguishBy(MapManager map, Block block)
+    {
+        Vector2Int position = block.GridPosition;
+
+        // adjacent inner flame
+        if (block is WaterDummy waterDummy)
+        {
+            FluidElement element = waterDummy.GetSourceElement();
+            // down
+            if (element.lowerGridPosition == position.y && element.localLowerLevel == 0)
+                TryExtinguishInnerFlameAt(map, position + Vector2Int.down);
+            // up
+            if (element.upperGridPosition == position.y && element.localUpperLevel == 0)
+                TryExtinguishInnerFlameAt(map, position + Vector2Int.up);
+
+            // left
+            TryExtinguishInnerFlameAt(map, position + Vector2Int.left);
+
+            // right
+            TryExtinguishInnerFlameAt(map, position + Vector2Int.right);
+        }
+
+        // top flame
+        Block blockBelow = map.GetBlock(position.x, position.y - 1);
+        if (blockBelow != null && blockBelow.GetComponent<FlammableObject>() is FlammableObject flammableObject)
+        {
+            Flame flame = flammableObject.GetFlame(Vector2Int.up);
+            if (flame != null)
+            {
+                if (block is WaterDummy)
+                    flame.Extinguish();
+                else
+                    flame.Die();
+            }
+        }
+    }
+
+    private static void TryExtinguishInnerFlameAt(MapManager map, Vector2Int position)
+    {
+        Block blockTarget = map.GetBlock(position.x, position.y);
+        if (blockTarget != null && blockTarget.GetComponent<FlammableObject>() is FlammableObject flammableObject)
+        {
+            Flame flame = flammableObject.GetFlame(Vector2Int.zero);
+            if (flame != null)
+            {
+                flame.Extinguish();
+            }
+        }
+    }
+
     private void AgeGrow()
     {
         age++;
@@ -69,7 +125,7 @@ public class Flame : MapRandomTickBehaviourObject
         // flame dies
         if (age > maxAge)
         {
-            Extinguish();
+            Die();
         }
     }
 

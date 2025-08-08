@@ -44,8 +44,12 @@ public class MapManager : MonoBehaviour
         WaterManager = waterManager;
         LavaManager = lavaManager;
 
+        // when block grid position updated:
+        // squeeze fluid
         OnGridPlace += waterManager.BlockSqueeze;
         OnGridPlace += lavaManager.BlockSqueeze;
+        // try extinguish fire
+        OnGridPlace += Flame.TryExtinguishBy;
     }
 
     public Block GetBlock(int x, int y)
@@ -169,7 +173,7 @@ public class MapManager : MonoBehaviour
         if (lockdownState)
             block.OnLockdown();
 
-        //OnGridPlace?.Invoke(this, block);
+        //OnGridPlace?.Invoke(this, block); //
     }
 
     private void SpawnFluidConcretion()

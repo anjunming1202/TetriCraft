@@ -30,11 +30,21 @@ public class FlameSource : MapObject
         if (randomTick % 1 == 0)
         {
             for (int i = 0; i < spreadAttempts; i++)
-                TrySpreadFlame(randomTick);
+                TrySpreadFlame(randomTick, failedSpreadReattempts);
         }
     }
 
-    private void TrySpreadFlame(int randomTick)
+    private bool TrySpreadFlame(int randomTick, int reattempts)
+    {
+        for (int i = 0; i < reattempts; i++)
+        {
+            if (TrySpreadFlame(randomTick))
+                return true;
+        }
+        return false;
+    }
+
+    private bool TrySpreadFlame(int randomTick)
     {
         int targetX = position.x + Random.Range(spreadableArea.xMin, spreadableArea.xMax + 1);
         int targetY = position.y + Random.Range(spreadableArea.yMin, spreadableArea.yMax + 1);
@@ -54,7 +64,7 @@ public class FlameSource : MapObject
                 if (attachedBlock.GetComponent<FlammableObject>() is FlammableObject target)
                 {
                     if (!target.isFlammable)
-                        return;
+                        return false;
 
                     Vector2Int flameOffset = offset == Vector2Int.down ? -offset : Vector2Int.zero;
 
@@ -65,15 +75,23 @@ public class FlameSource : MapObject
                         if (target.TryIgnite(distance, sourceStrength, DetectAdjacentFlammableBlocks(x, y)))
                         {
                             SetFire(target, flameOffset, randomTick);
-                            return;
+                            return true;
                         }
                     }
                     else
-                        target.GetFlame(flameOffset).Reset();
+                    {
+                        // 1/3 probability reset fire (reset flame)
+                        if (randomTick % 3 == 0)
+                        {
+                            target.GetFlame(flameOffset).Reset();
+                            return true;
+                        }
+                    }
                 }
-                return;
+                return false;
             }
         }
+        return false;
     }
 
     private void SetFire(FlammableObject attachedBlock, Vector2Int offset, int randomTick)
@@ -103,5 +121,6 @@ public class FlameSource : MapObject
         return adjacentFlammableBlocks;
     }
 
-    private int spreadAttempts = 3;
+    private int spreadAttempts = 1;
+    private int failedSpreadReattempts = 3;
 }

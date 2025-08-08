@@ -11,6 +11,8 @@ public abstract class FluidDummy : Block
         sourceElement = element;
     }
 
+    public FluidElement GetSourceElement() => sourceElement;
+
     public override bool CanBeReplacedBy(Block block)
     {
         return true;

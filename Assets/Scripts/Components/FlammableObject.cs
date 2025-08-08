@@ -23,6 +23,14 @@ public class FlammableObject : MonoBehaviour
     {
         foreach (FlammableObject adjacent in adjacents)
         {
+            // flame proof (water) stops ignitition
+            if (adjacent.flammability < 0)
+            {
+                igniteProgress = 0;
+                return false;
+            }
+
+            // ignite progress proceed
             igniteProgress += adjacent.flammability * Mathf.Lerp(2, 1, (distance - 1) / 3) * sourceStrength;
         }
 
@@ -43,7 +51,9 @@ public class FlammableObject : MonoBehaviour
 
     public Flame GetFlame(Vector2Int offset)
     {
-        return flamePositions[offset];
+        if (flamePositions.ContainsKey(offset))
+            return flamePositions[offset];
+        return null;
     }
 
     public void TakeBurnDamage(float amount = 1f)

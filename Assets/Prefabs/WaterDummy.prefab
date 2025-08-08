@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 9028015919182796587}
   - component: {fileID: -4112071912644774665}
   - component: {fileID: 1747300778872766148}
+  - component: {fileID: -673269557462242450}
   m_Layer: 0
   m_Name: WaterDummy
   m_TagString: Block
@@ -102,7 +103,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isInMap: 0
   isLocked: 0
-  isClearable: 0
   isAnimating: 0
 --- !u!114 &9028015919182796587
 MonoBehaviour:
@@ -148,3 +148,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   breakingParticles: {fileID: 0}
+--- !u!114 &-673269557462242450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fb38d4577e533e498e4dd23155c8194, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isFlammable: 1
+  flammability: -1
+  burnAbility: 0
+  canBurnAway: 0
+  igniteProgress: 0
+  burningHealth: 0
