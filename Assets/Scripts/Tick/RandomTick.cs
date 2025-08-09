@@ -29,6 +29,6 @@ public static class RandomTick
 
     public static void GenerateRandomTick()
     {
-        randomTick = Random.Range(0, 256);
+        randomTick = Random.Range(0, int.MaxValue);
     }
 }

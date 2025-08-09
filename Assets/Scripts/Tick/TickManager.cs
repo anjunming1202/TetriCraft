@@ -11,7 +11,7 @@ public static class TickManager
     public static void Init()
     {
         GameTick = 0;
-        RandomTick.randomTickSpeed = 3;
+        RandomTick.randomTickSpeed = 1;
     }
 
     public static void Update()

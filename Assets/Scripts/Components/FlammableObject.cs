@@ -31,7 +31,7 @@ public class FlammableObject : MonoBehaviour
             }
 
             // ignite progress proceed
-            igniteProgress += adjacent.flammability * Mathf.Lerp(2, 1, (distance - 1) / 3) * sourceStrength;
+            igniteProgress += adjacent.flammability * Mathf.Lerp(2, 1, (distance) / 3) * sourceStrength;
         }
 
         if (igniteProgress >= ignitePoint)
@@ -56,7 +56,7 @@ public class FlammableObject : MonoBehaviour
         return null;
     }
 
-    public void TakeBurnDamage(float amount = 1f)
+    public void TakeBurnDamage(float amount)
     {
         if (!canBurnAway)
             return;

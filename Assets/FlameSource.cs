@@ -53,45 +53,41 @@ public class FlameSource : MapObject
         else
             targetY = position.y + Random.Range(spreadableArea.yMin, spreadableArea.yMax + 1);*/
 
+        if (targetX == position.x && targetY == position.y)
+            return false;
 
-        foreach (var offset in new Vector2Int[] { Vector2Int.zero, Vector2Int.down, Vector2Int.left, Vector2Int.right, Vector2Int.up })
+        float distance = (new Vector2Int(targetX, targetY) - position).magnitude;
+        List<FlammableObject> adjacentFlammableBlocks = GetAdjacentFlammableBlocksAll(targetX, targetY);
+
+        bool hasSpread = false;
+
+        foreach (FlammableObject target in adjacentFlammableBlocks)
         {
-            int x = targetX + offset.x;
-            int y = targetY + offset.y;
-            Block attachedBlock = map.GetBlock(x, y);
-            if (attachedBlock != null)
+            if (!target.isFlammable)
+                continue;
+
+            Vector2Int flameOffset = target == GetAdjacentFlammableBlock(targetX, targetY, Vector2Int.down) ? Vector2Int.up : Vector2Int.zero;
+
+            if (!target.IsBurningAt(flameOffset))
             {
-                if (attachedBlock.GetComponent<FlammableObject>() is FlammableObject target)
+                // a position able to set fire => try to ignite, depends on adjacent flammability
+                if (target.TryIgnite(distance, sourceStrength, adjacentFlammableBlocks))
+                    if (!hasSpread && (map.GetBlock(targetX, targetY) == null || flameOffset == Vector2Int.zero))
+                    {
+                        SetFire(target, flameOffset, randomTick);
+                        hasSpread = true;
+                    }
+            }
+            else
+            {
+                // ... probability reset fire (reset flame)
+                if (randomTick % (1600) == 0)
                 {
-                    if (!target.isFlammable)
-                        return false;
-
-                    Vector2Int flameOffset = offset == Vector2Int.down ? -offset : Vector2Int.zero;
-
-                    if (!target.IsBurningAt(flameOffset))
-                    {
-                        // a position able to set fire => try to ignite, depends on adjacent flammability
-                        float distance = (new Vector2Int(x, y) - position).magnitude;
-                        if (target.TryIgnite(distance, sourceStrength, DetectAdjacentFlammableBlocks(x, y)))
-                        {
-                            SetFire(target, flameOffset, randomTick);
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        // 1/3 probability reset fire (reset flame)
-                        if (randomTick % 3 == 0)
-                        {
-                            target.GetFlame(flameOffset).Reset();
-                            return true;
-                        }
-                    }
+                    target.GetFlame(flameOffset).ResetFlame(randomTick);
                 }
-                return false;
             }
         }
-        return false;
+        return hasSpread;
     }
 
     private void SetFire(FlammableObject attachedBlock, Vector2Int offset, int randomTick)
@@ -102,25 +98,31 @@ public class FlameSource : MapObject
         flame.Burn(randomTick);
     }
 
-    private List<FlammableObject> DetectAdjacentFlammableBlocks(int posX, int posY)
+    private List<FlammableObject> GetAdjacentFlammableBlocksAll(int posX, int posY)
     {
         List<FlammableObject> adjacentFlammableBlocks = new List<FlammableObject>();
+
         foreach (var offset in new Vector2Int[] { Vector2Int.zero, Vector2Int.down, Vector2Int.left, Vector2Int.right, Vector2Int.up })
         {
-            int x = posX + offset.x;
-            int y = posY + offset.y;
-            Block adjacentBlock = map.GetBlock(x, y);
-            if (adjacentBlock != null)
-            {
-                if (adjacentBlock.GetComponent<FlammableObject>() is FlammableObject flammableBlock)
-                {
-                    adjacentFlammableBlocks.Add(flammableBlock);
-                }
-            }
+            FlammableObject flammableBlock = GetAdjacentFlammableBlock(posX, posY, offset);
+            if (flammableBlock != null)
+                adjacentFlammableBlocks.Add(flammableBlock);
         }
         return adjacentFlammableBlocks;
     }
 
+    private FlammableObject GetAdjacentFlammableBlock(int posX, int posY, Vector2Int offset)
+    {
+        int x = posX + offset.x;
+        int y = posY + offset.y;
+        Block adjacentBlock = map.GetBlock(x, y);
+        if (adjacentBlock != null && adjacentBlock.GetComponent<FlammableObject>() is FlammableObject flammableBlock)
+        {
+            return flammableBlock;
+        }
+        return null;
+    }
+
     private int spreadAttempts = 1;
-    private int failedSpreadReattempts = 3;
+    private int failedSpreadReattempts = 10;
 }

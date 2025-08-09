@@ -21,17 +21,19 @@ public class Flame : MapRandomTickBehaviourObject
         age = 0;
     }
 
-    public void Reset()
+    public void ResetFlame(int randomTick)
     {
         age = 0;
+        // when re-set burn once
+        Burn(randomTick);
     }
 
     public override void RandomTickUpdate(int randomTick)
     {
-        if (randomTick % 5 == 0)
+        if (randomTick % 7 == 0)
             Burn(randomTick);
-        if (randomTick % 3 == 0)
-            AgeGrow();
+        if (randomTick % 1 == 0)
+            AgeGrow(randomTick);
 
         base.RandomTickUpdate(randomTick);
     }
@@ -56,8 +58,8 @@ public class Flame : MapRandomTickBehaviourObject
         int i = 0;
         foreach (FlammableObject targetBlock in adjacentFlammableBlocks)
         {
-            if (randomTick % 3 == i || targetBlock == attachedBlock)
-                targetBlock.TakeBurnDamage(damage);
+            if (randomTick % 2 == i || targetBlock == attachedBlock)
+                targetBlock.TakeBurnDamage(damage * Mathf.Lerp(1, 16, age / maxAge));
 
             // target burns away
             if (targetBlock.IsDead())
@@ -119,9 +121,12 @@ public class Flame : MapRandomTickBehaviourObject
         }
     }
 
-    private void AgeGrow()
+    private void AgeGrow(int randomTick)
     {
         age++;
+
+        // 
+        Burn(randomTick);
 
         // flame dies
         if (age > maxAge)
@@ -148,7 +153,7 @@ public class Flame : MapRandomTickBehaviourObject
         }
     }
 
-    private int maxAge = 3;
+    private int maxAge = 15;
     private FlammableObject attachedBlock;
     private Vector2Int offset;
 
