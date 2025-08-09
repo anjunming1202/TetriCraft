@@ -38,6 +38,7 @@ public class Flame : MapRandomTickBehaviourObject
 
     public void Extinguish()
     {
+        AudioManager.Instance.PlaySoundAtPoint(extinguishSound, transform.position);
         Die();
     }
 
@@ -152,4 +153,6 @@ public class Flame : MapRandomTickBehaviourObject
     private Vector2Int offset;
 
     private List<FlammableObject> adjacentFlammableBlocks = new List<FlammableObject>();
+
+    [SerializeField] AudioClip extinguishSound;
 }
