@@ -931,8 +931,8 @@ MonoBehaviour:
   elementPrefab: {fileID: 1767523962583349396, guid: 5f55d0b41fc68c948ae062c12e30b169, type: 3}
   fluidSystem: {fileID: 718323504}
   dummyFluid: {fileID: 7742082380615453442, guid: 34bbde5f8ac730043bee465993c70ce0, type: 3}
-  flowingSpeed: 20
-  wobbleTime: 0.1
+  flowUpdateTick: 1
+  wobbleTick: 2
   useWobbling: 1
   dummyBlockPositions: []
   isDebugging: 0
@@ -1077,6 +1077,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87d370ecb0e1074429d81ddc9d96d716, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapRandomTickObjects: []
   waterManager: {fileID: 718323503}
   lavaManager: {fileID: 1152869739}
   fizzSound: {fileID: 8300000, guid: 3f00901b26a863f44a01d5437be52f62, type: 3}
@@ -1156,7 +1157,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debuggedMap: {fileID: 763784240}
-  blockSpawned: 14
+  blockSpawned: 10
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
 --- !u!114 &1036024157
 MonoBehaviour:
@@ -1285,8 +1286,8 @@ MonoBehaviour:
   elementPrefab: {fileID: 4999045374287984657, guid: d846fc19895732343ad8d3aba3de93e7, type: 3}
   fluidSystem: {fileID: 1152869741}
   dummyFluid: {fileID: -140977082897033341, guid: b311c5aa62e88ec479c84f6d40457f85, type: 3}
-  flowingSpeed: 10
-  wobbleTime: 0.4
+  flowUpdateTick: 2
+  wobbleTick: 8
   useWobbling: 1
   dummyBlockPositions: []
   isDebugging: 0
