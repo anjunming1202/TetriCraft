@@ -17,3 +17,5 @@ public class BlockResources : MonoBehaviour
         }
     }
 }
+
+// TODO: make it a singleton dontdestroyonload general PrefabManager

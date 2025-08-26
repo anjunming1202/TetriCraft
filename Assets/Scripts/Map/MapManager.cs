@@ -59,6 +59,14 @@ public class MapManager : MonoBehaviour
         return null;
     }
 
+    public IEnumerable<Block> GetAdjacentBlocks(int x, int y, bool includeSelf = false)
+    {
+        if (includeSelf)
+            yield return GetBlock(x, y);
+        foreach (Vector2Int offset in new Vector2Int[] {Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down})
+            yield return GetBlock(x + offset.x, y + offset.y);
+    }
+
     public bool IsBlocked(int x, int y)
     {
         return !CheckInside(x, y) || !CheckEmpty(x, y);
@@ -166,7 +174,7 @@ public class MapManager : MonoBehaviour
 
         blockGrid.Add(block);
 
-        block.OnPositionChanged += AddToUpdateBatch;
+        block.OnMoved += AddToUpdateBatch;
 
         blockList.Add(block);
 
@@ -233,18 +241,15 @@ public class MapManager : MonoBehaviour
     /// </summary>
     public bool CheckInside(int x, int y)
     {
-        return x >= 0 && x < width && y >= 0;
+        return blockGrid.CheckInside(x, y);
     }
     public bool CheckEmpty(int x, int y)
     {
-        if (y >= height)
-            return true;
-
-        return blockGrid[x, y] == null || blockGrid[x, y].IsDummy;
+        return blockGrid.CheckEmpty(x, y) || blockGrid[x, y].IsDummy;
     }
     public bool CheckInsideGrid(int x, int y)
     {
-        return x >= 0 && x < width && y >= 0 && y < height;
+        return blockGrid.CheckInsideGrid(x, y);
     }
 
     public bool CheckRowFull(int row)

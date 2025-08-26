@@ -9,17 +9,16 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9079800203541379973}
-  - component: {fileID: -2589523340903342069}
+  - component: {fileID: -481553252782381078}
   - component: {fileID: 2692196136773849335}
-  - component: {fileID: 1574669470567308448}
+  - component: {fileID: 5135986265687466591}
   - component: {fileID: 671932412832912740}
   - component: {fileID: 9028015919182796587}
-  - component: {fileID: -8426619234048717057}
-  - component: {fileID: -8376783949710103400}
-  - component: {fileID: 1350953311302521810}
-  - component: {fileID: -1966117480355432223}
+  - component: {fileID: 2341808955676992956}
+  - component: {fileID: 9170696589410686349}
+  - component: {fileID: -9009503282852880812}
   m_Layer: 0
-  m_Name: TNT
+  m_Name: RedstoneLamp
   m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40,7 +39,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &-2589523340903342069
+--- !u!61 &-481553252782381078
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -126,7 +125,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: c50acc80652b46b418c149d3990e79cf, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2beb76b426b019e42aaa78ebc4b45597, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -137,7 +136,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
---- !u!114 &1574669470567308448
+--- !u!114 &5135986265687466591
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -146,13 +145,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 6118796901473174655}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a8ba7a0006ff5b499cef3a1fade004b, type: 3}
+  m_Script: {fileID: 11500000, guid: 2e9ae50e057fc944698e9063c7328c82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isInMap: 0
   isLocked: 0
   isAnimating: 0
-  primedTNTPrefab: {fileID: 2248703179976296038, guid: 1ca753d5a2202534792d0029332f35ec, type: 3}
+  isActivated: 0
 --- !u!114 &671932412832912740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,7 +165,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textures:
-  - {fileID: 21300000, guid: c50acc80652b46b418c149d3990e79cf, type: 3}
+  - {fileID: 21300000, guid: c434b09ef4eb026448ded9de3dfd62ed, type: 3}
+  - {fileID: 21300000, guid: 83a19e3e7223ac8458ab56fc0cf88286, type: 3}
 --- !u!114 &9028015919182796587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -181,7 +181,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startPosition: {x: 0, y: 0, z: 0}
   endPosition: {x: 0, y: 0, z: 0}
---- !u!114 &-8426619234048717057
+--- !u!114 &2341808955676992956
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -194,16 +194,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placedSounds:
-  - {fileID: 8300000, guid: 937240f184b2308498482b68e87363ef, type: 3}
-  - {fileID: 8300000, guid: c37062a0ef49a1b44a0540c3ff510577, type: 3}
-  - {fileID: 8300000, guid: c606b3d27741fa044a55c2807b168657, type: 3}
-  - {fileID: 8300000, guid: c87a31b214eae144681f4791c2ee081b, type: 3}
+  - {fileID: 8300000, guid: 3cda5ddc40b6bcc4a9d3e404b2b06611, type: 3}
+  - {fileID: 8300000, guid: 7c787eded87b61347bd511bfd1dc4233, type: 3}
+  - {fileID: 8300000, guid: d92969c14d64a4842adedca3250289e2, type: 3}
+  - {fileID: 8300000, guid: 6d871d558047fe24abffb686dd53bee7, type: 3}
   destroyedSounds:
-  - {fileID: 8300000, guid: 937240f184b2308498482b68e87363ef, type: 3}
-  - {fileID: 8300000, guid: c37062a0ef49a1b44a0540c3ff510577, type: 3}
-  - {fileID: 8300000, guid: c606b3d27741fa044a55c2807b168657, type: 3}
-  - {fileID: 8300000, guid: c87a31b214eae144681f4791c2ee081b, type: 3}
---- !u!114 &-8376783949710103400
+  - {fileID: 8300000, guid: 87d2241323cd35b419e2a5b5193a9cf4, type: 3}
+  - {fileID: 8300000, guid: 790362548b5560a4bb51383d1df2813e, type: 3}
+  - {fileID: 8300000, guid: ee5d686867fef6242bcb865031bf7a32, type: 3}
+--- !u!114 &9170696589410686349
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -216,7 +215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   breakingParticles: {fileID: 7021957719075297926, guid: 8b40618432a6d2d428f4acdcc47c12c0, type: 3}
---- !u!114 &1350953311302521810
+--- !u!114 &-9009503282852880812
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -228,24 +227,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d721f7a934a19c40a99e894bce49369, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blastResistance: 0
+  blastResistance: 0.5
   isUnbreakable: 0
   health: 0
---- !u!114 &-1966117480355432223
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6118796901473174655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fb38d4577e533e498e4dd23155c8194, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isFlammable: 1
-  flammability: 15
-  burnAbility: 100
-  canBurnAway: 1
-  igniteProgress: 0
-  burningHealth: 100

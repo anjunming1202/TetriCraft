@@ -149,7 +149,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isInMap: 0
   isLocked: 0
-  isClearable: 0
   isAnimating: 0
 --- !u!114 &5886102563572143990
 MonoBehaviour:
@@ -163,7 +162,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95b4dfb9fdc6a734a8e5b2517ecad3ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainTexture: {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
+  textures:
+  - {fileID: 21300000, guid: 508cb813487579d41b8cd19cab11647d, type: 3}
 --- !u!114 &9028015919182796587
 MonoBehaviour:
   m_ObjectHideFlags: 0

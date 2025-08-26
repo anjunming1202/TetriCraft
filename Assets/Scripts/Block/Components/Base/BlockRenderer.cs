@@ -8,8 +8,14 @@ public class BlockRenderer : MonoBehaviour
 {
     public Texture2D Texture => spriteRenderer.sprite.texture;
 
+    public virtual void ChangeState(int state)
+    {
+        mainTexture = textures[state];
+    }
+
     // Block Texture
-    [SerializeField] protected Sprite mainTexture;
+    [SerializeField] protected Sprite[] textures;
+    protected Sprite mainTexture;
 
     // Renderer
     protected SpriteRenderer spriteRenderer;
@@ -20,7 +26,11 @@ public class BlockRenderer : MonoBehaviour
     protected void Awake()
     {
         block = GetComponent<Block>();
+        block.OnStateChanged += Render;
+
         spriteRenderer = GetComponent<SpriteRenderer>();
+        mainTexture = textures[0];
+
         Render(block);
     }
 
