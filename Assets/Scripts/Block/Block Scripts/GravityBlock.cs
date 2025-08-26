@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class GravityBlock : GeneralBlock
 {
-    private Vector2 lastPosition; 
     private float speed;
     private bool isFalling = false;
     private static float maxSpeed = 20;

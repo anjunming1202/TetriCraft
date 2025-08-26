@@ -104,7 +104,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: c1ef5eb8cca647148875f44db4133e89, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -148,9 +148,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36be716d95dfee344bad6168dc3cbcb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  orientation: 0
   isInMap: 0
   isLocked: 0
   isAnimating: 0
+  isRemoved: 0
+  isActivated: 0
+  isCharged: 0
+  activateSources: []
+  activateTargets: []
+  chargeSources: []
+  chargeTargets: []
   id: 1
 --- !u!114 &671932412832912740
 MonoBehaviour:

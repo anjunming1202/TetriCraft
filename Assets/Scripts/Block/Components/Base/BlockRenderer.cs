@@ -17,6 +17,9 @@ public class BlockRenderer : MonoBehaviour
     [SerializeField] protected Sprite[] textures;
     protected Sprite mainTexture;
 
+    // Material
+    protected MaterialPropertyBlock props;
+
     // Renderer
     protected SpriteRenderer spriteRenderer;
 
@@ -30,6 +33,8 @@ public class BlockRenderer : MonoBehaviour
 
         spriteRenderer = GetComponent<SpriteRenderer>();
         mainTexture = textures[0];
+
+        props = new MaterialPropertyBlock();
 
         Render(block);
     }
@@ -46,5 +51,11 @@ public class BlockRenderer : MonoBehaviour
     protected virtual void Render(Block block)
     {
         spriteRenderer.sprite = mainTexture;
+
+        // material rendering
+        spriteRenderer.GetPropertyBlock(props);
+        props.SetColor("_Color", spriteRenderer.color);
+        props.SetFloat("_Rotation", (int)block.orientation * 90);
+        spriteRenderer.SetPropertyBlock(props);
     }
 }

@@ -13,11 +13,15 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     // Data in the map
     private Vector2 position = Vector2.zero;            // Block position in the map
-    private Vector2 lastPosition = Vector2.zero;
+    protected Vector2 lastPosition = Vector2.zero;
 
-    // Block properties
+    public enum Orientation { Up, Left, Down, Right }
+    public Orientation orientation = Orientation.Up;
+
+    // Block readonly properties
     public virtual bool IsDummy => false;
     public virtual bool IsFluid => false;
+    public virtual bool IsOriented => false;
 
     // Block state flags
     public bool isInMap = false;        // is in the map data
@@ -57,6 +61,14 @@ public abstract class Block : MapRandomTickBehaviourObject
     public void SetPosition(int x, int y, bool animation = false)
     {
         SetPosition((float)x, (float)y, animation);
+    }
+
+    public void Rotate(bool clockwise)
+    {
+        if (!IsOriented)
+            return;
+        orientation = (Orientation)((((int)orientation + (clockwise ? -1 : 1)) + 4) % 4);
+        OnTriggerAppearanceChanged();
     }
 
     public virtual void OnSpawn(MapManager map)

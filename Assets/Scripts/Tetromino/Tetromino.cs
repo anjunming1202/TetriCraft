@@ -167,6 +167,9 @@ public class Tetromino : MonoBehaviour
                     rotated[j, size - 1 - i] = shape[i, j];
                 else
                     rotated[size - 1 - j, i] = shape[i, j];
+
+                if (shape[i, j] != null)
+                    shape[i, j].Rotate(clockwise);
             }
         }
 
