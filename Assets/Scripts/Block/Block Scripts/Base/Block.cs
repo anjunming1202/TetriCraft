@@ -58,6 +58,23 @@ public abstract class Block : MapRandomTickBehaviourObject
         return MapBoundaryData.MapToWorld(CentrePosition);
     }
 
+    public Vector2 Facing
+    {
+        get
+        {
+            return orientation switch
+            {
+                Orientation.Up => Vector2.up,
+                Orientation.Down => Vector2.down,
+                Orientation.Left => Vector2.left,
+                Orientation.Right => Vector2.right,
+                _ => Vector2.zero,
+            };
+        }
+    }
+
+    public float Rotation => (int)orientation * 90;
+
     public void SetPosition(int x, int y, bool animation = false)
     {
         SetPosition((float)x, (float)y, animation);

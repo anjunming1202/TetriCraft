@@ -20,6 +20,7 @@ public enum BlockID
     TNT,
     RedstoneBlock,
     RedstoneLamp,
+    NormalPiston,
 
     Count
 }
