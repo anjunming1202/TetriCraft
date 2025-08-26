@@ -18,6 +18,12 @@ public class BlockGrid
 
     public void Add(Block block)
     {
+        if (block.isRemoved)
+        {
+            Debug.LogError($"try add removed {block}");
+            return;
+        }
+
         int x = block.GridPosition.x;
         int y = block.GridPosition.y;
 
@@ -34,6 +40,12 @@ public class BlockGrid
 
     public void Remove(Block block)
     {
+        if (block.isRemoved)
+        {
+            Debug.LogError($"try remove {block} twice");
+            return;
+        }
+
         Debug.Assert(grid[positions[block].x, positions[block].y] == block, "Block position inconsistent!");
         grid[positions[block].x, positions[block].y] = null;
 

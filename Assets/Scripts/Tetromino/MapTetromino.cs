@@ -206,6 +206,9 @@ public class MapTetromino : Tetromino
         isLocked = true;
         foreach (var block in blocks)
         {
+            if (block == null) // block that is destroyed during falling
+                continue;
+
             block.OnLockdown();
         }
 
@@ -264,6 +267,6 @@ public class MapTetromino : Tetromino
     }
     public bool CheckValid(MapManager map)
     {
-        return (CheckInside(map) && !CheckCollide(map));
+        return !CheckEmpty() && CheckInside(map) && !CheckCollide(map);
     }
 }

@@ -26,7 +26,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     public bool isRemoved = false;
 
     public bool isActivated = false;
-    public virtual bool isCharged { get; private set; }
+    public bool isCharged = false;
 
     // Events
     public delegate void OnChangedEvent(Block block);
@@ -75,6 +75,8 @@ public abstract class Block : MapRandomTickBehaviourObject
     {
         Lockdown();
         map.OnGridPlace?.Invoke(map, this);
+        //
+        OnGridUpdated(this);
     }
 
     public virtual void OnUpdate()
@@ -124,7 +126,7 @@ public abstract class Block : MapRandomTickBehaviourObject
         {
             if (block != null)
             {
-                Block.UpdateActivationState(block); // for oncharge no need to foreach
+                UpdateActivationState(block); // for oncharge no need to foreach
             }
         }
     }
@@ -253,6 +255,7 @@ public abstract class Block : MapRandomTickBehaviourObject
                 {
 
                 }
+
                 block.activateSources.Insert(pointer, adjacent.GridPosition);
                 pointer++;
             }
@@ -294,10 +297,10 @@ public abstract class Block : MapRandomTickBehaviourObject
         {
             Block prevTargetBlock = block.map.GetBlock(prevTarget.x, prevTarget.y);
 
-            Debug.Assert(prevTargetBlock is IRedstoneActivatable, "wrong activation target was set"); //
-
             if (prevTargetBlock != null)
             {
+                Debug.Assert(prevTargetBlock is IRedstoneActivatable, $"wrong activation target {prevTarget} {prevTargetBlock} was set"); //
+
                 if (!prevTargetBlock.activateSources.Remove(block.LastGridPosition))
                     prevTargetBlock.activateSources.Remove(block.GridPosition);
 

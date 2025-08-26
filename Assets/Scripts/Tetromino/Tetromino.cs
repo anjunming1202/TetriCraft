@@ -187,6 +187,14 @@ public class Tetromino : MonoBehaviour
     {
         return MapBoundaryData.MapToWorld((Vector2)position + Vector2.one * ((float)size / 2));
     }
+
+    public bool CheckEmpty()
+    {
+        foreach (var block in blocks)
+            if (block != null)
+                return false;
+        return true;
+    }
 }
 
 public enum TetrominoType

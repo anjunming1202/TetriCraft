@@ -161,8 +161,16 @@ public class MapManager : MonoBehaviour
 
     private void AddToUpdateBatch(Block block)
     {
+        if (block.isRemoved)
+            return;
         if (!blockUpdateBatch.Contains(block))
             blockUpdateBatch.Add(block);
+    }
+
+    private void RemoveFromUpdateBatch(Block block)
+    {
+        if (blockUpdateBatch.Contains(block))
+            blockUpdateBatch.Remove(block);
     }
 
     /// <summary>
@@ -175,6 +183,7 @@ public class MapManager : MonoBehaviour
         blockGrid.Add(block);
 
         block.OnMoved += AddToUpdateBatch;
+        block.OnRemoved += RemoveFromUpdateBatch;
 
         blockList.Add(block);
 
