@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEditor;
+using UnityEngine.UI;
 
 public class MapDebugger : MonoBehaviour
 {
@@ -20,9 +22,14 @@ public class MapDebugger : MonoBehaviour
     public Color lockedColor;
     public Color tetrominoColor;
     public Color unclearableColor;
+
+    public Font font;
+    public Color textColor;
+
     [Header("Options")]
     public bool displayFrame = true;
     public bool displayPosition = true;
+    public bool displayCoordinates = true;
 
     private Vector3 cursorPosition;
     private Vector2 cursorMapPosition;
@@ -57,6 +64,25 @@ public class MapDebugger : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        // mark coordinates
+        if (displayCoordinates)
+        {
+            for (int x = 0; x < debuggedMap.Width; x++)
+                for (int y = 0; y < debuggedMap.Height; y++)
+                {
+                    Vector2Int gridPosition = new Vector2Int(x, y);
+                    Vector3 labelPosition = MapBoundaryData.MapToWorld(gridPosition) + new Vector3(0, 1f);
+
+                    GUIStyle style = new GUIStyle();
+                    style.normal.textColor = textColor;
+                    // style.font = font;
+                    style.fontSize = 7;
+
+                    Handles.Label(labelPosition, $"({x}, {y})", style);
+                }
+        }
+
+        // mark blocks
         foreach (Block block in debuggedMap.blocks)
         {
             if (block == null)
