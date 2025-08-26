@@ -25,8 +25,8 @@ public abstract class Block : MapRandomTickBehaviourObject
     public bool isAnimating = false;    // is moving with animation
     public bool isRemoved = false;
 
-    public virtual bool isCharged { get; private set; }
     public bool isActivated = false;
+    public virtual bool isCharged { get; private set; }
 
     // Events
     public delegate void OnChangedEvent(Block block);
@@ -142,16 +142,6 @@ public abstract class Block : MapRandomTickBehaviourObject
         }*/
     }
 
-    public virtual void OnRedstoneActivated()
-    {
-
-    }
-
-    public virtual void OnRedstoneDeactivated()
-    {
-
-    }
-
     public virtual void OnNeighbourUpdated()
     {
         //throw new NotImplementedException();
@@ -245,6 +235,9 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     private static void UpdateActivationState(Block block)
     {
+        if (block is not IRedstoneActivatable component)
+            return;
+
         // detect new sources
         int pointer = 0;
         foreach (Block adjacent in block.map.GetAdjacentBlocks(block.GridPosition.x, block.GridPosition.y, true))
@@ -279,12 +272,12 @@ public abstract class Block : MapRandomTickBehaviourObject
         if (block.isActivated && block.activateSources.Count == 0)
         {
             block.isActivated = false;
-            block.OnRedstoneDeactivated();
+            component.OnRedstoneDeactivated();
         }
         if (!block.isActivated && block.activateSources.Count > 0)
         {
             block.isActivated = true;
-            block.OnRedstoneActivated();
+            component.OnRedstoneActivated();
         }
     }
     private static void UpdateChargingState(Block block)
@@ -300,6 +293,9 @@ public abstract class Block : MapRandomTickBehaviourObject
         foreach (Vector2Int prevTarget in activateTargets)
         {
             Block prevTargetBlock = block.map.GetBlock(prevTarget.x, prevTarget.y);
+
+            Debug.Assert(prevTargetBlock is IRedstoneActivatable, "wrong activation target was set"); //
+
             if (prevTargetBlock != null)
             {
                 if (!prevTargetBlock.activateSources.Remove(block.LastGridPosition))
@@ -315,7 +311,7 @@ public abstract class Block : MapRandomTickBehaviourObject
         {
             foreach (Block newTargetBlock in block.map.GetAdjacentBlocks(block.GridPosition.x, block.GridPosition.y, true))
             {
-                if (newTargetBlock != null)
+                if (newTargetBlock != null && newTargetBlock is IRedstoneActivatable)
                 {
                     block.activateTargets.Add(newTargetBlock.GridPosition);
                     newTargetBlock.activateSources.Add(block.GridPosition);
@@ -328,15 +324,18 @@ public abstract class Block : MapRandomTickBehaviourObject
         // activate or deactivate
         foreach (Block updatedBlock in updatedBlocks)
         {
-            if (updatedBlock.isActivated && updatedBlock.activateSources.Count == 0)
+            if (updatedBlock is IRedstoneActivatable component)
             {
-                updatedBlock.isActivated = false;
-                updatedBlock.OnRedstoneDeactivated();
-            }
-            if (!updatedBlock.isActivated && updatedBlock.activateSources.Count > 0)
-            {
-                updatedBlock.isActivated = true;
-                updatedBlock.OnRedstoneActivated();
+                if (updatedBlock.isActivated && updatedBlock.activateSources.Count == 0)
+                {
+                    updatedBlock.isActivated = false;
+                    component.OnRedstoneDeactivated();
+                }
+                if (!updatedBlock.isActivated && updatedBlock.activateSources.Count > 0)
+                {
+                    updatedBlock.isActivated = true;
+                    component.OnRedstoneActivated();
+                }
             }
         }
     }

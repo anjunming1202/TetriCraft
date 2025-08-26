@@ -1,16 +1,16 @@
 ﻿using UnityEngine;
 
-public class RedstoneLamp : Block
+public class RedstoneLamp : Block, IRedstoneActivatable
 {
     public override BlockID ID => BlockID.RedstoneLamp;
 
-    public override void OnRedstoneActivated()
+    public void OnRedstoneActivated()
     {
         blockRenderer.ChangeState(1);
         OnTriggerAppearanceChanged();
     }
 
-    public override void OnRedstoneDeactivated()
+    public void OnRedstoneDeactivated()
     {
         blockRenderer.ChangeState(0);
         OnTriggerAppearanceChanged();
