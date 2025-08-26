@@ -15,9 +15,11 @@ public class Flame : MapRandomTickBehaviourObject
         this.map = map;
         this.attachedBlock = attachedBlock;
         this.offset = offset;
+
         attachedBlock.SetBurningAt(offset, this);
         transform.parent = attachedBlock.transform;
         transform.localPosition = (Vector2)offset;
+
         age = 0;
     }
 

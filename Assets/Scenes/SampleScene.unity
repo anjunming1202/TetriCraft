@@ -1157,7 +1157,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debuggedMap: {fileID: 763784240}
-  blockSpawned: 10
+  blockSpawned: 16
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
 --- !u!114 &1036024157
 MonoBehaviour:
@@ -1175,8 +1175,11 @@ MonoBehaviour:
   lockedColor: {r: 0, g: 1, b: 0.054327965, a: 1}
   tetrominoColor: {r: 1, g: 0, b: 0, a: 1}
   unclearableColor: {r: 1, g: 0.7153325, b: 0, a: 1}
+  font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
+  textColor: {r: 1, g: 1, b: 1, a: 0.29803923}
   displayFrame: 1
   displayPosition: 1
+  displayCoordinates: 1
 --- !u!4 &1036024158
 Transform:
   m_ObjectHideFlags: 0
@@ -1237,6 +1240,8 @@ MonoBehaviour:
   - {fileID: 6118796901473174655, guid: b311c5aa62e88ec479c84f6d40457f85, type: 3}
   - {fileID: 6118796901473174655, guid: 7bb75fccfc19ee0488ee3dd09240973c, type: 3}
   - {fileID: 6118796901473174655, guid: 2d9d6267074e3c045a3bb103d9fea903, type: 3}
+  - {fileID: 6118796901473174655, guid: c8da3c9bda479234cbb033d6e72145d2, type: 3}
+  - {fileID: 6118796901473174655, guid: 3fe4f5e0a8502904589a10ba00967fbf, type: 3}
 --- !u!4 &1050138633
 Transform:
   m_ObjectHideFlags: 0

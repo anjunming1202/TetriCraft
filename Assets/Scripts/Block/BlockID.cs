@@ -18,6 +18,8 @@ public enum BlockID
     LavaDummy,
     Obsidian,
     TNT,
+    RedstoneBlock,
+    RedstoneLamp,
 
     Count
 }
