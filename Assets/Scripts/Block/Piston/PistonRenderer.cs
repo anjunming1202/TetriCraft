@@ -36,13 +36,13 @@ public class PistonRenderer : BlockRenderer
 
         // head mask
         if (piston.Rotation % 180 == 0)
-            headMask.transform.localScale = new Vector3(1f, 2f, 1f);
+            headMask.transform.localScale = Vector3.one + new Vector3(0, 1, 0) * progression;
         else
-            headMask.transform.localScale = new Vector3(2f, 1f, 1f);
-        headMask.transform.localPosition = piston.Facing * 0.5f;
+            headMask.transform.localScale = Vector3.one + new Vector3(1, 0, 0) * progression;
+        headMask.transform.localPosition = (Vector2)piston.Facing * 0.5f * progression;
 
         // extension progression
-        headRenderer.transform.localPosition = progression * piston.Facing;
+        headRenderer.transform.localPosition = progression * (Vector2)piston.Facing;
     }
 
     private void ExtensionOnSet()

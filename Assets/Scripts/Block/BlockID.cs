@@ -21,6 +21,7 @@ public enum BlockID
     RedstoneBlock,
     RedstoneLamp,
     NormalPiston,
+    PistonHead,
 
     Count
 }

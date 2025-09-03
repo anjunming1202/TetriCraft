@@ -216,7 +216,9 @@ public class TetrisManager : MonoBehaviour
         // clear row
         for (int i = 0; i < map.Width; i++)
         {
-            map.DestroyBlock(map[i, row]);
+            Block block = map.GetBlock(i, row);
+            if (block != null)
+                map.DestroyBlock(block);
         }
         // move above rows down
         for (int y = row + 1; y < map.Height; y++)

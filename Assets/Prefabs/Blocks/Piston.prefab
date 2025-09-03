@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 1607309596142003805}
   - component: {fileID: 8553523833502908292}
   - component: {fileID: 9028015919182796587}
+  - component: {fileID: 7735495285952720393}
   - component: {fileID: 2341808955676992956}
-  - component: {fileID: 9170696589410686349}
   - component: {fileID: -9009503282852880812}
   m_Layer: 0
   m_Name: Piston
@@ -111,6 +111,7 @@ MonoBehaviour:
   chargeTargets: []
   id: 17
   isExtending: 0
+  maxPushNumber: 14
 --- !u!114 &8553523833502908292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,6 +140,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startPosition: {x: 0, y: 0, z: 0}
   endPosition: {x: 0, y: 0, z: 0}
+--- !u!114 &7735495285952720393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6118796901473174655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c862d2173dfa3746bbd462442382437, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  breakingParticles: {fileID: 7021957719075297926, guid: 8b40618432a6d2d428f4acdcc47c12c0, type: 3}
 --- !u!114 &2341808955676992956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -161,19 +175,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 7c787eded87b61347bd511bfd1dc4233, type: 3}
   - {fileID: 8300000, guid: d92969c14d64a4842adedca3250289e2, type: 3}
   - {fileID: 8300000, guid: 6d871d558047fe24abffb686dd53bee7, type: 3}
---- !u!114 &9170696589410686349
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6118796901473174655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c64fff6d2c61293468fdf8af9bbab426, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  breakingParticles: {fileID: 7021957719075297926, guid: 8b40618432a6d2d428f4acdcc47c12c0, type: 3}
 --- !u!114 &-9009503282852880812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -271,7 +272,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
+  m_MaskInteraction: 1
   m_SpriteSortPoint: 0
 --- !u!1 &8491590162172394866
 GameObject:

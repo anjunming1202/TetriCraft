@@ -7,28 +7,33 @@ public class BlockParticleManager : MonoBehaviour
 {
     [SerializeField] private ParticleSystem breakingParticles;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         block = GetComponent<Block>();
-        blockRenderer = GetComponent<BlockRenderer>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
         block.OnDestroyed += SpawnBreakingParticles;
     }
 
-    private void SpawnBreakingParticles()
+    protected virtual void SpawnBreakingParticles()
+    {
+        SpawnBreakingParticles(transform.position, spriteRenderer.sprite.texture);
+    }
+
+    protected void SpawnBreakingParticles(Vector3 position, Texture texture)
     {
         if (breakingParticles == null)
             return;
 
-        breakingParticlesInstance = Instantiate(breakingParticles, transform.position, Quaternion.identity);
+        breakingParticlesInstance = Instantiate(breakingParticles, position, Quaternion.identity);
         breakingParticlesRenderer = breakingParticlesInstance.GetComponent<ParticleSystemRenderer>();
         Material material = new Material(breakingParticlesRenderer.material);
-        material.mainTexture = blockRenderer.Texture;
+        material.mainTexture = texture;
         breakingParticlesRenderer.material = material;
     } // Todo: currently using new instantiated material, increasing draw call
 
-    private Block block;
-    private BlockRenderer blockRenderer;
+    protected Block block;
+    private SpriteRenderer spriteRenderer;
 
     private ParticleSystem breakingParticlesInstance;
     private ParticleSystemRenderer breakingParticlesRenderer;

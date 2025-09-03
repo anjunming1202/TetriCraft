@@ -22,6 +22,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     public virtual bool IsDummy => false;
     public virtual bool IsFluid => false;
     public virtual bool IsOriented => false;
+    public virtual bool IsPushable => true;
 
     // Block state flags
     public bool isInMap = false;        // is in the map data
@@ -29,12 +30,12 @@ public abstract class Block : MapRandomTickBehaviourObject
     public bool isAnimating = false;    // is moving with animation
     public bool isRemoved = false;
 
-    public bool isActivated = false;
+    public bool onActivation => activateSources.Count > 0;
+    public bool isActivated = false;    // is activated in last frame
     public bool isCharged = false;
 
     // Events
     public delegate void OnChangedEvent(Block block);
-    public event OnChangedEvent OnBlockUpdated;
     public event OnChangedEvent OnMoved;
     public event OnChangedEvent OnStateChanged;
 
@@ -58,20 +59,30 @@ public abstract class Block : MapRandomTickBehaviourObject
         return MapBoundaryData.MapToWorld(CentrePosition);
     }
 
-    public Vector2 Facing
+    public Vector2Int Orientation2Direction(Orientation orientation)
     {
-        get
+        return orientation switch
         {
-            return orientation switch
-            {
-                Orientation.Up => Vector2.up,
-                Orientation.Down => Vector2.down,
-                Orientation.Left => Vector2.left,
-                Orientation.Right => Vector2.right,
-                _ => Vector2.zero,
-            };
-        }
+            Orientation.Up => Vector2Int.up,
+            Orientation.Down => Vector2Int.down,
+            Orientation.Left => Vector2Int.left,
+            Orientation.Right => Vector2Int.right,
+            _ => Vector2Int.zero,
+        };
     }
+    public Orientation Direction2Orientation(Vector2Int dir)
+    {
+        return (dir.x, dir.y) switch
+        {
+            (0, 1) => Orientation.Up,
+            (0, -1) => Orientation.Down,
+            (1, 0) => Orientation.Right,
+            (-1, 0) => Orientation.Left,
+            _ => Orientation.Up
+        };
+    }
+
+    public Vector2Int Facing => Orientation2Direction(orientation);
 
     public float Rotation => (int)orientation * 90;
 
@@ -94,18 +105,12 @@ public abstract class Block : MapRandomTickBehaviourObject
         this.transform.SetParent(map.transform);
 
         isCharged = false;
-
-        OnRemoved += OnGridUpdated;
-        OnMoved += OnGridUpdated;
-        OnStateChanged += OnBlockUpdated;
     }
 
     public virtual void OnLockdown()
     {
         Lockdown();
         map.OnGridPlace?.Invoke(map, this);
-        //
-        OnGridUpdated(this);
     }
 
     public virtual void OnUpdate()
@@ -133,6 +138,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     /// </summary>
     public virtual void Destroy()
     {
+        isRemoved = true;
         OnDestroyed?.Invoke();
         Remove();
     }
@@ -171,6 +177,12 @@ public abstract class Block : MapRandomTickBehaviourObject
                 component.RedstoneSourceDeactivated(GridPosition);
             }
         }*/
+    }
+
+    public virtual void OnUpdateRedstoneStates()
+    {
+        UpdateActivationState(this);
+        UpdateChargingState(this);
     }
 
     public virtual void OnNeighbourUpdated()
@@ -234,18 +246,6 @@ public abstract class Block : MapRandomTickBehaviourObject
         OnStateChanged?.Invoke(this);
     }
 
-    protected virtual void OnGridUpdated(Block block)
-    {
-        UpdateActivationState(block);
-        UpdateChargingState(block);
-        OnBlockUpdated?.Invoke(block);
-    }
-
-    protected void OnTriggerBlockUpdate()
-    {
-        OnBlockUpdated?.Invoke(this);
-    }
-
     protected virtual void OnExploded()
     {
         map.DestroyBlock(this);
@@ -259,11 +259,14 @@ public abstract class Block : MapRandomTickBehaviourObject
     private ExplosionBlocker explosionTarget;
     private FlammableObject flammableObject;
 
-    [SerializeField] private List<Vector2Int> activateSources = new List<Vector2Int>();
-    [SerializeField] private List<Vector2Int> activateTargets= new List<Vector2Int>();
-    [SerializeField] private List<Vector2Int> chargeSources = new List<Vector2Int>();
-    [SerializeField] private List<Vector2Int> chargeTargets = new List<Vector2Int>();
+    [SerializeField] protected List<Vector2Int> activateSources = new List<Vector2Int>();
+    [SerializeField] protected List<Vector2Int> activateTargets= new List<Vector2Int>();
+    [SerializeField] protected List<Vector2Int> chargeSources = new List<Vector2Int>();
+    [SerializeField] protected List<Vector2Int> chargeTargets = new List<Vector2Int>();
 
+    /// <summary>
+    /// Update when added/removed.
+    /// </summary>
     private static void UpdateActivationState(Block block)
     {
         if (block is not IRedstoneActivatable component)
@@ -273,7 +276,7 @@ public abstract class Block : MapRandomTickBehaviourObject
         int pointer = 0;
         foreach (Block adjacent in block.map.GetAdjacentBlocks(block.GridPosition.x, block.GridPosition.y, true))
         {
-            if (adjacent != null && adjacent.isCharged)
+            if (adjacent != null && adjacent.isInMap && !adjacent.isRemoved && adjacent.isCharged && component.CanActivatedBy(adjacent)) // a valid source found
             {
                 if (block.activateSources.Contains(adjacent.GridPosition)) // valid old sources
                     block.activateSources.Remove(adjacent.GridPosition);   
@@ -300,18 +303,13 @@ public abstract class Block : MapRandomTickBehaviourObject
                 source.activateTargets.Remove(block.GridPosition);
         }
 
-        // activate or deactivate
-        if (block.isActivated && block.activateSources.Count == 0)
-        {
-            block.isActivated = false;
-            component.OnRedstoneDeactivated();
-        }
-        if (!block.isActivated && block.activateSources.Count > 0)
-        {
-            block.isActivated = true;
-            component.OnRedstoneActivated();
-        }
+        // add to redstone manager update list
+        block.map.RedstoneManager.AddUpdatedBlock(block);
     }
+
+    /// <summary>
+    /// Update when added/removed.
+    /// </summary>
     private static void UpdateChargingState(Block block)
     {
         // change charging state
@@ -319,7 +317,7 @@ public abstract class Block : MapRandomTickBehaviourObject
 
 
         // update activation
-        List<Block> updatedBlocks = new List<Block>();
+
         // remove old targets
         Vector2Int[] activateTargets = block.activateTargets.ToArray();
         foreach (Vector2Int prevTarget in activateTargets)
@@ -333,40 +331,23 @@ public abstract class Block : MapRandomTickBehaviourObject
                 if (!prevTargetBlock.activateSources.Remove(block.LastGridPosition))
                     prevTargetBlock.activateSources.Remove(block.GridPosition);
 
-                if (!updatedBlocks.Contains(prevTargetBlock))
-                    updatedBlocks.Add(prevTargetBlock);
+                // add to redstone manager update list
+                block.map.RedstoneManager.AddUpdatedBlock(prevTargetBlock);
             }
             block.activateTargets.Remove(prevTarget); // possibly the old target became empty grid
         }
         // add new activated targets
-        if (!block.isRemoved && block.isCharged)
+        if (block.isInMap && !block.isRemoved && block.isCharged)
         {
             foreach (Block newTargetBlock in block.map.GetAdjacentBlocks(block.GridPosition.x, block.GridPosition.y, true))
             {
-                if (newTargetBlock != null && newTargetBlock is IRedstoneActivatable)
+                if (newTargetBlock != null && newTargetBlock.isInMap && newTargetBlock is IRedstoneActivatable component && component.CanActivatedBy(block)) // a valid target found
                 {
                     block.activateTargets.Add(newTargetBlock.GridPosition);
                     newTargetBlock.activateSources.Add(block.GridPosition);
 
-                    if (!updatedBlocks.Contains(newTargetBlock))
-                        updatedBlocks.Add(newTargetBlock);
-                }
-            }
-        }
-        // activate or deactivate
-        foreach (Block updatedBlock in updatedBlocks)
-        {
-            if (updatedBlock is IRedstoneActivatable component)
-            {
-                if (updatedBlock.isActivated && updatedBlock.activateSources.Count == 0)
-                {
-                    updatedBlock.isActivated = false;
-                    component.OnRedstoneDeactivated();
-                }
-                if (!updatedBlock.isActivated && updatedBlock.activateSources.Count > 0)
-                {
-                    updatedBlock.isActivated = true;
-                    component.OnRedstoneActivated();
+                    // add to redstone manager update list
+                    block.map.RedstoneManager.AddUpdatedBlock(newTargetBlock);
                 }
             }
         }

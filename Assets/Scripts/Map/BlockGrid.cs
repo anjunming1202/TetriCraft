@@ -16,6 +16,9 @@ public class BlockGrid
     public Block this[int x, int y] => grid[x, y];
     public int blockCount => positions.Count;   // debug
 
+    // event
+    public event Action<Vector2Int> OnGridBlockUpdate; // block update
+
     public void Add(Block block)
     {
         if (block.isRemoved)
@@ -104,6 +107,8 @@ public class BlockGrid
                 neighbour.OnNeighbourUpdated();
             }
         }
+
+        OnGridBlockUpdate?.Invoke(pos);
     }
 
     private int width;

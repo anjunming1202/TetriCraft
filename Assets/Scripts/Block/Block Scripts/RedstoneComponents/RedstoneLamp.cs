@@ -4,17 +4,24 @@ public class RedstoneLamp : Block, IRedstoneActivatable
 {
     public override BlockID ID => BlockID.RedstoneLamp;
 
-    public void OnRedstoneActivated()
+    bool IRedstoneActivatable.OnRedstoneActivated()
     {
         blockRenderer.ChangeState(1);
         OnTriggerAppearanceChanged();
+        return true;
     }
 
-    public void OnRedstoneDeactivated()
+    bool IRedstoneActivatable.OnRedstoneDeactivated()
     {
         blockRenderer.ChangeState(0);
         OnTriggerAppearanceChanged();
+        return true;
     }
+
+    bool IRedstoneActivatable.CanActivatedBy(Block source)
+    {
+        return true;
+    }    
 
     protected override void Awake()
     {
