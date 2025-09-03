@@ -6,7 +6,6 @@ public class RedstoneManager
     public RedstoneManager(MapManager map)
     {
         this.map = map;
-        map.grid.OnGridBlockUpdate += UpdateBlockStates;
     }
 
     public void RedstoneUpdate()
@@ -54,12 +53,5 @@ public class RedstoneManager
     private void Reset()
     {
         updatedBlocks.Clear();
-    }
-
-    private void UpdateBlockStates(Vector2Int position)
-    {
-        Block block = map.GetBlock(position.x, position.y);
-        if (block != null)
-            block.OnUpdateRedstoneStates();
     }
 }

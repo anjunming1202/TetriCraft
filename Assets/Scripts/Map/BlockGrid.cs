@@ -16,9 +16,6 @@ public class BlockGrid
     public Block this[int x, int y] => grid[x, y];
     public int blockCount => positions.Count;   // debug
 
-    // event
-    public event Action<Vector2Int> OnGridBlockUpdate; // block update
-
     public void Add(Block block)
     {
         if (block.isRemoved)
@@ -38,7 +35,7 @@ public class BlockGrid
         block.isInMap = true;
 
         // grid block update
-        OnBlockUpdate(block.GridPosition);
+        OnBlockUpdate(new Vector2Int(x, y));
     }
 
     public void Remove(Block block)
@@ -50,14 +47,15 @@ public class BlockGrid
         }
 
         Debug.Assert(grid[positions[block].x, positions[block].y] == block, "Block position inconsistent!");
-        grid[positions[block].x, positions[block].y] = null;
+        Vector2Int removedPos = positions[block];
+        grid[removedPos.x, removedPos.y] = null;
 
         positions.Remove(block);
 
         block.isInMap = false;
 
         // grid block update
-        OnBlockUpdate(block.GridPosition);
+        OnBlockUpdate(removedPos);
     }
 
     public Block Get(int x, int y)
@@ -97,6 +95,7 @@ public class BlockGrid
 
     public void OnBlockUpdate(Vector2Int pos)
     {
+        // notify neighbours
         Vector2Int[] dirs = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
         foreach (var dir in dirs)
         {
@@ -104,11 +103,9 @@ public class BlockGrid
             Block neighbour = Get(nPos.x, nPos.y);
             if (neighbour != null)
             {
-                neighbour.OnNeighbourUpdated();
+                neighbour.OnNeighbourUpdated(pos);
             }
         }
-
-        OnGridBlockUpdate?.Invoke(pos);
     }
 
     private int width;

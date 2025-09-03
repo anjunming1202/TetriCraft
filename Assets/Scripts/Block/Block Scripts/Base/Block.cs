@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
+using static Unity.VisualScripting.Member;
 
 public abstract class Block : MapRandomTickBehaviourObject
 {
@@ -118,6 +119,19 @@ public abstract class Block : MapRandomTickBehaviourObject
         if (this == null) return;
     }
 
+    public virtual void OnNeighbourUpdated(Vector2Int neighbourPos)
+    {
+        //Debug.Log($"neighbour updated {GridPosition}");
+        
+        // detect if the updated neighbour is a activation/charging source
+        UpdateActivationSourceState(neighbourPos);
+        UpdateChargingSourceState(neighbourPos);
+
+        // detect if the updated neighbour can be activated/charged by this block
+        UpdateActivationTargetState(neighbourPos);
+        UpdateChargingTargetState(neighbourPos);
+    }
+
     public virtual bool CanBeReplacedBy(Block block)
     {
         return false;
@@ -157,37 +171,14 @@ public abstract class Block : MapRandomTickBehaviourObject
     {
         isCharged = true;
 
-        foreach (Block block in map.GetAdjacentBlocks(GridPosition.x, GridPosition.y))
-        {
-            if (block != null)
-            {
-                UpdateActivationState(block); // for oncharge no need to foreach
-            }
-        }
+        map.grid.OnBlockUpdate(GridPosition);
     }
 
     public virtual void OnDischarged(Vector2Int sourcePosition)
     {
         isCharged = false;
 
-        /*foreach (Block block in map.GetAdjacentBlocks(GridPosition.x, GridPosition.y))
-        {
-            if (block is RedstonePassiveComponent component)
-            {
-                component.RedstoneSourceDeactivated(GridPosition);
-            }
-        }*/
-    }
-
-    public virtual void OnUpdateRedstoneStates()
-    {
-        UpdateActivationState(this);
-        UpdateChargingState(this);
-    }
-
-    public virtual void OnNeighbourUpdated()
-    {
-        //throw new NotImplementedException();
+        map.grid.OnBlockUpdate(GridPosition);
     }
 
     protected virtual void Awake()
@@ -259,97 +250,78 @@ public abstract class Block : MapRandomTickBehaviourObject
     private ExplosionBlocker explosionTarget;
     private FlammableObject flammableObject;
 
-    [SerializeField] protected List<Vector2Int> activateSources = new List<Vector2Int>();
-    [SerializeField] protected List<Vector2Int> activateTargets= new List<Vector2Int>();
-    [SerializeField] protected List<Vector2Int> chargeSources = new List<Vector2Int>();
-    [SerializeField] protected List<Vector2Int> chargeTargets = new List<Vector2Int>();
+    [SerializeField] protected Dictionary<Vector2Int, Block> activateSources = new Dictionary<Vector2Int, Block>();
+    [SerializeField] protected Dictionary<Vector2Int, Block> chargeSources = new Dictionary<Vector2Int, Block>();
+    [SerializeField] protected Dictionary<Vector2Int, Block> activateTargets = new Dictionary<Vector2Int, Block>();
+    [SerializeField] protected Dictionary<Vector2Int, Block> chargeTargets = new Dictionary<Vector2Int, Block>();
 
     /// <summary>
-    /// Update when added/removed.
+    /// 
     /// </summary>
-    private static void UpdateActivationState(Block block)
+    private void UpdateActivationSourceState(Vector2Int sourcePos)
     {
-        if (block is not IRedstoneActivatable component)
+        if (this is not IRedstoneActivatable component)
             return;
 
-        // detect new sources
-        int pointer = 0;
-        foreach (Block adjacent in block.map.GetAdjacentBlocks(block.GridPosition.x, block.GridPosition.y, true))
+        Block source = map.GetBlock(sourcePos.x, sourcePos.y);
+
+        // if the detected position is able to activate this block
+        if (source != null && !source.isRemoved && source.isCharged && component.CanActivatedBy(source))
         {
-            if (adjacent != null && adjacent.isInMap && !adjacent.isRemoved && adjacent.isCharged && component.CanActivatedBy(adjacent)) // a valid source found
+            // detect if it's a new position
+            if (!activateSources.ContainsKey(sourcePos))
             {
-                if (block.activateSources.Contains(adjacent.GridPosition)) // valid old sources
-                    block.activateSources.Remove(adjacent.GridPosition);   
-                else                                                       // valid new sources
-                    adjacent.activateTargets.Add(block.GridPosition);
-
-                if (pointer > block.activateSources.Count)
-                {
-
-                }
-
-                block.activateSources.Insert(pointer, adjacent.GridPosition);
-                pointer++;
+                activateSources.Add(sourcePos, source);
+                source.activateTargets.Add(GridPosition, this);
             }
+            // add this block to the redstone update list
+            map.RedstoneManager.AddUpdatedBlock(this);
         }
-
-        // remove invalid old sources
-        for (int i = block.activateSources.Count - 1; i >= pointer; i--)
+        // if the detected position isn't able to activate this block
+        else
         {
-            Vector2Int invalidSourcePosition = block.activateSources[i];
-            block.activateSources.RemoveAt(i);
-            Block source = block.map.GetBlock(invalidSourcePosition.x, invalidSourcePosition.y);
-            if (source != null)
-                source.activateTargets.Remove(block.GridPosition);
+            // detect if it's an old position
+            if (activateSources.ContainsKey(sourcePos))
+            {
+                activateSources.Remove(sourcePos);
+                if (source != null)
+                    source.activateTargets.Remove(GridPosition);
+            }
+            // add this block to the redstone update list (only when no sources present need an update check)
+            if (activateSources.Count == 0)
+                map.RedstoneManager.AddUpdatedBlock(this);
         }
+    }
 
-        // add to redstone manager update list
-        block.map.RedstoneManager.AddUpdatedBlock(block);
+    private void UpdateActivationTargetState(Vector2Int targetPos)
+    {
+        Block target = map.GetBlock(targetPos.x, targetPos.y);
+
+        if (target != null)
+        {
+            target.UpdateActivationSourceState(GridPosition);
+        }
+        else if (activateTargets.ContainsKey(targetPos))
+        {
+            target = activateTargets[targetPos];
+            if (target != null)
+                target.activateSources.Remove(GridPosition);
+            activateTargets.Remove(targetPos);
+
+            map.RedstoneManager.AddUpdatedBlock(target);//
+        }
     }
 
     /// <summary>
-    /// Update when added/removed.
+    /// 
     /// </summary>
-    private static void UpdateChargingState(Block block)
+    private void UpdateChargingSourceState(Vector2Int sourcePos)
     {
-        // change charging state
 
+    }
 
+    private void UpdateChargingTargetState(Vector2Int targetPos)
+    {
 
-        // update activation
-
-        // remove old targets
-        Vector2Int[] activateTargets = block.activateTargets.ToArray();
-        foreach (Vector2Int prevTarget in activateTargets)
-        {
-            Block prevTargetBlock = block.map.GetBlock(prevTarget.x, prevTarget.y);
-
-            if (prevTargetBlock != null)
-            {
-                Debug.Assert(prevTargetBlock is IRedstoneActivatable, $"wrong activation target {prevTarget} {prevTargetBlock} was set"); //
-
-                if (!prevTargetBlock.activateSources.Remove(block.LastGridPosition))
-                    prevTargetBlock.activateSources.Remove(block.GridPosition);
-
-                // add to redstone manager update list
-                block.map.RedstoneManager.AddUpdatedBlock(prevTargetBlock);
-            }
-            block.activateTargets.Remove(prevTarget); // possibly the old target became empty grid
-        }
-        // add new activated targets
-        if (block.isInMap && !block.isRemoved && block.isCharged)
-        {
-            foreach (Block newTargetBlock in block.map.GetAdjacentBlocks(block.GridPosition.x, block.GridPosition.y, true))
-            {
-                if (newTargetBlock != null && newTargetBlock.isInMap && newTargetBlock is IRedstoneActivatable component && component.CanActivatedBy(block)) // a valid target found
-                {
-                    block.activateTargets.Add(newTargetBlock.GridPosition);
-                    newTargetBlock.activateSources.Add(block.GridPosition);
-
-                    // add to redstone manager update list
-                    block.map.RedstoneManager.AddUpdatedBlock(newTargetBlock);
-                }
-            }
-        }
     }
 }
