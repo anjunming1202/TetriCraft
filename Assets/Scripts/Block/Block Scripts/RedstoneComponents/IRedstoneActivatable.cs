@@ -1,21 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public interface IRedstoneActivatable
 {
     /// <summary>
     /// Activate only if it's deactivated when source is added
     /// </summary>
-    /// <returns>a flag indicating whether the activation is successful</returns>
-    public bool OnRedstoneActivated();
+    public void OnRedstoneActivated();
 
     /// <summary>
     /// Deactivate only if it's activated when source is removed
     /// </summary>
-    /// <returns>a flag indicating whether the deactivation is successful</returns>
-    public bool OnRedstoneDeactivated();
+    public void OnRedstoneDeactivated();
 
     /// <summary>
     /// 
     /// </summary>
-    public bool CanActivatedBy(Block source);
+    public virtual bool CanActivatedBy(Block source)
+    {
+        return source.isCharged;
+    }
 }

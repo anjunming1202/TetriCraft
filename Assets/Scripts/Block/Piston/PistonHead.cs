@@ -1,6 +1,11 @@
 ﻿public class PistonHead : Block
 {
     public override BlockID ID => BlockID.PistonHead;
+    public override bool isInMap => pistonBase.isInMap;
+    public override bool isLocked => pistonBase.isLocked;
+    public override bool isEnabled => pistonBase.isEnabled;
+    public override bool isAnimating => pistonBase.isAnimating;
+
     public override bool IsPushable => false;
 
     public void Init(Piston pistonBase)

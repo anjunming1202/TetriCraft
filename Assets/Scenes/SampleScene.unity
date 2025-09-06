@@ -1175,8 +1175,9 @@ MonoBehaviour:
   lockedColor: {r: 0, g: 1, b: 0.054327965, a: 1}
   tetrominoColor: {r: 1, g: 0, b: 0, a: 1}
   unclearableColor: {r: 1, g: 0.7153325, b: 0, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 1}
   font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
-  textColor: {r: 1, g: 1, b: 1, a: 0.29803923}
+  textColor: {r: 1, g: 1, b: 1, a: 0.05882353}
   displayFrame: 1
   displayPosition: 1
   displayCoordinates: 1
@@ -1844,8 +1845,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 365, y: -725}
-  m_SizeDelta: {x: 600, y: 1324}
+  m_AnchoredPosition: {x: 365, y: -727}
+  m_SizeDelta: {x: 600, y: 1328}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1623497026
 MonoBehaviour:

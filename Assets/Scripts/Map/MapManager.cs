@@ -25,6 +25,9 @@ public class MapManager : MonoBehaviour
     // redstone
     public RedstoneManager RedstoneManager;
 
+    // block update
+    public BlockUpdateManager BlockUpdateManager;
+
     public List<MapRandomTickBehaviourObject> mapRandomTickObjects;
     public int randomTickSelectionCount => width * height;
 
@@ -51,6 +54,8 @@ public class MapManager : MonoBehaviour
         LavaManager = lavaManager;
 
         RedstoneManager = new RedstoneManager(this);
+
+        BlockUpdateManager = new BlockUpdateManager(this);
 
         // when block grid position updated:
         // squeeze fluid
@@ -118,9 +123,10 @@ public class MapManager : MonoBehaviour
         blockList.Remove(block);
     }
 
+    // map one frame update
     public void OnUpdate()
     {
-        // Block map
+        // Framely block update
         for (int i = 0; i < blockList.Count; i++)
         {
             blockList[i].OnUpdate();
@@ -131,13 +137,16 @@ public class MapManager : MonoBehaviour
             BatchUpdateBlocks();
         }
 
-        // Fluid
+        // Fluid Update
         waterManager.OnUpdate();
         lavaManager.OnUpdate();
         SpawnFluidConcretion();
 
         // Random tick behaviours
         RandomTick.InvokeRandomBehaviours(this);
+
+        // Block update
+        BlockUpdateManager.BlockUpdate();
 
         // Redstone
         RedstoneManager.RedstoneUpdate();

@@ -14,20 +14,14 @@ public class TNT : Block, IRedstoneActivatable
         map.RemoveBlock(this);
     }
 
-    bool IRedstoneActivatable.OnRedstoneActivated()
+    void IRedstoneActivatable.OnRedstoneActivated()
     {
         Ignite(4f);
-        return true;
     }
 
-    bool IRedstoneActivatable.OnRedstoneDeactivated()
+    void IRedstoneActivatable.OnRedstoneDeactivated()
     {
-        return true;
-    }
 
-    bool IRedstoneActivatable.CanActivatedBy(Block source)
-    {
-        return true;
     }
 
     protected override void OnExploded()

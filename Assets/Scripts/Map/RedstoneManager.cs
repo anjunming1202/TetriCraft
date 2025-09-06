@@ -22,15 +22,15 @@ public class RedstoneManager
             }
             else if (block is IRedstoneActivatable component)
             {
-                if (block.isActivated && !block.onActivation)
+                if (!block.wasActivated && block.isActivated)
                 {
-                    block.isActivated = false;
-                    component.OnRedstoneDeactivated();
-                }
-                if (!block.isActivated && block.onActivation)
-                {
-                    block.isActivated = true;
+                    block.wasActivated = true;
                     component.OnRedstoneActivated();
+                }
+                if (block.wasActivated && !block.isActivated)
+                {
+                    block.wasActivated = false;
+                    component.OnRedstoneDeactivated();
                 }
             }
             else

@@ -6,7 +6,6 @@ public class PistonRenderer : BlockRenderer
 {
     private SpriteRenderer baseRenderer;
     private SpriteRenderer headRenderer;
-    private SpriteMask headMask;
 
     [SerializeField] private AnimationCurveAsset pistonMotionCurveAsset;
     private float progression = 0;
@@ -17,7 +16,6 @@ public class PistonRenderer : BlockRenderer
     {
         baseRenderer = transform.Find("base").GetComponent<SpriteRenderer>();
         headRenderer = transform.Find("head").GetComponent<SpriteRenderer>();
-        headMask = GetComponentInChildren<SpriteMask>();
 
         Piston pistion = GetComponent<Piston>();
         pistion.OnExtending += ExtensionOnSet;
@@ -30,19 +28,19 @@ public class PistonRenderer : BlockRenderer
     {
         Piston piston = block as Piston;
 
-        // sprites orientation
-        baseRenderer.transform.rotation = Quaternion.Euler(0f, 0f, piston.Rotation); // *using trasform rotation instead of shader
-        headRenderer.transform.rotation = Quaternion.Euler(0f, 0f, piston.Rotation);
+        // material shader (masking)
+        baseRenderer.GetPropertyBlock(props);
+        props.SetFloat("_Rotation", piston.Rotation);
+        baseRenderer.SetPropertyBlock(props);
 
-        // head mask
-        if (piston.Rotation % 180 == 0)
-            headMask.transform.localScale = Vector3.one + new Vector3(0, 1, 0) * progression;
-        else
-            headMask.transform.localScale = Vector3.one + new Vector3(1, 0, 0) * progression;
-        headMask.transform.localPosition = (Vector2)piston.Facing * 0.5f * progression;
+        headRenderer.GetPropertyBlock(props);
+        //props.SetFloat("_Rotation", piston.Rotation);
+        props.SetFloat("_Progress", progression);
+        headRenderer.SetPropertyBlock(props);
 
-        // extension progression
+        // sprite size, rotation and position
         headRenderer.transform.localPosition = progression * (Vector2)piston.Facing;
+        headRenderer.transform.rotation = Quaternion.Euler(new Vector3(0, 0, piston.Rotation));
     }
 
     private void ExtensionOnSet()
