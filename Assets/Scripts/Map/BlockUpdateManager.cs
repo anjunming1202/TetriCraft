@@ -70,7 +70,8 @@ public class BlockUpdateManager
 
         foreach (var (block, updateSrc) in copy)
         {
-            block.NCNotificationUpdate(updateSrc);
+            if (block != null)
+                block.NCNotificationUpdate(updateSrc);
         }
     }
 

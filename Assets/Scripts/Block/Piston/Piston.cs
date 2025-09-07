@@ -85,10 +85,15 @@ public class Piston : GeneralBlock, IRedstoneActivatable
 
     private PistonHead pistonHead;
 
+    private static readonly List<BlockID> destroyableBlocks = new(){
+        BlockID.Leaf
+    };
+
     /// <summary>
     /// every block in the pushed block list structure should be listened when NC updates for attempting re-extending
     /// </summary>
     private List<Block> pushedBlockList = new List<Block>();
+    private List<Block> destroyedBlockList = new List<Block>();
 
     private Coroutine redstoneCoroutine;
     private IEnumerator DelayExecute(Action action, float delay)
@@ -113,6 +118,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
 
         // check whether it's able to push
         ResetPushedBlockList();
+        destroyedBlockList.Clear();
 
         bool successful = true;
         if (map.IsBlocked(forwardPosition.x, forwardPosition.y))
@@ -124,7 +130,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         // execute
         if (successful)
         {
-            ExecuteExtension(pushedBlockList);
+            ExecuteExtension();
         }
 
         // failed to execute => subscribe notifications
@@ -163,26 +169,32 @@ public class Piston : GeneralBlock, IRedstoneActivatable
 
     private bool TryPushBlock(Block block)
     {
+        // boundary condition: forward is destroyable => true
+        if (block != null && destroyableBlocks.Contains(block.ID))
+        {
+            destroyedBlockList.Add(block);
+            return true;
+        }
+
         // add to pushed block list
         if (block != null && !pushedBlockList.Contains(block))
             pushedBlockList.Add(block);
 
-        // boundary condition 1: block unable to push (null block means boundary)
+        // boundary condition: block unable to push (null block means boundary)
         if (block == null || !block.IsPushable || pushedBlockList.Count > maxPushNumber)
             return false;
 
-        // boundary condition 2 special case: extending piston
+        // boundary condition special case: extending piston
         if (block is Piston piston && piston.isExtending)
             return TryPushBlock(piston.pistonHead); // false
 
-        // boundary condition 3: forward is air => true
+        // boundary condition: forward is air => true
         Vector2Int nextPosition = block.GridPosition + Facing;
         if (!map.IsBlocked(nextPosition.x, nextPosition.y))
             return true;
 
         // recursion: try push forward block
         Block forwardBlock = map.GetBlock(nextPosition.x, nextPosition.y);
-
         return TryPushBlock(forwardBlock);
     }
 
@@ -194,10 +206,16 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         return false;
     }
 
-    private void ExecuteExtension(List<Block> structure)
+    private void ExecuteExtension()
     {
+        // destroy blocks to be destroyed
+        for (int i = destroyedBlockList.Count - 1; i >= 0; i--)
+        {
+            map.DestroyBlock(destroyedBlockList[i]);
+        }
+
         // set pushed blocks
-        foreach (Block block in structure)
+        foreach (Block block in pushedBlockList)
         {
             Vector2Int targetPosition = block.GridPosition + Facing;
             block.SetPosition(targetPosition.x, targetPosition.y, true);
