@@ -1009,13 +1009,13 @@ SpriteMask:
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
   m_MaskAlphaCutoff: 0.2
-  m_FrontSortingLayerID: 0
+  m_FrontSortingLayerID: 1635080769
   m_BackSortingLayerID: 0
-  m_FrontSortingLayer: 0
+  m_FrontSortingLayer: 3
   m_BackSortingLayer: 0
-  m_FrontSortingOrder: 0
-  m_BackSortingOrder: 0
-  m_IsCustomRangeActive: 0
+  m_FrontSortingOrder: 100
+  m_BackSortingOrder: -100
+  m_IsCustomRangeActive: 1
   m_SpriteSortPoint: 0
 --- !u!4 &757604693
 Transform:
@@ -1157,7 +1157,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debuggedMap: {fileID: 763784240}
-  blockSpawned: 16
+  blockSpawned: 15
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
 --- !u!114 &1036024157
 MonoBehaviour:
@@ -1175,8 +1175,9 @@ MonoBehaviour:
   lockedColor: {r: 0, g: 1, b: 0.054327965, a: 1}
   tetrominoColor: {r: 1, g: 0, b: 0, a: 1}
   unclearableColor: {r: 1, g: 0.7153325, b: 0, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 1}
   font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
-  textColor: {r: 1, g: 1, b: 1, a: 0.29803923}
+  textColor: {r: 1, g: 1, b: 1, a: 0.05882353}
   displayFrame: 1
   displayPosition: 1
   displayCoordinates: 1
@@ -1242,6 +1243,8 @@ MonoBehaviour:
   - {fileID: 6118796901473174655, guid: 2d9d6267074e3c045a3bb103d9fea903, type: 3}
   - {fileID: 6118796901473174655, guid: c8da3c9bda479234cbb033d6e72145d2, type: 3}
   - {fileID: 6118796901473174655, guid: 3fe4f5e0a8502904589a10ba00967fbf, type: 3}
+  - {fileID: 6118796901473174655, guid: b74a488e81e476a4e8180e96f17d229a, type: 3}
+  - {fileID: 6118796901473174655, guid: 344d17236ae2a5e4c90b941eef1537fa, type: 3}
 --- !u!4 &1050138633
 Transform:
   m_ObjectHideFlags: 0
@@ -1842,8 +1845,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 365, y: -725}
-  m_SizeDelta: {x: 600, y: 1324}
+  m_AnchoredPosition: {x: 365, y: -727}
+  m_SizeDelta: {x: 600, y: 1328}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1623497026
 MonoBehaviour:
@@ -1943,13 +1946,13 @@ SpriteMask:
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
   m_MaskAlphaCutoff: 0.2
-  m_FrontSortingLayerID: 0
+  m_FrontSortingLayerID: 1635080769
   m_BackSortingLayerID: 0
-  m_FrontSortingLayer: 0
+  m_FrontSortingLayer: 3
   m_BackSortingLayer: 0
-  m_FrontSortingOrder: 0
-  m_BackSortingOrder: 0
-  m_IsCustomRangeActive: 0
+  m_FrontSortingOrder: 100
+  m_BackSortingOrder: -100
+  m_IsCustomRangeActive: 1
   m_SpriteSortPoint: 0
 --- !u!4 &1631176128
 Transform:
@@ -2037,11 +2040,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9079800203541379973, guid: ffb5340e1f0990441897ac10bc39ac1b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.16
       objectReference: {fileID: 0}
     - target: {fileID: 9079800203541379973, guid: ffb5340e1f0990441897ac10bc39ac1b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.47
       objectReference: {fileID: 0}
     - target: {fileID: 9079800203541379973, guid: ffb5340e1f0990441897ac10bc39ac1b, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2150,8 +2153,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1635080769
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

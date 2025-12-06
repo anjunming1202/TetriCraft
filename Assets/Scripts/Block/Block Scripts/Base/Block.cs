@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
+using static Unity.VisualScripting.Member;
 
 public abstract class Block : MapRandomTickBehaviourObject
 {
@@ -13,24 +14,30 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     // Data in the map
     private Vector2 position = Vector2.zero;            // Block position in the map
-    private Vector2 lastPosition = Vector2.zero;
+    protected Vector2 lastPosition = Vector2.zero;
 
-    // Block properties
+    public enum Orientation { Up, Left, Down, Right }
+    public Orientation orientation = Orientation.Up;
+
+    // Block readonly properties
     public virtual bool IsDummy => false;
     public virtual bool IsFluid => false;
+    public virtual bool IsOriented => false;
+    public virtual bool IsPushable => isLocked;
 
     // Block state flags
-    public bool isInMap = false;        // is in the map data
-    public bool isLocked = false;       // is locked => ready to be cleared
-    public bool isAnimating = false;    // is moving with animation
-    public bool isRemoved = false;
+    public virtual bool isInMap { get; set; }       // is in the block grid data
+    public virtual bool isLocked { get; set; }      // is locked => ready to be cleared
+    public virtual bool isEnabled { get; set; }     // is the block able to do block behaviour logic 
+    public virtual bool isAnimating { get; set; }   // is moving with animation
+    public virtual bool isRemoved { get; set; }
 
     public bool isActivated = false;
+    public bool wasActivated = false;
     public bool isCharged = false;
 
     // Events
     public delegate void OnChangedEvent(Block block);
-    public event OnChangedEvent OnBlockUpdated;
     public event OnChangedEvent OnMoved;
     public event OnChangedEvent OnStateChanged;
 
@@ -41,6 +48,9 @@ public abstract class Block : MapRandomTickBehaviourObject
     public event Action OnLockedDown;
     public event Action OnDestroyed;
     public event OnChangedEvent OnRemoved;
+
+    public event Action<Vector2Int> OnNCBlockUpdated;
+    public event Action<Vector2Int> OnPPBlockUpdated;
 
 
 
@@ -54,9 +64,49 @@ public abstract class Block : MapRandomTickBehaviourObject
         return MapBoundaryData.MapToWorld(CentrePosition);
     }
 
-    public void SetPosition(int x, int y, bool animation = false)
+    public Vector2Int Orientation2Direction(Orientation orientation)
+    {
+        return orientation switch
+        {
+            Orientation.Up => Vector2Int.up,
+            Orientation.Down => Vector2Int.down,
+            Orientation.Left => Vector2Int.left,
+            Orientation.Right => Vector2Int.right,
+            _ => Vector2Int.zero,
+        };
+    }
+    public Orientation Direction2Orientation(Vector2Int dir)
+    {
+        return (dir.x, dir.y) switch
+        {
+            (0, 1) => Orientation.Up,
+            (0, -1) => Orientation.Down,
+            (1, 0) => Orientation.Right,
+            (-1, 0) => Orientation.Left,
+            _ => Orientation.Up
+        };
+    }
+
+    public Vector2Int Facing => Orientation2Direction(orientation);
+
+    public float Rotation => (int)orientation * 90;
+
+    public virtual void SetPosition(int x, int y, bool animation = false)
     {
         SetPosition((float)x, (float)y, animation);
+    }
+
+    public void Rotate(bool clockwise)
+    {
+        if (!IsOriented)
+            return;
+        orientation = (Orientation)((((int)orientation + (clockwise ? -1 : 1)) + 4) % 4);
+        OnTriggerAppearanceChanged();
+    }
+
+    public Coroutine Disable(float sec)
+    {
+        return StartCoroutine(DisableOnSet(sec));
     }
 
     public virtual void OnSpawn(MapManager map)
@@ -64,24 +114,44 @@ public abstract class Block : MapRandomTickBehaviourObject
         this.map = map;
         this.transform.SetParent(map.transform);
 
-        isCharged = false;
+        isInMap = true;
+        isLocked = false;
+        isEnabled = true;
+        isAnimating = false;
+        isRemoved = false;
 
-        OnRemoved += OnGridUpdated;
-        OnMoved += OnGridUpdated;
-        OnStateChanged += OnBlockUpdated;
+        isCharged = false;
     }
 
     public virtual void OnLockdown()
     {
         Lockdown();
         map.OnGridPlace?.Invoke(map, this);
-        //
-        OnGridUpdated(this);
+        BlockUpdateManager.OnNeighbourChangedBlockUpdate(map.grid, GridPosition); // lockdown triggers a block update
     }
 
     public virtual void OnUpdate()
     {
         if (this == null) return;
+    }
+
+    public virtual void OnNCUpdateTriggered()
+    {
+        OnNCBlockUpdated?.Invoke(GridPosition);
+    }
+
+    public void NeighbourChangedNotified(Vector2Int updateSrc)
+    {
+        map.BlockUpdateManager.AddUpdatedBlock(this, updateSrc);
+    }
+
+    public virtual void NCNotificationUpdate(Vector2Int updateSrc)
+    {
+        //Debug.Log($"neighbour updated {GridPosition}");
+
+        // detect if the updated neighbour is a activation/charging source
+        UpdateActivationState();
+        UpdateChargingState();
     }
 
     public virtual bool CanBeReplacedBy(Block block)
@@ -104,6 +174,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     /// </summary>
     public virtual void Destroy()
     {
+        isRemoved = true;
         OnDestroyed?.Invoke();
         Remove();
     }
@@ -122,31 +193,14 @@ public abstract class Block : MapRandomTickBehaviourObject
     {
         isCharged = true;
 
-        foreach (Block block in map.GetAdjacentBlocks(GridPosition.x, GridPosition.y))
-        {
-            if (block != null)
-            {
-                UpdateActivationState(block); // for oncharge no need to foreach
-            }
-        }
+        BlockUpdateManager.OnNeighbourChangedBlockUpdate(map.grid, GridPosition);
     }
 
     public virtual void OnDischarged(Vector2Int sourcePosition)
     {
         isCharged = false;
 
-        /*foreach (Block block in map.GetAdjacentBlocks(GridPosition.x, GridPosition.y))
-        {
-            if (block is RedstonePassiveComponent component)
-            {
-                component.RedstoneSourceDeactivated(GridPosition);
-            }
-        }*/
-    }
-
-    public virtual void OnNeighbourUpdated()
-    {
-        //throw new NotImplementedException();
+        BlockUpdateManager.OnNeighbourChangedBlockUpdate(map.grid, GridPosition);
     }
 
     protected virtual void Awake()
@@ -205,18 +259,6 @@ public abstract class Block : MapRandomTickBehaviourObject
         OnStateChanged?.Invoke(this);
     }
 
-    protected virtual void OnGridUpdated(Block block)
-    {
-        UpdateActivationState(block);
-        UpdateChargingState(block);
-        OnBlockUpdated?.Invoke(block);
-    }
-
-    protected void OnTriggerBlockUpdate()
-    {
-        OnBlockUpdated?.Invoke(this);
-    }
-
     protected virtual void OnExploded()
     {
         map.DestroyBlock(this);
@@ -230,116 +272,39 @@ public abstract class Block : MapRandomTickBehaviourObject
     private ExplosionBlocker explosionTarget;
     private FlammableObject flammableObject;
 
-    [SerializeField] private List<Vector2Int> activateSources = new List<Vector2Int>();
-    [SerializeField] private List<Vector2Int> activateTargets= new List<Vector2Int>();
-    [SerializeField] private List<Vector2Int> chargeSources = new List<Vector2Int>();
-    [SerializeField] private List<Vector2Int> chargeTargets = new List<Vector2Int>();
-
-    private static void UpdateActivationState(Block block)
+    // Redstone
+    /// <summary>
+    /// 
+    /// </summary>
+    private void UpdateActivationState()
     {
-        if (block is not IRedstoneActivatable component)
+        if (this is not IRedstoneActivatable component)
             return;
 
-        // detect new sources
-        int pointer = 0;
-        foreach (Block adjacent in block.map.GetAdjacentBlocks(block.GridPosition.x, block.GridPosition.y, true))
+        bool activated = false;
+        foreach (var block in map.GetAdjacentBlocks(GridPosition.x, GridPosition.y, true))
         {
-            if (adjacent != null && adjacent.isCharged)
+            if (block != null && component.CanActivatedBy(block))
             {
-                if (block.activateSources.Contains(adjacent.GridPosition)) // valid old sources
-                    block.activateSources.Remove(adjacent.GridPosition);   
-                else                                                       // valid new sources
-                    adjacent.activateTargets.Add(block.GridPosition);
-
-                if (pointer > block.activateSources.Count)
-                {
-
-                }
-
-                block.activateSources.Insert(pointer, adjacent.GridPosition);
-                pointer++;
+                activated = true;
+                break;
             }
         }
 
-        // remove invalid old sources
-        for (int i = block.activateSources.Count - 1; i >= pointer; i--)
-        {
-            Vector2Int invalidSourcePosition = block.activateSources[i];
-            block.activateSources.RemoveAt(i);
-            Block source = block.map.GetBlock(invalidSourcePosition.x, invalidSourcePosition.y);
-            if (source != null)
-                source.activateTargets.Remove(block.GridPosition);
-        }
+        isActivated = activated;
 
-        // activate or deactivate
-        if (block.isActivated && block.activateSources.Count == 0)
-        {
-            block.isActivated = false;
-            component.OnRedstoneDeactivated();
-        }
-        if (!block.isActivated && block.activateSources.Count > 0)
-        {
-            block.isActivated = true;
-            component.OnRedstoneActivated();
-        }
+        map.RedstoneManager.AddUpdatedBlock(this);
     }
-    private static void UpdateChargingState(Block block)
+
+    private void UpdateChargingState()
     {
-        // change charging state
 
+    }
 
-
-        // update activation
-        List<Block> updatedBlocks = new List<Block>();
-        // remove old targets
-        Vector2Int[] activateTargets = block.activateTargets.ToArray();
-        foreach (Vector2Int prevTarget in activateTargets)
-        {
-            Block prevTargetBlock = block.map.GetBlock(prevTarget.x, prevTarget.y);
-
-            if (prevTargetBlock != null)
-            {
-                Debug.Assert(prevTargetBlock is IRedstoneActivatable, $"wrong activation target {prevTarget} {prevTargetBlock} was set"); //
-
-                if (!prevTargetBlock.activateSources.Remove(block.LastGridPosition))
-                    prevTargetBlock.activateSources.Remove(block.GridPosition);
-
-                if (!updatedBlocks.Contains(prevTargetBlock))
-                    updatedBlocks.Add(prevTargetBlock);
-            }
-            block.activateTargets.Remove(prevTarget); // possibly the old target became empty grid
-        }
-        // add new activated targets
-        if (!block.isRemoved && block.isCharged)
-        {
-            foreach (Block newTargetBlock in block.map.GetAdjacentBlocks(block.GridPosition.x, block.GridPosition.y, true))
-            {
-                if (newTargetBlock != null && newTargetBlock is IRedstoneActivatable)
-                {
-                    block.activateTargets.Add(newTargetBlock.GridPosition);
-                    newTargetBlock.activateSources.Add(block.GridPosition);
-
-                    if (!updatedBlocks.Contains(newTargetBlock))
-                        updatedBlocks.Add(newTargetBlock);
-                }
-            }
-        }
-        // activate or deactivate
-        foreach (Block updatedBlock in updatedBlocks)
-        {
-            if (updatedBlock is IRedstoneActivatable component)
-            {
-                if (updatedBlock.isActivated && updatedBlock.activateSources.Count == 0)
-                {
-                    updatedBlock.isActivated = false;
-                    component.OnRedstoneDeactivated();
-                }
-                if (!updatedBlock.isActivated && updatedBlock.activateSources.Count > 0)
-                {
-                    updatedBlock.isActivated = true;
-                    component.OnRedstoneActivated();
-                }
-            }
-        }
+    private IEnumerator DisableOnSet(float sec)
+    {
+        isEnabled = false;
+        yield return new WaitForSeconds(sec);
+        isEnabled = true;
     }
 }

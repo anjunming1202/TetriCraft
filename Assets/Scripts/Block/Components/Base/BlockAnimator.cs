@@ -11,8 +11,6 @@ public class BlockAnimator : MonoBehaviour
     public static AnimationCurveAsset FastMovingCurveAsset;
 
     private AnimationCurveAsset currentCurveAsset;
-    private AnimationCurve movementCurve => currentCurveAsset.curve;
-    private float duration => currentCurveAsset.duration;
     private float elapsedTime = 0f;
 
     public Vector3 startPosition;
@@ -23,7 +21,7 @@ public class BlockAnimator : MonoBehaviour
     /*public delegate void OnFlagEvent();
     public OnFlagEvent OnFinish;*/
 
-    private void Awake()
+    protected virtual void Awake()
     {
         block = GetComponent<Block>();
 
@@ -42,23 +40,22 @@ public class BlockAnimator : MonoBehaviour
     }
     public void MoveAnimationOnSet()
     {
-        // Stop current animation
-        if (currentCoroutine != null)
-            StopCoroutine(currentCoroutine);
-        // Start moving animation
-        currentCurveAsset = MovingCurveAsset;
-        block.isAnimating = true;
-        currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
+        AnimationOnSet(block.GetWorldPosition(), MovingCurveAsset);
     }
     public void LandAnimationOnSet()
+    {
+        AnimationOnSet(block.GetWorldPosition(), FastMovingCurveAsset);
+    }
+
+    protected void AnimationOnSet(Vector3 to, AnimationCurveAsset curveAsset)
     {
         // Stop current animation
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
-        // Start landing animation
-        currentCurveAsset = FastMovingCurveAsset;
+        // Start moving animation
+        currentCurveAsset = curveAsset;
         block.isAnimating = true;
-        currentCoroutine = StartCoroutine(MoveTo(block.GetWorldPosition()));
+        currentCoroutine = StartCoroutine(MoveTo(to, curveAsset.curve, curveAsset.duration));
     }
 
 
@@ -68,7 +65,7 @@ public class BlockAnimator : MonoBehaviour
         elapsedTime = 0f;
     }
 
-    private IEnumerator MoveTo(Vector3 to)
+    private IEnumerator MoveTo(Vector3 to, AnimationCurve curve, float duration)
     {
         if (transform.position == to)
         {
@@ -85,8 +82,10 @@ public class BlockAnimator : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / duration;
-            float value = movementCurve.Evaluate(progress);
+            float value = curve.Evaluate(progress);
+
             transform.position = Vector3.Lerp(startPosition, endPosition, value);
+
             yield return null;
         }
 

@@ -17,26 +17,26 @@ public class BlockRenderer : MonoBehaviour
     [SerializeField] protected Sprite[] textures;
     protected Sprite mainTexture;
 
+    // Material
+    protected MaterialPropertyBlock props;
+
     // Renderer
     protected SpriteRenderer spriteRenderer;
 
     // Block Reference
     protected Block block;
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         block = GetComponent<Block>();
         block.OnStateChanged += Render;
 
         spriteRenderer = GetComponent<SpriteRenderer>();
-        mainTexture = textures[0];
+        mainTexture = textures.Length > 0 ? textures[0] : null;
+
+        props = new MaterialPropertyBlock();
 
         Render(block);
-    }
-
-    protected void Update()
-    {
-        
     }
 
 
@@ -46,5 +46,11 @@ public class BlockRenderer : MonoBehaviour
     protected virtual void Render(Block block)
     {
         spriteRenderer.sprite = mainTexture;
+
+        // material rendering
+        spriteRenderer.GetPropertyBlock(props);
+        props.SetColor("_Color", spriteRenderer.color);
+        props.SetFloat("_Rotation", block.Rotation);
+        spriteRenderer.SetPropertyBlock(props);
     }
 }

@@ -35,26 +35,27 @@ public class BlockGrid
         block.isInMap = true;
 
         // grid block update
-        OnBlockUpdate(block.GridPosition);
+        BlockUpdateManager.OnNeighbourChangedBlockUpdate(this, new Vector2Int(x, y), block);
     }
 
     public void Remove(Block block)
     {
-        if (block.isRemoved)
+        if (block == null || block.isRemoved)
         {
-            Debug.LogError($"try remove {block} twice");
+            Debug.LogError($"try remove {block} at {block.GridPosition} twice");
             return;
         }
 
         Debug.Assert(grid[positions[block].x, positions[block].y] == block, "Block position inconsistent!");
-        grid[positions[block].x, positions[block].y] = null;
+        Vector2Int removedPos = positions[block];
+        grid[removedPos.x, removedPos.y] = null;
 
         positions.Remove(block);
 
         block.isInMap = false;
 
         // grid block update
-        OnBlockUpdate(block.GridPosition);
+        BlockUpdateManager.OnNeighbourChangedBlockUpdate(this, removedPos, block);
     }
 
     public Block Get(int x, int y)
@@ -90,20 +91,6 @@ public class BlockGrid
             return true;
 
         return grid[x, y] == null;
-    }
-
-    public void OnBlockUpdate(Vector2Int pos)
-    {
-        Vector2Int[] dirs = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
-        foreach (var dir in dirs)
-        {
-            Vector2Int nPos = pos + dir;
-            Block neighbour = Get(nPos.x, nPos.y);
-            if (neighbour != null)
-            {
-                neighbour.OnNeighbourUpdated();
-            }
-        }
     }
 
     private int width;

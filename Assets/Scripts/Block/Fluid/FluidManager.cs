@@ -360,7 +360,9 @@ public class FluidManager : MonoBehaviour
             {
                 FluidElement upper = mergeList[i];
                 FluidElement lower = mergeList[i - 1];
-                Debug.Assert(upper.lowerLevel == lower.upperLevel, $"element merging error {upper} {upper.lowerLevel} {upper.amount}, {lower} {lower.upperLevel} {lower.amount}");
+
+                if (upper.lowerLevel != lower.upperLevel)
+                    Debug.LogWarning($"element merging error {upper} {upper.lowerLevel} {upper.amount}, {lower} {lower.upperLevel} {lower.amount}");
 
                 upper.FlowTo(lower, upper.amount);
                 fluidSystem.Remove(upper);

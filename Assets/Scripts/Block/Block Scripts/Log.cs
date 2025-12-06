@@ -3,6 +3,7 @@
 public class Log : Block
 {
     [HideInInspector] public override BlockID ID => BlockID.Log;
+    public override bool IsOriented => true;
 
     public override void OnLockdown()
     {

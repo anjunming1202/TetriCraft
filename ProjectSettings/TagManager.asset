@@ -51,3 +51,6 @@ TagManager:
   - name: Explosion
     uniqueID: 3548977679
     locked: 0
+  - name: Boundary
+    uniqueID: 1635080769
+    locked: 0

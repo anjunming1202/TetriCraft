@@ -67,6 +67,13 @@ public class MapTetromino : Tetromino
                         mapBlock.OnReplacedBy(block);
                 }
 
+                // special case: deactivate extending pistons
+                if (block is Piston piston && piston.isExtending)
+                {
+                    piston.ForcedDeactivate();
+                    piston.isActivated = false;
+                }
+
                 // update the block
                 block.SetPosition(currPosition.x, currPosition.y, true);
             }
@@ -239,6 +246,13 @@ public class MapTetromino : Tetromino
                     if (!map.CheckInside(blockPos.x, blockPos.y))
                         return false;
                 }
+                /*// special case: piston
+                if (shape[r, c] is Piston pistonBlock && pistonBlock.isExtending)
+                {
+                    Vector2Int blockPos = LocalToMap(r, c) + pistonBlock.Facing;
+                    if (!map.CheckInside(blockPos.x, blockPos.y))
+                        return false;
+                }*/
             }
         return true;
     }
@@ -262,6 +276,21 @@ public class MapTetromino : Tetromino
                         return true;
                     }
                 }
+                /*// special case: piston
+                if (tetrominoBlock is Piston pistonBlock && pistonBlock.isExtending)
+                {
+                    Vector2Int mapBlockPos = LocalToMap(r, c) + pistonBlock.Facing;
+                    Block mapBlock = map[mapBlockPos.x, mapBlockPos.y];
+                    if (mapBlock != null && mapBlock.isLocked)
+                    {
+                        // if can be replaced => ignore
+                        bool collide = !mapBlock.CanBeReplacedBy(tetrominoBlock);
+                        if (!collide)
+                            continue;
+
+                        return true;
+                    }
+                }*/
             }
         return false;
     }

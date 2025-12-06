@@ -22,6 +22,7 @@ public class MapDebugger : MonoBehaviour
     public Color lockedColor;
     public Color tetrominoColor;
     public Color unclearableColor;
+    public Color disabledColor;
 
     public Font font;
     public Color textColor;
@@ -87,17 +88,23 @@ public class MapDebugger : MonoBehaviour
         {
             if (block == null)
                 continue;
+
+            if (!block.isEnabled) // disabled blocks
+            {
+                MarkBlock(block, disabledColor);
+            }
+
             if (block.isLocked)
             {
                 if (block.IsClearable())
-                    MarkBlock(block, lockedColor);
+                    MarkBlock(block, lockedColor); // clearable locked blocks
                 else
-                    MarkBlock(block, unclearableColor);
+                    MarkBlock(block, unclearableColor); // unclearable locked blocks
                 continue;
             }
-            if (block.isInMap)
+            else if (block.isInMap)
             {
-                MarkBlock(block, tetrominoColor);
+                MarkBlock(block, tetrominoColor); // unlocked blocks
             }
         }
         // check for lost reference block

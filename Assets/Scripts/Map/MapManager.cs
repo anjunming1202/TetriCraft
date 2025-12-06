@@ -13,23 +13,32 @@ using static UnityEngine.GraphicsBuffer;
 /// </summary>
 public class MapManager : MonoBehaviour
 { 
+    // map parameters
     public static float gravity = 15f;
+    public int Width => width;
+    public int Height => height;
 
+    // fluid
     public static FluidManager WaterManager;
     public static FluidManager LavaManager;
+
+    // redstone
+    public RedstoneManager RedstoneManager;
+
+    // block update
+    public BlockUpdateManager BlockUpdateManager;
 
     public List<MapRandomTickBehaviourObject> mapRandomTickObjects;
     public int randomTickSelectionCount => width * height;
 
     public Block this[int x, int y] => blockGrid[x, y];
-    public int Width => width;
-    public int Height => height;
 
     public int blockCount => blockGrid.blockCount;  // debug
     public BlockGrid grid => blockGrid;
     public List<Block> blocks => blockList;
     public List<Block> batchBlocks => blockUpdateBatch;
 
+    // event
     public Action<MapManager, Block> OnGridPlace;
 
     public void NewMap(int width, int height)
@@ -43,6 +52,10 @@ public class MapManager : MonoBehaviour
 
         WaterManager = waterManager;
         LavaManager = lavaManager;
+
+        RedstoneManager = new RedstoneManager(this);
+
+        BlockUpdateManager = new BlockUpdateManager(this);
 
         // when block grid position updated:
         // squeeze fluid
@@ -110,21 +123,33 @@ public class MapManager : MonoBehaviour
         blockList.Remove(block);
     }
 
+    // map one frame update
     public void OnUpdate()
     {
-        // Block map
+        // Framely block update
         for (int i = 0; i < blockList.Count; i++)
         {
             blockList[i].OnUpdate();
         }
 
-        // Fluid map
+        if (blockUpdateBatch.Count > 0)
+        {
+            BatchUpdateBlocks();
+        }
+
+        // Fluid Update
         waterManager.OnUpdate();
         lavaManager.OnUpdate();
         SpawnFluidConcretion();
 
         // Random tick behaviours
         RandomTick.InvokeRandomBehaviours(this);
+
+        // Block update
+        BlockUpdateManager.BlockUpdate();
+
+        // Redstone
+        RedstoneManager.RedstoneUpdate();
     }
 
     public void BatchUpdateBlocks()
@@ -151,13 +176,13 @@ public class MapManager : MonoBehaviour
         blockUpdateBatch.Clear();
     }
 
-    private void Update()
+    /*private void Update()
     {
         if (blockUpdateBatch.Count > 0)
         {
             BatchUpdateBlocks();
         }
-    }
+    }*/
 
     private void AddToUpdateBatch(Block block)
     {
