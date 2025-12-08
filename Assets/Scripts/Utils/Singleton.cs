@@ -24,6 +24,8 @@ public abstract class Singleton<T> : StaticInstance<T> where T : MonoBehaviour
     {
         if (Instance != null) Destroy(gameObject);
         base.Awake();
+        // using service locator
+        ServiceLocator.Register(Instance);
     }
 }
 
