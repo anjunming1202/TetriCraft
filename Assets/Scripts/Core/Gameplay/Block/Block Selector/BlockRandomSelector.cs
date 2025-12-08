@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlockRandomSelector : MonoBehaviour
+public class BlockRandomSelector : Singleton<BlockRandomSelector>
 {
     public static BlockID GetRandomBlockID()
     {        
@@ -15,8 +15,10 @@ public class BlockRandomSelector : MonoBehaviour
     [SerializeField]
     private SpawnableBlockList list;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         if (SpawnableBlockList == null)
             SpawnableBlockList = list;
         else

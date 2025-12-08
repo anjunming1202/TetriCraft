@@ -1,14 +1,16 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class BlockResources : MonoBehaviour
+public class BlockResources : PersistentSingleton<BlockResources>
 {
     static public Dictionary<BlockID, GameObject> BlockIndexer;
 
     public List<GameObject> blockPrefabList = new List<GameObject>();
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         BlockIndexer = new Dictionary<BlockID, GameObject>();
         foreach (var prefab in blockPrefabList)
         {
@@ -17,5 +19,3 @@ public class BlockResources : MonoBehaviour
         }
     }
 }
-
-// TODO: make it a singleton dontdestroyonload general PrefabManager

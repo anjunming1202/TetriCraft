@@ -5,10 +5,8 @@ using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
-public class ScoreManager : MonoBehaviour
+public class ScoreManager : Singleton<ScoreManager>
 {
-    public static ScoreManager Instance;
-
     private uint score;
     public Text scoreText; // inspector
     public uint digit = 8;
@@ -63,17 +61,9 @@ public class ScoreManager : MonoBehaviour
         UpdateScoreBoard();
     }
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        base.Awake();
     }
     private void UpdateScoreBoard()
     {
