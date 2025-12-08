@@ -1,11 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
 using UnityEngine;
-using static Unity.Collections.AllocatorManager;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.GraphicsBuffer;
 
 /*// Control the lifecycles of data in the map;
 // Control logic of data (How but not When)

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
-using UnityEngine.UI;
+#endif
 
 public class MapDebugger : MonoBehaviour
 {
@@ -78,8 +79,9 @@ public class MapDebugger : MonoBehaviour
                     style.normal.textColor = textColor;
                     // style.font = font;
                     style.fontSize = 7;
-
+#if UNITY_EDITOR
                     Handles.Label(labelPosition, $"({x}, {y})", style);
+#endif
                 }
         }
 
