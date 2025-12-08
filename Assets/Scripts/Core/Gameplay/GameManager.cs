@@ -1,10 +1,8 @@
 using UnityEngine;
 
 // Game Manager for managing the whole game
-public class GameManager : MonoBehaviour
+public class GameManager : Singleton<GameManager>
 {
-    public static GameManager Instance { get; private set; }
-
     [Header("Map")]
     // Map Manager
     public TetrisManager mapManager; // inspector
@@ -25,17 +23,9 @@ public class GameManager : MonoBehaviour
     [Header("Debug")]
     public bool debug = true;
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        base.Awake();
 
         // Load static resources
         InitialiseResources();

@@ -3,25 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class AudioManager : MonoBehaviour
+public class AudioManager : PersistentSingleton<AudioManager>
 {
-    public static AudioManager Instance;
-
     [SerializeField] private int initialPoolSize = 5;
     private List<AudioSource> audioSourcePool; // globle audio sources
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            InitializePool();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        base.Awake();
+
+        InitializePool();
     }
 
     /// <summary>
