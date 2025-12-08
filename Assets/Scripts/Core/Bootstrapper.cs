@@ -10,11 +10,9 @@ public class Bootstrapper : PersistentSingleton<Bootstrapper>
     {
         base.Awake();
 
-        // Instantiate managers and register to ServiceLocator
+        // Instantiate managers and register to ServiceLocator (manager will register itself when awake)
         if (audioManagerPrefab) Instantiate(audioManagerPrefab);
         if (uiManagerPrefab) Instantiate(uiManagerPrefab);
-
-        //* manager will register itself when awake
 
         // Load main menu
         UnityEngine.SceneManagement.SceneManager.LoadScene(firstScene);
