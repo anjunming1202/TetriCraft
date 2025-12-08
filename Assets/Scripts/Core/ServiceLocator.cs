@@ -13,6 +13,11 @@ public static class ServiceLocator
         else services.Add(t, service);
     }
 
+    public static void Unregister<T>(T service)
+    {
+        services.Remove(typeof(T));
+    }
+
     public static T Get<T>()
     {
         var t = typeof(T);
