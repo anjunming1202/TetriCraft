@@ -78,7 +78,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 2560, y: 1600}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -218,5 +218,7 @@ MonoBehaviour:
   panelEntries:
   - key: Loading
     prefab: {fileID: 2367332825141949870, guid: 57ac015eea58b1340a4e1c7cb6ec6fd3, type: 3}
+  - key: MainMenu
+    prefab: {fileID: 2087815378285442198, guid: b57cff6775a325141870a6eaa0dd932d, type: 3}
   rootCanvas: {fileID: 2049698534689748878}
   modalBlockerPrefab: {fileID: 0}

@@ -100,13 +100,13 @@ public class BasePanel : MonoBehaviour
 
     #region Lifecycle Hooks (override in derived classes)
 
-    /// <summary>Called immediately when Show is triggered. 'data' may be provided by caller.</summary>
+    /// <summary>Called immediately when Show is triggered. 'data' may be provided by caller. (e.g. add coroutine for animations)</summary>
     protected virtual void OnOpen(object data) { }
 
     /// <summary>Called after the show transition completes.</summary>
     protected virtual void OnOpened() { }
 
-    /// <summary>Called when Hide is triggered (before transition).</summary>
+    /// <summary>Called when Hide is triggered (before transition). (e.g. add coroutine for animations)</summary>
     protected virtual void OnClose() { }
 
     /// <summary>Called after the hide transition completes.</summary>
