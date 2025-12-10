@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ public class MainMenuPanel : BasePanel
 
     [SerializeField] private RectTransform menuContainer;
 
-    [SerializeField] private Text versionText;
+    [SerializeField] private TextMeshProUGUI versionText;
     private string versionString = "v1.1";
 
     protected override void Awake()
