@@ -8,7 +8,7 @@ using UnityEngine;
 //      ...*/
 public class TetrisManager : MonoBehaviour
 {
-    // Map Data
+    [Header("Map Objects")]
     [SerializeField] private MapManager map;
 
     [SerializeField] private MapTetromino fallingTetromino;
@@ -17,6 +17,10 @@ public class TetrisManager : MonoBehaviour
     [SerializeField] private DummyTetromino ghostTetromino;
 
     [SerializeField] private DummyTetromino nextTetromino;
+
+    [Header("Rendering Data")]
+    [SerializeField] private Canvas sceneCanvas;
+
 
     // Line clear data
     public uint lastClearLineCount = 0;
@@ -44,7 +48,8 @@ public class TetrisManager : MonoBehaviour
         fallingTetromino.OnHardDrop += (MapTetromino tetromino) => OnTetrominoHardDrop?.Invoke(tetromino);
         OnFinishTurn += OnNextTurn;
     }
-    private void Update()
+
+    public void OnUpdate()
     {
         if (isUpdating)
         {
@@ -98,6 +103,11 @@ public class TetrisManager : MonoBehaviour
         bool gameover = !map.CheckRowEmpty(deathline);
         isUpdating = gameover ? false : isUpdating;
         return gameover;
+    }
+
+    public void Render()
+    {
+
     }
 
     //================================//
