@@ -47,6 +47,7 @@ public class UIManager : PersistentSingleton<UIManager>
 
     // Scene-registered panels (owned by a scene; registration does not duplicate ownership)
     private Dictionary<string, BasePanel> sceneRegisteredPanels = new Dictionary<string, BasePanel>();
+    private Dictionary<string, Canvas> sceneRegisteredPanelCanvas = new Dictionary<string, Canvas>();
 
     protected override void Awake()
     {
@@ -265,11 +266,13 @@ public class UIManager : PersistentSingleton<UIManager>
     /// Register a panel that already exists in the scene (scene-owned). This will make UIManager manage it without instantiating.
     /// Use this when a scene contains its own panel prefab instance and you want UIManager to control it.
     /// </summary>
-    public void RegisterScenePanel(string key, BasePanel panel)
+    public void RegisterScenePanel(string key, BasePanel panel, Canvas canvas = null)
     {
         if (string.IsNullOrEmpty(key) || panel == null) return;
-        panel.transform.SetParent(uiRootTransform, false);
+        RectTransform parent = canvas == null ? uiRootTransform : canvas.transform as RectTransform;
+        panel.transform.SetParent(parent, false);
         sceneRegisteredPanels[key] = panel;
+        sceneRegisteredPanelCanvas[key] = canvas == null ? rootCanvas : canvas;
         instanceMap[key] = panel;
     }
 
@@ -279,6 +282,7 @@ public class UIManager : PersistentSingleton<UIManager>
     public void UnregisterScenePanel(string key)
     {
         if (sceneRegisteredPanels.ContainsKey(key)) sceneRegisteredPanels.Remove(key);
+        if (sceneRegisteredPanelCanvas.ContainsKey(key)) sceneRegisteredPanelCanvas.Remove(key);
         if (instanceMap.ContainsKey(key)) instanceMap.Remove(key);
     }
 

@@ -246,7 +246,7 @@ MonoBehaviour:
   audioManagerPrefab: {fileID: 3908664777431582411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
   uiManagerPrefab: {fileID: 4092427121609815606, guid: bc722bcef3842d940b34a49105f612ee, type: 3}
   sceneLoaderPrefab: {fileID: 119222038543848436, guid: 7169e1c67df276b4fad9e83db12c65ff, type: 3}
-  firstScene: MainMenu
+  firstScene: MainMenuScene
 --- !u!4 &2023590829
 Transform:
   m_ObjectHideFlags: 0

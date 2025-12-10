@@ -4,21 +4,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ScenePrefabUIRegistrar
+/// SceneUIInitializer
 /// - Inspector: set an array of PrefabEntry (key + prefab + options)
 /// - On Start (or when triggered) instantiate each prefab, register to UIManager, and optionally show it.
 /// - On Destroy / OnDisable: hide + unregister + cleanup instantiated objects.
 /// - Supports synchronous instantiation; can be extended to async Addressables if needed.
 /// </summary>
-public class ScenePrefabUIRegistrar : Singleton<ScenePrefabUIRegistrar>
+public class SceneUIInitializer : Singleton<SceneUIInitializer>
 {
     [Serializable]
     public class PrefabEntry
     {
         public string key;
-        public GameObject prefab;
+        public BasePanel prefab;
+        public Canvas canvas;
         public bool showOnStart = true;
-        public bool reparentToUIRoot = true;
         public bool destroyOnSceneUnload = true; // if reparented and persistent, destroy on cleanup
     }
 
@@ -28,12 +28,23 @@ public class ScenePrefabUIRegistrar : Singleton<ScenePrefabUIRegistrar>
     class InstInfo
     {
         public PrefabEntry entry;
-        public GameObject instance;
+        public BasePanel instance;
         public Transform originalParent;
     }
-    List<InstInfo> instances = new List<InstInfo>();
+    Dictionary<string, InstInfo> instances = new Dictionary<string, InstInfo>();
 
     public float waitForUIManagerTimeout = 5f; // seconds
+
+    /// <summary>
+    /// get instance by key (for Scene scripts/controllers).
+    /// </summary>
+    public BasePanel GetInstance(string key)
+    {
+        var it = instances[key];
+        return it != null ? it.instance : null;
+    }
+
+    protected virtual void InitInstance(PrefabEntry entry, BasePanel panel) { }
 
     private IEnumerator Start()
     {
@@ -46,7 +57,7 @@ public class ScenePrefabUIRegistrar : Singleton<ScenePrefabUIRegistrar>
         {
             if (Time.realtimeSinceStartup - start > waitForUIManagerTimeout)
             {
-                Debug.LogWarning($"ScenePrefabUIRegistrar: UIManager not found after {waitForUIManagerTimeout}s - abort registration.");
+                Debug.LogWarning($"SceneUIInitializer: UIManager not found after {waitForUIManagerTimeout}s - abort registration.");
                 yield break;
             }
             yield return null;
@@ -65,7 +76,7 @@ public class ScenePrefabUIRegistrar : Singleton<ScenePrefabUIRegistrar>
                 var basePanel = go.GetComponent<BasePanel>();
                 if (basePanel == null)
                 {
-                    Debug.LogWarning($"ScenePrefabUIRegistrar: prefab '{entry.prefab.name}' has no BasePanel component.");
+                    Debug.LogWarning($"SceneUIInitializer: prefab '{entry.prefab.name}' has no BasePanel component.");
                 }
 
                 var info = new InstInfo
@@ -74,16 +85,13 @@ public class ScenePrefabUIRegistrar : Singleton<ScenePrefabUIRegistrar>
                     instance = go,
                     originalParent = go.transform.parent
                 };
-                instances.Add(info);
+                instances.Add(entry.key, info);
+
+                // Initialize instance
+                InitInstance(entry, basePanel);
 
                 // Register with UIManager
-                UIManager.Instance.RegisterScenePanel(entry.key, basePanel);
-
-                // Optionally reparent to UIManager root so ordering/modal works as expected
-                if (entry.reparentToUIRoot && UIManager.Instance.rootCanvas != null)
-                {
-                    go.transform.SetParent(UIManager.Instance.rootCanvas.transform, false);
-                }
+                UIManager.Instance.RegisterScenePanel(entry.key, basePanel, entry.canvas);
 
                 // Optionally show
                 if (entry.showOnStart)
@@ -91,11 +99,11 @@ public class ScenePrefabUIRegistrar : Singleton<ScenePrefabUIRegistrar>
                     UIManager.Instance.ShowPanel<BasePanel>(entry.key);
                 }
 
-                Debug.Log($"ScenePrefabUIRegistrar: Registered panel '{entry.key}' from prefab '{entry.prefab.name}'");
+                Debug.Log($"SceneUIInitializer: Registered panel '{entry.key}' from prefab '{entry.prefab.name}'");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"ScenePrefabUIRegistrar: Exception instantiating prefab {entry.prefab.name}: {ex}");
+                Debug.LogError($"SceneUIInitializer: Exception instantiating prefab {entry.prefab.name}: {ex}");
             }
         }
     }
@@ -105,15 +113,16 @@ public class ScenePrefabUIRegistrar : Singleton<ScenePrefabUIRegistrar>
         CleanupAll();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         CleanupAll();
+        base.OnDestroy();
     }
 
     private void CleanupAll()
     {
         // Hide + Unregister + Destroy or restore parent
-        foreach (var info in instances)
+        foreach (var info in instances.Values)
         {
             if (info == null || info.instance == null) continue;
             try
@@ -129,7 +138,7 @@ public class ScenePrefabUIRegistrar : Singleton<ScenePrefabUIRegistrar>
             catch { }
 
             // If reparented and destroyOnSceneUnload -> destroy
-            if (info.entry.reparentToUIRoot && info.entry.destroyOnSceneUnload)
+            if (info.entry.canvas == UIManager.Instance.rootCanvas && info.entry.destroyOnSceneUnload)
             {
                 if (Application.isPlaying) Destroy(info.instance);
                 else DestroyImmediate(info.instance);
@@ -148,14 +157,5 @@ public class ScenePrefabUIRegistrar : Singleton<ScenePrefabUIRegistrar>
         }
 
         instances.Clear();
-    }
-
-    /// <summary>
-    /// Optional api: get instance by key (for Scene scripts/controllers).
-    /// </summary>
-    public GameObject GetInstance(string key)
-    {
-        var it = instances.Find(i => i.entry != null && i.entry.key == key);
-        return it != null ? it.instance : null;
     }
 }

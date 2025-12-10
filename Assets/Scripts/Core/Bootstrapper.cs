@@ -5,7 +5,7 @@ public class Bootstrapper : PersistentSingleton<Bootstrapper>
     [SerializeField] GameObject audioManagerPrefab;
     [SerializeField] GameObject uiManagerPrefab;
     [SerializeField] GameObject sceneLoaderPrefab;
-    [SerializeField] string firstScene = "MainMenu";
+    [SerializeField] string firstScene;
 
     protected override void Awake()
     {
@@ -18,6 +18,5 @@ public class Bootstrapper : PersistentSingleton<Bootstrapper>
 
         // Load main menu
         SceneLoader.Instance.LoadScene(firstScene);
-        //UnityEngine.SceneManagement.SceneManager.LoadScene(firstScene);
     }
 }

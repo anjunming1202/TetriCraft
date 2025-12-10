@@ -29,7 +29,11 @@ public abstract class Singleton<T> : StaticInstance<T> where T : MonoBehaviour
 {
     protected override void Awake()
     {
-        if (Instance != null) Destroy(gameObject);
+        if (Instance != null)
+        {
+            Debug.LogWarning($"Singleton<{typeof(T)}>: try to instantiate a second singleton object {gameObject.name}");
+            Destroy(gameObject);
+        }
         base.Awake();
         // using service locator
         ServiceLocator.Register(Instance);

@@ -15,6 +15,19 @@ public class MainMenuPanel : BasePanel
     [SerializeField] private TextMeshProUGUI versionText;
     private string versionString = "v1.1";
 
+    public void Init(MainMenuController mainMenuController)
+    {
+        newGameButton.onClick.RemoveAllListeners();
+        continueButton.onClick.RemoveAllListeners();
+        settingsButton.onClick.RemoveAllListeners();
+        quitButton.onClick.RemoveAllListeners();
+
+        newGameButton.onClick.AddListener(mainMenuController.OnNewGame);
+        continueButton.onClick.AddListener(mainMenuController.OnContinue);
+        settingsButton.onClick.AddListener(mainMenuController.OnSettings);
+        quitButton.onClick.AddListener(mainMenuController.OnQuit);
+    }
+
     protected override void Awake()
     {
         base.Awake();
