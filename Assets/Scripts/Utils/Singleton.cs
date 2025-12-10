@@ -31,6 +31,7 @@ public abstract class Singleton<T> : StaticInstance<T> where T : MonoBehaviour
         {
             Debug.LogWarning($"Singleton<{typeof(T)}>: try to instantiate a second singleton object {gameObject.name}");
             Destroy(gameObject);
+            return;
         }
         base.Awake();
         // using service locator
