@@ -26,7 +26,7 @@ public class SceneLoader : PersistentSingleton<SceneLoader>
 
         float timer = 0f;
         float displayedProgress = 0f;
-        float minShowTime = 1.5f; // 最小显示时间，避免闪烁
+        float minShowTime = 0.8f; // 最小显示时间，避免闪烁
 
         while (!async.isDone || !async.allowSceneActivation)
         {
