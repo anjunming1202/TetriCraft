@@ -3,13 +3,6 @@ using UnityEngine;
 
 public class MainMenuController : Singleton<MainMenuController>
 {
-    [SerializeField] private BasePanel mainMenuPanel;
-
-    public void Start()
-    {
-        mainMenuPanel.Show();
-    }    
-
     public void OnNewGame()
     {
         // Clean old data
