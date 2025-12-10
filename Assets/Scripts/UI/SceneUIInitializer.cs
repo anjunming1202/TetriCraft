@@ -125,6 +125,7 @@ public class SceneUIInitializer : Singleton<SceneUIInitializer>
         foreach (var info in instances.Values)
         {
             if (info == null || info.instance == null) continue;
+
             try
             {
                 UIManager.Instance?.HidePanel(info.entry.key);
@@ -137,8 +138,8 @@ public class SceneUIInitializer : Singleton<SceneUIInitializer>
             }
             catch { }
 
-            // If reparented and destroyOnSceneUnload -> destroy
-            if (info.entry.canvas == UIManager.Instance.rootCanvas && info.entry.destroyOnSceneUnload)
+            // If destroyOnSceneUnload -> destroy
+            if (info.entry.destroyOnSceneUnload)
             {
                 if (Application.isPlaying) Destroy(info.instance);
                 else DestroyImmediate(info.instance);

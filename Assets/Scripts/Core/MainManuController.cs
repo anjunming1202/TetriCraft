@@ -3,12 +3,14 @@ using UnityEngine;
 
 public class MainMenuController : Singleton<MainMenuController>
 {
+    [SerializeField] private string gameplayScene;
+
     public void OnNewGame()
     {
         // Clean old data
 
         // Load game scene
-        SceneLoader.Instance.LoadScene("Gameplay");
+        SceneLoader.Instance.LoadScene(gameplayScene);
     }
 
     public void OnContinue()
@@ -16,7 +18,7 @@ public class MainMenuController : Singleton<MainMenuController>
         // Load archive
 
         // Load game scene
-        SceneLoader.Instance.LoadScene("Gameplay");
+        SceneLoader.Instance.LoadScene(gameplayScene);
     }
 
     public void OnSettings()

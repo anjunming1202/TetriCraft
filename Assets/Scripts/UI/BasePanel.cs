@@ -54,7 +54,8 @@ public class BasePanel : MonoBehaviour
     public void Hide()
     {
         StopAllCoroutines();
-        StartCoroutine(HideRoutine());
+        if (gameObject.activeInHierarchy)
+            StartCoroutine(HideRoutine());
     }
 
     /// <summary>
@@ -68,7 +69,7 @@ public class BasePanel : MonoBehaviour
         while (t < transitionDuration)
         {
             t += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(start, 1f, t / transitionDuration); Debug.Log(t);Debug.Log(canvasGroup.alpha);
+            canvasGroup.alpha = Mathf.Lerp(start, 1f, t / transitionDuration);
             yield return null;
         }
         canvasGroup.alpha = 1f;
@@ -88,7 +89,7 @@ public class BasePanel : MonoBehaviour
         while (t < transitionDuration)
         {
             t += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(start, 0f, t / transitionDuration); Debug.Log(t); Debug.Log(canvasGroup.alpha);
+            canvasGroup.alpha = Mathf.Lerp(start, 0f, t / transitionDuration); Debug.Log($"{t}, {canvasGroup.alpha}");
             yield return null;
         }
         canvasGroup.alpha = 0f;

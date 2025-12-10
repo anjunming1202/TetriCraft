@@ -45,6 +45,9 @@ public class SceneLoader : PersistentSingleton<SceneLoader>
             yield return null;
         }
 
+        // margin for scene activation
+        yield return new WaitForSeconds(0.1f);
+
         // вўВи Loading Panel
         UIManager.Instance.HidePanel("Loading");
         onComplete?.Invoke();

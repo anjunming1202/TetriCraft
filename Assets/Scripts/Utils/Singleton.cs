@@ -10,15 +10,13 @@ public abstract class StaticInstance<T> : MonoBehaviour where T : MonoBehaviour
 
     protected virtual void OnApplicationQuit()
     {
+        Instance = null;
         Destroy(gameObject);
     }
 
     protected virtual void OnDestroy()
     {
-        if (Instance == this)
-        {
-            Instance = null;
-        }
+        
     }
 }
 
