@@ -1,4 +1,3 @@
-using TMPro.EditorUtilities;
 using UnityEngine;
 
 /// <summary>
@@ -14,6 +13,11 @@ public abstract class StaticInstance<T> : MonoBehaviour where T : MonoBehaviour
         Instance = null;
         Destroy(gameObject);
     }
+
+    protected virtual void OnDestroy()
+    {
+        
+    }
 }
 
 /// <summary>
@@ -23,15 +27,30 @@ public abstract class Singleton<T> : StaticInstance<T> where T : MonoBehaviour
 {
     protected override void Awake()
     {
-        if (Instance != null) Destroy(gameObject);
+        if (Instance != null)
+        {
+            Debug.LogWarning($"Singleton<{typeof(T)}>: try to instantiate a second singleton object {gameObject.name}");
+            Destroy(gameObject);
+            return;
+        }
         base.Awake();
+        // using service locator
+        ServiceLocator.Register(Instance);
+    }
+
+    protected override void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            ServiceLocator.Unregister(Instance);
+        }
+        base.OnDestroy();
     }
 }
 
 /// <summary>
 /// A persistent singleton, not destroyed on load.
 /// </summary>
-/// <typeparam name="T"></typeparam>
 public abstract class PersistentSingleton<T> : Singleton<T> where T : MonoBehaviour
 {
     protected override void Awake()

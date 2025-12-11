@@ -1,11 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using UnityEngine;
-using static Unity.Collections.AllocatorManager;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.GraphicsBuffer;
 
 /*// Control the lifecycles of data in the map;
 // Control logic of data (How but not When)
@@ -14,7 +10,7 @@ using static UnityEngine.GraphicsBuffer;
 //      ...*/
 public class TetrisManager : MonoBehaviour
 {
-    // Map Data
+    [Header("Map Objects")]
     [SerializeField] private MapManager map;
 
     [SerializeField] private MapTetromino fallingTetromino;
@@ -22,7 +18,12 @@ public class TetrisManager : MonoBehaviour
 
     [SerializeField] private DummyTetromino ghostTetromino;
 
-    [SerializeField] private DummyTetromino nextTetromino;
+    [SerializeField] private DummyTetromino[] nextTetrominoList = new DummyTetromino[4];
+    public List<DummyTetromino> nextTetrominos { get; private set; } = new List<DummyTetromino>(); // inner reference
+
+    [Header("Rendering Data")]
+    [SerializeField] private Canvas sceneCanvas;
+
 
     // Line clear data
     public uint lastClearLineCount = 0;
@@ -36,10 +37,11 @@ public class TetrisManager : MonoBehaviour
 
     // Events
     public delegate void MapEvent(TetrisManager mapManager);
-    public MapEvent OnLineClear;
-    public Action OnFinishTurn;
-    public MapTetromino.TetrominoEvent OnTetrominoSoftDrop;
-    public MapTetromino.TetrominoEvent OnTetrominoHardDrop;
+    public event MapEvent OnLineClear;
+    public event Action OnFinishTurn;
+    public event Action OnStartTurn;
+    public event MapTetromino.TetrominoEvent OnTetrominoSoftDrop;
+    public event MapTetromino.TetrominoEvent OnTetrominoHardDrop;
 
 
 
@@ -50,7 +52,8 @@ public class TetrisManager : MonoBehaviour
         fallingTetromino.OnHardDrop += (MapTetromino tetromino) => OnTetrominoHardDrop?.Invoke(tetromino);
         OnFinishTurn += OnNextTurn;
     }
-    private void Update()
+
+    public void OnUpdate()
     {
         if (isUpdating)
         {
@@ -88,7 +91,7 @@ public class TetrisManager : MonoBehaviour
         isUpdating = true;
         controller.Activate();
         // Start first turn
-        TetrominoGenerator.NewRandomTetromino(nextTetromino);
+        InitNextTetrominoList();
         OnNextTurn();
     }
 
@@ -104,6 +107,11 @@ public class TetrisManager : MonoBehaviour
         bool gameover = !map.CheckRowEmpty(deathline);
         isUpdating = gameover ? false : isUpdating;
         return gameover;
+    }
+
+    public void Render()
+    {
+
     }
 
     //================================//
@@ -173,13 +181,26 @@ public class TetrisManager : MonoBehaviour
             return;
 
         // Spawn new tetromino in map
-        SpawnTetromino(nextTetromino);
+        DummyTetromino tetrominoSpawned = nextTetrominos[0];
+        SpawnTetromino(tetrominoSpawned);
 
         // Create next new tetromino
-        TetrominoGenerator.NewRandomTetromino(nextTetromino);
+        nextTetrominos.RemoveAt(0);
+        nextTetrominos.Add(tetrominoSpawned);
+        TetrominoGenerator.NewRandomTetromino(tetrominoSpawned);
 
-        // Display next tetromino
-        nextTetromino.Display();
+        // Start the new turn
+        OnStartTurn?.Invoke();
+    }
+
+    private void InitNextTetrominoList()
+    {
+        foreach (var tetromino in nextTetrominoList)
+        {
+            TetrominoGenerator.NewRandomTetromino(tetromino);
+            nextTetrominos.Add(tetromino);
+            tetromino.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>

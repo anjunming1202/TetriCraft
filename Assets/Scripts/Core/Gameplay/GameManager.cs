@@ -57,6 +57,8 @@ public class GameManager : Singleton<GameManager>
     ////////////////////////////////////////////////////
     void Update()
     {
+        mapManager.OnUpdate();
+
         if (!gameover)
         {
             if (mapManager.CheckGameover())

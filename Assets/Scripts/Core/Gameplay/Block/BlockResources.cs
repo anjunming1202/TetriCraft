@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class BlockResources : PersistentSingleton<BlockResources>
 {
-    static public Dictionary<BlockID, GameObject> BlockIndexer;
+    [SerializeField] private List<GameObject> blockPrefabList = new List<GameObject>();
 
-    public List<GameObject> blockPrefabList = new List<GameObject>();
+    static private Dictionary<BlockID, GameObject> BlockIndexer;
 
     protected override void Awake()
     {
@@ -17,5 +17,15 @@ public class BlockResources : PersistentSingleton<BlockResources>
             Block block = prefab.GetComponent<Block>();
             BlockIndexer.Add(block.ID, prefab);
         }
+    }
+
+    static public GameObject GetPrefab(BlockID id)
+    {
+        return BlockIndexer[id]; 
+    }
+
+    static public Sprite GetSprite(BlockID id)
+    {
+        return BlockIndexer[id].GetComponent<BlockRenderer>().DefaultSprite;
     }
 }

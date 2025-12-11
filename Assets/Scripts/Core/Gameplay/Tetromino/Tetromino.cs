@@ -25,6 +25,9 @@ public class Tetromino : MonoBehaviour
     // Wallkick table
     public Dictionary<Vector2Int, Vector2Int[]> wallkick;
 
+    // Tetromino default shape 
+    //public static readonly Dictionary<TetrominoType, Block[,]> Shapes = new Dictionary<TetrominoType, Block[,]>();
+
     public void New(TetrominoType type, Block block1, Block block2, Block block3, Block block4)
     {
         // Initialise tetromino data
