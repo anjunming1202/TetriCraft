@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8204463561140908790}
   - component: {fileID: 6160187174611469054}
   m_Layer: 5
-  m_Name: UIRoot_Canvas
+  m_Name: GlobalUIRootCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -180,7 +180,7 @@ GameObject:
   - component: {fileID: 5841123654789778399}
   - component: {fileID: 6164364607642320882}
   m_Layer: 0
-  m_Name: UI Manager
+  m_Name: Global UI Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -219,4 +219,4 @@ MonoBehaviour:
   - key: Loading
     prefab: {fileID: 2367332825141949870, guid: 57ac015eea58b1340a4e1c7cb6ec6fd3, type: 3}
   rootCanvas: {fileID: 2049698534689748878}
-  modalBlockerPrefab: {fileID: 0}
+  modalBlockerPrefab: {fileID: 6934398333403512065, guid: 9ad47cf24540f1e4890558f9f8ba970d, type: 3}

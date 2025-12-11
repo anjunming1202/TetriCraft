@@ -5,6 +5,14 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+// TODO: if need scene modal stack management => separate this ui manager
+// IUIManager: the only public API (use together with singleton), used by other objects to manage panels lifecycle.
+//      Show/hide (use modal stack depending on panel.isModal), injecting data needed for the panel (hold panel reference for future control)
+//      GlobalUIManager (this), SceneUIHost
+// IUIRepository: key - prefab list, instance list
+// IUIFactory: (create unexisting prefab), instantiate ui prefab, initialise instance, and manage reparenting
+// IModalManager: managing modal stack, modal blocker, ESC/back behavior, and input routing.
+
 /// <summary>
 /// Global UI manager:
 /// - Single persistent UI root that manages panel prefabs (key => prefab).
