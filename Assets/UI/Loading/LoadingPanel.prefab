@@ -65,7 +65,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b4b71513d0b1f942949a7d3519d91fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isModal: 0
+  isModal: 1
   hideOnBack: 0
   transitionDuration: 0.2
   progressSlider: {fileID: 3987142537783761175}

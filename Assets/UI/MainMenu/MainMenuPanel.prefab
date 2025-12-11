@@ -509,7 +509,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 336a42209adb8e746beda8e3d8fda7df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isModal: 0
+  isModal: 1
   hideOnBack: 0
   transitionDuration: 0
   newGameButton: {fileID: 4474167695147125684}
