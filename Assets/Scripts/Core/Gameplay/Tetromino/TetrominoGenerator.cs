@@ -2,7 +2,7 @@
 
 public class TetrominoGenerator
 {
-    public static void NewRandomTetromino(Tetromino tetromino)
+    public static Tetromino NewRandomTetromino(Tetromino tetromino)
     {
         // Random tetromino type
         TetrominoType tetroType = (TetrominoType)UnityEngine.Random.Range(0, (int)TetrominoType.Count);
@@ -10,7 +10,7 @@ public class TetrominoGenerator
         // Random blocks type
         BlockID blockType = BlockRandomSelector.GetRandomBlockID();
 
-        NewTetromino(tetromino, tetroType, blockType);
+        return NewTetromino(tetromino, tetroType, blockType);
     }
 
     public static void Clone(Tetromino src, Tetromino dst)
@@ -24,7 +24,7 @@ public class TetrominoGenerator
         dst.New(src.type, blocks[0], blocks[1], blocks[2], blocks[3]);
     }
 
-    private static void NewTetromino(Tetromino tetromino, TetrominoType tetroType, BlockID blockType)
+    private static Tetromino NewTetromino(Tetromino tetromino, TetrominoType tetroType, BlockID blockType)
     {
         // For intrinsic tetromino (same four blocks)
         Block[] blocks = new Block[4];
@@ -35,5 +35,7 @@ public class TetrominoGenerator
 
         // New a tetromino
         tetromino.New(tetroType, blocks[0], blocks[1], blocks[2], blocks[3]);
+
+        return tetromino;
     }
 }

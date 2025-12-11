@@ -230,6 +230,7 @@ MonoBehaviour:
   UIManagerPrefab: {fileID: 4092427121609815606, guid: bc722bcef3842d940b34a49105f612ee, type: 3}
   sceneLoaderPrefab: {fileID: 119222038543848436, guid: 7169e1c67df276b4fad9e83db12c65ff, type: 3}
   resourcesPrefab: {fileID: 3359756058277608293, guid: 8a98926bd647bac4b8a058a8163d67a8, type: 3}
+  factoriesPrefab: {fileID: 8276203266237824120, guid: 30685a1172f889a49ae1b498c4aba2ab, type: 3}
   firstScene: MainMenuScene
 --- !u!1 &3300044140108170393
 GameObject:

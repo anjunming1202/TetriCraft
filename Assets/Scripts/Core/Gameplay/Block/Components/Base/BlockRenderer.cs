@@ -7,6 +7,7 @@ using static Unity.Collections.AllocatorManager;
 public class BlockRenderer : MonoBehaviour
 {
     public Texture2D Texture => spriteRenderer.sprite.texture;
+    public Sprite DefaultSprite;
 
     public virtual void ChangeState(int state)
     {

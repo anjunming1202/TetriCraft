@@ -26,6 +26,6 @@ public class BlockResources : PersistentSingleton<BlockResources>
 
     static public Sprite GetSprite(BlockID id)
     {
-        return BlockIndexer[id].GetComponent<SpriteRenderer>().sprite;
+        return BlockIndexer[id].GetComponent<BlockRenderer>().DefaultSprite;
     }
 }

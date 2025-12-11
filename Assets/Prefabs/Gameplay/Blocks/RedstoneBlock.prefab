@@ -149,16 +149,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   orientation: 0
-  isInMap: 0
-  isLocked: 0
-  isAnimating: 0
-  isRemoved: 0
   isActivated: 0
+  wasActivated: 0
   isCharged: 0
-  activateSources: []
-  activateTargets: []
-  chargeSources: []
-  chargeTargets: []
 --- !u!114 &671932412832912740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,6 +164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16bdf98159c6a344cbc5ea1dba9fba4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DefaultSprite: {fileID: 21300000, guid: b1f31ee4486605f4b9a4e90203c709ab, type: 3}
   textures:
   - {fileID: 21300000, guid: b1f31ee4486605f4b9a4e90203c709ab, type: 3}
 --- !u!114 &9028015919182796587

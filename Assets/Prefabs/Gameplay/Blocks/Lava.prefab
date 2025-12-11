@@ -147,9 +147,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 836c40d9ead3b594abb068ca777f59c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isInMap: 0
-  isLocked: 0
-  isAnimating: 0
+  orientation: 0
+  isActivated: 0
+  wasActivated: 0
+  isCharged: 0
 --- !u!114 &5886102563572143990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,6 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95b4dfb9fdc6a734a8e5b2517ecad3ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DefaultSprite: {fileID: 21300000, guid: 167c0c7be345d2a4bbf25c13d86640d1, type: 3}
   textures:
   - {fileID: 21300000, guid: 7e293fdfa0cca25499a8d498d0473de7, type: 3}
 --- !u!114 &9028015919182796587

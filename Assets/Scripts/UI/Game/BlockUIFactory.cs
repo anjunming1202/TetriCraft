@@ -3,9 +3,9 @@ using UnityEngine.UI;
 
 public class BlockUIFactory : PersistentSingleton<BlockUIFactory>
 {
-    [SerializeField] private GameObject templatePrefab;
+    [SerializeField] private BlockIcon templatePrefab;
 
-    public static GameObject Create(BlockID id)
+    public static BlockIcon Create(BlockID id)
     {
         // instantiate
         var go = Instantiate(Instance.templatePrefab);
@@ -13,11 +13,9 @@ public class BlockUIFactory : PersistentSingleton<BlockUIFactory>
 
         // transform
         //RectTransform rectTransform = go.GetComponent<RectTransform>();
-        
+
         // assembly image
-        Image image = go.GetComponent<Image>();
-        Sprite blockSprite = BlockResources.GetSprite(id);
-        image.sprite = blockSprite;
+        go.Init(id);
 
         return go;
     }
