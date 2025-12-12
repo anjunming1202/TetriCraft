@@ -12,8 +12,7 @@ public class BlockRandomSelector : Singleton<BlockRandomSelector>
     }
 
     private static SpawnableBlockList SpawnableBlockList = null;
-    [SerializeField]
-    private SpawnableBlockList list;
+    [SerializeField] private SpawnableBlockList list;
 
     protected override void Awake()
     {
@@ -21,7 +20,5 @@ public class BlockRandomSelector : Singleton<BlockRandomSelector>
 
         if (SpawnableBlockList == null)
             SpawnableBlockList = list;
-        else
-            Debug.LogError("Block selector should be singletoned!");
     }
 }

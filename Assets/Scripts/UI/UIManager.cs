@@ -168,6 +168,12 @@ public class UIManager : PersistentSingleton<UIManager>
         foreach (var k in keys) HidePanel(k);
     }
 
+    public bool IsPanelShown(string key)
+    {
+        if (!instanceMap.TryGetValue(key,out var panel)) return false;
+        return panel.IsShown;
+    }
+
     #endregion
 
     #region Modal Stack Management
@@ -211,8 +217,8 @@ public class UIManager : PersistentSingleton<UIManager>
             modalBlockerInstance.SetActive(true);
             var top = modalStack.Peek().transform;
             // Make sure blocker is just below the top panel visually
-            modalBlockerInstance.transform.SetSiblingIndex(top.GetSiblingIndex());
             modalBlockerInstance.transform.SetAsLastSibling();
+            top.transform.SetAsLastSibling();
         }
         else
         {

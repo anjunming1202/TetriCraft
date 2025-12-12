@@ -25,6 +25,8 @@ public class BasePanel : MonoBehaviour
     protected CanvasGroup canvasGroup;
     protected RectTransform rectTransform;
 
+    protected bool isShown;
+
     protected virtual void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
@@ -35,6 +37,7 @@ public class BasePanel : MonoBehaviour
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
         gameObject.SetActive(false);
+        isShown = false;
     }
 
     /// <summary>
@@ -46,6 +49,7 @@ public class BasePanel : MonoBehaviour
         StopAllCoroutines();
         gameObject.SetActive(true);
         StartCoroutine(ShowRoutine(data));
+        isShown = true;
     }
 
     /// <summary>
@@ -56,6 +60,7 @@ public class BasePanel : MonoBehaviour
         StopAllCoroutines();
         if (gameObject.activeInHierarchy)
             StartCoroutine(HideRoutine());
+        isShown = false;
     }
 
     /// <summary>
@@ -98,6 +103,8 @@ public class BasePanel : MonoBehaviour
         OnClosed();
         gameObject.SetActive(false);
     }
+
+    public bool IsShown => isShown;
 
     #region Lifecycle Hooks (override in derived classes)
 

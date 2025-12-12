@@ -14,7 +14,7 @@ public class TetrisManager : MonoBehaviour
     [SerializeField] private MapManager map;
 
     [SerializeField] private MapTetromino fallingTetromino;
-    [SerializeField] private TetrominoController controller;
+    [SerializeField] private TetrominoController tetrominoController;
 
     [SerializeField] private DummyTetromino ghostTetromino;
 
@@ -30,7 +30,7 @@ public class TetrisManager : MonoBehaviour
     public uint combo = 0;
 
     // Updating
-    public bool isUpdating = false;
+    public bool isUpdating /*{ get; private set; } */= false;
 
     // Readonly Data
     public int blockCount => map.blockCount;    // debug
@@ -74,11 +74,11 @@ public class TetrisManager : MonoBehaviour
         // New a map
         map.NewMap(Width, height);
 
-        // Initialise controller
-        controller.Initialise(map, fallingTetromino);
+        // Initialise tetrominoController
+        tetrominoController.Initialise(map, fallingTetromino);
 
         // Initialise data
-        isUpdating = false;
+        StopUpdating();
         lastClearLineCount = 0;
         combo = 0;
 
@@ -86,26 +86,30 @@ public class TetrisManager : MonoBehaviour
         TickManager.Init();
     }
 
-    public void StartUpdating()
+    public void StartNewMap()
     {
-        isUpdating = true;
-        controller.Activate();
+        ResumeUpdating();
         // Start first turn
         InitNextTetrominoList();
         OnNextTurn();
     }
 
-    public void FinishUpdating()
+    public void StopUpdating()
     {
         isUpdating = false;
-        controller.Deactivate();
+        tetrominoController.Deactivate();
+    }
+
+    public void ResumeUpdating()
+    {
+        isUpdating = true;
+        tetrominoController.Activate();
     }
 
     public bool CheckGameover()
     {
         int deathline = map.Height;
         bool gameover = !map.CheckRowEmpty(deathline);
-        isUpdating = gameover ? false : isUpdating;
         return gameover;
     }
 

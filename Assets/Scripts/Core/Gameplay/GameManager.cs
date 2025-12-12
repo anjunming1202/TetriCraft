@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 // Game Manager for managing the whole game
@@ -5,7 +6,7 @@ public class GameManager : Singleton<GameManager>
 {
     [Header("Map")]
     // Map Manager
-    public TetrisManager mapManager; // inspector
+    public TetrisManager tetrisManager; // inspector
 
     // Map Region
     public SpriteMask boundaryRegion; // inspector
@@ -23,6 +24,10 @@ public class GameManager : Singleton<GameManager>
     [Header("Debug")]
     public bool debug = true;
 
+    public event Action OnPause;
+    public event Action OnResume;
+    public bool IsPaused { get; private set; } = false;
+
     protected override void Awake()
     {
         base.Awake();
@@ -33,18 +38,39 @@ public class GameManager : Singleton<GameManager>
     public void NewGame()
     {
         // Initialise map
-        mapManager.NewMap(MapBoundaryData.Instance.width, MapBoundaryData.Instance.height);
+        tetrisManager.NewMap(MapBoundaryData.Instance.width, MapBoundaryData.Instance.height);
 
         // Initialise game state
         gameover = false;
 
         // Initialise scorer
-        scoreManager.LinkToGame(mapManager);
+        scoreManager.LinkToGame(tetrisManager);
         scoreManager.Reset();
     }
     public void StartGame()
     {
-        mapManager.StartUpdating();
+        tetrisManager.StartNewMap();
+        IsPaused = false;
+    }
+
+    public void PauseGame()
+    {
+        IsPaused = true;
+        tetrisManager.StopUpdating();
+        Time.timeScale = 0f;
+        OnPause?.Invoke();
+        // debug
+        debug = false;
+    }
+
+    public void ResumeGame()
+    {
+        IsPaused = false;
+        tetrisManager.ResumeUpdating();
+        Time.timeScale = 1f;
+        OnResume?.Invoke();
+        // debug
+        debug = true;
     }
 
     void Start()
@@ -57,21 +83,24 @@ public class GameManager : Singleton<GameManager>
     ////////////////////////////////////////////////////
     void Update()
     {
-        mapManager.OnUpdate();
-
-        if (!gameover)
+        if (!IsPaused)
         {
-            if (mapManager.CheckGameover())
-                OnGameover();
+            tetrisManager.OnUpdate();
+
+            if (!gameover)
+            {
+                if (tetrisManager.CheckGameover())
+                    OnGameover();
+            }
+            else
+                Debug.Log("Game Over");
         }
-        else
-            Debug.Log("Game Over");
     }
 
     private void OnGameover()
     {
         gameover = true;
-        mapManager.FinishUpdating();
+        tetrisManager.StopUpdating();
         Debug.Log("Now Game Over!");
     }
 
