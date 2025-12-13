@@ -112,7 +112,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     public virtual void OnSpawn(MapManager map)
     {
         this.map = map;
-        this.transform.SetParent(map.transform);
+        transform.SetParent(map.blockGrid.transform);
 
         isInMap = true;
         isLocked = false;

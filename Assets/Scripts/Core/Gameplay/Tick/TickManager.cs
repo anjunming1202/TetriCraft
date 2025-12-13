@@ -2,15 +2,26 @@
 
 public static class TickManager
 {
-    public static uint GameTick;
-    public static bool IsGameTickUpdate;
+    public static uint GameTick { get; private set; }
+    public static bool IsGameTickUpdate { get; private set; }
+    public static int DeltaTick { get; private set; }
+    public static float DeltaTickTime { get; private set; }
 
-    public static int deltaTick;
-    public static float deltaTickTime;
+    private static float timer;
+    private const float gameTickTime = 1f / 20;
+
+    private static uint lastTick;
+    private static float lastTickTime;
 
     public static void Init()
     {
+        timer = 0f;
         GameTick = 0;
+        IsGameTickUpdate = false;
+
+        lastTickTime = 0f;
+        lastTick = 0;
+
         RandomTick.randomTickSpeed = 1;
     }
 
@@ -21,7 +32,7 @@ public static class TickManager
         {
             // game tick
             GameTick += (uint)(timer / gameTickTime);
-            deltaTick = (int)(GameTick - lastTick);
+            DeltaTick = (int)(GameTick - lastTick);
             lastTick = GameTick;
 
             IsGameTickUpdate = true;
@@ -29,18 +40,11 @@ public static class TickManager
             // random tick
             RandomTick.GenerateRandomTick();
 
-            deltaTickTime = timer - lastTickTime;
+            DeltaTickTime = timer - lastTickTime;
             timer %= gameTickTime;
             lastTickTime = timer;
         }
         else
             IsGameTickUpdate = false;
     }
-
-    private static float timer = 0;
-
-    private static float gameTickTime = 1f / 20;
-
-    private static uint lastTick;
-    private static float lastTickTime;
 }

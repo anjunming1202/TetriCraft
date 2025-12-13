@@ -5,6 +5,8 @@ using UnityEditor;
 
 public class MapDebugger : MonoBehaviour
 {
+    [SerializeField] GameManager gameManager;
+
     private static MapDebugger _instance;
     public static MapDebugger Instance
     {
@@ -51,7 +53,7 @@ public class MapDebugger : MonoBehaviour
 
     private void Update()
     {
-        if (!GameManager.Instance.debug)
+        if (!gameManager.debug)
             return;
 
         if (debuggedMap == null)

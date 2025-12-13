@@ -3,12 +3,14 @@ using UnityEngine;
 
 public class FluidManager : MonoBehaviour
 {
-    public MapManager mapManager;
     public BlockID ID => elementPrefab.ID;
     public BlockID DummyID => dummyFluid.ID;
 
-    public FluidElement elementPrefab;
+    // Fluid system
     public FluidSystem fluidSystem;
+
+    // Prefabs
+    public FluidElement elementPrefab;
     public Block dummyFluid;
 
     public const int unitFlowingAmount = 10;
@@ -17,7 +19,30 @@ public class FluidManager : MonoBehaviour
     public int wobbleTick = 2;
     public bool useWobbling = true;
 
-    public List<Vector2Int> dummyBlockPositions = new List<Vector2Int>();
+    public List<Vector2Int> dummyBlockPositions;
+
+    private MapManager mapManager;
+
+    private int ticker;
+    private List<FluidElement> elementUpdateList = new List<FluidElement>();
+    private List<List<FluidElement>> lazilyMergedLists = new List<List<FluidElement>>();
+    private List<FluidElement> entrainmentElements = new List<FluidElement>();
+
+    private int wobbleTicker;
+    private bool isWobbleTriggered;
+
+    public void Init(MapManager map)
+    {
+        // Init map reference
+        mapManager = map;
+        // Init fluid system
+        fluidSystem.Init(map.Width);
+        // Init lists
+        dummyBlockPositions = new List<Vector2Int>();
+        elementUpdateList = new List<FluidElement>();
+        lazilyMergedLists = new List<List<FluidElement>>();
+        entrainmentElements = new List<FluidElement>();
+    }
 
     public void OnUpdate()
     {
@@ -25,9 +50,9 @@ public class FluidManager : MonoBehaviour
         if (!TickManager.IsGameTickUpdate)
             return;
 
-        ticker += TickManager.deltaTick;
+        ticker += TickManager.DeltaTick;
 
-        wobbleTicker += TickManager.deltaTick;
+        wobbleTicker += TickManager.DeltaTick;
         isWobbleTriggered = false;
 
         // element flow
@@ -326,16 +351,6 @@ public class FluidManager : MonoBehaviour
 
         return elementSplitted;
     }
-
-
-
-    private int ticker;
-    private List<FluidElement> elementUpdateList = new List<FluidElement>();
-    private List<List<FluidElement>> lazilyMergedLists = new List<List<FluidElement>>();
-    private List<FluidElement> entrainmentElements = new List<FluidElement>();
-
-    private int wobbleTicker;
-    private bool isWobbleTriggered; 
 
     private void ResetFlowUpdates()
     {

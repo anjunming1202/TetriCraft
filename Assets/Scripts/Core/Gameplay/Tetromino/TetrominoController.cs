@@ -50,7 +50,7 @@ public class TetrominoController : MonoBehaviour
         isActive = false;
     }
 
-    private void Update()
+    public void OnUpdate()
     {
         if (!isActive)
             return;

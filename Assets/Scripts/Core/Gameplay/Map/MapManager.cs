@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static Unity.Collections.AllocatorManager;
-using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// Data of blocks in the game
@@ -41,28 +35,30 @@ public class MapManager : MonoBehaviour
     // event
     public Action<MapManager, Block> OnGridPlace;
 
-    public void NewMap(int width, int height)
+    public void InitMap(int width, int height)
     {
+        // Init blocks
         this.width = width;
         this.height = height;
-        blockGrid = new BlockGrid(width, height); // all null
+        blockGrid.Init(width, height); // all null
         blockList = new List<Block>();
         blockUpdateBatch = new List<Block>();
         blockDestroyBatch = new List<Block>();
 
+        BlockUpdateManager = new BlockUpdateManager(this); // block update system
+        RedstoneManager = new RedstoneManager(this); // redstone system
+
+        // Init fluid system
+        waterManager.Init(this);
+        lavaManager.Init(this);
         WaterManager = waterManager;
         LavaManager = lavaManager;
 
-        RedstoneManager = new RedstoneManager(this);
-
-        BlockUpdateManager = new BlockUpdateManager(this);
-
-        // when block grid position updated:
-        // squeeze fluid
-        OnGridPlace += waterManager.BlockSqueeze;
+        // Init map event
+        OnGridPlace += waterManager.BlockSqueeze; // squeeze fluid
         OnGridPlace += lavaManager.BlockSqueeze;
-        // try extinguish fire
-        OnGridPlace += Flame.TryExtinguishBy;
+
+        OnGridPlace += Flame.TryExtinguishBy; // try extinguish fire
     }
 
     public Block GetBlock(int x, int y)
@@ -247,7 +243,7 @@ public class MapManager : MonoBehaviour
     }
 
     // Blocks
-    private BlockGrid blockGrid;
+    [SerializeField] public BlockGrid blockGrid;
 
     // Fluid
     [SerializeField] private FluidManager waterManager;

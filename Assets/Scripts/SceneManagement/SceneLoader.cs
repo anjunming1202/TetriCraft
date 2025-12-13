@@ -13,6 +13,7 @@ public class SceneLoader : PersistentSingleton<SceneLoader>
 
     public void LoadScene(string sceneName, Action onComplete = null)
     {
+        Time.timeScale = 1f; // init timescale
         StartCoroutine(LoadRoutine(sceneName, onComplete));
     }
 

@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 // Game Manager for managing the whole game
-public class GameManager : Singleton<GameManager>
+public class GameManager : MonoBehaviour
 {
     [Header("Map")]
     // Map Manager
@@ -16,6 +16,7 @@ public class GameManager : Singleton<GameManager>
 
     [Header("Game State")]
     public bool gameover = false; // Game over flag
+    public event Action OnGameOver;
 
     [Header("Visual")]
     public AnimationCurveAsset blockMovementCurve;
@@ -28,29 +29,37 @@ public class GameManager : Singleton<GameManager>
     public event Action OnResume;
     public bool IsPaused { get; private set; } = false;
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
-
         // Load static resources
         InitialiseResources();
     }
+
+    void Start()
+    {
+        // New game
+        NewGame();
+    }
+
+    private void Update()
+    {
+        if (!IsPaused)
+        {
+            tetrisManager.OnUpdate();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        CleanUp();
+    }
+
     public void NewGame()
     {
-        // Initialise map
-        tetrisManager.NewMap(MapBoundaryData.Instance.width, MapBoundaryData.Instance.height);
-
-        // Initialise game state
-        gameover = false;
-
-        // Initialise scorer
-        scoreManager.LinkToGame(tetrisManager);
-        scoreManager.Reset();
-    }
-    public void StartGame()
-    {
-        tetrisManager.StartNewMap();
-        IsPaused = false;
+        // Init
+        InitNewGame();
+        // Start
+        StartGame();
     }
 
     public void PauseGame()
@@ -73,38 +82,43 @@ public class GameManager : Singleton<GameManager>
         debug = true;
     }
 
-    void Start()
-    {
-        // New game
-        NewGame();
-        StartGame();
-    }
-
     ////////////////////////////////////////////////////
-    void Update()
+    private void InitNewGame()
     {
-        if (!IsPaused)
-        {
-            tetrisManager.OnUpdate();
+        // Initialise map
+        tetrisManager.InitMap(MapBoundaryData.Instance.width, MapBoundaryData.Instance.height, this);
 
-            if (!gameover)
-            {
-                if (tetrisManager.CheckGameover())
-                    OnGameover();
-            }
-            else
-                Debug.Log("Game Over");
-        }
+        // Initialise game state
+        tetrisManager.OnGameOver += GameOver;
+        gameover = false;
+
+        // Initialise scorer
+        scoreManager.LinkToGame(tetrisManager);
+        scoreManager.Reset();
     }
 
-    private void OnGameover()
+    private void StartGame()
     {
+        tetrisManager.StartNewMap();
+        IsPaused = false;
+        Time.timeScale = 1f;
+    }
+
+    private void GameOver()
+    {
+        Debug.Log("Now Game Over!");
+
         gameover = true;
         tetrisManager.StopUpdating();
-        Debug.Log("Now Game Over!");
+        Time.timeScale = 0f;
+
+        OnGameOver?.Invoke();
     }
 
-
+    private void CleanUp()
+    {
+        Time.timeScale = 1f;
+    }
 
 
     //================================//

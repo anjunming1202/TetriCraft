@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class BlockGrid
+public class BlockGrid : MonoBehaviour
 {
-    public BlockGrid(int width, int height)
+    public void Init(int width, int height)
     {
+        // Init
         this.width = width;
         this.height = height;
         grid = new Block[width, height + 5];

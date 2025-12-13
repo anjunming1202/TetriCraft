@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PauseManuPanel : BasePanel
+public class PauseMenuPanel : BasePanel
 {
     [Header("UI Components")]
     [SerializeField] private Button resumeButton;

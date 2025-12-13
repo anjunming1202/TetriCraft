@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class PauseMenuController : MonoBehaviour
 {
-    private PauseManuPanel pauseManuPanel;
+    [SerializeField] GameManager gameManager;
+    private PauseMenuPanel pauseManuPanel;
 
     private void Start()
     {
-        GameManager.Instance.OnPause += OnPause;
-        GameManager.Instance.OnResume += OnResume;
+        gameManager.OnPause += OnPause;
+        gameManager.OnResume += OnResume;
     }
 
     public void OnResumeGame()
     {
-        GameManager.Instance.ResumeGame();
+        gameManager.ResumeGame();
     }
 
     public void OnSettings()
@@ -35,7 +36,7 @@ public class PauseMenuController : MonoBehaviour
     {
         if (pauseManuPanel != null && pauseManuPanel.IsShown)
             return;
-        pauseManuPanel = UIManager.Instance.ShowPanel<PauseManuPanel>("PauseMenu");
+        pauseManuPanel = UIManager.Instance.ShowPanel<PauseMenuPanel>("PauseMenu");
         pauseManuPanel.Init(this);
     }
 

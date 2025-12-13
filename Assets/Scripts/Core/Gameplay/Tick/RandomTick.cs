@@ -20,7 +20,7 @@ public static class RandomTick
                 MapRandomTickBehaviourObject mapObject = map.mapRandomTickObjects[randomIndex];
                 mapObject.RandomTickUpdate(randomTick);
 
-                Debug.DrawRay(mapObject.transform.position - Vector3.right * 0.5f, Vector3.right, Color.green, TickManager.deltaTickTime);
+                Debug.DrawRay(mapObject.transform.position - Vector3.right * 0.5f, Vector3.right, Color.green, TickManager.DeltaTickTime);
             }
         }
 

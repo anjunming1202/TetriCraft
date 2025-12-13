@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class BlockSpawnDebugger : MonoBehaviour
 {
+    [SerializeField] private GameManager gameManager;
     private static BlockSpawnDebugger _instance;
 
     public MapManager debuggedMap;
@@ -24,7 +25,7 @@ public class BlockSpawnDebugger : MonoBehaviour
 
     void Update()
     {
-        if (!GameManager.Instance.debug)
+        if (!gameManager.debug)
             return;
 
         if (debuggedMap == null)

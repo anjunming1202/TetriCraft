@@ -9,6 +9,18 @@ public class FluidSystem : MonoBehaviour
     public List<FluidElement> elements;
     public List<FluidElement> ColumnElements(int column) => columnElementLists[column];
 
+    public void Init(int columns)
+    {
+        // Init
+        elements = new List<FluidElement>();
+
+        columnElementLists = new List<FluidElement>[columns];  
+        for (int i = 0; i < columnElementLists.Length; i++)
+        {
+            columnElementLists[i] = new List<FluidElement>();
+        }
+    }
+
     public void Add(FluidElement element)
     {
         int index = elements.FindIndex(e => e.lowerLevel > element.lowerLevel);
@@ -165,16 +177,6 @@ public class FluidSystem : MonoBehaviour
         return false;
     }
 
-    private void Awake()
-    {
-        elements = new List<FluidElement>();
-
-        for (int i = 0; i < columnElementLists.Length; i++)
-        {
-            columnElementLists[i] = new List<FluidElement>();
-        }
-    }
-
     private void AddToColumnLists(FluidElement element)
     {
         List<FluidElement> columnList = columnElementLists[element.column];
@@ -188,5 +190,5 @@ public class FluidSystem : MonoBehaviour
         columnElementLists[element.column].Remove(element);
     }
 
-    private List<FluidElement>[] columnElementLists = new List<FluidElement>[10];
+    private List<FluidElement>[] columnElementLists;
 }

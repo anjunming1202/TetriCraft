@@ -12,7 +12,7 @@ public class NextTetrominoUIController : MonoBehaviour
     private void Awake()
     {
         icons = GetComponentsInChildren<TetrominoIcon>();
-        tetrisManager.OnStartTurn += UpdatePanel;
+        tetrisManager.OnStartedTurn += UpdatePanel;
     }
 
     private void UpdatePanel()
