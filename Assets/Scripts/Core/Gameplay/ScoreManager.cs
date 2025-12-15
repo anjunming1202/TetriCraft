@@ -1,14 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
-using UnityEngine.UI;
+using TMPro;
 
 public class ScoreManager : Singleton<ScoreManager>
 {
     private uint score;
-    public Text scoreText; // inspector
+    public TextMeshProUGUI scoreText; // inspector
     public uint digit = 8;
 
     public void Reset()
