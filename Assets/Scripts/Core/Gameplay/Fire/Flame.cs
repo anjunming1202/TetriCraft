@@ -42,7 +42,7 @@ public class Flame : MapRandomTickBehaviourObject
 
     public void Extinguish()
     {
-        AudioManager.Instance.PlaySoundAtPoint(extinguishSound, transform.position);
+        AudioManager.Instance.PlaySFXAtPoint(extinguishSound, transform.position);
         Die();
     }
 

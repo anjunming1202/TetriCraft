@@ -17,9 +17,9 @@ public class MapSoundManager : MonoBehaviour
     private void PlayLineClearSound(TetrisManager mapManager)
     {
         if (mapManager.lastClearLineCount < 4)
-            AudioManager.Instance.PlaySound(clearLine, 0.7f);
+            AudioManager.Instance.PlaySFX(clearLine, 0.7f);
         else
-            AudioManager.Instance.PlaySound(clearLineFour, 0.7f);
+            AudioManager.Instance.PlaySFX(clearLineFour, 0.7f);
     }
 
     private TetrisManager mapManager;

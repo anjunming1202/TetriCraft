@@ -20,7 +20,7 @@ public class BlockSoundManager : MonoBehaviour
         if (placedSounds.Length > 0)
         {
             int random = UnityEngine.Random.Range(0, placedSounds.Length);
-            AudioManager.Instance.PlaySoundAtPoint(placedSounds[random], block.GetWorldPosition());
+            AudioManager.Instance.PlaySFXAtPoint(placedSounds[random], block.GetWorldPosition());
         }
     }
 
@@ -29,7 +29,7 @@ public class BlockSoundManager : MonoBehaviour
         if (destroyedSounds.Length > 0)
         {
             int random = UnityEngine.Random.Range(0, destroyedSounds.Length);
-            AudioManager.Instance.PlaySoundAtPoint(destroyedSounds[random], block.GetWorldPosition());
+            AudioManager.Instance.PlaySFXAtPoint(destroyedSounds[random], block.GetWorldPosition());
         }
     }
 
