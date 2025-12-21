@@ -7,6 +7,7 @@ public class Bootstrapper : PersistentSingleton<Bootstrapper>
     [SerializeField] GameObject sceneLoaderPrefab;
     [SerializeField] GameObject resourcesPrefab;
     [SerializeField] GameObject factoriesPrefab;
+    [SerializeField] GameObject settingsManagerPrefab;
     [SerializeField] string firstScene;
 
     protected override void Awake()
@@ -19,6 +20,7 @@ public class Bootstrapper : PersistentSingleton<Bootstrapper>
         if (audioManagerPrefab) Instantiate(audioManagerPrefab);
         if (resourcesPrefab) Instantiate(resourcesPrefab);
         if (factoriesPrefab) Instantiate(factoriesPrefab);
+        if (settingsManagerPrefab) Instantiate(settingsManagerPrefab);
 
         // Load main menu
         SceneLoader.Instance.LoadScene(firstScene);

@@ -99,6 +99,7 @@ public class UIManager : PersistentSingleton<UIManager>
     /// <summary>
     /// Show a panel by key. If not instantiated yet, the panel is instantiated and cached.
     /// If the panel is modal, it is pushed onto the modal stack.
+    /// Init explicitly after ShowPanel
     /// </summary>
     public T ShowPanel<T>(string key, object data = null) where T : BasePanel
     {
@@ -114,6 +115,7 @@ public class UIManager : PersistentSingleton<UIManager>
         if (panelT.isModal)
             PushModal(panelT);
 
+        panelT.Initialise();
         panelT.Show(data);
         return panelT;
     }

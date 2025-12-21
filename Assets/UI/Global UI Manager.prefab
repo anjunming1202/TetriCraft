@@ -222,5 +222,9 @@ MonoBehaviour:
     prefab: {fileID: 2087815378285442198, guid: 16216b29a0859d14c89de443b88a9d23, type: 3}
   - key: GameOverMenu
     prefab: {fileID: 2087815378285442198, guid: 0b32b36805444ea40b57bd110fd3f98d, type: 3}
+  - key: Options
+    prefab: {fileID: 2883948444899245850, guid: 70ea706df1ab6ae43b5d8ee788cfaf5e, type: 3}
+  - key: AudioSettings
+    prefab: {fileID: 2883948444899245850, guid: 6bdb90e2745d75641abb2d6ba9d58a0e, type: 3}
   rootCanvas: {fileID: 2049698534689748878}
   modalBlockerPrefab: {fileID: 6934398333403512065, guid: 9ad47cf24540f1e4890558f9f8ba970d, type: 3}

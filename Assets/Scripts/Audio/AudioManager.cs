@@ -54,7 +54,7 @@ public class AudioManager : PersistentSingleton<AudioManager>
     protected override void Awake()
     {
         base.Awake();
-
+        
         // Validate / create music sources if missing
         if (musicSourceA == null)
         {

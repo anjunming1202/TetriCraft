@@ -1,0 +1,82 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+
+public class SettingsManager : PersistentSingleton<SettingsManager>
+{
+    public SettingsData Current { get; private set; }
+    public SettingsData Pending { get; private set; }// // explosed to settings controller to adjust settings
+
+    public event Action<SettingsData> OnSettingsChanged; // notify all managers to change values (can have a event for each manager)
+
+    // path for storing option settings
+    private const string PREF_KEY = "settings";
+
+    [SerializeField] private SettingsData defaultData;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        Load();
+        OnSettingsChanged?.Invoke(Current);
+    }
+
+    public void StartEdit()//
+    {
+        Pending = Clone(Current);
+    }
+
+    public void CancelEdit()//
+    {
+        Pending = null;
+    }
+
+    public void ApplyEdit()
+    {
+        if (Pending != null)
+        {
+            Current = Clone(Pending);
+            OnSettingsChanged?.Invoke(Current);
+        }
+        Pending = null;
+
+        Save();
+    }
+
+    /// <summary>
+    /// For real time updated features
+    /// </summary>
+    public void UpdatePendingSettings()//
+    {
+        OnSettingsChanged?.Invoke(Pending);
+    }
+
+    public void Load()
+    {
+        string json = PlayerPrefs.GetString(PREF_KEY, "");
+        if (string.IsNullOrEmpty(json))
+            Current = JsonUtility.FromJson<SettingsData>(json);
+        else if (defaultData != null)
+            Current = Clone(defaultData);
+        else
+        {
+            Debug.LogWarning("Lack of default settings data, created a new data");
+            Current = new SettingsData();
+        }
+    }
+
+    public void Save()
+    {
+        string json = JsonUtility.ToJson(Current);
+        PlayerPrefs.SetString(PREF_KEY, json);
+        PlayerPrefs.Save();
+    }
+
+    private SettingsData Clone(SettingsData src)
+    {
+        string json = JsonUtility.ToJson(src);
+        return JsonUtility.FromJson<SettingsData>(json);
+    }
+}

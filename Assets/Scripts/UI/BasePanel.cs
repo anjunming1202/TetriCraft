@@ -31,8 +31,13 @@ public class BasePanel : MonoBehaviour
     {
         canvasGroup = GetComponent<CanvasGroup>();
         rectTransform = transform as RectTransform;
+    }
 
-        // Start hidden
+    /// <summary>
+    /// Start hidden
+    /// </summary>
+    public void Initialise()
+    {
         canvasGroup.alpha = 0f;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
