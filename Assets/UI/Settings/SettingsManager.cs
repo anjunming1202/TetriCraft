@@ -58,12 +58,15 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
         string json = PlayerPrefs.GetString(PREF_KEY, "");
         if (string.IsNullOrEmpty(json))
             Current = JsonUtility.FromJson<SettingsData>(json);
-        else if (defaultData != null)
-            Current = Clone(defaultData);
-        else
+        if (Current == null)
         {
-            Debug.LogWarning("Lack of default settings data, created a new data");
-            Current = new SettingsData();
+            if (defaultData != null)
+                Current = Clone(defaultData);
+            else
+            {
+                Debug.LogWarning("Lack of default settings data, created a new data");
+                Current = new SettingsData();
+            }
         }
     }
 

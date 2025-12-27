@@ -16,7 +16,7 @@ public class OptionsPanelController : MonoBehaviour
 
     public void OnAccessibilitySettings()
     {
-
+        UIManager.Instance.ShowPanel<AccessibilitySettingsPanel>("AccessibilitySettings", SettingsManager.Instance.Current);
     }
 
     public void OnControlsSettings()

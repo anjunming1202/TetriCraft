@@ -27,8 +27,5 @@ public class OptionsPanel : SettingsPanel
         doneButton.onClick.AddListener(optionsMenuController.OnDone);
     }
 
-    protected override void PopularData(SettingsData data)
-    {
-        
-    }
+    protected override void PopulateData(SettingsData data) { }
 }

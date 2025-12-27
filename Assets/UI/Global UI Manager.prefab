@@ -226,5 +226,7 @@ MonoBehaviour:
     prefab: {fileID: 2883948444899245850, guid: 70ea706df1ab6ae43b5d8ee788cfaf5e, type: 3}
   - key: AudioSettings
     prefab: {fileID: 2883948444899245850, guid: 6bdb90e2745d75641abb2d6ba9d58a0e, type: 3}
+  - key: AccessibilitySettings
+    prefab: {fileID: 2883948444899245850, guid: 15929d198ddc7354c840a37adf5aa607, type: 3}
   rootCanvas: {fileID: 2049698534689748878}
   modalBlockerPrefab: {fileID: 6934398333403512065, guid: 9ad47cf24540f1e4890558f9f8ba970d, type: 3}

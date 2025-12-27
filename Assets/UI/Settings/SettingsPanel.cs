@@ -5,7 +5,7 @@
         base.OnOpen(data);
         if (data is SettingsData settingsData)
         {
-            PopularData(settingsData);
+            PopulateData(settingsData);
         }
     }
 
@@ -20,5 +20,5 @@
         SettingsManager.Instance.Save();
     }
 
-    protected abstract void PopularData(SettingsData data);
+    protected abstract void PopulateData(SettingsData data);
 }

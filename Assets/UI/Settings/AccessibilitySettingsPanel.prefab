@@ -141,7 +141,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: -1
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -172,13 +172,25 @@ MonoBehaviour:
   m_FillRect: {fileID: 3236554794332690716}
   m_HandleRect: {fileID: 3307460249105088109}
   m_Direction: 0
-  m_MinValue: 0
-  m_MaxValue: 1
-  m_WholeNumbers: 0
-  m_Value: 0.8
+  m_MinValue: 1
+  m_MaxValue: 10
+  m_WholeNumbers: 1
+  m_Value: 5
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 5630110723481936630}
+        m_TargetAssemblyTypeName: TextBinder`1[[System.Single, mscorlib
+        m_MethodName: OnValueChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &78347958734485474
 GameObject:
   m_ObjectHideFlags: 0
@@ -191,6 +203,7 @@ GameObject:
   - component: {fileID: 8161527447009683925}
   - component: {fileID: 2735567048160436093}
   - component: {fileID: 8789988873781824740}
+  - component: {fileID: 8909749362320644114}
   m_Layer: 5
   m_Name: GhostPieceOpacity
   m_TagString: Untagged
@@ -277,6 +290,20 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &8909749362320644114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78347958734485474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &346098172340461118
 GameObject:
   m_ObjectHideFlags: 0
@@ -346,6 +373,8 @@ GameObject:
   - component: {fileID: 315721905157816365}
   - component: {fileID: 4435144934980142483}
   - component: {fileID: 7020823153972142557}
+  - component: {fileID: 1620471169825464004}
+  - component: {fileID: 6433747038380155979}
   m_Layer: 5
   m_Name: GhostPieceType
   m_TagString: Untagged
@@ -487,6 +516,48 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1620471169825464004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 562945524420016956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
+--- !u!114 &6433747038380155979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 562945524420016956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61594b8a507ca674a99ea39719eb29df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onClicks:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 487254399614567268}
+        m_TargetAssemblyTypeName: TextBinder`1[[System.String, mscorlib
+        m_MethodName: OnValueChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  defaultValue: 0
 --- !u!1 &567077049741186015
 GameObject:
   m_ObjectHideFlags: 0
@@ -759,6 +830,8 @@ GameObject:
   - component: {fileID: 2572926702442030940}
   - component: {fileID: 990016138231621235}
   - component: {fileID: 3817647438705743258}
+  - component: {fileID: 2973817695088989591}
+  - component: {fileID: 5630110723481936630}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -882,6 +955,40 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2973817695088989591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735072782782178177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a1e2161c81b56498930dc993c2c33f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 3817647438705743258}
+  viewportRect: {fileID: 4973299519502876552}
+  scrollSpeed: 100
+  pauseAtEnds: 1
+  pauseDuration: 1
+  smoothTime: 0.0025
+  startDelay: 0.25
+  onlyScrollWhenActive: 1
+--- !u!114 &5630110723481936630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735072782782178177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a86d2da513d8f47b3546f0c18e81c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textContent: 'Drop Speed: {0}'
+  value: 0
 --- !u!1 &1771382293552769963
 GameObject:
   m_ObjectHideFlags: 0
@@ -1082,7 +1189,19 @@ MonoBehaviour:
   m_Value: 0.8
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3524405486680872986}
+        m_TargetAssemblyTypeName: TextBinder`1[[System.Single, mscorlib
+        m_MethodName: OnValueChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &2670941634124550170
 GameObject:
   m_ObjectHideFlags: 0
@@ -1096,6 +1215,8 @@ GameObject:
   - component: {fileID: 4217811374640002377}
   - component: {fileID: 2511712391122105722}
   - component: {fileID: 5609275522157263889}
+  - component: {fileID: 8046837969076878456}
+  - component: {fileID: 5675519899688002381}
   m_Layer: 5
   m_Name: BlockOutlines
   m_TagString: Untagged
@@ -1237,6 +1358,48 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &8046837969076878456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2670941634124550170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
+--- !u!114 &5675519899688002381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2670941634124550170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89039cef63e51744aa1cf5c287d239cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onClicks:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2487277305326276753}
+        m_TargetAssemblyTypeName: TextBinder`1[[System.String, mscorlib
+        m_MethodName: OnValueChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  defaultValue: 0
 --- !u!1 &2831783719479579787
 GameObject:
   m_ObjectHideFlags: 0
@@ -1249,6 +1412,7 @@ GameObject:
   - component: {fileID: 8555506292713813300}
   - component: {fileID: 764474816285843887}
   - component: {fileID: 2628401677416422920}
+  - component: {fileID: 2413121167107113342}
   m_Layer: 5
   m_Name: DropSpeed
   m_TagString: Untagged
@@ -1335,6 +1499,20 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2413121167107113342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2831783719479579787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &2838617116531563860
 GameObject:
   m_ObjectHideFlags: 0
@@ -1530,8 +1708,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7589898215422094711}
   m_HandleRect: {fileID: 7922368313188327507}
   m_Direction: 2
-  m_Value: 0.9999994
-  m_Size: 0.92419785
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1584,7 +1762,7 @@ GameObject:
   - component: {fileID: 438117622946268383}
   - component: {fileID: 2427115220121459576}
   - component: {fileID: 5928965585503931980}
-  - component: {fileID: 8969741324621387195}
+  - component: {fileID: 8567765177191565764}
   m_Layer: 0
   m_Name: AccessibilitySettingsPanel
   m_TagString: Untagged
@@ -1663,7 +1841,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8969741324621387195
+--- !u!114 &8567765177191565764
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1672,12 +1850,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 2883948444899245850}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0a6ee4c0c0b9d8e4ead846544db84349, type: 3}
+  m_Script: {fileID: 11500000, guid: 9ea2ad1cec9dfdf42b46ba3ff7e8a5fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isModal: 1
+  isModal: 0
   hideOnBack: 1
-  transitionDuration: 0
+  transitionDuration: 0.25
+  dropSpeedSlider: {fileID: 3126415455497595097}
+  ghostPieceTypeButton: {fileID: 6433747038380155979}
+  dropAnimationSpeedSlider: {fileID: 5804616044192860164}
+  ghostPieceOpaitySlider: {fileID: 1046930064868896813}
+  blockOutlinesButton: {fileID: 5675519899688002381}
+  hardDropVibrationStrengthSlider: {fileID: 3409991135495595275}
+  doneButton: {fileID: 8209483632756894879}
 --- !u!1 &2947280684403008655
 GameObject:
   m_ObjectHideFlags: 0
@@ -1689,6 +1874,8 @@ GameObject:
   - component: {fileID: 6909444387639049414}
   - component: {fileID: 1059209533598424688}
   - component: {fileID: 4452175184952080974}
+  - component: {fileID: 6712775802919303688}
+  - component: {fileID: 3524405486680872986}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -1812,6 +1999,40 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &6712775802919303688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2947280684403008655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a1e2161c81b56498930dc993c2c33f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 4452175184952080974}
+  viewportRect: {fileID: 4988294219067975313}
+  scrollSpeed: 100
+  pauseAtEnds: 1
+  pauseDuration: 1
+  smoothTime: 0.0025
+  startDelay: 0.25
+  onlyScrollWhenActive: 1
+--- !u!114 &3524405486680872986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2947280684403008655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a86d2da513d8f47b3546f0c18e81c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textContent: 'Ghost Piece Opacity: {0:P0}'
+  value: 0
 --- !u!1 &3368838365594736990
 GameObject:
   m_ObjectHideFlags: 0
@@ -1934,6 +2155,8 @@ GameObject:
   - component: {fileID: 2641794490113966422}
   - component: {fileID: 8237613842304687607}
   - component: {fileID: 8897024615918281719}
+  - component: {fileID: 1958517594274122928}
+  - component: {fileID: 487254399614567268}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -2057,6 +2280,40 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1958517594274122928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3524438496659531888}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a1e2161c81b56498930dc993c2c33f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 8897024615918281719}
+  viewportRect: {fileID: 5318994911700207488}
+  scrollSpeed: 100
+  pauseAtEnds: 1
+  pauseDuration: 1
+  smoothTime: 0.0025
+  startDelay: 0.25
+  onlyScrollWhenActive: 1
+--- !u!114 &487254399614567268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3524438496659531888}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f228e569d228f543bf9f12ca2c9c4c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textContent: 'Ghost Piece Type: {0}'
+  value: 
 --- !u!1 &3608961249762561106
 GameObject:
   m_ObjectHideFlags: 0
@@ -2299,6 +2556,8 @@ GameObject:
   - component: {fileID: 4284443649749503751}
   - component: {fileID: 1234203680094014795}
   - component: {fileID: 3217979228309875435}
+  - component: {fileID: 6868203582960235882}
+  - component: {fileID: 2487277305326276753}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -2422,6 +2681,40 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &6868203582960235882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4102852548632988838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a1e2161c81b56498930dc993c2c33f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 3217979228309875435}
+  viewportRect: {fileID: 7639070596647602771}
+  scrollSpeed: 100
+  pauseAtEnds: 1
+  pauseDuration: 1
+  smoothTime: 0.0025
+  startDelay: 0.25
+  onlyScrollWhenActive: 1
+--- !u!114 &2487277305326276753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4102852548632988838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f228e569d228f543bf9f12ca2c9c4c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textContent: 'Block Outlines: {0}'
+  value: 
 --- !u!1 &4143452524070115574
 GameObject:
   m_ObjectHideFlags: 0
@@ -2965,7 +3258,19 @@ MonoBehaviour:
   m_Value: 0.8
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4248232555001261060}
+        m_TargetAssemblyTypeName: TextBinder`1[[System.Single, mscorlib
+        m_MethodName: OnValueChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4744368884592779648
 GameObject:
   m_ObjectHideFlags: 0
@@ -2978,6 +3283,7 @@ GameObject:
   - component: {fileID: 8507544053336894686}
   - component: {fileID: 6395826916453930302}
   - component: {fileID: 6345456660548274165}
+  - component: {fileID: 2937097425685436763}
   m_Layer: 5
   m_Name: HardDropVibrationStrength
   m_TagString: Untagged
@@ -3064,6 +3370,20 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2937097425685436763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4744368884592779648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &4775017334582632562
 GameObject:
   m_ObjectHideFlags: 0
@@ -3452,13 +3772,25 @@ MonoBehaviour:
   m_FillRect: {fileID: 3719203561365419820}
   m_HandleRect: {fileID: 5295806020108753367}
   m_Direction: 0
-  m_MinValue: 0
-  m_MaxValue: 1
-  m_WholeNumbers: 0
-  m_Value: 0.8
+  m_MinValue: 1
+  m_MaxValue: 10
+  m_WholeNumbers: 1
+  m_Value: 5
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7110547321902931151}
+        m_TargetAssemblyTypeName: TextBinder`1[[System.Single, mscorlib
+        m_MethodName: OnValueChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &5615504812553372034
 GameObject:
   m_ObjectHideFlags: 0
@@ -4106,6 +4438,7 @@ GameObject:
   - component: {fileID: 4125752470772950473}
   - component: {fileID: 6258042682662112945}
   - component: {fileID: 7226838269291311280}
+  - component: {fileID: 2420401186500062552}
   m_Layer: 5
   m_Name: DropAnimationSpeed
   m_TagString: Untagged
@@ -4192,6 +4525,20 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2420401186500062552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7948330656275682297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &8222899474908533422
 GameObject:
   m_ObjectHideFlags: 0
@@ -4203,6 +4550,8 @@ GameObject:
   - component: {fileID: 1097156940124061609}
   - component: {fileID: 1165795023677600492}
   - component: {fileID: 8922208540874291713}
+  - component: {fileID: 1687588177053393040}
+  - component: {fileID: 7110547321902931151}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -4326,6 +4675,40 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1687588177053393040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8222899474908533422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a1e2161c81b56498930dc993c2c33f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 8922208540874291713}
+  viewportRect: {fileID: 6628110580424389775}
+  scrollSpeed: 100
+  pauseAtEnds: 1
+  pauseDuration: 1
+  smoothTime: 0.0025
+  startDelay: 0.25
+  onlyScrollWhenActive: 1
+--- !u!114 &7110547321902931151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8222899474908533422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a86d2da513d8f47b3546f0c18e81c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textContent: 'Drop Animation Speed: {0}'
+  value: 0
 --- !u!1 &8326369865775223914
 GameObject:
   m_ObjectHideFlags: 0
@@ -4544,6 +4927,8 @@ GameObject:
   - component: {fileID: 4910573150822651413}
   - component: {fileID: 2481914734382318584}
   - component: {fileID: 8288737996527704385}
+  - component: {fileID: 2206587238553198013}
+  - component: {fileID: 4248232555001261060}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -4598,7 +4983,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'HardDropVibrationStrength: '
+  m_text: 'Hard Drop Vibration Strength: 100%'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 524e0b0bc0628e948bbab36e55a620d9, type: 2}
   m_sharedMaterial: {fileID: 2850639060164096969, guid: 524e0b0bc0628e948bbab36e55a620d9, type: 2}
@@ -4625,11 +5010,11 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 38.55
-  m_fontSizeBase: 176.6
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
-  m_enableAutoSizing: 1
-  m_fontSizeMin: 18
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 40
   m_fontSizeMax: 40
   m_fontStyle: 0
   m_HorizontalAlignment: 2
@@ -4667,3 +5052,37 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2206587238553198013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9054109520411516804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a1e2161c81b56498930dc993c2c33f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 8288737996527704385}
+  viewportRect: {fileID: 522598115257057391}
+  scrollSpeed: 100
+  pauseAtEnds: 1
+  pauseDuration: 1
+  smoothTime: 0.0025
+  startDelay: 0.25
+  onlyScrollWhenActive: 1
+--- !u!114 &4248232555001261060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9054109520411516804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a86d2da513d8f47b3546f0c18e81c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textContent: 'Hard Drop Vibration Strength: {0:P0}'
+  value: 0
