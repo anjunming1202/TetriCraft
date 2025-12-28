@@ -99,7 +99,7 @@ public class BasePanel : MonoBehaviour
         while (t < transitionDuration)
         {
             t += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(start, 0f, t / transitionDuration); Debug.Log($"{t}, {canvasGroup.alpha}");
+            canvasGroup.alpha = Mathf.Lerp(start, 0f, t / transitionDuration); //Debug.Log($"{t}, {canvasGroup.alpha}");
             yield return null;
         }
         canvasGroup.alpha = 0f;

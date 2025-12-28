@@ -31,6 +31,7 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
     public void CancelEdit()//
     {
         Pending = null;
+        OnSettingsChanged?.Invoke(Current);
     }
 
     public void ApplyEdit()
@@ -38,9 +39,9 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
         if (Pending != null)
         {
             Current = Clone(Pending);
-            OnSettingsChanged?.Invoke(Current);
         }
         Pending = null;
+        OnSettingsChanged?.Invoke(Current);
 
         Save();
     }
@@ -56,18 +57,23 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
     public void Load()
     {
         string json = PlayerPrefs.GetString(PREF_KEY, "");
-        if (string.IsNullOrEmpty(json))
+        if (!string.IsNullOrEmpty(json))
             Current = JsonUtility.FromJson<SettingsData>(json);
         if (Current == null)
         {
             if (defaultData != null)
+            {
                 Current = Clone(defaultData);
+                Debug.Log("Loaded Default Settings");
+            }
             else
             {
                 Debug.LogWarning("Lack of default settings data, created a new data");
                 Current = new SettingsData();
             }
         }
+        else
+            Debug.Log("Loaded Last Saved Settings");
     }
 
     public void Save()

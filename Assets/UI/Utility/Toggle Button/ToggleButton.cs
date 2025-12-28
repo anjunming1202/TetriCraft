@@ -9,7 +9,8 @@ namespace UnityEngine.UI
     [RequireComponent(typeof(Button))]
     public abstract class ToggleButton<TEnum> : MonoBehaviour where TEnum : struct, Enum
     {
-        [SerializeField] private List<UnityEvent<string>> onClicks;
+        [SerializeField] public UnityEvent<TEnum> onValueChanged;
+        [SerializeField] public UnityEvent<string> onValueChangedAsString;
 
         [SerializeField] private TEnum defaultValue;
         private TEnum value;
@@ -20,6 +21,8 @@ namespace UnityEngine.UI
             {
                 this.value = value; 
                 index = GetIndex(value);
+                onValueChanged?.Invoke(value);
+                onValueChangedAsString?.Invoke(value.ToString());
             }
         }
         private Array enumValues;
@@ -66,10 +69,8 @@ namespace UnityEngine.UI
             index = (index + 1) % enumValues.Length;
             value = GetValue(index);
 
-            foreach (var e in onClicks)
-            {
-                e?.Invoke(value.ToString());
-            }
+            onValueChanged?.Invoke(value);
+            onValueChangedAsString?.Invoke(value.ToString());
         }
     }
 }

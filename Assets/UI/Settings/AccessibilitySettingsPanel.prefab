@@ -483,19 +483,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 315721905157816365}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &7020823153972142557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -542,8 +530,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61594b8a507ca674a99ea39719eb29df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onClicks:
-  - m_PersistentCalls:
+  onValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onValueChangedAsString:
+    m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 487254399614567268}
         m_TargetAssemblyTypeName: TextBinder`1[[System.String, mscorlib
@@ -1325,19 +1316,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4217811374640002377}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &5609275522157263889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1384,8 +1363,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89039cef63e51744aa1cf5c287d239cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onClicks:
-  - m_PersistentCalls:
+  onValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onValueChangedAsString:
+    m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2487277305326276753}
         m_TargetAssemblyTypeName: TextBinder`1[[System.String, mscorlib
@@ -1708,8 +1690,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7589898215422094711}
   m_HandleRect: {fileID: 7922368313188327507}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 0.9999803
+  m_Size: 0.9977273
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1763,6 +1745,7 @@ GameObject:
   - component: {fileID: 2427115220121459576}
   - component: {fileID: 5928965585503931980}
   - component: {fileID: 8567765177191565764}
+  - component: {fileID: 305884172864075905}
   m_Layer: 0
   m_Name: AccessibilitySettingsPanel
   m_TagString: Untagged
@@ -1853,7 +1836,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ea2ad1cec9dfdf42b46ba3ff7e8a5fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isModal: 0
+  isModal: 1
   hideOnBack: 1
   transitionDuration: 0.25
   dropSpeedSlider: {fileID: 3126415455497595097}
@@ -1863,6 +1846,18 @@ MonoBehaviour:
   blockOutlinesButton: {fileID: 5675519899688002381}
   hardDropVibrationStrengthSlider: {fileID: 3409991135495595275}
   doneButton: {fileID: 8209483632756894879}
+--- !u!114 &305884172864075905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2883948444899245850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a3c2642428e92647bf1e343a22b1cfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2947280684403008655
 GameObject:
   m_ObjectHideFlags: 0
@@ -2987,13 +2982,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 305884172864075905}
+        m_TargetAssemblyTypeName: AccessibilitySettingsController, Assembly-CSharp
+        m_MethodName: OnDone
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 

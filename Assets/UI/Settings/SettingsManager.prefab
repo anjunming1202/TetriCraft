@@ -44,4 +44,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87d5724c29ffed446946024d6c1aec67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultData: {fileID: 11400000, guid: e837be273f6c49d449f66ee6bfddd849, type: 2}
+  defaultData:
+    version: 1
+    masterVolume: 1
+    musicVolume: 0.8
+    blocksVolume: 0.8
+    eventsVolume: 0.8
+    uiVolume: 0.8
+    resolutionIndex: 0
+    fullscreen: 1
+    guiScaleIndex: 1
+    inputBindingsJson: 
+    dropSpeed: 5
+    ghostPiece: 0
+    ghostPieceOpacity: 0.5
+    blockOutlines: 0
+    dropAnimationSpeed: 5
+    hardDropVibrationStrength: 0.5
+    locale: en

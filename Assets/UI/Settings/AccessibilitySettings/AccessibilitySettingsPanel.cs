@@ -16,19 +16,25 @@ public class AccessibilitySettingsPanel : SettingsPanel
 
     [SerializeField] private Button doneButton;
 
-    public void Init(AccessibilitySettingsController controller)
+    protected override void Awake()
     {
-
+        base.Awake();
+        dropSpeedSlider.onValueChanged.AddListener(value => Pending.dropSpeed = value);
+        ghostPieceTypeButton.onValueChanged.AddListener(value => Pending.ghostPiece = value);
+        dropAnimationSpeedSlider.onValueChanged.AddListener(value => Pending.dropAnimationSpeed = value);
+        ghostPieceOpaitySlider.onValueChanged.AddListener(value => Pending.ghostPieceOpacity = value);
+        blockOutlinesButton.onValueChanged.AddListener(value => Pending.blockOutlines = value == OnOff.On);
+        hardDropVibrationStrengthSlider.onValueChanged.AddListener(value => Pending.hardDropVibrationStrength = value);
     }
 
     protected override void PopulateData(SettingsData data)
     {
         Debug.Log("Accessibility Settings Populating Data");
-        dropSpeedSlider.value = data.dropSpeed;
+        PopulateSliderData(dropSpeedSlider, data.dropSpeed);
         ghostPieceTypeButton.Value = data.ghostPiece;
-        dropAnimationSpeedSlider.value = data.dropAnimationSpeed;
-        ghostPieceOpaitySlider.value = data.ghostPieceOpacity;
+        PopulateSliderData(dropAnimationSpeedSlider, data.dropAnimationSpeed);
+        PopulateSliderData(ghostPieceOpaitySlider, data.ghostPieceOpacity);
         blockOutlinesButton.Value = data.blockOutlines ? OnOff.On : OnOff.Off;
-        hardDropVibrationStrengthSlider.value = data.hardDropVibrationStrength;
+        PopulateSliderData(hardDropVibrationStrengthSlider, data.hardDropVibrationStrength);
     }
 }

@@ -2,8 +2,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-[CreateAssetMenu(fileName = "SettingsData", menuName = "SettingsData")]
-public class SettingsData : ScriptableObject
+public class SettingsData
 {
     // Version for migration
     public int version = 1;

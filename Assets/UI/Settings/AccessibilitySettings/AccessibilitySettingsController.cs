@@ -4,15 +4,10 @@ using UnityEngine;
 
 public class AccessibilitySettingsController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public void OnDone()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        SettingsManager.Instance.ApplyEdit(); // if having a 'Cancel', split this to 'OnDone', 'OnCancel' and 'OnEsc'
+        SettingsManager.Instance.Save();
+        UIManager.Instance.OnBack();
     }
 }
