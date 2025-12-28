@@ -1026,7 +1026,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e57ae5e7a8c230340a7a8fcdf7b887a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialPoolSize: 5
+  mixer: {fileID: 0}
+  musicSourceA: {fileID: 0}
+  musicSourceB: {fileID: 0}
+  defaultMusicCrossfade: 1
+  sfxSourcePrefab: {fileID: 0}
+  sfxInitialPoolSize: 16
 --- !u!4 &493148362
 Transform:
   m_ObjectHideFlags: 0
@@ -2637,6 +2642,63 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bc722bcef3842d940b34a49105f612ee, type: 3}
+--- !u!1001 &1796868904
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2805683854728260812, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3379588983970418185, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
+      propertyPath: m_Name
+      value: SettingsManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fd8f49fae8142b7488201b159e68ba36, type: 3}
 --- !u!1001 &1861834495
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3021,7 +3083,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2722b78f275bf5a4c8606a19f1a319ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gravity: 1
   speedDrop: 1
   speedSoftDrop: 8
   keyInputInterval: 0.2
@@ -3327,5 +3388,6 @@ SceneRoots:
   - {fileID: 2098479939}
   - {fileID: 329727407}
   - {fileID: 725790050753591688}
+  - {fileID: 1796868904}
   - {fileID: 1753712650}
   - {fileID: 758003342}

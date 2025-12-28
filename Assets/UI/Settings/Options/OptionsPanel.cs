@@ -12,6 +12,12 @@ public class OptionsPanel : SettingsPanel
 
     [SerializeField] private Button doneButton;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        Init(GetComponent<OptionsPanelController>());
+    }
+
     public void Init(OptionsPanelController optionsMenuController)
     {
         audioSettingsButton.onClick.RemoveAllListeners();

@@ -22,6 +22,15 @@ public class GameManager : MonoBehaviour
     public AnimationCurveAsset blockMovementCurve;
     public AnimationCurveAsset blockLandCurve;
 
+    // Preferences
+    public class Preference
+    {
+        public float tetrominoDropSpeed;
+        public float animationSpeed;
+    }
+    public static Preference preference;
+
+
     [Header("Debug")]
     public bool debug = true;
 
@@ -33,6 +42,9 @@ public class GameManager : MonoBehaviour
     {
         // Load static resources
         InitialiseResources();
+        // Init preferences
+        InitPreferences();
+        SettingsManager.Instance.OnSettingsChanged += ApplySettings;
     }
 
     void Start()
@@ -118,6 +130,13 @@ public class GameManager : MonoBehaviour
     private void CleanUp()
     {
         Time.timeScale = 1f;
+        SettingsManager.Instance.OnSettingsChanged -= ApplySettings;
+    }
+
+    private void ApplySettings(SettingsData settings)
+    {
+        preference.tetrominoDropSpeed = settings.dropSpeed;
+        preference.animationSpeed = settings.dropAnimationSpeed;
     }
 
 
@@ -136,5 +155,11 @@ public class GameManager : MonoBehaviour
         // Initialise block animator
         BlockAnimator.MovingCurveAsset = blockMovementCurve;
         BlockAnimator.FastMovingCurveAsset = blockLandCurve;
+    }
+
+    private void InitPreferences()
+    {
+        preference = new Preference();
+        ApplySettings(SettingsManager.Instance.Current);
     }
 }

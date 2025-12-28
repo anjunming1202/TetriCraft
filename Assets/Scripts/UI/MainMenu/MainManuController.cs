@@ -25,7 +25,6 @@ public class MainMenuController : Singleton<MainMenuController>
     {
         // Open setting panel
         OptionsPanel optionsPanel= UIManager.Instance.ShowPanel<OptionsPanel>("Options");
-        optionsPanel.Init(optionsPanel.GetComponent<OptionsPanelController>());
     }
 
     public void OnQuit()

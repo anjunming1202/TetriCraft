@@ -12,10 +12,7 @@ public abstract class SettingsPanel : BasePanel
         SettingsManager.Instance.StartEdit();
 
         // Populate panel data
-        if (data is SettingsData settingsData)
-        {
-            PopulateData(settingsData);
-        }
+        PopulateData(SettingsManager.Instance.Current);
     }
 
     private void OnDisable()

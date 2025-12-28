@@ -9,6 +9,7 @@ public class BlockAnimator : MonoBehaviour
 
     public static AnimationCurveAsset MovingCurveAsset;   // *static: make it can be initialised at other places
     public static AnimationCurveAsset FastMovingCurveAsset;
+    public static float animationSpeed => GameManager.preference.animationSpeed;
 
     private AnimationCurveAsset currentCurveAsset;
     private float elapsedTime = 0f;
@@ -40,22 +41,23 @@ public class BlockAnimator : MonoBehaviour
     }
     public void MoveAnimationOnSet()
     {
-        AnimationOnSet(block.GetWorldPosition(), MovingCurveAsset);
+        AnimationOnSet(block.GetWorldPosition(), MovingCurveAsset, animationSpeed);
     }
     public void LandAnimationOnSet()
     {
-        AnimationOnSet(block.GetWorldPosition(), FastMovingCurveAsset);
+        AnimationOnSet(block.GetWorldPosition(), FastMovingCurveAsset, animationSpeed);
     }
 
-    protected void AnimationOnSet(Vector3 to, AnimationCurveAsset curveAsset)
+    protected void AnimationOnSet(Vector3 to, AnimationCurveAsset curveAsset, float speed)
     {
         // Stop current animation
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
         // Start moving animation
+        float duration = curveAsset.duration / (speed / 10 + 0.5f);
         currentCurveAsset = curveAsset;
         block.isAnimating = true;
-        currentCoroutine = StartCoroutine(MoveTo(to, curveAsset.curve, curveAsset.duration));
+        currentCoroutine = StartCoroutine(MoveTo(to, curveAsset.curve, duration));
     }
 
 

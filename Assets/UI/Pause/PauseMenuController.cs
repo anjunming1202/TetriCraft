@@ -20,7 +20,7 @@ public class PauseMenuController : MonoBehaviour
 
     public void OnSettings()
     {
-
+        UIManager.Instance.ShowPanel<OptionsPanel>("Options");
     }
 
     public void OnSaveAndExit()

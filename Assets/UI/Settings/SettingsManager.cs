@@ -42,6 +42,7 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
         }
         Pending = null;
         OnSettingsChanged?.Invoke(Current);
+        Debug.Log("Apply Settings");
 
         Save();
     }

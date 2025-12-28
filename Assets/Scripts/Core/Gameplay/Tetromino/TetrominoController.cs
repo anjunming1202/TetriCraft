@@ -9,14 +9,14 @@ public class TetrominoController : MonoBehaviour
     private bool isActive = false;
 
     // Control
-    public float gravity = 1;
+    public float gravity => GameManager.preference.tetrominoDropSpeed / 10 + 0.5f;
     public float speedDrop = 1;
     public float speedSoftDrop = 2;
     public float keyInputInterval = 0.2f;
 
     private float dropTimer = 0;
     private bool isAccelerating = false;
-    private float interval;
+    private float interval => isAccelerating ? intervalAccelerating : intervalNormal;
     private float intervalNormal => 1 / (gravity * speedDrop);
     private float intervalAccelerating => 1 / (gravity * speedSoftDrop);
 
@@ -36,7 +36,8 @@ public class TetrominoController : MonoBehaviour
     {
         this.map = map;
         this.tetromino = tetromino;
-        interval = intervalNormal;
+
+        isAccelerating = false;
         Deactivate();
     }
 
@@ -88,12 +89,10 @@ public class TetrominoController : MonoBehaviour
                 return;
             tetromino.SoftDrop(map);  // drop immediately
             isAccelerating = true;
-            interval = intervalAccelerating;
         }
         if (Input.GetKeyUp(key_accelerate))
         {
             isAccelerating = false;
-            interval = intervalNormal;
         }
         if (Input.GetKeyDown(key_land)) // Hard drop
         {
