@@ -27,6 +27,8 @@ public class GameManager : MonoBehaviour
     {
         public float tetrominoDropSpeed;
         public float animationSpeed;
+        public GhostPieceType ghostPieceType;
+        public float ghostPieceOpacity;
     }
     public static Preference preference;
 
@@ -137,6 +139,8 @@ public class GameManager : MonoBehaviour
     {
         preference.tetrominoDropSpeed = settings.dropSpeed;
         preference.animationSpeed = settings.dropAnimationSpeed;
+        preference.ghostPieceType = settings.ghostPiece;
+        preference.ghostPieceOpacity = settings.ghostPieceOpacity;
     }
 
 

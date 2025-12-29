@@ -39,7 +39,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     // Events
     public delegate void OnChangedEvent(Block block);
     public event OnChangedEvent OnMoved;
-    public event OnChangedEvent OnStateChanged;
+    public event OnChangedEvent OnAppearanceChanged;
 
     public delegate void OnAnimationUpdateEvent();
     public event OnAnimationUpdateEvent OnInstantMove;
@@ -102,6 +102,11 @@ public abstract class Block : MapRandomTickBehaviourObject
             return;
         orientation = (Orientation)((((int)orientation + (clockwise ? -1 : 1)) + 4) % 4);
         OnTriggerAppearanceChanged();
+    }
+
+    public void OnTriggerAppearanceChanged()
+    {
+        OnAppearanceChanged?.Invoke(this);
     }
 
     public Coroutine Disable(float sec)
@@ -252,11 +257,6 @@ public abstract class Block : MapRandomTickBehaviourObject
             explosionTarget.isUnbreakable = false;
         if (flammableObject != null)
             flammableObject.isFlammable = true;
-    }
-
-    protected void OnTriggerAppearanceChanged()
-    {
-        OnStateChanged?.Invoke(this);
     }
 
     protected virtual void OnExploded()

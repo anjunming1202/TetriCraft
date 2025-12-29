@@ -42,9 +42,16 @@ public class DummyTetromino : Tetromino
             {
                 if (tetrominoShape.shape[r, c] != null)
                 {
-                    shape[r, c] = blocks[blockCount];
+                    Block block = blocks[blockCount];
+                    shape[r, c] = block;
+                    block.OnTriggerAppearanceChanged();
                     blockCount++;
                 }
             }
     }
+}
+
+public class GhostTetromino : DummyTetromino
+{
+    public Tetromino shadowTetromino;
 }

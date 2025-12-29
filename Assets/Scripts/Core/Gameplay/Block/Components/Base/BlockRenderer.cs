@@ -30,16 +30,18 @@ public class BlockRenderer : MonoBehaviour
     protected virtual void Awake()
     {
         block = GetComponent<Block>();
-        block.OnStateChanged += Render;
+        block.OnAppearanceChanged += Render;
 
         spriteRenderer = GetComponent<SpriteRenderer>();
         mainTexture = textures.Length > 0 ? textures[0] : null;
 
         props = new MaterialPropertyBlock();
-
-        Render(block);
     }
 
+    protected void Start()
+    {
+        Render(block);
+    }
 
     /// <summary>
     /// Render block: set position, set texture
@@ -49,6 +51,11 @@ public class BlockRenderer : MonoBehaviour
         spriteRenderer.sprite = mainTexture;
 
         // material rendering
+        UpdateMaterial();
+    }
+
+    protected void UpdateMaterial()
+    {
         spriteRenderer.GetPropertyBlock(props);
         props.SetColor("_Color", spriteRenderer.color);
         props.SetFloat("_Rotation", block.Rotation);

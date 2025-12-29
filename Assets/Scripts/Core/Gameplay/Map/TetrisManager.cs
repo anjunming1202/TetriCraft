@@ -210,12 +210,15 @@ public class TetrisManager : MonoBehaviour
         DummyTetromino tetrominoSpawned = nextTetrominos[0];
         SpawnTetromino(tetrominoSpawned);
 
+        // Init ghost block
+        InitGhostTetromino(tetrominoSpawned);
+
         // Create next new tetromino
         nextTetrominos.RemoveAt(0);
         nextTetrominos.Add(tetrominoSpawned);
         TetrominoGenerator.NewRandomTetromino(tetrominoSpawned);
 
-        // Start the new turn
+        // Start the turn
         OnStartedTurn?.Invoke();
     }
 
@@ -279,6 +282,15 @@ public class TetrisManager : MonoBehaviour
                 map[x, y].SetPosition(x, y - 1, true);
             }
             map.BatchUpdateBlocks(); // update once for each row
+        }
+    }
+
+    private void InitGhostTetromino(Tetromino tetromino)
+    {
+        for (int i = 0; i < ghostTetromino.blocks.Length; i++)
+        {
+            GhostBlock block = ghostTetromino.blocks[i] as GhostBlock;
+            block.Shadow(tetromino.blocks[i]);
         }
     }
 
