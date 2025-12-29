@@ -19,9 +19,15 @@ using UnityEngine.Audio;
 /// </summary>
 public class AudioManager : PersistentSingleton<AudioManager>
 {
-    [Header("Mixer (optional)")]
+    [Header("Mixer")]
     [Tooltip("Optional AudioMixer. If assigned, the manager will try to set exposed params MasterVolume, MusicVolume and SFXVolume (in dB).")]
     public AudioMixer mixer;
+    public AudioMixerGroup masterGroup;
+    public AudioMixerGroup musicGroup;
+    public AudioMixerGroup blockSFXGroup;
+    public AudioMixerGroup environmentSFXGroup;
+    public AudioMixerGroup eventSFXGroup;
+    public AudioMixerGroup uiSFXGroup;
 
     [Header("Music")]
     public AudioSource musicSourceA;
@@ -40,12 +46,18 @@ public class AudioManager : PersistentSingleton<AudioManager>
     // Volume state stored as linear 0..1 values
     private float masterVolume = 1f;
     private float musicVolume = 1f;
-    private float sfxVolume = 1f;
+    private float blockSFXVolume = 1f;
+    private float environmentSFXVolume = 1f;
+    private float eventSFXVolume = 1f;
+    private float uiSFXVolume = 1f;
 
     // mixer parameter names expected if mixer is provided
     private const string MIXER_MASTER_PARAM = "MasterVolume";
     private const string MIXER_MUSIC_PARAM = "MusicVolume";
-    private const string MIXER_SFX_PARAM = "SFXVolume";
+    private const string MIXER_BLOCKSFX_PARAM = "BlockSFXVolume";
+    private const string MIXER_ENVIRONMENTSFX_PARAM = "EnvironmentSFXVolume";
+    private const string MIXER_EVENTSFX_PARAM = "EventSFXVolume";
+    private const string MIXER_UISFX_PARAM = "UISFXVolume";
 
     // used for crossfading
     private AudioSource activeMusicSource;
@@ -74,26 +86,38 @@ public class AudioManager : PersistentSingleton<AudioManager>
 
         // Build SFX pool
         BuildSFXPool();
+
+        // Init settings
+        InitSettings();
     }
 
     /// <summary>
     /// Play sound in the world
     /// </summary>
-    public void PlaySFXAtPoint(AudioClip clip, Vector3 position, float volume = 1f)
+    public void PlaySFXAtPoint(AudioClip clip, Vector3 position, float volume = 1f, AudioBus output = AudioBus.Master)
     {
-        AudioSource.PlayClipAtPoint(clip, position, volume * sfxVolume * masterVolume);
+        GameObject gameObject = new GameObject("One shot audio");
+        gameObject.transform.position = position;
+        AudioSource audioSource = (AudioSource)gameObject.AddComponent(typeof(AudioSource));
+        audioSource.clip = clip;
+        audioSource.spatialBlend = 0f; // 2D
+        audioSource.volume = volume;
+        audioSource.outputAudioMixerGroup = GetGroup(output);
+        audioSource.Play();
+        Destroy(gameObject, clip.length * ((Time.timeScale < 0.01f) ? 0.01f : Time.timeScale));
     }
 
     /// <summary>
     /// Play a one-shot SFX clip at the manager's pool. Returns true if played.
     /// </summary>
-    public bool PlaySFX(AudioClip clip, float volume = 1f)
+    public bool PlaySFX(AudioClip clip, float volume = 1f, AudioBus output = AudioBus.Master)
     {
         if (sfxPool.Count == 0)
         {
             // no pool available
             var fallback = gameObject.AddComponent<AudioSource>();
-            fallback.PlayOneShot(clip, volume * sfxVolume * masterVolume);
+            fallback.PlayOneShot(clip, volume);
+            fallback.outputAudioMixerGroup = GetGroup(output);
             //Destroy(fallback, clip.length + 0.1f);
             return true;
         }
@@ -103,7 +127,8 @@ public class AudioManager : PersistentSingleton<AudioManager>
 
         // configure
         src.clip = clip;
-        src.volume = volume * sfxVolume * masterVolume;
+        src.volume = volume;
+        src.outputAudioMixerGroup = GetGroup(output);
         src.loop = false;
         src.Play();
 
@@ -115,7 +140,7 @@ public class AudioManager : PersistentSingleton<AudioManager>
     /// <summary>
     /// Play sound following an object
     /// </summary>
-    public void PlaySFXFollowing(AudioClip clip, Transform target, float volume = 1f)
+    public void PlaySFXFollowing(AudioClip clip, Transform target, float volume = 1f, AudioBus output = AudioBus.Master)
     {
         GameObject tempGO = new GameObject("TempAudio");
         tempGO.transform.position = target.position;
@@ -124,10 +149,11 @@ public class AudioManager : PersistentSingleton<AudioManager>
         AudioSource aSource = tempGO.AddComponent<AudioSource>();
         aSource.clip = clip;
         aSource.volume = volume;
+        aSource.outputAudioMixerGroup = GetGroup(output);
         aSource.spatialBlend = 0f; // 2D audio
         aSource.Play();
 
-        GameObject.Destroy(tempGO, clip.length);
+        Destroy(tempGO, clip.length * ((Time.timeScale < 0.01f) ? 0.01f : Time.timeScale));
     }
 
     private IEnumerator ReturnSFXToPoolWhenDone(AudioSource src, float wait)
@@ -141,7 +167,7 @@ public class AudioManager : PersistentSingleton<AudioManager>
     /// <summary>
     /// Play a music clip. If crossfadeDuration > 0, crossfades to the new clip.
     /// </summary>
-    public void PlayMusic(AudioClip clip, float crossfadeDuration = -1f, bool loop = true)
+    public void PlayMusic(AudioClip clip, float volume = 1f, float crossfadeDuration = -1f, bool loop = true)
     {
         if (crossfadeDuration < 0f) crossfadeDuration = defaultMusicCrossfade;
 
@@ -151,7 +177,8 @@ public class AudioManager : PersistentSingleton<AudioManager>
             activeMusicSource.Stop();
             activeMusicSource.clip = clip;
             activeMusicSource.loop = loop;
-            activeMusicSource.volume = musicVolume * masterVolume;
+            activeMusicSource.volume = volume;
+            activeMusicSource.outputAudioMixerGroup = GetGroup(AudioBus.Music);
             activeMusicSource.Play();
             return;
         }
@@ -160,10 +187,11 @@ public class AudioManager : PersistentSingleton<AudioManager>
         fadingMusicSource.clip = clip;
         fadingMusicSource.loop = loop;
         fadingMusicSource.volume = 0f;
+        fadingMusicSource.outputAudioMixerGroup = GetGroup(AudioBus.Music);
         fadingMusicSource.Play();
 
         StopAllCoroutines(); // stop any ongoing crossfades
-        StartCoroutine(CrossfadeMusicCoroutine(activeMusicSource, fadingMusicSource, crossfadeDuration));
+        StartCoroutine(CrossfadeMusicCoroutine(activeMusicSource, fadingMusicSource, crossfadeDuration, volume));
 
         // swap references
         var temp = activeMusicSource;
@@ -171,7 +199,7 @@ public class AudioManager : PersistentSingleton<AudioManager>
         fadingMusicSource = temp;
     }
 
-    private IEnumerator CrossfadeMusicCoroutine(AudioSource from, AudioSource to, float duration)
+    private IEnumerator CrossfadeMusicCoroutine(AudioSource from, AudioSource to, float duration, float finalVolume)
     {
         float t = 0f;
         float fromStartVol = (from != null) ? from.volume : 0f;
@@ -179,8 +207,8 @@ public class AudioManager : PersistentSingleton<AudioManager>
         {
             t += Time.deltaTime;
             float p = Mathf.Clamp01(t / duration);
-            if (from != null) from.volume = Mathf.Lerp(fromStartVol, 0f, p) * masterVolume * musicVolume;
-            if (to != null) to.volume = Mathf.Lerp(0f, 1f, p) * masterVolume * musicVolume;
+            if (from != null) from.volume = Mathf.Lerp(fromStartVol, 0f, p);
+            if (to != null) to.volume = Mathf.Lerp(0f, finalVolume, p);
             yield return null;
         }
 
@@ -191,7 +219,7 @@ public class AudioManager : PersistentSingleton<AudioManager>
             from.clip = null;
         }
 
-        if (to != null) to.volume = musicVolume * masterVolume;
+        if (to != null) to.volume = finalVolume;
     }
 
     /// <summary>
@@ -213,42 +241,21 @@ public class AudioManager : PersistentSingleton<AudioManager>
     }
 
     /// <summary>
-    /// Set master volume normalized 0..1 (use from UI slider)
-    /// This updates mixer if present and saves to PlayerPrefs.
-    /// </summary>
-    public void SetMasterVolumeNormalized(float value)
-    {
-        masterVolume = Mathf.Clamp01(value);
-        if (mixer != null)
-            mixer.SetFloat(MIXER_MASTER_PARAM, LinearToDecibel(masterVolume));
-    }
-
-    /// <summary>
-    /// Set music volume normalized 0..1
-    /// </summary>
-    public void SetMusicVolumeNormalized(float value)
-    {
-        musicVolume = Mathf.Clamp01(value);
-        if (mixer != null)
-            mixer.SetFloat(MIXER_MUSIC_PARAM, LinearToDecibel(musicVolume));
-    }
-
-    /// <summary>
     /// Set SFX volume normalized 0..1
     /// </summary>
-    public void SetSFXVolumeNormalized(float value)
+    public void SetVolumeNormalized(float value, out float volume, string mixerParam)
     {
-        sfxVolume = Mathf.Clamp01(value);
+        volume = Mathf.Clamp01(value);
         if (mixer != null)
-            mixer.SetFloat(MIXER_SFX_PARAM, LinearToDecibel(sfxVolume));
+            Debug.Log(mixer.SetFloat(mixerParam, LinearToDecibel(volume)));
+        Debug.Log(LinearToDecibel(volume));
     }
 
-    /// <summary>
-    /// Exposed getters (normalized 0..1) useful for UI sliders to read initial values
-    /// </summary>
-    public float GetMasterVolumeNormalized() => masterVolume;
-    public float GetMusicVolumeNormalized() => musicVolume;
-    public float GetSFXVolumeNormalized() => sfxVolume;
+    private void InitSettings()
+    {
+        SettingsManager.Instance.OnSettingsChanged += ApplySettings;
+        ApplySettings(SettingsManager.Instance.Current);
+    }
 
     private void BuildSFXPool()
     {
@@ -274,13 +281,26 @@ public class AudioManager : PersistentSingleton<AudioManager>
         }
     }
 
+    private void ApplySettings(SettingsData settings)
+    {
+        SetVolumeNormalized(settings.masterVolume, out masterVolume, MIXER_MASTER_PARAM);
+        SetVolumeNormalized(settings.musicVolume, out musicVolume, MIXER_MUSIC_PARAM);
+        SetVolumeNormalized(settings.blocksVolume, out blockSFXVolume, MIXER_BLOCKSFX_PARAM);
+        SetVolumeNormalized(settings.environmentVolume, out environmentSFXVolume, MIXER_ENVIRONMENTSFX_PARAM);
+        SetVolumeNormalized(settings.eventsVolume, out eventSFXVolume, MIXER_EVENTSFX_PARAM);
+        SetVolumeNormalized(settings.uiVolume, out uiSFXVolume, MIXER_UISFX_PARAM);
+        Debug.Log(masterVolume);
+    }
+
     private void ApplyVolumesToAudioSystem()
     {
         if (mixer != null)
         {
             mixer.SetFloat(MIXER_MASTER_PARAM, LinearToDecibel(masterVolume));
             mixer.SetFloat(MIXER_MUSIC_PARAM, LinearToDecibel(musicVolume));
-            mixer.SetFloat(MIXER_SFX_PARAM, LinearToDecibel(sfxVolume));
+            mixer.SetFloat(MIXER_BLOCKSFX_PARAM, LinearToDecibel(blockSFXVolume));
+            mixer.SetFloat(MIXER_EVENTSFX_PARAM, LinearToDecibel(eventSFXVolume));
+            mixer.SetFloat(MIXER_UISFX_PARAM, LinearToDecibel(uiSFXVolume));
         }
     }
 
@@ -294,14 +314,24 @@ public class AudioManager : PersistentSingleton<AudioManager>
         return Mathf.Log10(linear) * 20f;
     }
 
-    /// <summary>
-    /// Example debug helpers
-    /// </summary>
-    [ContextMenu("ResetVolumesToDefault")]
-    public void ResetVolumesToDefault()
+    private AudioMixerGroup GetGroup(AudioBus bus)
     {
-        SetMasterVolumeNormalized(1f);
-        SetMusicVolumeNormalized(1f);
-        SetSFXVolumeNormalized(1f);
+        switch (bus)
+        {
+            case AudioBus.Master:
+                return masterGroup;
+            case AudioBus.Music:
+                return musicGroup;
+            case AudioBus.Block:
+                return blockSFXGroup;
+            case AudioBus.Environment:
+                return environmentSFXGroup;
+            case AudioBus.Event:
+                return eventSFXGroup;
+            case AudioBus.UI:
+                return uiSFXGroup;
+            default:
+                return null;
+        }
     }
 }

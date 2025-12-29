@@ -9,10 +9,11 @@ public class SettingsData
 
     // Audio
     public float masterVolume = 1f;   // 0..1
-    public float musicVolume = 0.8f;
-    public float blocksVolume = 0.8f;
-    public float eventsVolume = 0.8f;
-    public float uiVolume = 0.8f;
+    public float musicVolume = 1f;
+    public float blocksVolume = 1f;
+    public float environmentVolume = 1f;
+    public float eventsVolume = 1f;
+    public float uiVolume = 1f;
 
     // Video / Graphics
     public int resolutionIndex = 0;   // index into available resolutions

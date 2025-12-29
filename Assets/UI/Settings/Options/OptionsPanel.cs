@@ -20,12 +20,6 @@ public class OptionsPanel : SettingsPanel
 
     public void Init(OptionsPanelController optionsMenuController)
     {
-        audioSettingsButton.onClick.RemoveAllListeners();
-        graphicsSettingsButton.onClick.RemoveAllListeners();
-        accessibilitySettingsButton.onClick.RemoveAllListeners();
-        controlSettingsButton.onClick.RemoveAllListeners();
-        doneButton.onClick.RemoveAllListeners();
-
         audioSettingsButton.onClick.AddListener(optionsMenuController.OnAudioSettings);
         graphicsSettingsButton.onClick.AddListener(optionsMenuController.OnGraphicsSettings);
         accessibilitySettingsButton.onClick.AddListener(optionsMenuController.OnAccessibilitySettings);

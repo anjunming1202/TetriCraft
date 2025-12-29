@@ -5,6 +5,12 @@ public class MainMenuController : Singleton<MainMenuController>
 {
     [SerializeField] private string gameplayScene;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        GetComponent<MainMenuPanel>().Init(this);
+    }
+
     public void OnNewGame()
     {
         // Clean old data

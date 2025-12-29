@@ -178,6 +178,18 @@ public class UIManager : PersistentSingleton<UIManager>
 
     #endregion
 
+    /*#region Display Order Management
+
+    public void MoveToBottom(string key)
+    {
+        if (instanceMap.TryGetValue(key, out var panel) && panel != null)
+        {
+            panel.transform.SetAsFirstSibling();
+        }
+    }
+
+    #endregion*/
+
     #region Modal Stack Management
 
     /// <summary>

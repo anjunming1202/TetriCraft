@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainMenuPanel : BasePanel
+public class MainMenuPanel : MenuPanel
 {
     [Header("UI Components")]
     [SerializeField] private Button newGameButton;
@@ -17,11 +17,6 @@ public class MainMenuPanel : BasePanel
 
     public void Init(MainMenuController mainMenuController)
     {
-        newGameButton.onClick.RemoveAllListeners();
-        continueButton.onClick.RemoveAllListeners();
-        settingsButton.onClick.RemoveAllListeners();
-        quitButton.onClick.RemoveAllListeners();
-
         newGameButton.onClick.AddListener(mainMenuController.OnNewGame);
         continueButton.onClick.AddListener(mainMenuController.OnContinue);
         settingsButton.onClick.AddListener(mainMenuController.OnSettings);

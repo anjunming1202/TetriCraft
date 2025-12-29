@@ -9,7 +9,7 @@ public class PrimedTNT : Entity
     public override void OnSpawned(MapManager map, Vector2 position)
     {
         base.OnSpawned(map, position);
-        AudioManager.Instance.PlaySFXFollowing(fuseSound, this.transform);
+        AudioManager.Instance.PlaySFXFollowing(fuseSound, this.transform, 1f, AudioBus.Block);
         StartCoroutine(FuseCountdown());
     }
 

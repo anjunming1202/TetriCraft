@@ -1,6 +1,6 @@
 ﻿using UnityEngine.UI;
 
-public abstract class SettingsPanel : BasePanel
+public abstract class SettingsPanel : MenuPanel
 {
     protected SettingsData Pending => SettingsManager.Instance.Pending;
 

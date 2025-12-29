@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameOverMenuPanel : BasePanel
+public class GameOverMenuPanel : MenuPanel
 {
     [Header("UI Components")]
     [SerializeField] private Button newGameButton;
@@ -9,9 +9,6 @@ public class GameOverMenuPanel : BasePanel
 
     public void Init(GameOverMenuController gameOverManuController)
     {
-        newGameButton.onClick.RemoveAllListeners();
-        exitButton.onClick.RemoveAllListeners();
-
         newGameButton.onClick.AddListener(gameOverManuController.OnNewGame);
         exitButton.onClick.AddListener(gameOverManuController.OnExit);
     }

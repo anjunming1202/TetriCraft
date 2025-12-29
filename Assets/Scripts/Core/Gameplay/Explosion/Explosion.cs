@@ -39,7 +39,7 @@ public class Explosion : MonoBehaviour
 
         // explosion sound
         int random = UnityEngine.Random.Range(0, explodeSounds.Length);
-        AudioManager.Instance.PlaySFXAtPoint(explodeSounds[random], transform.position);
+        AudioManager.Instance.PlaySFXAtPoint(explodeSounds[random], transform.position, 1f, AudioBus.Block);
 
         // explosion particles
         SpawnExplosionParticles();
