@@ -1702,8 +1702,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7589898215422094711}
   m_HandleRect: {fileID: 7922368313188327507}
   m_Direction: 2
-  m_Value: 0.99999976
-  m_Size: 0.8273836
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1814,7 +1814,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isModal: 1
   hideOnBack: 1
-  transitionDuration: 0
+  transitionDuration: 0.1
   masterVolumeSlider: {fileID: 2248329288166727787}
   musicVolumeSlider: {fileID: 7382742738310177537}
   blockSoundsSlider: {fileID: 4525258215151551228}

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2049698534689748878}
   - component: {fileID: 8204463561140908790}
   - component: {fileID: 6160187174611469054}
+  - component: {fileID: 2916489063742693961}
   m_Layer: 5
   m_Name: GlobalUIRootCanvas
   m_TagString: Untagged
@@ -73,7 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 1
+  m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 2560, y: 1600}
@@ -101,6 +102,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &2916489063742693961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1952671936190419797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 928bd5a1978932249bece89dc9be4033, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2114256490090693273
 GameObject:
   m_ObjectHideFlags: 0
@@ -230,5 +243,7 @@ MonoBehaviour:
     prefab: {fileID: 2883948444899245850, guid: 15929d198ddc7354c840a37adf5aa607, type: 3}
   - key: MainMenu
     prefab: {fileID: 2087815378285442198, guid: b57cff6775a325141870a6eaa0dd932d, type: 3}
+  - key: GraphicSettings
+    prefab: {fileID: 2883948444899245850, guid: c32c383a0c436e1409ebcb9862bf4a97, type: 3}
   rootCanvas: {fileID: 2049698534689748878}
   modalBlockerPrefab: {fileID: 6934398333403512065, guid: 9ad47cf24540f1e4890558f9f8ba970d, type: 3}

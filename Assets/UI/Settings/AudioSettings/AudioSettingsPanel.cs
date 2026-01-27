@@ -15,11 +15,11 @@ public class AudioSettingsPanel : SettingsPanel
     protected override void Awake()
     {
         base.Awake();
-        masterVolumeSlider.onValueChanged.AddListener(value => Pending.masterVolume = value);
-        musicVolumeSlider.onValueChanged.AddListener(value => Pending.musicVolume = value);
-        blockSoundsSlider.onValueChanged.AddListener(value => Pending.blocksVolume = value);
-        eventSoundsSlider.onValueChanged.AddListener(value => Pending.eventsVolume = value);
-        uiSoundsSlider.onValueChanged.AddListener(value => Pending.uiVolume = value);
+        masterVolumeSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.masterVolume = value; });
+        musicVolumeSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.musicVolume = value; });
+        blockSoundsSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.blocksVolume = value; });
+        eventSoundsSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.eventsVolume = value; });
+        uiSoundsSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.uiVolume = value; });
     }
 
     protected override void PopulateData(SettingsData data)

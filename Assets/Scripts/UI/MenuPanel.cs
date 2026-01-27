@@ -7,6 +7,10 @@ public abstract class MenuPanel : BasePanel
     protected override void Awake()
     {
         base.Awake();
+    }
+
+    private void Start()
+    {
         SetButtonClickSounds();
     }
 

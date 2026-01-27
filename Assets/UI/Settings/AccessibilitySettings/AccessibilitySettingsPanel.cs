@@ -19,12 +19,12 @@ public class AccessibilitySettingsPanel : SettingsPanel
     protected override void Awake()
     {
         base.Awake();
-        dropSpeedSlider.onValueChanged.AddListener(value => Pending.dropSpeed = value);
-        ghostPieceTypeButton.onValueChanged.AddListener(value => Pending.ghostPiece = value);
-        dropAnimationSpeedSlider.onValueChanged.AddListener(value => Pending.dropAnimationSpeed = value);
-        ghostPieceOpaitySlider.onValueChanged.AddListener(value => Pending.ghostPieceOpacity = value);
-        blockOutlinesButton.onValueChanged.AddListener(value => Pending.blockOutlines = value == OnOff.On);
-        hardDropVibrationStrengthSlider.onValueChanged.AddListener(value => Pending.hardDropVibrationStrength = value);
+        dropSpeedSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.dropSpeed = value; });
+        ghostPieceTypeButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.ghostPiece = value; });
+        dropAnimationSpeedSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.dropAnimationSpeed = value; });
+        ghostPieceOpaitySlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.ghostPieceOpacity = value; });
+        blockOutlinesButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.blockOutlines = value == OnOff.On; });
+        hardDropVibrationStrengthSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.hardDropVibrationStrength = value; });
     }
 
     protected override void PopulateData(SettingsData data)

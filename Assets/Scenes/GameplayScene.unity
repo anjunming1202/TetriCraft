@@ -970,7 +970,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tetrisManager: {fileID: 310913972}
-  blockSize: 1.3
+  blockSize: 1
 --- !u!114 &478339262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1027,6 +1027,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mixer: {fileID: 0}
+  masterGroup: {fileID: 0}
+  musicGroup: {fileID: 0}
+  blockSFXGroup: {fileID: 0}
+  environmentSFXGroup: {fileID: 0}
+  eventSFXGroup: {fileID: 0}
+  uiSFXGroup: {fileID: 0}
   musicSourceA: {fileID: 0}
   musicSourceB: {fileID: 0}
   defaultMusicCrossfade: 1

@@ -20,6 +20,8 @@ public abstract class TextBinder<T> : MonoBehaviour
     public void OnValueChanged(T value)
     {
         this.value = value;
+        if (displayedText == null)
+            displayedText = GetComponent<TextMeshProUGUI>();
         displayedText.text = string.Format(textContent, value);
     }
 

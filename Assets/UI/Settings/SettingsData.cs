@@ -19,7 +19,7 @@ public class SettingsData
     public int resolutionIndex = 0;   // index into available resolutions
     public bool fullscreen = true;
     //public int qualityLevel = 2;      // 0..n (Unity QualitySettings)
-    public int guiScaleIndex = 1;      // index into UI scale factors for Canvas Scaler
+    public GUIScale guiScale = GUIScale.Auto;      // UI scale factors for Canvas Scaler
 
     // Controls
     public string inputBindingsJson = ""; // serialized Input System bindings or custom map

@@ -11,7 +11,7 @@ public class OptionsPanelController : MonoBehaviour
 
     public void OnGraphicsSettings()
     {
-
+        UIManager.Instance.ShowPanel<GraphicSettingsPanel>("GraphicSettings");
     }
 
     public void OnAccessibilitySettings()

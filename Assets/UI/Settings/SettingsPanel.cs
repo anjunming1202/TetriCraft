@@ -1,4 +1,5 @@
-﻿using UnityEngine.UI;
+﻿using Unity.VisualScripting;
+using UnityEngine.UI;
 
 public abstract class SettingsPanel : MenuPanel
 {
@@ -7,12 +8,22 @@ public abstract class SettingsPanel : MenuPanel
     protected override void OnOpen(object data)
     {
         base.OnOpen(data);
-
+        
+        /*
         // Start edit (initialise pending)
         SettingsManager.Instance.StartEdit();
 
         // Populate panel data
+        PopulateData(SettingsManager.Instance.Current);*/
+    }
+
+    private void OnEnable()
+    {
+        // Populate panel data
         PopulateData(SettingsManager.Instance.Current);
+
+        // Start edit (initialise pending)
+        SettingsManager.Instance.StartEdit();
     }
 
     private void OnDisable()

@@ -1,12 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine.Events;
 
 namespace UnityEngine.UI
 {
-    [RequireComponent(typeof(Button))]
-    public abstract class ToggleButton<TEnum> : MonoBehaviour where TEnum : struct, Enum
+    [RequireComponent(typeof(Slider))]
+    public abstract class ToggleSlider<TEnum> : MonoBehaviour where TEnum : struct, Enum
     {
         [SerializeField] public UnityEvent<TEnum> onValueChanged;
         [SerializeField] public UnityEvent<string> onValueChangedAsString;
@@ -18,19 +17,27 @@ namespace UnityEngine.UI
             get => value;
             set
             {
-                this.value = value; 
-                if (enumValues == null)
+                this.value = value;
+
+                // set index
+                if (enumValues ==  null)
                     enumValues = Enum.GetValues(typeof(TEnum));
                 index = GetIndex(value);
+
+                // populate slider synchronously
+                if (selectorSlider == null)
+                    selectorSlider = GetComponent<Slider>();
+                selectorSlider.value = index;
+
+                // trigger events to sync value
                 onValueChanged?.Invoke(value);
                 onValueChangedAsString?.Invoke(ValueToString(value));
             }
         }
-
         private Array enumValues;
         private int index;
 
-        private Button selectorButton;
+        private Slider selectorSlider;
 
         private TEnum GetValue(int index) => (TEnum)enumValues.GetValue(index);
         private int GetIndex(TEnum value) => Array.IndexOf(enumValues, value);
@@ -38,7 +45,7 @@ namespace UnityEngine.UI
         private void Awake()
         {
             // button component
-            selectorButton = GetComponent<Button>();
+            selectorSlider = GetComponent<Slider>();
 
             // values array
             enumValues = Enum.GetValues(typeof(TEnum));
@@ -55,60 +62,66 @@ namespace UnityEngine.UI
                 index = 0;
             }
 
+            // init slider, populate later
+            selectorSlider.value = index;
+
             // button event
-            selectorButton.onClick.AddListener(OnValueChanged);
+            selectorSlider.onValueChanged.AddListener(OnValueChanged);
         }
 
         private void OnDestroy()
         {
             // clean up listener to avoid leaks
-            if (selectorButton != null)
-                selectorButton.onClick.RemoveListener(OnValueChanged);
+            if (selectorSlider != null)
+                selectorSlider.onValueChanged.RemoveListener(OnValueChanged);
         }
 
-        private void OnValueChanged()
+        private void OnValueChanged(float value)
         {
-            index = (index + 1) % enumValues.Length;
-            value = GetValue(index);
+            index = (int)value;
+            this.value = GetValue(index);
 
-            onValueChanged?.Invoke(value);
-            onValueChangedAsString?.Invoke(ValueToString(value));
+            onValueChanged?.Invoke(this.value);
+            onValueChangedAsString?.Invoke(ValueToString(this.value));
         }
 
-        protected virtual string ValueToString(TEnum value)
-        {
-            return value.ToString();
-        }
+        protected abstract string ValueToString(TEnum value);
     }
 
-    [RequireComponent(typeof(Button))]
-    public class ToggleButton : MonoBehaviour
+    [RequireComponent(typeof(Slider))]
+    public abstract class ToggleSlider : MonoBehaviour
     {
-        [SerializeField] private List<string> stringValues;
+        public abstract int Count { get; }
         [SerializeField] public UnityEvent<int> onValueChanged;
         [SerializeField] public UnityEvent<string> onStringValueChanged;
 
         [SerializeField] private int defaultValue;
-        private int value;
+        protected int value;
         public int Value
         {
             get => value;
             set
             {
                 this.value = value;
+
+                // populate slider synchronously
+                if (selectorSlider == null)
+                    selectorSlider = GetComponent<Slider>(); 
+                selectorSlider.value = value;
+
+                // trigger events to sync value
                 onValueChanged?.Invoke(value);
-                onStringValueChanged?.Invoke(stringValues[value]);
+                onStringValueChanged?.Invoke(ValueToString(value));
             }
         }
         private int[] indexValues;
-        private int Count => stringValues.Count;
 
-        private Button selectorButton;
+        private Slider selectorSlider;
 
         private void Awake()
         {
             // button component
-            selectorButton = GetComponent<Button>();
+            selectorSlider = GetComponent<Slider>();
 
             // values array
             indexValues = new int[Count];
@@ -117,26 +130,32 @@ namespace UnityEngine.UI
                 indexValues[i] = i;
             }
 
-            // initial value
+            // initial value, populate later
             value = defaultValue;
 
+            // init slider
+            selectorSlider.maxValue = Count - 1;
+            selectorSlider.value = defaultValue;
+
             // button event
-            selectorButton.onClick.AddListener(OnValueChanged);
+            selectorSlider.onValueChanged.AddListener(OnValueChanged);
         }
 
         private void OnDestroy()
         {
             // clean up listener to avoid leaks
-            if (selectorButton != null)
-                selectorButton.onClick.RemoveListener(OnValueChanged);
+            if (selectorSlider != null)
+                selectorSlider.onValueChanged.RemoveListener(OnValueChanged);
         }
 
-        private void OnValueChanged()
+        private void OnValueChanged(float value)
         {
-            value = (value + 1) % indexValues.Length;
+            this.value = (int)value;
 
-            onValueChanged?.Invoke(value);
-            onStringValueChanged.Invoke(stringValues[value]);
+            onValueChanged?.Invoke(this.value);
+            onStringValueChanged?.Invoke(ValueToString(this.value));
         }
+
+        protected abstract string ValueToString(int index);
     }
 }

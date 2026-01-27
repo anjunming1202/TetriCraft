@@ -20,7 +20,7 @@ using UnityEngine.Audio;
 public class AudioManager : PersistentSingleton<AudioManager>
 {
     [Header("Mixer")]
-    [Tooltip("Optional AudioMixer. If assigned, the manager will try to set exposed params MasterVolume, MusicVolume and SFXVolume (in dB).")]
+    [Tooltip("Manager will try to set exposed params MasterVolume, MusicVolume and other SFXVolume (in dB).")]
     public AudioMixer mixer;
     public AudioMixerGroup masterGroup;
     public AudioMixerGroup musicGroup;
