@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerInput: {fileID: 2310245916282956940}
+  rebindManager: {fileID: 5705113784094189041}
 --- !u!1 &8738915084044776381
 GameObject:
   m_ObjectHideFlags: 0
@@ -169,3 +170,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffe1f82fb9a0a44478be90ba7d628ab9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isLoaded: 0
