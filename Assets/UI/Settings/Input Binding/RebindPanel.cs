@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -17,8 +18,9 @@ public class RebindPanel : SettingsPanel
         foreach (var button in rebindButtons)
         {
             button.SetPlayerInput(playerInput);
-            // rebind button on changed => save to pending
+            // rebind button on changed => save to pending, check conflicts
             button.onBindingsUpdate.AddListener(playerInput => SaveBindings(playerInput, Pending));
+            button.onBindingsUpdate.AddListener(playerInput => CheckConflicts());
         }
     }
 
@@ -36,6 +38,9 @@ public class RebindPanel : SettingsPanel
             // update to populate when open
             button.UpdateBindingDisplay();
         }
+
+        // check conflicts
+        CheckConflicts();
     }
 
     private static void SaveBindings(PlayerInput playerInput, SettingsData settingsData)
@@ -47,6 +52,32 @@ public class RebindPanel : SettingsPanel
             Debug.Log("save");
             string json = actions.SaveBindingOverridesAsJson();
             settingsData.inputBindingsJson = json;
+        }
+    }
+
+    private void CheckConflicts()
+    {
+        HashSet<RebindButtonUI> conflictsBindingUI = new HashSet<RebindButtonUI>();
+        Dictionary<string, RebindButtonUI> buttonSet = new Dictionary<string, RebindButtonUI>();
+
+        // find conflicted bindings
+        foreach (var button in rebindButtons)
+        {
+            if (buttonSet.ContainsKey(button.bindingText.text))
+            {
+                conflictsBindingUI.Add(buttonSet[button.bindingText.text]);
+                conflictsBindingUI.Add(button);
+            }
+            else
+                buttonSet.Add(button.bindingText.text, button);
+        }
+        // highlight conflicted bindings
+        foreach (var button in rebindButtons)
+        {
+            if (conflictsBindingUI.Contains(button))
+                button.bindingText.color = Color.yellow;
+            else
+                button.bindingText.color = Color.white;
         }
     }
 }

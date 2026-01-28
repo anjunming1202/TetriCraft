@@ -7,6 +7,7 @@ using UnityEngine.Events;
 using TMPro;
 using UnityEngine.EventSystems;
 using Unity.VisualScripting;
+using System.Collections.Generic;
 
 /// <summary>
 /// RebindButtonUI (PlayerInput 版本)
@@ -146,7 +147,7 @@ public class RebindButtonUI : MonoBehaviour
 
         // 3) 更新状态文本提示玩家按键
         bindingText.text = "Press any key...";
-        bindingText.color = new Color(1f, 1f, 0f); // yellow highlight
+        bindingText.color = new Color(1f, 1f, 1f); // yellow highlight
 
         // 4) 开始交互式重绑定
         //    主要链式配置：排除鼠标移动/鼠标 delta，允许 ESC 取消，完成/取消回调
