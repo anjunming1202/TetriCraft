@@ -10,28 +10,22 @@ public class RebindPanel : SettingsPanel
 
     [SerializeField] private Button doneButton;
 
-    private PlayerInput playerInput => InputRoot.Instance.playerInput;
+    private PlayerInput playerInput;
 
     protected override void Awake()
     {
         base.Awake();
+        playerInput = InputRoot.Instance.playerInput;
         foreach (var button in rebindButtons)
         {
-            button.SetPlayerInput(playerInput);
             // rebind button on changed => save to pending, check conflicts
-            button.onBindingsUpdate.AddListener(playerInput => SaveBindings(playerInput, Pending));
-            button.onBindingsUpdate.AddListener(playerInput => CheckConflicts());
+            button.onBindingsUpdate.AddListener(() => SaveBindings(playerInput, Pending));
+            button.onBindingsUpdate.AddListener(CheckConflicts);
         }
     }
 
     protected override void PopulateData(SettingsData data)
     {
-        // debug check
-        if (!InputRoot.Instance.rebindManager.isLoaded)
-        {
-            Debug.Log("Bindings not loaded to actions asset");
-        }
-
         // populate action bindings
         foreach (var button in rebindButtons)
         {

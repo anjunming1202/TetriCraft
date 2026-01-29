@@ -16,7 +16,10 @@ public class GameManager : MonoBehaviour
 
     [Header("Game State")]
     public bool gameover = false; // Game over flag
+    public event Action OnGameStart;
     public event Action OnGameOver;
+    public event Action OnPause;
+    public event Action OnResume;
 
     [Header("Visual")]
     public AnimationCurveAsset blockMovementCurve;
@@ -35,9 +38,6 @@ public class GameManager : MonoBehaviour
 
     [Header("Debug")]
     public bool debug = true;
-
-    public event Action OnPause;
-    public event Action OnResume;
     public bool IsPaused { get; private set; } = false;
 
     private void Awake()
@@ -113,6 +113,8 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
+        OnGameStart?.Invoke();
+
         tetrisManager.StartNewMap();
         IsPaused = false;
         Time.timeScale = 1f;

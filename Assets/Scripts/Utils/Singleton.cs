@@ -16,7 +16,7 @@ public abstract class StaticInstance<T> : MonoBehaviour where T : MonoBehaviour
 
     protected virtual void OnDestroy()
     {
-        
+        Debug.Log($"Destroyed static instance {gameObject.name}");
     }
 }
 
@@ -44,12 +44,12 @@ public abstract class Singleton<T> : StaticInstance<T> where T : MonoBehaviour
         {
             ServiceLocator.Unregister(Instance);
         }
-        base.OnDestroy();
+        Debug.Log($"Destroyed singleton {gameObject.name}");
     }
 }
 
 /// <summary>
-/// A persistent singleton, not destroyed on load.
+/// A persistent singleton (DontDestroyOnLoad), it destroys any new versions and leaves the original instance intact.
 /// </summary>
 public abstract class PersistentSingleton<T> : Singleton<T> where T : MonoBehaviour
 {
@@ -57,5 +57,10 @@ public abstract class PersistentSingleton<T> : Singleton<T> where T : MonoBehavi
     {
         base.Awake();
         DontDestroyOnLoad(gameObject);
+    }
+
+    protected override void OnDestroy()
+    {
+        Debug.Log($"Destroyed persistent singleton {gameObject.name}");
     }
 }

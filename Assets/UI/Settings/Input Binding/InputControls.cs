@@ -28,7 +28,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
             ""id"": ""902b5e19-e13c-4a8a-83f0-1d1034a2e3d0"",
             ""actions"": [
                 {
-                    ""name"": ""LeftShift"",
+                    ""name"": ""Left"",
                     ""type"": ""Button"",
                     ""id"": ""fa9f9143-e72f-423a-8ceb-cda86eceb8ab"",
                     ""expectedControlType"": ""Button"",
@@ -37,7 +37,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""RightShift"",
+                    ""name"": ""Right"",
                     ""type"": ""Button"",
                     ""id"": ""25a31be4-883f-4b66-83d0-aa1633da51e9"",
                     ""expectedControlType"": ""Button"",
@@ -46,7 +46,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""LeftRotate"",
+                    ""name"": ""RotateCCW"",
                     ""type"": ""Button"",
                     ""id"": ""f079d68f-a38d-4e97-8a8c-7c1b7d8a7db4"",
                     ""expectedControlType"": ""Button"",
@@ -55,7 +55,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""RightRotate"",
+                    ""name"": ""RotateCW"",
                     ""type"": ""Button"",
                     ""id"": ""1802be66-e8cf-4000-bcef-1d16992fb274"",
                     ""expectedControlType"": ""Button"",
@@ -99,7 +99,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""LeftShift"",
+                    ""action"": ""Left"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -110,7 +110,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RightShift"",
+                    ""action"": ""Right"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -121,7 +121,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""LeftRotate"",
+                    ""action"": ""RotateCCW"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -132,7 +132,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RightRotate"",
+                    ""action"": ""RotateCW"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -405,10 +405,10 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
 }");
         // Gameplay
         m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
-        m_Gameplay_LeftShift = m_Gameplay.FindAction("LeftShift", throwIfNotFound: true);
-        m_Gameplay_RightShift = m_Gameplay.FindAction("RightShift", throwIfNotFound: true);
-        m_Gameplay_LeftRotate = m_Gameplay.FindAction("LeftRotate", throwIfNotFound: true);
-        m_Gameplay_RightRotate = m_Gameplay.FindAction("RightRotate", throwIfNotFound: true);
+        m_Gameplay_Left = m_Gameplay.FindAction("Left", throwIfNotFound: true);
+        m_Gameplay_Right = m_Gameplay.FindAction("Right", throwIfNotFound: true);
+        m_Gameplay_RotateCCW = m_Gameplay.FindAction("RotateCCW", throwIfNotFound: true);
+        m_Gameplay_RotateCW = m_Gameplay.FindAction("RotateCW", throwIfNotFound: true);
         m_Gameplay_SoftDrop = m_Gameplay.FindAction("SoftDrop", throwIfNotFound: true);
         m_Gameplay_HardDrop = m_Gameplay.FindAction("HardDrop", throwIfNotFound: true);
         m_Gameplay_Pause = m_Gameplay.FindAction("Pause", throwIfNotFound: true);
@@ -480,10 +480,10 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     // Gameplay
     private readonly InputActionMap m_Gameplay;
     private List<IGameplayActions> m_GameplayActionsCallbackInterfaces = new List<IGameplayActions>();
-    private readonly InputAction m_Gameplay_LeftShift;
-    private readonly InputAction m_Gameplay_RightShift;
-    private readonly InputAction m_Gameplay_LeftRotate;
-    private readonly InputAction m_Gameplay_RightRotate;
+    private readonly InputAction m_Gameplay_Left;
+    private readonly InputAction m_Gameplay_Right;
+    private readonly InputAction m_Gameplay_RotateCCW;
+    private readonly InputAction m_Gameplay_RotateCW;
     private readonly InputAction m_Gameplay_SoftDrop;
     private readonly InputAction m_Gameplay_HardDrop;
     private readonly InputAction m_Gameplay_Pause;
@@ -491,10 +491,10 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     {
         private @InputControls m_Wrapper;
         public GameplayActions(@InputControls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @LeftShift => m_Wrapper.m_Gameplay_LeftShift;
-        public InputAction @RightShift => m_Wrapper.m_Gameplay_RightShift;
-        public InputAction @LeftRotate => m_Wrapper.m_Gameplay_LeftRotate;
-        public InputAction @RightRotate => m_Wrapper.m_Gameplay_RightRotate;
+        public InputAction @Left => m_Wrapper.m_Gameplay_Left;
+        public InputAction @Right => m_Wrapper.m_Gameplay_Right;
+        public InputAction @RotateCCW => m_Wrapper.m_Gameplay_RotateCCW;
+        public InputAction @RotateCW => m_Wrapper.m_Gameplay_RotateCW;
         public InputAction @SoftDrop => m_Wrapper.m_Gameplay_SoftDrop;
         public InputAction @HardDrop => m_Wrapper.m_Gameplay_HardDrop;
         public InputAction @Pause => m_Wrapper.m_Gameplay_Pause;
@@ -507,18 +507,18 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_GameplayActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_GameplayActionsCallbackInterfaces.Add(instance);
-            @LeftShift.started += instance.OnLeftShift;
-            @LeftShift.performed += instance.OnLeftShift;
-            @LeftShift.canceled += instance.OnLeftShift;
-            @RightShift.started += instance.OnRightShift;
-            @RightShift.performed += instance.OnRightShift;
-            @RightShift.canceled += instance.OnRightShift;
-            @LeftRotate.started += instance.OnLeftRotate;
-            @LeftRotate.performed += instance.OnLeftRotate;
-            @LeftRotate.canceled += instance.OnLeftRotate;
-            @RightRotate.started += instance.OnRightRotate;
-            @RightRotate.performed += instance.OnRightRotate;
-            @RightRotate.canceled += instance.OnRightRotate;
+            @Left.started += instance.OnLeft;
+            @Left.performed += instance.OnLeft;
+            @Left.canceled += instance.OnLeft;
+            @Right.started += instance.OnRight;
+            @Right.performed += instance.OnRight;
+            @Right.canceled += instance.OnRight;
+            @RotateCCW.started += instance.OnRotateCCW;
+            @RotateCCW.performed += instance.OnRotateCCW;
+            @RotateCCW.canceled += instance.OnRotateCCW;
+            @RotateCW.started += instance.OnRotateCW;
+            @RotateCW.performed += instance.OnRotateCW;
+            @RotateCW.canceled += instance.OnRotateCW;
             @SoftDrop.started += instance.OnSoftDrop;
             @SoftDrop.performed += instance.OnSoftDrop;
             @SoftDrop.canceled += instance.OnSoftDrop;
@@ -532,18 +532,18 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
 
         private void UnregisterCallbacks(IGameplayActions instance)
         {
-            @LeftShift.started -= instance.OnLeftShift;
-            @LeftShift.performed -= instance.OnLeftShift;
-            @LeftShift.canceled -= instance.OnLeftShift;
-            @RightShift.started -= instance.OnRightShift;
-            @RightShift.performed -= instance.OnRightShift;
-            @RightShift.canceled -= instance.OnRightShift;
-            @LeftRotate.started -= instance.OnLeftRotate;
-            @LeftRotate.performed -= instance.OnLeftRotate;
-            @LeftRotate.canceled -= instance.OnLeftRotate;
-            @RightRotate.started -= instance.OnRightRotate;
-            @RightRotate.performed -= instance.OnRightRotate;
-            @RightRotate.canceled -= instance.OnRightRotate;
+            @Left.started -= instance.OnLeft;
+            @Left.performed -= instance.OnLeft;
+            @Left.canceled -= instance.OnLeft;
+            @Right.started -= instance.OnRight;
+            @Right.performed -= instance.OnRight;
+            @Right.canceled -= instance.OnRight;
+            @RotateCCW.started -= instance.OnRotateCCW;
+            @RotateCCW.performed -= instance.OnRotateCCW;
+            @RotateCCW.canceled -= instance.OnRotateCCW;
+            @RotateCW.started -= instance.OnRotateCW;
+            @RotateCW.performed -= instance.OnRotateCW;
+            @RotateCW.canceled -= instance.OnRotateCW;
             @SoftDrop.started -= instance.OnSoftDrop;
             @SoftDrop.performed -= instance.OnSoftDrop;
             @SoftDrop.canceled -= instance.OnSoftDrop;
@@ -650,10 +650,10 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     public UIActions @UI => new UIActions(this);
     public interface IGameplayActions
     {
-        void OnLeftShift(InputAction.CallbackContext context);
-        void OnRightShift(InputAction.CallbackContext context);
-        void OnLeftRotate(InputAction.CallbackContext context);
-        void OnRightRotate(InputAction.CallbackContext context);
+        void OnLeft(InputAction.CallbackContext context);
+        void OnRight(InputAction.CallbackContext context);
+        void OnRotateCCW(InputAction.CallbackContext context);
+        void OnRotateCW(InputAction.CallbackContext context);
         void OnSoftDrop(InputAction.CallbackContext context);
         void OnHardDrop(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);

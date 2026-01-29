@@ -1,12 +1,12 @@
 {
-    "name": "TetrominoControls",
+    "name": "InputControls",
     "maps": [
         {
             "name": "Gameplay",
             "id": "902b5e19-e13c-4a8a-83f0-1d1034a2e3d0",
             "actions": [
                 {
-                    "name": "LeftShift",
+                    "name": "Left",
                     "type": "Button",
                     "id": "fa9f9143-e72f-423a-8ceb-cda86eceb8ab",
                     "expectedControlType": "Button",
@@ -15,7 +15,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "RightShift",
+                    "name": "Right",
                     "type": "Button",
                     "id": "25a31be4-883f-4b66-83d0-aa1633da51e9",
                     "expectedControlType": "Button",
@@ -24,7 +24,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "LeftRotate",
+                    "name": "RotateCCW",
                     "type": "Button",
                     "id": "f079d68f-a38d-4e97-8a8c-7c1b7d8a7db4",
                     "expectedControlType": "Button",
@@ -33,7 +33,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "RightRotate",
+                    "name": "RotateCW",
                     "type": "Button",
                     "id": "1802be66-e8cf-4000-bcef-1d16992fb274",
                     "expectedControlType": "Button",
@@ -77,7 +77,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "LeftShift",
+                    "action": "Left",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -88,7 +88,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "RightShift",
+                    "action": "Right",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -99,7 +99,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "LeftRotate",
+                    "action": "RotateCCW",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -110,7 +110,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "RightRotate",
+                    "action": "RotateCW",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

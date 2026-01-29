@@ -45,15 +45,28 @@ public class TetrominoController : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
+    }
 
+    private void OnEnable()
+    {
+        
+    }
+
+    private void OnDisable()
+    {
+        
+    }
+
+    private void Start()
+    {
         var actionMap = playerInput.actions.FindActionMap("Gameplay");
 
-        left = actionMap.FindAction("LeftShift");
-        right = actionMap.FindAction("LeftRight");
-        rotateCCW = actionMap.FindAction("RotateCCW");
-        rotateCW = actionMap.FindAction("RotateCW");
-        softDrop = actionMap.FindAction("SoftDrop");
-        hardDrop = actionMap.FindAction("HardDrop");
+        left = actionMap?.FindAction("Left");
+        right = actionMap?.FindAction("Right");
+        rotateCCW = actionMap?.FindAction("RotateCCW");
+        rotateCW = actionMap?.FindAction("RotateCW");
+        softDrop = actionMap?.FindAction("SoftDrop");
+        hardDrop = actionMap?.FindAction("HardDrop");
 
         left.started += ctx => OnStartRepeatingAction(ref leftCoroutine, OnLeft, left);
         left.canceled += ctx => OnCancelRepeatingAction(ref leftCoroutine);
@@ -71,16 +84,6 @@ public class TetrominoController : MonoBehaviour
         softDrop.canceled += ctx => OnSoftDropStop();
 
         hardDrop.performed += ctx => OnHardDrop();
-    }
-
-    private void OnEnable()
-    {
-        
-    }
-
-    private void OnDisable()
-    {
-        
     }
 
     void OnDestroy()

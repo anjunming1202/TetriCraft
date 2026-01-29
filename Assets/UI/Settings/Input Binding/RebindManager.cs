@@ -11,7 +11,20 @@ public class RebindManager : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
+    }
+
+    private void OnEnable()
+    {
         SettingsManager.Instance.OnSettingsChanged += LoadBindings;
+    }
+
+    private void OnDisable()
+    {
+        SettingsManager.Instance.OnSettingsChanged -= LoadBindings;
+    }
+
+    private void Start()
+    {
         LoadBindings(SettingsManager.Instance.Current); // load
     }
 
@@ -25,7 +38,7 @@ public class RebindManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Bindings loaded");
+            Debug.Log($"{gameObject.name} {playerInput.actions.name} Bindings loaded");
             playerInput.actions.LoadBindingOverridesFromJson(json);
             isLoaded = true;
         }
