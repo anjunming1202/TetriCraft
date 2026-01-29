@@ -55,6 +55,8 @@ public class CanvasScaleController : StaticInstance<CanvasScaleController>
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
 
         // Use current screen resolution as reference resolution
+        if (ResolutionController.Instance == null)
+            Debug.LogError("Missing ResolutionController");
         scaler.referenceResolution = new Vector2(ResolutionController.defaultResolution.width, ResolutionController.defaultResolution.height); //
 
         // Balanced scaling between width and height

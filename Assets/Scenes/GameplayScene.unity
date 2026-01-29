@@ -443,6 +443,63 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ffb5340e1f0990441897ac10bc39ac1b, type: 3}
+--- !u!1001 &209357043
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3908664777431582411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_Name
+      value: AudioManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5273618080696503411, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 82739524ec029b84fbee1f4cef65b6d3, type: 3}
 --- !u!1 &310913971
 GameObject:
   m_ObjectHideFlags: 0
@@ -997,62 +1054,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!1 &493148360
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 493148362}
-  - component: {fileID: 493148361}
-  m_Layer: 0
-  m_Name: Audio Manager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &493148361
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 493148360}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e57ae5e7a8c230340a7a8fcdf7b887a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mixer: {fileID: 0}
-  masterGroup: {fileID: 0}
-  musicGroup: {fileID: 0}
-  blockSFXGroup: {fileID: 0}
-  environmentSFXGroup: {fileID: 0}
-  eventSFXGroup: {fileID: 0}
-  uiSFXGroup: {fileID: 0}
-  musicSourceA: {fileID: 0}
-  musicSourceB: {fileID: 0}
-  defaultMusicCrossfade: 1
-  sfxSourcePrefab: {fileID: 0}
-  sfxInitialPoolSize: 16
---- !u!4 &493148362
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 493148360}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 50.593647, y: -21.554443, z: 125.507675}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &509887418
 GameObject:
   m_ObjectHideFlags: 0
@@ -3235,6 +3236,7 @@ GameObject:
   - component: {fileID: 6114805197209585004}
   - component: {fileID: 2995492060295323001}
   - component: {fileID: 669825742502143756}
+  - component: {fileID: 6114805197209585005}
   m_Layer: 0
   m_Name: Falling Tetromino
   m_TagString: Untagged
@@ -3349,6 +3351,84 @@ Transform:
   m_Children: []
   m_Father: {fileID: 310913973}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6114805197209585005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2802537167676436936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: 0620e3752eff1ad4da6790a303a051aa, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: fa9f9143-e72f-423a-8ceb-cda86eceb8ab
+    m_ActionName: Gameplay/LeftShift[/Keyboard/a]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 25a31be4-883f-4b66-83d0-aa1633da51e9
+    m_ActionName: Gameplay/RightShift[/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f079d68f-a38d-4e97-8a8c-7c1b7d8a7db4
+    m_ActionName: Gameplay/LeftRotate[/Keyboard/q]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1802be66-e8cf-4000-bcef-1d16992fb274
+    m_ActionName: Gameplay/RightRotate[/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6df02731-aabe-4357-9d1f-60aceca7f113
+    m_ActionName: Gameplay/SoftDrop[/Keyboard/s]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 50ea2904-0211-4abe-ab72-a3d0b95abdb2
+    m_ActionName: Gameplay/HardDrop[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 4243bcc1-7b1f-4af5-946e-1b6960cd2436
+    m_ActionName: Gameplay/Pause[/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1d636d0c-4e1b-424b-ab16-7b1349a366b6
+    m_ActionName: UI/Navigate[/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow,/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 84e591ae-269d-418b-ac57-d32eecedab12
+    m_ActionName: UI/Submit[/Keyboard/space,/Keyboard/enter]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 34d99e7d-56de-4657-beb6-01e5b15b33dc
+    m_ActionName: UI/Cancel[/Keyboard/escape,/Keyboard/backspace]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f236acb9-e3dd-40c1-995b-d80404490da8
+    m_ActionName: UI/Point[/Mouse/position]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ffcb18c9-16d6-4a0c-a9a6-19fcc776cb0a
+    m_ActionName: UI/Click[/Mouse/leftButton]
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Gameplay
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 519420031}
 --- !u!4 &6616733120276660816
 Transform:
   m_ObjectHideFlags: 0
@@ -3389,11 +3469,11 @@ SceneRoots:
   - {fileID: 2464639}
   - {fileID: 1631176128}
   - {fileID: 310913973}
-  - {fileID: 493148362}
   - {fileID: 1036024158}
   - {fileID: 2098479939}
   - {fileID: 329727407}
   - {fileID: 725790050753591688}
+  - {fileID: 209357043}
   - {fileID: 1796868904}
   - {fileID: 1753712650}
   - {fileID: 758003342}
