@@ -18,6 +18,9 @@ public class TetrominoController : MonoBehaviour
     public float speedSoftDrop = 2;
     public float keyInputInterval = 0.2f;
 
+    // Input action asset reference
+    public static InputActionAsset inputActionAsset => playerInput.actions;
+
     private float dropTimer = 0;
     private bool isAccelerating = false;
     private float interval => isAccelerating ? intervalAccelerating : intervalNormal;
@@ -25,9 +28,14 @@ public class TetrominoController : MonoBehaviour
     private float intervalAccelerating => 1 / (gravity * speedSoftDrop);
 
     // Input actions
-    private PlayerInput playerInput;
-    private InputActionAsset inputActionAsset;
-    private InputControls inputs; // generated C#
+    private static PlayerInput playerInput;
+
+    private InputAction left;
+    private InputAction right;
+    private InputAction rotateCCW;
+    private InputAction rotateCW;
+    private InputAction softDrop;
+    private InputAction hardDrop;
 
     private Coroutine leftCoroutine;
     private Coroutine rightCoroutine;
@@ -37,26 +45,42 @@ public class TetrominoController : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
-        inputs = new InputControls();
 
-        inputs.Gameplay.Enable();
+        var actionMap = playerInput.actions.FindActionMap("Gameplay");
 
-        inputs.Gameplay.LeftShift.started += ctx => OnStartRepeatingAction(ref leftCoroutine, OnLeft, inputs.Gameplay.LeftShift);
-        inputs.Gameplay.LeftShift.canceled += ctx => OnCancelRepeatingAction(ref leftCoroutine);
+        left = actionMap.FindAction("LeftShift");
+        right = actionMap.FindAction("LeftRight");
+        rotateCCW = actionMap.FindAction("RotateCCW");
+        rotateCW = actionMap.FindAction("RotateCW");
+        softDrop = actionMap.FindAction("SoftDrop");
+        hardDrop = actionMap.FindAction("HardDrop");
 
-        inputs.Gameplay.RightShift.started += ctx => OnStartRepeatingAction(ref rightCoroutine, OnRight, inputs.Gameplay.RightShift);
-        inputs.Gameplay.RightShift.canceled += ctx => OnCancelRepeatingAction(ref rightCoroutine);
+        left.started += ctx => OnStartRepeatingAction(ref leftCoroutine, OnLeft, left);
+        left.canceled += ctx => OnCancelRepeatingAction(ref leftCoroutine);
 
-        inputs.Gameplay.LeftRotate.started += ctx => OnStartRepeatingAction(ref rotateCCWCoroutine, OnRotateCCW, inputs.Gameplay.LeftRotate);
-        inputs.Gameplay.LeftRotate.canceled += ctx => OnCancelRepeatingAction(ref rotateCCWCoroutine);
+        right.started += ctx => OnStartRepeatingAction(ref rightCoroutine, OnRight, right);
+        right.canceled += ctx => OnCancelRepeatingAction(ref rightCoroutine);
 
-        inputs.Gameplay.RightRotate.started += ctx => OnStartRepeatingAction(ref rotateCWCoroutine, OnRotateCW, inputs.Gameplay.RightRotate);
-        inputs.Gameplay.RightRotate.canceled += ctx => OnCancelRepeatingAction(ref rotateCWCoroutine);
+        rotateCCW.started += ctx => OnStartRepeatingAction(ref rotateCCWCoroutine, OnRotateCCW, rotateCCW);
+        rotateCCW.canceled += ctx => OnCancelRepeatingAction(ref rotateCCWCoroutine);
 
-        inputs.Gameplay.SoftDrop.started += ctx => OnSoftDropStart();
-        inputs.Gameplay.SoftDrop.canceled += ctx => OnSoftDropStop();
+        rotateCW.started += ctx => OnStartRepeatingAction(ref rotateCWCoroutine, OnRotateCW, rotateCW);
+        rotateCW.canceled += ctx => OnCancelRepeatingAction(ref rotateCWCoroutine);
 
-        inputs.Gameplay.HardDrop.performed += ctx => OnHardDrop();
+        softDrop.started += ctx => OnSoftDropStart();
+        softDrop.canceled += ctx => OnSoftDropStop();
+
+        hardDrop.performed += ctx => OnHardDrop();
+    }
+
+    private void OnEnable()
+    {
+        
+    }
+
+    private void OnDisable()
+    {
+        
     }
 
     void OnDestroy()
@@ -113,11 +137,7 @@ public class TetrominoController : MonoBehaviour
     // assign actions asset by player in the future
     private void InitPlayerInput()
     {
-        if (InputRoot.Instance != null)
-        {
-            playerInput.actions = InputRoot.Instance.playerInput.actions;
-            Debug.Log($"Actions set for player of {tetromino}!");
-        }
+        
     }
 
     private void OnLeft()
