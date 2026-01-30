@@ -8,6 +8,7 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
 {
     public SettingsData Current { get; private set; }
     public SettingsData Pending { get; private set; }// // explosed to settings controller to adjust settings
+    public bool isEditting = false;
 
     public event Action<SettingsData> OnSettingsChanged; // notify all managers to change values (can have a event for each manager)
 
@@ -26,12 +27,14 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
     public void StartEdit()//
     {
         Pending = Clone(Current);
+        isEditting = true;
     }
 
     public void CancelEdit()//
     {
         Pending = null;
         OnSettingsChanged?.Invoke(Current);
+        isEditting= false;
     }
 
     public void ApplyEdit()
@@ -45,6 +48,8 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
         Debug.Log("Apply Settings");
 
         Save();
+
+        isEditting = false;
     }
 
     /// <summary>

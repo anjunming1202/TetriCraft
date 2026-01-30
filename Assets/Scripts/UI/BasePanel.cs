@@ -38,6 +38,8 @@ public class BasePanel : MonoBehaviour
     /// </summary>
     public void Initialise()
     {
+        if (canvasGroup == null)
+            canvasGroup = GetComponent<CanvasGroup>();
         canvasGroup.alpha = 0f;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;

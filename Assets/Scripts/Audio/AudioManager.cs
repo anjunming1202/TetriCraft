@@ -246,9 +246,9 @@ public class AudioManager : PersistentSingleton<AudioManager>
     public void SetVolumeNormalized(float value, out float volume, string mixerParam)
     {
         volume = Mathf.Clamp01(value);
-        if (mixer != null)
-            Debug.Log(mixer.SetFloat(mixerParam, LinearToDecibel(volume)));
-        Debug.Log(LinearToDecibel(volume));
+        //if (mixer != null)
+        //    Debug.Log(mixer.SetFloat(mixerParam, LinearToDecibel(volume)));
+        //Debug.Log(LinearToDecibel(volume));
     }
 
     private void InitSettings()
@@ -289,7 +289,6 @@ public class AudioManager : PersistentSingleton<AudioManager>
         SetVolumeNormalized(settings.environmentVolume, out environmentSFXVolume, MIXER_ENVIRONMENTSFX_PARAM);
         SetVolumeNormalized(settings.eventsVolume, out eventSFXVolume, MIXER_EVENTSFX_PARAM);
         SetVolumeNormalized(settings.uiVolume, out uiSFXVolume, MIXER_UISFX_PARAM);
-        Debug.Log(masterVolume);
     }
 
     private void ApplyVolumesToAudioSystem()

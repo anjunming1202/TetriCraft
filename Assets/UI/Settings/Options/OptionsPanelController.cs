@@ -21,7 +21,7 @@ public class OptionsPanelController : MonoBehaviour
 
     public void OnControlsSettings()
     {
-
+        UIManager.Instance.ShowPanel<ControlSettingsPanel>("ControlSettings");
     }
 
     public void OnDone()

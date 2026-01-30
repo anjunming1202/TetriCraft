@@ -2,13 +2,7 @@ using UnityEngine;
 
 public class Bootstrapper : PersistentSingleton<Bootstrapper>
 {
-    [SerializeField] GameObject resourcesPrefab;
-    [SerializeField] GameObject settingsManagerPrefab;
-    [SerializeField] GameObject audioManagerPrefab;
-    [SerializeField] GameObject UIManagerPrefab;
-    [SerializeField] GameObject sceneLoaderPrefab;
-    [SerializeField] GameObject factoriesPrefab;
-    [SerializeField] GameObject fullScreenManagerPrefab;
+    [SerializeField] GameObject[] orderedPersistentGameObjectPrefabs;
     [SerializeField] string firstScene;
 
     protected override void Awake()
@@ -28,13 +22,10 @@ public class Bootstrapper : PersistentSingleton<Bootstrapper>
     private void InstantiateAll()
     {
         // avoid instantiation dependency problems
-        if (resourcesPrefab) Instantiate(resourcesPrefab);
-        if (settingsManagerPrefab) Instantiate(settingsManagerPrefab);
-        if (audioManagerPrefab) Instantiate(audioManagerPrefab);
-        if (UIManagerPrefab) Instantiate(UIManagerPrefab);
-        if (sceneLoaderPrefab) Instantiate(sceneLoaderPrefab);
-        if (factoriesPrefab) Instantiate(factoriesPrefab);
-        if (fullScreenManagerPrefab) Instantiate(fullScreenManagerPrefab);
+        foreach (GameObject prefab in orderedPersistentGameObjectPrefabs)
+        {
+            if (prefab) Instantiate(prefab);
+        }
     }
 
     private void InitialiseAll()

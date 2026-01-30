@@ -8,6 +8,7 @@
 
     protected override void OnExit()
     {
-        UIManager.Instance.CloseAll();
+        if (UIManager.Instance)
+            UIManager.Instance.CloseAll();
     }
 }

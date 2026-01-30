@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ResolutionController : StaticInstance<ResolutionController>
+public class ResolutionController : PersistentSingleton<ResolutionController>
 {
     public static Resolution current;
     public static Resolution defaultResolution;
