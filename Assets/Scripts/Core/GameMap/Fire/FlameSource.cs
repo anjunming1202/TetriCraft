@@ -8,7 +8,7 @@ public class FlameSource : MapObject
     public Flame topFlamePrefab;
     public float sourceStrength;
     public RectInt spreadableArea;
-    public Vector2Int position => MapBoundaryData.WorldToGrid(transform.position);
+    public Vector2Int position => BoundaryDataManager.GetBoundaryData(map.PlayerID).WorldToGrid(transform.position);
 
     protected void Start()
     {

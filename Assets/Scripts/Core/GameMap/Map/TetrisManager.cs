@@ -10,7 +10,7 @@ using UnityEngine;
 //      ...*/
 public class TetrisManager : MonoBehaviour
 {
-    public PlayerID PlayerID => tetrominoController.PlayerID;
+    public PlayerID PlayerID { get; private set; }
 
     [Header("Map Objects")]
     [SerializeField] private MapManager map;
@@ -61,8 +61,11 @@ public class TetrisManager : MonoBehaviour
 
     public void InitMap(int Width, int height, GameManager gameManager)
     {
+        // Player reference
+        this.PlayerID = gameManager.playerID;
+
         // Initialise map
-        map.InitMap(Width, height);
+        map.InitMap(Width, height, this);
 
         // Initialise tetrominos
         fallingTetromino.Init();
@@ -317,7 +320,7 @@ public class TetrisManager : MonoBehaviour
         }
 
         ghostTetromino.Transform(fallingTetromino);
-        ghostTetromino.SetPosition(fallingTetromino.position);
+        ghostTetromino.SetPosition(fallingTetromino.position, map);
 
         fallingTetromino.SetPosition(fallingTetrominoPosition);
     }

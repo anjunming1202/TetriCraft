@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class MapManager : MonoBehaviour
 { 
+    public PlayerID PlayerID { get; private set; }
+
     // map parameters
     public static float gravity = 15f;
     public int Width => width;
@@ -35,8 +37,11 @@ public class MapManager : MonoBehaviour
     // event
     public Action<MapManager, Block> OnGridPlace;
 
-    public void InitMap(int width, int height)
+    public void InitMap(int width, int height, TetrisManager tetrisManager)
     {
+        // Player reference
+        PlayerID = tetrisManager.PlayerID;
+
         // Init blocks
         this.width = width;
         this.height = height;

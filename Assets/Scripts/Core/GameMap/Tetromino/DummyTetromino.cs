@@ -3,8 +3,12 @@ using UnityEngine;
 
 public class DummyTetromino : Tetromino
 { 
-    public void Display()
+    public void Display(MapManager map)
     {
+        // set tetromino (parent to blocks) position
+        transform.position = BoundaryDataManager.GetBoundaryData(map.PlayerID).GridToWorld(position + Vector2Int.one * (size / 2));
+
+        // set blocks position
         int blockCount = 0;
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
@@ -12,7 +16,7 @@ public class DummyTetromino : Tetromino
                 Block block = shape[r, c];
                 if (block == null)
                     continue;
-                block.transform.position = transform.position + MapBoundaryData.MapToWorld(new Vector2(c + 0.5f - (float)size / 2, -r + 0.5f + (float)size / 2));
+                block.transform.position = transform.position + BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(new Vector2(c + 0.5f - (float)size / 2, -r + 0.5f + (float)size / 2));
                 blockCount++;
             }
 
@@ -21,11 +25,10 @@ public class DummyTetromino : Tetromino
             blocks[i].transform.position = new Vector3(-1, -1, 0); // somewhere hidden
     }
 
-    public void SetPosition(Vector2Int mapPosition)
+    public void SetPosition(Vector2Int mapPosition, MapManager map)
     {
         position = mapPosition;
-        transform.position = GetWorldPosition();
-        Display();
+        Display(map);
     }
 
     public void Transform(Tetromino tetrominoShape)

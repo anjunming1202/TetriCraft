@@ -11,6 +11,7 @@ public abstract class Block : MapRandomTickBehaviourObject
 {
     // Identity
     public abstract BlockID ID { get; }
+    public PlayerID PlayerID { get; private set; }
 
     // Data in the map
     private Vector2 position = Vector2.zero;            // Block position in the map
@@ -61,7 +62,7 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     public Vector3 GetWorldPosition()
     {
-        return MapBoundaryData.MapToWorld(CentrePosition);
+        return BoundaryDataManager.GetBoundaryData(PlayerID).MapToWorld(CentrePosition);
     }
 
     public Vector2Int Orientation2Direction(Orientation orientation)
@@ -118,6 +119,8 @@ public abstract class Block : MapRandomTickBehaviourObject
     {
         this.map = map;
         transform.SetParent(map.blockGrid.transform);
+
+        this.PlayerID = map.PlayerID;
 
         isInMap = true;
         isLocked = false;

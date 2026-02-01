@@ -89,6 +89,6 @@ public class FluidElementRenderer : MonoBehaviour
         }
 
         // Set transform position
-        transform.position = MapBoundaryData.MapToWorld(fluidElement.mapPosition);
+        transform.position = BoundaryDataManager.GetBoundaryData(fluidElement.GetMap().PlayerID).MapToWorld(fluidElement.mapPosition);
     }
 }

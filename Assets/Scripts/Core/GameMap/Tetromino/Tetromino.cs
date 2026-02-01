@@ -189,11 +189,6 @@ public class Tetromino : MonoBehaviour
         return position + new Vector2Int(column, size - 1 - row);
     }
 
-    public Vector3 GetWorldPosition()
-    {
-        return MapBoundaryData.MapToWorld((Vector2)position + Vector2.one * ((float)size / 2));
-    }
-
     public bool CheckEmpty()
     {
         foreach (var block in blocks)

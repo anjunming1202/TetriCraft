@@ -18,7 +18,7 @@ public abstract class Entity : MapObject
     protected virtual void Update()
     {
         UpdateFalling(Time.deltaTime);
-        transform.position = MapBoundaryData.MapToWorld(this.position);
+        transform.position = BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(this.position);
     }
 
     protected void UpdateFalling(float deltaTime)
@@ -87,7 +87,7 @@ public abstract class Entity : MapObject
 
     protected Vector3 GetWorldPosition()
     {
-        return MapBoundaryData.MapToWorld(position);
+        return BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(position);
     }
 
     protected virtual Vector2 size => Vector2.one;

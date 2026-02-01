@@ -6,18 +6,26 @@ using static UnityEngine.GraphicsBuffer;
 
 public class Flame : MapRandomTickBehaviourObject
 {
-    public Vector2Int position => MapBoundaryData.WorldToGrid(transform.position);
+    public Vector2Int position => BoundaryDataManager.GetBoundaryData(map.PlayerID).WorldToGrid(transform.position);
     public int age;
     public float damage = 1f;
 
-    public void Init(MapManager map, FlammableObject attachedBlock, Vector2Int offset)
+    private int maxAge = 15;
+    private FlammableObject attachedFlammable;
+    private Vector2Int offset;
+
+    private List<FlammableObject> adjacentFlammableBlocks = new List<FlammableObject>();
+
+    [SerializeField] AudioClip extinguishSound;
+
+    public void Init(MapManager map, FlammableObject attachedFlammable, Vector2Int offset)
     {
         this.map = map;
-        this.attachedBlock = attachedBlock;
+        this.attachedFlammable = attachedFlammable;
         this.offset = offset;
 
-        attachedBlock.SetBurningAt(offset, this);
-        transform.parent = attachedBlock.transform;
+        attachedFlammable.SetBurningAt(offset, this);
+        transform.parent = attachedFlammable.transform;
         transform.localPosition = (Vector2)offset;
 
         age = 0;
@@ -48,7 +56,7 @@ public class Flame : MapRandomTickBehaviourObject
 
     public void Die()
     {
-        attachedBlock.StopBurningAt(offset);
+        attachedFlammable.StopBurningAt(offset);
         GameObject.Destroy(this.gameObject);
     }
 
@@ -60,7 +68,7 @@ public class Flame : MapRandomTickBehaviourObject
         int i = 0;
         foreach (FlammableObject targetBlock in adjacentFlammableBlocks)
         {
-            if (randomTick % 2 == i || targetBlock == attachedBlock)
+            if (randomTick % 2 == i || targetBlock == attachedFlammable)
                 targetBlock.TakeBurnDamage(damage * Mathf.Lerp(1, 16, age / maxAge));
 
             // target burns away
@@ -154,12 +162,4 @@ public class Flame : MapRandomTickBehaviourObject
             }
         }
     }
-
-    private int maxAge = 15;
-    private FlammableObject attachedBlock;
-    private Vector2Int offset;
-
-    private List<FlammableObject> adjacentFlammableBlocks = new List<FlammableObject>();
-
-    [SerializeField] AudioClip extinguishSound;
 }

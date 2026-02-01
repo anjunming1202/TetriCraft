@@ -75,7 +75,7 @@ public class MapDebugger : MonoBehaviour
                 for (int y = 0; y < debuggedMap.Height; y++)
                 {
                     Vector2Int gridPosition = new Vector2Int(x, y);
-                    Vector3 labelPosition = MapBoundaryData.MapToWorld(gridPosition) + new Vector3(0, 1f);
+                    Vector3 labelPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).MapToWorld(gridPosition) + new Vector3(0, 1f);
 
                     GUIStyle style = new GUIStyle();
                     style.normal.textColor = textColor;
@@ -125,21 +125,21 @@ public class MapDebugger : MonoBehaviour
         // Block frame
         if (displayFrame)
         {
-            Vector3 centrePosition = MapBoundaryData.GridToWorld(block.GridPosition);
+            Vector3 centrePosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).GridToWorld(block.GridPosition);
             float width = MapBoundaryData.unitSize;
             Gizmos.DrawWireCube(centrePosition, Vector3.one * width);
         }
         // Block map position
         if (displayPosition)
         {
-            Vector3 centrePosition = MapBoundaryData.GridToWorld(block.GridPosition);
+            Vector3 centrePosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).GridToWorld(block.GridPosition);
             Gizmos.DrawSphere(centrePosition, 0.1f);
         }
     }
 
     private void CrossBlock(Block block, Color color)
     {
-        Vector3 centrePosition = MapBoundaryData.GridToWorld(block.GridPosition);
+        Vector3 centrePosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).GridToWorld(block.GridPosition);
         float width = MapBoundaryData.unitSize;
         Gizmos.color = color;
         Gizmos.DrawLine(centrePosition + new Vector3(1, 1, 0) * width / 2, centrePosition + new Vector3(-1, -1, 0) * width / 2);
@@ -151,8 +151,8 @@ public class MapDebugger : MonoBehaviour
         Vector3 cursorScreenPosition = Input.mousePosition;
         cursorScreenPosition.z = Mathf.Abs(Camera.main.transform.position.z);
         cursorPosition = Camera.main.ScreenToWorldPoint(cursorScreenPosition);
-        cursorGridPosition = MapBoundaryData.WorldToGrid(cursorPosition);
-        cursorMapPosition = MapBoundaryData.WorldToMap(cursorPosition);
+        cursorGridPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToGrid(cursorPosition);
+        cursorMapPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToMap(cursorPosition);
     }
 
     private void MousePositionsDebug()

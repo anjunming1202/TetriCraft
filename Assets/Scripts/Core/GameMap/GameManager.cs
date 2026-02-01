@@ -4,7 +4,7 @@ using UnityEngine;
 // Game Manager for managing the whole game
 public class GameManager : MonoBehaviour
 {
-    public PlayerID playerID => tetrisManager.PlayerID;
+    [SerializeField] public PlayerID playerID;
 
     [Header("Map")]
     // Map Manager
@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
 
     // Map Region
     public SpriteMask boundaryRegion; // inspector
+    public MapBoundaryData boundaryData { get; private set; }
 
     [Header("Score")]
     public ScoreManager scoreManager; // inspector
@@ -99,7 +100,7 @@ public class GameManager : MonoBehaviour
     private void InitNewGame()
     {
         // Initialise map
-        tetrisManager.InitMap(MapBoundaryData.Instance.width, MapBoundaryData.Instance.height, this);
+        tetrisManager.InitMap(boundaryData.width, boundaryData.height, this);
 
         // Initialise game state
         tetrisManager.OnGameOver += GameOver;
@@ -146,7 +147,7 @@ public class GameManager : MonoBehaviour
     private void InitialiseResources()
     {
         // Initialise boundary data
-        MapBoundaryData.Create(boundaryRegion.transform);
+        boundaryData = MapBoundaryData.Create(boundaryRegion.transform);
 
         // Initialise block animator
         BlockAnimator.MovingCurveAsset = blockMovementCurve;
