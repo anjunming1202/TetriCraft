@@ -15,19 +15,19 @@ public class AudioSettingsPanel : SettingsPanel
     protected override void Awake()
     {
         base.Awake();
-        masterVolumeSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.masterVolume = value; });
-        musicVolumeSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.musicVolume = value; });
-        blockSoundsSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.blocksVolume = value; });
-        eventSoundsSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.eventsVolume = value; });
-        uiSoundsSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.uiVolume = value; });
+        masterVolumeSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.GlobalSettings.masterVolume = value; });
+        musicVolumeSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.GlobalSettings.musicVolume = value; });
+        blockSoundsSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.GlobalSettings.blocksVolume = value; });
+        eventSoundsSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.GlobalSettings.eventsVolume = value; });
+        uiSoundsSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.GlobalSettings.uiVolume = value; });
     }
 
     protected override void PopulateData(SettingsData data)
     {
-        PopulateSliderData(masterVolumeSlider, data.masterVolume);
-        PopulateSliderData(musicVolumeSlider, data.musicVolume);
-        PopulateSliderData(blockSoundsSlider, data.blocksVolume);
-        PopulateSliderData(eventSoundsSlider, data.eventsVolume);
-        PopulateSliderData(uiSoundsSlider, data.uiVolume);
+        PopulateSliderData(masterVolumeSlider, data.GlobalSettings.masterVolume);
+        PopulateSliderData(musicVolumeSlider, data.GlobalSettings.musicVolume);
+        PopulateSliderData(blockSoundsSlider, data.GlobalSettings.blocksVolume);
+        PopulateSliderData(eventSoundsSlider, data.GlobalSettings.eventsVolume);
+        PopulateSliderData(uiSoundsSlider, data.GlobalSettings.uiVolume);
     }
 }

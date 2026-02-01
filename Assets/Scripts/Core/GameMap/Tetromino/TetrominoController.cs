@@ -6,6 +6,8 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class TetrominoController : MonoBehaviour
 {
+    public PlayerID PlayerID;
+
     private MapTetromino tetromino;
     private MapManager map;
 
@@ -13,7 +15,7 @@ public class TetrominoController : MonoBehaviour
     private bool isActive = false;
 
     // Control
-    public float gravity => GameManager.preference.tetrominoDropSpeed / 10 + 0.5f;
+    public float gravity => SettingsManager.Current[PlayerID].dropSpeed / 10 + 0.5f;
     public float speedDrop = 1;
     public float speedSoftDrop = 2;
     public float keyInputInterval = 0.2f;

@@ -10,6 +10,8 @@ using UnityEngine;
 //      ...*/
 public class TetrisManager : MonoBehaviour
 {
+    public PlayerID PlayerID => tetrominoController.PlayerID;
+
     [Header("Map Objects")]
     [SerializeField] private MapManager map;
 

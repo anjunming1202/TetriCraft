@@ -3,10 +3,12 @@ using UnityEngine;
 
 public class GhostBlockRenderer : BlockRenderer
 {
+    [SerializeField] private PlayerID playerID;
+  
     [SerializeField] private Sprite empty;
 
-    public float opacity => GameManager.preference.ghostPieceOpacity;
-    public GhostPieceType type => GameManager.preference.ghostPieceType;
+    public float opacity => SettingsManager.Current[playerID].ghostPieceOpacity;
+    public GhostPieceType type => SettingsManager.Current[playerID].ghostPiece;
 
     protected override void Render(Block block)
     {

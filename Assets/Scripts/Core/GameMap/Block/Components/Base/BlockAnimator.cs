@@ -4,12 +4,14 @@ using UnityEngine;
 // Manage the movement of the instantiated block
 public class BlockAnimator : MonoBehaviour
 {
+    public PlayerID playerID;
+
     // Reference of block
     private Block block;
 
     public static AnimationCurveAsset MovingCurveAsset;   // *static: make it can be initialised at other places
     public static AnimationCurveAsset FastMovingCurveAsset;
-    public static float animationSpeed => GameManager.preference.animationSpeed;
+    public float animationSpeed => SettingsManager.Current[playerID].dropAnimationSpeed;
 
     private AnimationCurveAsset currentCurveAsset;
     private float elapsedTime = 0f;

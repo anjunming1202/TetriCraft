@@ -4,6 +4,8 @@ using UnityEngine;
 // Game Manager for managing the whole game
 public class GameManager : MonoBehaviour
 {
+    public PlayerID playerID => tetrisManager.PlayerID;
+
     [Header("Map")]
     // Map Manager
     public TetrisManager tetrisManager; // inspector
@@ -25,16 +27,6 @@ public class GameManager : MonoBehaviour
     public AnimationCurveAsset blockMovementCurve;
     public AnimationCurveAsset blockLandCurve;
 
-    // Preferences
-    public class Preference
-    {
-        public float tetrominoDropSpeed;
-        public float animationSpeed;
-        public GhostPieceType ghostPieceType;
-        public float ghostPieceOpacity;
-    }
-    public static Preference preference;
-
 
     [Header("Debug")]
     public bool debug = true;
@@ -44,9 +36,16 @@ public class GameManager : MonoBehaviour
     {
         // Load static resources
         InitialiseResources();
-        // Init preferences
-        InitPreferences();
-        SettingsManager.Instance.OnSettingsChanged += ApplySettings;
+    }
+
+    private void OnEnable()
+    {
+
+    }
+
+    private void OnDisable()
+    {
+
     }
 
     void Start()
@@ -134,15 +133,6 @@ public class GameManager : MonoBehaviour
     private void CleanUp()
     {
         Time.timeScale = 1f;
-        SettingsManager.Instance.OnSettingsChanged -= ApplySettings;
-    }
-
-    private void ApplySettings(SettingsData settings)
-    {
-        preference.tetrominoDropSpeed = settings.dropSpeed;
-        preference.animationSpeed = settings.dropAnimationSpeed;
-        preference.ghostPieceType = settings.ghostPiece;
-        preference.ghostPieceOpacity = settings.ghostPieceOpacity;
     }
 
 
@@ -161,11 +151,5 @@ public class GameManager : MonoBehaviour
         // Initialise block animator
         BlockAnimator.MovingCurveAsset = blockMovementCurve;
         BlockAnimator.FastMovingCurveAsset = blockLandCurve;
-    }
-
-    private void InitPreferences()
-    {
-        preference = new Preference();
-        ApplySettings(SettingsManager.Instance.Current);
     }
 }

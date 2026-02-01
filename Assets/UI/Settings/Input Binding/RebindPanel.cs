@@ -37,7 +37,7 @@ public class RebindPanel : SettingsPanel
         CheckConflicts();
     }
 
-    private static void SaveBindings(PlayerInput playerInput, SettingsData settingsData)
+    private void SaveBindings(PlayerInput playerInput, SettingsData settingsData)
     {
         Debug.Log("update bindings");
         var actions = playerInput.actions;
@@ -45,7 +45,7 @@ public class RebindPanel : SettingsPanel
         {
             Debug.Log("save");
             string json = actions.SaveBindingOverridesAsJson();
-            settingsData.inputBindingsJson = json;
+            settingsData[PlayerID].inputBindingsJson = json;
         }
     }
 

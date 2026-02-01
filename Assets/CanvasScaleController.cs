@@ -16,7 +16,7 @@ public class CanvasScaleController : StaticInstance<CanvasScaleController>
 
     private void Start()
     {
-        SettingsManager.Instance.OnSettingsChanged += data => ChangeGUIScale(data.guiScale);
+        SettingsManager.Instance.OnSettingsChanged += data => ChangeGUIScale(data.GlobalSettings.guiScale);
     }
 
     public void ChangeGUIScale(GUIScale mode)

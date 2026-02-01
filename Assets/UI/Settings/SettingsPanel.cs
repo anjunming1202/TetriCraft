@@ -3,7 +3,9 @@ using UnityEngine.UI;
 
 public abstract class SettingsPanel : MenuPanel
 {
-    protected SettingsData Pending => SettingsManager.Instance.Pending;
+    public PlayerID PlayerID; // each player has one settings menu /*protected*/
+
+    protected SettingsData Pending => SettingsManager.Pending;
 
     protected override void OnOpen(object data)
     {
@@ -14,16 +16,16 @@ public abstract class SettingsPanel : MenuPanel
         SettingsManager.Instance.StartEdit();
 
         // Populate panel data
-        PopulateData(SettingsManager.Instance.Current);*/
+        PopulateData(SettingsManager.Current);*/
     }
 
     private void OnEnable()
     {
         // Populate panel data
-        PopulateData(SettingsManager.Instance.Current);
+        PopulateData(SettingsManager.Current);
 
         // Start edit (initialise pending)
-        SettingsManager.Instance.StartEdit();
+        SettingsManager.Instance.StartEdit(PlayerID);
     }
 
     private void OnDisable()

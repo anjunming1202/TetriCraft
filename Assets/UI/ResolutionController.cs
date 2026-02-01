@@ -25,12 +25,12 @@ public class ResolutionController : PersistentSingleton<ResolutionController>
         resolutions = Screen.resolutions;
         optionCount = resolutions.Length + 1;
         defaultResolution = resolutions[optionCount - 2];
-        UpdateResolution(GetResolution(SettingsManager.Instance.Current.resolutionIndex));
     }
 
     private void Start()
     {
-        SettingsManager.Instance.OnSettingsChanged += data => UpdateResolution(GetResolution(data.resolutionIndex));
+        UpdateResolution(GetResolution(SettingsManager.Current.GlobalSettings.resolutionIndex));
+        SettingsManager.Instance.OnSettingsChanged += data => UpdateResolution(GetResolution(data.GlobalSettings.resolutionIndex));
     }
 
     private void UpdateResolution(Resolution resolution)

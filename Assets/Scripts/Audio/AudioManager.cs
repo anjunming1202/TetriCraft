@@ -254,7 +254,7 @@ public class AudioManager : PersistentSingleton<AudioManager>
     private void InitSettings()
     {
         SettingsManager.Instance.OnSettingsChanged += ApplySettings;
-        ApplySettings(SettingsManager.Instance.Current);
+        ApplySettings(SettingsManager.Current);
     }
 
     private void BuildSFXPool()
@@ -283,12 +283,12 @@ public class AudioManager : PersistentSingleton<AudioManager>
 
     private void ApplySettings(SettingsData settings)
     {
-        SetVolumeNormalized(settings.masterVolume, out masterVolume, MIXER_MASTER_PARAM);
-        SetVolumeNormalized(settings.musicVolume, out musicVolume, MIXER_MUSIC_PARAM);
-        SetVolumeNormalized(settings.blocksVolume, out blockSFXVolume, MIXER_BLOCKSFX_PARAM);
-        SetVolumeNormalized(settings.environmentVolume, out environmentSFXVolume, MIXER_ENVIRONMENTSFX_PARAM);
-        SetVolumeNormalized(settings.eventsVolume, out eventSFXVolume, MIXER_EVENTSFX_PARAM);
-        SetVolumeNormalized(settings.uiVolume, out uiSFXVolume, MIXER_UISFX_PARAM);
+        SetVolumeNormalized(settings.GlobalSettings.masterVolume, out masterVolume, MIXER_MASTER_PARAM);
+        SetVolumeNormalized(settings.GlobalSettings.musicVolume, out musicVolume, MIXER_MUSIC_PARAM);
+        SetVolumeNormalized(settings.GlobalSettings.blocksVolume, out blockSFXVolume, MIXER_BLOCKSFX_PARAM);
+        SetVolumeNormalized(settings.GlobalSettings.environmentVolume, out environmentSFXVolume, MIXER_ENVIRONMENTSFX_PARAM);
+        SetVolumeNormalized(settings.GlobalSettings.eventsVolume, out eventSFXVolume, MIXER_EVENTSFX_PARAM);
+        SetVolumeNormalized(settings.GlobalSettings.uiVolume, out uiSFXVolume, MIXER_UISFX_PARAM);
     }
 
     private void ApplyVolumesToAudioSystem()

@@ -15,10 +15,22 @@ public class GameInputController : MonoBehaviour
         gameManager = GetComponent<GameManager>();
         playerInput = controller.GetComponent<PlayerInput>();
 
+    }
+
+    private void OnEnable()
+    {
         gameManager.OnGameStart += () => playerInput.SwitchCurrentActionMap("Gameplay");
         gameManager.OnPause += () => playerInput.SwitchCurrentActionMap("UI");
         gameManager.OnResume += () => playerInput.SwitchCurrentActionMap("Gameplay");
         gameManager.OnGameOver += () => playerInput.SwitchCurrentActionMap("UI");
+    }
+
+    private void OnDisable()
+    {
+        gameManager.OnGameStart -= () => playerInput.SwitchCurrentActionMap("Gameplay");
+        gameManager.OnPause -= () => playerInput.SwitchCurrentActionMap("UI");
+        gameManager.OnResume -= () => playerInput.SwitchCurrentActionMap("Gameplay");
+        gameManager.OnGameOver -= () => playerInput.SwitchCurrentActionMap("UI");
     }
 
     // Update is called once per frame

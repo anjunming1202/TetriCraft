@@ -22,7 +22,7 @@ public class RebindButtonUI : MonoBehaviour
 
     // 1) 拖入具体的 Action（例如：Gameplay -> Jump）
     //    在 Input Actions 资源里右键某个 Action，选择 "Create Input Action Reference"，或直接把 Action 从资源里拖进来。
-    public InputActionReference actionReference;
+    public InputActionReference actionReference; // just for getting the name, not the reference!
 
     // 2) 要重绑定的是 action 的第几个 binding（如果该 action 在 InputActions 里只有一个 binding，通常为 0）
     //    如果同一个 Action 在 InputActions 中绑定了多个设备（Keyboard / Gamepad），按索引选择要替换哪一个。
@@ -58,6 +58,9 @@ public class RebindButtonUI : MonoBehaviour
     public UnityEvent onRebindComplete;
     public UnityEvent onRebindCanceled;
 
+    // player input reference => the player that rebinding operates on
+    private PlayerInput playerInput;
+
     // 内部使用的重绑定操作引用
     private InputActionRebindingExtensions.RebindingOperation rebindingOp;
 
@@ -87,7 +90,7 @@ public class RebindButtonUI : MonoBehaviour
             return;
         }
 
-        var action = actionReference.action;
+        var action = /*GetRuntimeAction(playerInput);*/ actionReference.action;
         if (action == null)
         {
             Debug.LogError($"[{nameof(RebindButtonUI)}] actionReference.action 为 null（检查 InputActionReference 配置）。");
@@ -311,5 +314,13 @@ public class RebindButtonUI : MonoBehaviour
             StopCoroutine(timeoutCoroutine);
             timeoutCoroutine = null;
         }
+    }
+
+    private InputAction GetRuntimeAction(PlayerInput playerInput)
+    {
+        return playerInput.actions.FindAction(
+            actionReference.action.name,
+            throwIfNotFound: true
+        );
     }
 }

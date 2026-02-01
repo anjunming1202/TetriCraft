@@ -6,7 +6,7 @@ public class FullScreenManager : PersistentSingleton<FullScreenManager>
 {
     void Start()
     {
-        SettingsManager.Instance.OnSettingsChanged += data => SetFullScreen(data.fullscreen);
+        SettingsManager.Instance.OnSettingsChanged += data => SetFullScreen(data.GlobalSettings.fullscreen);
     }
 
     private void Update()
@@ -18,7 +18,7 @@ public class FullScreenManager : PersistentSingleton<FullScreenManager>
     public void SetFullScreen(bool fullscreen)
     {
         Screen.fullScreenMode = fullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
-        SettingsManager.Instance.Current.fullscreen = fullscreen; // edit setting data directly
+        SettingsManager.Current.GlobalSettings.fullscreen = fullscreen; // edit setting data directly
         Debug.Log($"Full Screen: {fullscreen}");
     }
 }
