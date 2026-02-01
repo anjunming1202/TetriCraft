@@ -3,6 +3,12 @@ public abstract class FluidDummy : Block
 {
     public override bool IsDummy => true;
 
+    public void Init(FluidManager fluidManager, FluidElement sourceElement)
+    {
+        FluidManager = fluidManager;
+        SetSourceElement(sourceElement);
+    }
+
     public void SetSourceElement(FluidElement element)
     {
         sourceElement = element;
@@ -62,6 +68,6 @@ public abstract class FluidDummy : Block
         base.Destroy();
     }
 
-    protected abstract FluidManager FluidManager { get; }
+    protected FluidManager FluidManager { get; private set; }
     protected FluidElement sourceElement;
 }

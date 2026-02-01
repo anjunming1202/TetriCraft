@@ -6,7 +6,7 @@ public class DummyTetromino : Tetromino
     public void Display(MapManager map)
     {
         // set tetromino (parent to blocks) position
-        transform.position = BoundaryDataManager.GetBoundaryData(map.PlayerID).GridToWorld(position + Vector2Int.one * (size / 2));
+        transform.position = BoundaryDataManager.GetBoundaryData(map.PlayerID).GridToWorld(position);
 
         // set blocks position
         int blockCount = 0;
@@ -16,7 +16,7 @@ public class DummyTetromino : Tetromino
                 Block block = shape[r, c];
                 if (block == null)
                     continue;
-                block.transform.position = transform.position + BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(new Vector2(c + 0.5f - (float)size / 2, -r + 0.5f + (float)size / 2));
+                block.transform.position = transform.position + MapBoundaryData.MapToWorldRelative(LocalToMap(r, c) - position);
                 blockCount++;
             }
 

@@ -2,6 +2,6 @@
 
 public class WaterBlock : FluidBlock
 {
-    [HideInInspector] public override BlockID ID => BlockID.Water;
-    protected override FluidManager FluidManager => MapManager.WaterManager;
+    public override BlockID ID => BlockID.Water;
+    public override FluidID FluidID => FluidID.Water;
 }

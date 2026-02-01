@@ -2,6 +2,6 @@
 
 public class LavaBlock : FluidBlock
 {
-    [HideInInspector] public override BlockID ID => BlockID.Lava;
-    protected override FluidManager FluidManager => MapManager.LavaManager;
+    public override BlockID ID => BlockID.Lava;
+    public override FluidID FluidID => FluidID.Lava;
 }

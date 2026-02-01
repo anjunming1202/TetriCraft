@@ -15,8 +15,7 @@ public class MapManager : MonoBehaviour
     public int Height => height;
 
     // fluid
-    public static FluidManager WaterManager;
-    public static FluidManager LavaManager;
+    public Dictionary<FluidID, FluidManager> fluidManager;
 
     // redstone
     public RedstoneManager RedstoneManager;
@@ -56,8 +55,11 @@ public class MapManager : MonoBehaviour
         // Init fluid system
         waterManager.Init(this);
         lavaManager.Init(this);
-        WaterManager = waterManager;
-        LavaManager = lavaManager;
+        fluidManager = new Dictionary<FluidID, FluidManager>()
+        {
+            { FluidID.Water, waterManager },
+            { FluidID.Lava, lavaManager },
+        };
 
         // Init map event
         OnGridPlace += waterManager.BlockSqueeze; // squeeze fluid

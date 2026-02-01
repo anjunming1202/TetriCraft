@@ -720,7 +720,7 @@ public class FluidManager : MonoBehaviour
 
         Block newBlock = BlockSpawner.NewBlock(DummyID);
         FluidDummy newDummyBlock = newBlock as FluidDummy;
-        newDummyBlock.SetSourceElement(element);
+        newDummyBlock.Init(this, element);
         mapManager.SpawnBlock(newDummyBlock, position.x, position.y);
     }
 

@@ -318,6 +318,7 @@ public class TetrisManager : MonoBehaviour
             fallingTetromino.Shift(0, -1);
             reachedBottom = !fallingTetromino.CheckValid(map);
         }
+        fallingTetromino.Shift(0, 1); // step back by 1
 
         ghostTetromino.Transform(fallingTetromino);
         ghostTetromino.SetPosition(fallingTetromino.position, map);

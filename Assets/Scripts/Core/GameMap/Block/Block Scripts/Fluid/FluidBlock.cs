@@ -6,6 +6,7 @@ using UnityEngine;
 
 public abstract class FluidBlock : Block
 {
+    public abstract FluidID FluidID { get; }
     public override bool IsFluid => true;
 
     public override void OnLockdown()
@@ -15,5 +16,5 @@ public abstract class FluidBlock : Block
         map.RemoveBlock(this);
     }
 
-    protected abstract FluidManager FluidManager { get; }
+    protected FluidManager FluidManager => map.fluidManager[FluidID];
 }
