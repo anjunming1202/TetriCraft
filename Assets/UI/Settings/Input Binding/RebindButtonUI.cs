@@ -22,7 +22,7 @@ public class RebindButtonUI : MonoBehaviour
 
     // 1) 拖入具体的 Action（例如：Gameplay -> Jump）
     //    在 Input Actions 资源里右键某个 Action，选择 "Create Input Action Reference"，或直接把 Action 从资源里拖进来。
-    public InputActionReference actionReference; // just for getting the name, not the reference!
+    public InputActionReference actionReference; // JUST FOR FINDING THE ACTION NAME, NOT THE REFERENCE!
 
     // 2) 要重绑定的是 action 的第几个 binding（如果该 action 在 InputActions 里只有一个 binding，通常为 0）
     //    如果同一个 Action 在 InputActions 中绑定了多个设备（Keyboard / Gamepad），按索引选择要替换哪一个。
@@ -39,10 +39,7 @@ public class RebindButtonUI : MonoBehaviour
     [Header("=== ActionMap 名称配置（替换为你项目的 Map 名称）")]
 
     // 6) 切换到哪个 Map 用于重绑定（通常是 "UI" 或 "Rebind"）
-    public string rebindActionMapName = "UI";
-
-    // 7) 重绑定完成后要恢复到哪个 Map（通常是 "Gameplay"）
-    //public string restoreActionMapName = "Gameplay";
+    //public string rebindActionMapName = "UI";
 
     [Header("=== 可选 UI 关联 / 行为配置 ===")]
 
@@ -70,8 +67,14 @@ public class RebindButtonUI : MonoBehaviour
     // 用于超时 coroutine 的引用
     private Coroutine timeoutCoroutine;
 
+    public void Init(PlayerInput bindedPlayerInput)
+    {
+        playerInput = bindedPlayerInput;
+    }
+
     void OnEnable()
     {
+        Debug.Assert(playerInput != null, "PlayerInput not set to this rebind button ui");
         // 启用时刷新显示当前绑定（确保 UI 与当前 binding 保持一致）
         //UpdateBindingDisplay();
         //Debug.Log(actionReference.action.GetBindingDisplayString(bindingIndex, InputBinding.DisplayStringOptions.DontUseShortDisplayNames));
@@ -90,7 +93,7 @@ public class RebindButtonUI : MonoBehaviour
             return;
         }
 
-        var action = /*GetRuntimeAction(playerInput);*/ actionReference.action;
+        var action = GetRuntimeAction(playerInput);
         if (action == null)
         {
             Debug.LogError($"[{nameof(RebindButtonUI)}] actionReference.action 为 null（检查 InputActionReference 配置）。");
@@ -126,7 +129,7 @@ public class RebindButtonUI : MonoBehaviour
         action.Disable();
 
         // 2) disable eventsystem navigate, point, click, and submit
-        InputActionMap uiMap = actionReference.asset.FindActionMap("UI", throwIfNotFound: false);
+        InputActionMap uiMap = actionReference.asset.FindActionMap("UI", throwIfNotFound: false); // asset means the template asset (not instantiated clone)
         var navigate = uiMap?.FindAction("Navigate", throwIfNotFound: false);
         var click = uiMap?.FindAction("Click", throwIfNotFound: false);
         var submit = uiMap?.FindAction("Submit", throwIfNotFound: false);
@@ -182,7 +185,7 @@ public class RebindButtonUI : MonoBehaviour
 
                 // 刷新显示 + 保存
                 UpdateBindingDisplay();
-                onBindingsUpdate?.Invoke();                
+                onBindingsUpdate?.Invoke(); // => save               
 
                 // 触发完成事件（便于外部 UI 做动画或提示）
                 onRebindComplete?.Invoke();
@@ -275,7 +278,7 @@ public class RebindButtonUI : MonoBehaviour
     {
         if (actionReference == null || bindingText == null) return;
 
-        var action = actionReference.action;
+        var action = GetRuntimeAction(playerInput);
         if (action == null) return;
 
         // 取 binding 的可读字符串，例如 "Space" / "Left Ctrl" / "Gamepad button south"
@@ -292,7 +295,7 @@ public class RebindButtonUI : MonoBehaviour
     {
         if (actionReference == null) return;
 
-        var action = actionReference.action;
+        var action = GetRuntimeAction(playerInput);
         action.RemoveBindingOverride(bindingIndex);
         // update display
         UpdateBindingDisplay();

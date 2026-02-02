@@ -6,7 +6,8 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class TetrominoController : MonoBehaviour
 {
-    public PlayerID PlayerID;
+    [SerializeField] public PlayerID PlayerID;
+    [SerializeField] public string actionMapName;
 
     private MapTetromino tetromino;
     private MapManager map;
@@ -21,7 +22,7 @@ public class TetrominoController : MonoBehaviour
     public float keyInputInterval = 0.2f;
 
     // Input action asset reference
-    public static InputActionAsset inputActionAsset => playerInput.actions;
+    public InputActionAsset inputActionAsset => playerInput.actions;
 
     private float dropTimer = 0;
     private bool isAccelerating = false;
@@ -30,7 +31,7 @@ public class TetrominoController : MonoBehaviour
     private float intervalAccelerating => 1 / (gravity * speedSoftDrop);
 
     // Input actions
-    private static PlayerInput playerInput;
+    private PlayerInput playerInput;
 
     private InputAction left;
     private InputAction right;
@@ -61,7 +62,7 @@ public class TetrominoController : MonoBehaviour
 
     private void Start()
     {
-        var actionMap = playerInput.actions.FindActionMap("Gameplay");
+        var actionMap = playerInput.actions.FindActionMap(actionMapName, throwIfNotFound: true);
 
         left = actionMap?.FindAction("Left");
         right = actionMap?.FindAction("Right");

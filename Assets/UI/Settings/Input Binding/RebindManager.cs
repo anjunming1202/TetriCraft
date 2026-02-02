@@ -34,6 +34,7 @@ public class RebindManager : MonoBehaviour
     {
         Debug.Log($"try load bindings for {playerID}");
         string json = settingsData[playerID].inputBindingsJson;
+        Debug.Log(json);
         if (string.IsNullOrEmpty(json))
         {
             Debug.Log($"Input bindings json has not been saved yet for {playerID}");

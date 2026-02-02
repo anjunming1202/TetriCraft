@@ -2,7 +2,7 @@
     "name": "InputControls",
     "maps": [
         {
-            "name": "Gameplay",
+            "name": "GameplayP1",
             "id": "902b5e19-e13c-4a8a-83f0-1d1034a2e3d0",
             "actions": [
                 {
@@ -139,6 +139,154 @@
                 {
                     "name": "",
                     "id": "91c8ec38-814f-4d79-9646-b35e4c05b742",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "GameplayP2",
+            "id": "f959bc57-e7d5-4a01-a9a2-b28da6cc896c",
+            "actions": [
+                {
+                    "name": "Left",
+                    "type": "Button",
+                    "id": "616acc07-3736-4722-92c8-6fc68f3e85f7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Right",
+                    "type": "Button",
+                    "id": "7262ad30-92f9-40a3-8d0d-440c4c48b619",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RotateCCW",
+                    "type": "Button",
+                    "id": "797c00fa-87d4-4a7f-97b1-7411010026f7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RotateCW",
+                    "type": "Button",
+                    "id": "84d4dd2b-5b0b-4a07-b80c-a50124b8e306",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SoftDrop",
+                    "type": "Button",
+                    "id": "b70e949d-68a0-44f1-a96e-c252e53ed60f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "HardDrop",
+                    "type": "Button",
+                    "id": "c0f1ba06-ba0c-4109-9976-33c900486c0c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "74a31cab-65d9-44eb-8f74-489bf47daf8d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "4a664f0c-0217-4985-a4cb-3c66f86e8ad9",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Left",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8f3f2701-a99e-442f-84b4-1146e102d292",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Right",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "171a626f-16fe-49b3-a7e3-dd61f8b2ed9e",
+                    "path": "<Keyboard>/numpad1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RotateCCW",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c7f6a885-0694-416e-94e3-77a91aa3a5c0",
+                    "path": "<Keyboard>/numpad2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RotateCW",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4bc36bd7-661e-45bd-9a83-49068aaabe20",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SoftDrop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "425a1428-f281-4bdc-ac7a-1335135de4b4",
+                    "path": "<Keyboard>/numpad0",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "HardDrop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ba3a27fc-f1c8-4c30-a7d2-2c5154a24edc",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",

@@ -24,7 +24,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     ""name"": ""InputControls"",
     ""maps"": [
         {
-            ""name"": ""Gameplay"",
+            ""name"": ""GameplayP1"",
             ""id"": ""902b5e19-e13c-4a8a-83f0-1d1034a2e3d0"",
             ""actions"": [
                 {
@@ -161,6 +161,154 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""91c8ec38-814f-4d79-9646-b35e4c05b742"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""GameplayP2"",
+            ""id"": ""f959bc57-e7d5-4a01-a9a2-b28da6cc896c"",
+            ""actions"": [
+                {
+                    ""name"": ""Left"",
+                    ""type"": ""Button"",
+                    ""id"": ""616acc07-3736-4722-92c8-6fc68f3e85f7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Right"",
+                    ""type"": ""Button"",
+                    ""id"": ""7262ad30-92f9-40a3-8d0d-440c4c48b619"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RotateCCW"",
+                    ""type"": ""Button"",
+                    ""id"": ""797c00fa-87d4-4a7f-97b1-7411010026f7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RotateCW"",
+                    ""type"": ""Button"",
+                    ""id"": ""84d4dd2b-5b0b-4a07-b80c-a50124b8e306"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SoftDrop"",
+                    ""type"": ""Button"",
+                    ""id"": ""b70e949d-68a0-44f1-a96e-c252e53ed60f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""HardDrop"",
+                    ""type"": ""Button"",
+                    ""id"": ""c0f1ba06-ba0c-4109-9976-33c900486c0c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Pause"",
+                    ""type"": ""Button"",
+                    ""id"": ""74a31cab-65d9-44eb-8f74-489bf47daf8d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""4a664f0c-0217-4985-a4cb-3c66f86e8ad9"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8f3f2701-a99e-442f-84b4-1146e102d292"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""171a626f-16fe-49b3-a7e3-dd61f8b2ed9e"",
+                    ""path"": ""<Keyboard>/numpad1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RotateCCW"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c7f6a885-0694-416e-94e3-77a91aa3a5c0"",
+                    ""path"": ""<Keyboard>/numpad2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RotateCW"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4bc36bd7-661e-45bd-9a83-49068aaabe20"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SoftDrop"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""425a1428-f281-4bdc-ac7a-1335135de4b4"",
+                    ""path"": ""<Keyboard>/numpad0"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HardDrop"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ba3a27fc-f1c8-4c30-a7d2-2c5154a24edc"",
                     ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -403,15 +551,24 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
     ],
     ""controlSchemes"": []
 }");
-        // Gameplay
-        m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
-        m_Gameplay_Left = m_Gameplay.FindAction("Left", throwIfNotFound: true);
-        m_Gameplay_Right = m_Gameplay.FindAction("Right", throwIfNotFound: true);
-        m_Gameplay_RotateCCW = m_Gameplay.FindAction("RotateCCW", throwIfNotFound: true);
-        m_Gameplay_RotateCW = m_Gameplay.FindAction("RotateCW", throwIfNotFound: true);
-        m_Gameplay_SoftDrop = m_Gameplay.FindAction("SoftDrop", throwIfNotFound: true);
-        m_Gameplay_HardDrop = m_Gameplay.FindAction("HardDrop", throwIfNotFound: true);
-        m_Gameplay_Pause = m_Gameplay.FindAction("Pause", throwIfNotFound: true);
+        // GameplayP1
+        m_GameplayP1 = asset.FindActionMap("GameplayP1", throwIfNotFound: true);
+        m_GameplayP1_Left = m_GameplayP1.FindAction("Left", throwIfNotFound: true);
+        m_GameplayP1_Right = m_GameplayP1.FindAction("Right", throwIfNotFound: true);
+        m_GameplayP1_RotateCCW = m_GameplayP1.FindAction("RotateCCW", throwIfNotFound: true);
+        m_GameplayP1_RotateCW = m_GameplayP1.FindAction("RotateCW", throwIfNotFound: true);
+        m_GameplayP1_SoftDrop = m_GameplayP1.FindAction("SoftDrop", throwIfNotFound: true);
+        m_GameplayP1_HardDrop = m_GameplayP1.FindAction("HardDrop", throwIfNotFound: true);
+        m_GameplayP1_Pause = m_GameplayP1.FindAction("Pause", throwIfNotFound: true);
+        // GameplayP2
+        m_GameplayP2 = asset.FindActionMap("GameplayP2", throwIfNotFound: true);
+        m_GameplayP2_Left = m_GameplayP2.FindAction("Left", throwIfNotFound: true);
+        m_GameplayP2_Right = m_GameplayP2.FindAction("Right", throwIfNotFound: true);
+        m_GameplayP2_RotateCCW = m_GameplayP2.FindAction("RotateCCW", throwIfNotFound: true);
+        m_GameplayP2_RotateCW = m_GameplayP2.FindAction("RotateCW", throwIfNotFound: true);
+        m_GameplayP2_SoftDrop = m_GameplayP2.FindAction("SoftDrop", throwIfNotFound: true);
+        m_GameplayP2_HardDrop = m_GameplayP2.FindAction("HardDrop", throwIfNotFound: true);
+        m_GameplayP2_Pause = m_GameplayP2.FindAction("Pause", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -477,36 +634,36 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // Gameplay
-    private readonly InputActionMap m_Gameplay;
-    private List<IGameplayActions> m_GameplayActionsCallbackInterfaces = new List<IGameplayActions>();
-    private readonly InputAction m_Gameplay_Left;
-    private readonly InputAction m_Gameplay_Right;
-    private readonly InputAction m_Gameplay_RotateCCW;
-    private readonly InputAction m_Gameplay_RotateCW;
-    private readonly InputAction m_Gameplay_SoftDrop;
-    private readonly InputAction m_Gameplay_HardDrop;
-    private readonly InputAction m_Gameplay_Pause;
-    public struct GameplayActions
+    // GameplayP1
+    private readonly InputActionMap m_GameplayP1;
+    private List<IGameplayP1Actions> m_GameplayP1ActionsCallbackInterfaces = new List<IGameplayP1Actions>();
+    private readonly InputAction m_GameplayP1_Left;
+    private readonly InputAction m_GameplayP1_Right;
+    private readonly InputAction m_GameplayP1_RotateCCW;
+    private readonly InputAction m_GameplayP1_RotateCW;
+    private readonly InputAction m_GameplayP1_SoftDrop;
+    private readonly InputAction m_GameplayP1_HardDrop;
+    private readonly InputAction m_GameplayP1_Pause;
+    public struct GameplayP1Actions
     {
         private @InputControls m_Wrapper;
-        public GameplayActions(@InputControls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Left => m_Wrapper.m_Gameplay_Left;
-        public InputAction @Right => m_Wrapper.m_Gameplay_Right;
-        public InputAction @RotateCCW => m_Wrapper.m_Gameplay_RotateCCW;
-        public InputAction @RotateCW => m_Wrapper.m_Gameplay_RotateCW;
-        public InputAction @SoftDrop => m_Wrapper.m_Gameplay_SoftDrop;
-        public InputAction @HardDrop => m_Wrapper.m_Gameplay_HardDrop;
-        public InputAction @Pause => m_Wrapper.m_Gameplay_Pause;
-        public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
+        public GameplayP1Actions(@InputControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Left => m_Wrapper.m_GameplayP1_Left;
+        public InputAction @Right => m_Wrapper.m_GameplayP1_Right;
+        public InputAction @RotateCCW => m_Wrapper.m_GameplayP1_RotateCCW;
+        public InputAction @RotateCW => m_Wrapper.m_GameplayP1_RotateCW;
+        public InputAction @SoftDrop => m_Wrapper.m_GameplayP1_SoftDrop;
+        public InputAction @HardDrop => m_Wrapper.m_GameplayP1_HardDrop;
+        public InputAction @Pause => m_Wrapper.m_GameplayP1_Pause;
+        public InputActionMap Get() { return m_Wrapper.m_GameplayP1; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(GameplayActions set) { return set.Get(); }
-        public void AddCallbacks(IGameplayActions instance)
+        public static implicit operator InputActionMap(GameplayP1Actions set) { return set.Get(); }
+        public void AddCallbacks(IGameplayP1Actions instance)
         {
-            if (instance == null || m_Wrapper.m_GameplayActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_GameplayActionsCallbackInterfaces.Add(instance);
+            if (instance == null || m_Wrapper.m_GameplayP1ActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GameplayP1ActionsCallbackInterfaces.Add(instance);
             @Left.started += instance.OnLeft;
             @Left.performed += instance.OnLeft;
             @Left.canceled += instance.OnLeft;
@@ -530,7 +687,7 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
             @Pause.canceled += instance.OnPause;
         }
 
-        private void UnregisterCallbacks(IGameplayActions instance)
+        private void UnregisterCallbacks(IGameplayP1Actions instance)
         {
             @Left.started -= instance.OnLeft;
             @Left.performed -= instance.OnLeft;
@@ -555,21 +712,115 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
             @Pause.canceled -= instance.OnPause;
         }
 
-        public void RemoveCallbacks(IGameplayActions instance)
+        public void RemoveCallbacks(IGameplayP1Actions instance)
         {
-            if (m_Wrapper.m_GameplayActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_GameplayP1ActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
-        public void SetCallbacks(IGameplayActions instance)
+        public void SetCallbacks(IGameplayP1Actions instance)
         {
-            foreach (var item in m_Wrapper.m_GameplayActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_GameplayP1ActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_GameplayActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_GameplayP1ActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
-    public GameplayActions @Gameplay => new GameplayActions(this);
+    public GameplayP1Actions @GameplayP1 => new GameplayP1Actions(this);
+
+    // GameplayP2
+    private readonly InputActionMap m_GameplayP2;
+    private List<IGameplayP2Actions> m_GameplayP2ActionsCallbackInterfaces = new List<IGameplayP2Actions>();
+    private readonly InputAction m_GameplayP2_Left;
+    private readonly InputAction m_GameplayP2_Right;
+    private readonly InputAction m_GameplayP2_RotateCCW;
+    private readonly InputAction m_GameplayP2_RotateCW;
+    private readonly InputAction m_GameplayP2_SoftDrop;
+    private readonly InputAction m_GameplayP2_HardDrop;
+    private readonly InputAction m_GameplayP2_Pause;
+    public struct GameplayP2Actions
+    {
+        private @InputControls m_Wrapper;
+        public GameplayP2Actions(@InputControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Left => m_Wrapper.m_GameplayP2_Left;
+        public InputAction @Right => m_Wrapper.m_GameplayP2_Right;
+        public InputAction @RotateCCW => m_Wrapper.m_GameplayP2_RotateCCW;
+        public InputAction @RotateCW => m_Wrapper.m_GameplayP2_RotateCW;
+        public InputAction @SoftDrop => m_Wrapper.m_GameplayP2_SoftDrop;
+        public InputAction @HardDrop => m_Wrapper.m_GameplayP2_HardDrop;
+        public InputAction @Pause => m_Wrapper.m_GameplayP2_Pause;
+        public InputActionMap Get() { return m_Wrapper.m_GameplayP2; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(GameplayP2Actions set) { return set.Get(); }
+        public void AddCallbacks(IGameplayP2Actions instance)
+        {
+            if (instance == null || m_Wrapper.m_GameplayP2ActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GameplayP2ActionsCallbackInterfaces.Add(instance);
+            @Left.started += instance.OnLeft;
+            @Left.performed += instance.OnLeft;
+            @Left.canceled += instance.OnLeft;
+            @Right.started += instance.OnRight;
+            @Right.performed += instance.OnRight;
+            @Right.canceled += instance.OnRight;
+            @RotateCCW.started += instance.OnRotateCCW;
+            @RotateCCW.performed += instance.OnRotateCCW;
+            @RotateCCW.canceled += instance.OnRotateCCW;
+            @RotateCW.started += instance.OnRotateCW;
+            @RotateCW.performed += instance.OnRotateCW;
+            @RotateCW.canceled += instance.OnRotateCW;
+            @SoftDrop.started += instance.OnSoftDrop;
+            @SoftDrop.performed += instance.OnSoftDrop;
+            @SoftDrop.canceled += instance.OnSoftDrop;
+            @HardDrop.started += instance.OnHardDrop;
+            @HardDrop.performed += instance.OnHardDrop;
+            @HardDrop.canceled += instance.OnHardDrop;
+            @Pause.started += instance.OnPause;
+            @Pause.performed += instance.OnPause;
+            @Pause.canceled += instance.OnPause;
+        }
+
+        private void UnregisterCallbacks(IGameplayP2Actions instance)
+        {
+            @Left.started -= instance.OnLeft;
+            @Left.performed -= instance.OnLeft;
+            @Left.canceled -= instance.OnLeft;
+            @Right.started -= instance.OnRight;
+            @Right.performed -= instance.OnRight;
+            @Right.canceled -= instance.OnRight;
+            @RotateCCW.started -= instance.OnRotateCCW;
+            @RotateCCW.performed -= instance.OnRotateCCW;
+            @RotateCCW.canceled -= instance.OnRotateCCW;
+            @RotateCW.started -= instance.OnRotateCW;
+            @RotateCW.performed -= instance.OnRotateCW;
+            @RotateCW.canceled -= instance.OnRotateCW;
+            @SoftDrop.started -= instance.OnSoftDrop;
+            @SoftDrop.performed -= instance.OnSoftDrop;
+            @SoftDrop.canceled -= instance.OnSoftDrop;
+            @HardDrop.started -= instance.OnHardDrop;
+            @HardDrop.performed -= instance.OnHardDrop;
+            @HardDrop.canceled -= instance.OnHardDrop;
+            @Pause.started -= instance.OnPause;
+            @Pause.performed -= instance.OnPause;
+            @Pause.canceled -= instance.OnPause;
+        }
+
+        public void RemoveCallbacks(IGameplayP2Actions instance)
+        {
+            if (m_Wrapper.m_GameplayP2ActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IGameplayP2Actions instance)
+        {
+            foreach (var item in m_Wrapper.m_GameplayP2ActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_GameplayP2ActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public GameplayP2Actions @GameplayP2 => new GameplayP2Actions(this);
 
     // UI
     private readonly InputActionMap m_UI;
@@ -648,7 +899,17 @@ public partial class @InputControls: IInputActionCollection2, IDisposable
         }
     }
     public UIActions @UI => new UIActions(this);
-    public interface IGameplayActions
+    public interface IGameplayP1Actions
+    {
+        void OnLeft(InputAction.CallbackContext context);
+        void OnRight(InputAction.CallbackContext context);
+        void OnRotateCCW(InputAction.CallbackContext context);
+        void OnRotateCW(InputAction.CallbackContext context);
+        void OnSoftDrop(InputAction.CallbackContext context);
+        void OnHardDrop(InputAction.CallbackContext context);
+        void OnPause(InputAction.CallbackContext context);
+    }
+    public interface IGameplayP2Actions
     {
         void OnLeft(InputAction.CallbackContext context);
         void OnRight(InputAction.CallbackContext context);

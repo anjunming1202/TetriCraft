@@ -19,17 +19,17 @@ public class GameInputController : MonoBehaviour
 
     private void OnEnable()
     {
-        gameManager.OnGameStart += () => playerInput.SwitchCurrentActionMap("Gameplay");
+        gameManager.OnGameStart += () => playerInput.SwitchCurrentActionMap(controller.actionMapName);
         gameManager.OnPause += () => playerInput.SwitchCurrentActionMap("UI");
-        gameManager.OnResume += () => playerInput.SwitchCurrentActionMap("Gameplay");
+        gameManager.OnResume += () => playerInput.SwitchCurrentActionMap(controller.actionMapName);
         gameManager.OnGameOver += () => playerInput.SwitchCurrentActionMap("UI");
     }
 
     private void OnDisable()
     {
-        gameManager.OnGameStart -= () => playerInput.SwitchCurrentActionMap("Gameplay");
+        gameManager.OnGameStart -= () => playerInput.SwitchCurrentActionMap(controller.actionMapName);
         gameManager.OnPause -= () => playerInput.SwitchCurrentActionMap("UI");
-        gameManager.OnResume -= () => playerInput.SwitchCurrentActionMap("Gameplay");
+        gameManager.OnResume -= () => playerInput.SwitchCurrentActionMap(controller.actionMapName);
         gameManager.OnGameOver -= () => playerInput.SwitchCurrentActionMap("UI");
     }
 

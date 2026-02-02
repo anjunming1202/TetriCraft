@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 // Game Manager for managing the whole game
 public class GameManager : MonoBehaviour

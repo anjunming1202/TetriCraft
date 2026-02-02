@@ -46,6 +46,7 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
         if (Pending != null)
         {
             Current = Clone(Pending);
+            Debug.Log($"Current: {JsonUtility.ToJson(Current)}");
         }
         Pending = null;
         UpdateSettings(Current);

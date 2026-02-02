@@ -262,8 +262,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0bccefe7ae190c4cacd298827a89507, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager1P: {fileID: 2464638}
-  gameManager2P: {fileID: 1248932361}
+  gameManagerP1: {fileID: 2464638}
+  gameManagerP2: {fileID: 1248932361}
+  controllerPlayerInputP1: {fileID: 6114805197209585005}
+  controllerPlayerInputP2: {fileID: 420218144}
 --- !u!4 &22394620
 Transform:
   m_ObjectHideFlags: 0
@@ -1658,7 +1660,7 @@ GameObject:
   - component: {fileID: 420218144}
   - component: {fileID: 420218143}
   m_Layer: 0
-  m_Name: Falling Tetromino
+  m_Name: Falling Tetromino P2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1677,6 +1679,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerID: 1
+  actionMapName: GameplayP2
   speedDrop: 1
   speedSoftDrop: 8
   keyInputInterval: 0.2
@@ -1767,9 +1770,37 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: ffcb18c9-16d6-4a0c-a9a6-19fcc776cb0a
     m_ActionName: UI/Click[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 616acc07-3736-4722-92c8-6fc68f3e85f7
+    m_ActionName: GameplayP2/Left[/Keyboard/leftArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 7262ad30-92f9-40a3-8d0d-440c4c48b619
+    m_ActionName: GameplayP2/Right[/Keyboard/rightArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 797c00fa-87d4-4a7f-97b1-7411010026f7
+    m_ActionName: GameplayP2/RotateCCW[/Keyboard/numpad1]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 84d4dd2b-5b0b-4a07-b80c-a50124b8e306
+    m_ActionName: GameplayP2/RotateCW[/Keyboard/numpad2]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b70e949d-68a0-44f1-a96e-c252e53ed60f
+    m_ActionName: GameplayP2/SoftDrop[/Keyboard/downArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c0f1ba06-ba0c-4109-9976-33c900486c0c
+    m_ActionName: GameplayP2/HardDrop[/Keyboard/numpad0]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 74a31cab-65d9-44eb-8f74-489bf47daf8d
+    m_ActionName: GameplayP2/Pause[/Keyboard/escape]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: Gameplay
+  m_DefaultActionMap: GameplayP2
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 393701454}
 --- !u!4 &420218145
@@ -6091,6 +6122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerID: 0
+  actionMapName: GameplayP1
   speedDrop: 1
   speedSoftDrop: 8
   keyInputInterval: 0.2
@@ -6183,7 +6215,7 @@ GameObject:
   - component: {fileID: 6114805197209585005}
   - component: {fileID: 6114805197209585006}
   m_Layer: 0
-  m_Name: Falling Tetromino
+  m_Name: Falling Tetromino P2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6369,9 +6401,37 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: ffcb18c9-16d6-4a0c-a9a6-19fcc776cb0a
     m_ActionName: UI/Click[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 616acc07-3736-4722-92c8-6fc68f3e85f7
+    m_ActionName: GameplayP2/Left[/Keyboard/leftArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 7262ad30-92f9-40a3-8d0d-440c4c48b619
+    m_ActionName: GameplayP2/Right[/Keyboard/rightArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 797c00fa-87d4-4a7f-97b1-7411010026f7
+    m_ActionName: GameplayP2/RotateCCW[/Keyboard/numpad1]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 84d4dd2b-5b0b-4a07-b80c-a50124b8e306
+    m_ActionName: GameplayP2/RotateCW[/Keyboard/numpad2]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b70e949d-68a0-44f1-a96e-c252e53ed60f
+    m_ActionName: GameplayP2/SoftDrop[/Keyboard/downArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c0f1ba06-ba0c-4109-9976-33c900486c0c
+    m_ActionName: GameplayP2/HardDrop[/Keyboard/numpad0]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 74a31cab-65d9-44eb-8f74-489bf47daf8d
+    m_ActionName: GameplayP2/Pause[/Keyboard/escape]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: Gameplay
+  m_DefaultActionMap: GameplayP1
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 519420031}
 --- !u!114 &6114805197209585006
