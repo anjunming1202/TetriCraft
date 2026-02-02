@@ -70,6 +70,7 @@ public class RebindButtonUI : MonoBehaviour
     public void Init(PlayerInput bindedPlayerInput)
     {
         playerInput = bindedPlayerInput;
+        Debug.Log($"PlayerInput set as {playerInput.name}");
     }
 
     void OnEnable()
@@ -321,7 +322,9 @@ public class RebindButtonUI : MonoBehaviour
 
     private InputAction GetRuntimeAction(PlayerInput playerInput)
     {
-        return playerInput.actions.FindAction(
+        //Debug.Log($"GetRuntimeAction {playerInput.actions.FindAction(actionReference.action.name,throwIfNotFound: true)}");
+        var map = playerInput.actions.FindActionMap(actionReference.action.actionMap.name);
+        return map.FindAction(
             actionReference.action.name,
             throwIfNotFound: true
         );

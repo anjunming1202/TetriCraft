@@ -259,5 +259,7 @@ MonoBehaviour:
     prefab: {fileID: 2883948444899245850, guid: 972ad01e158ebe841b5195a46063a714, type: 3}
   - key: KeyBinds
     prefab: {fileID: 2883948444899245850, guid: e4a9b5cbdbff85340be2b7f86e780423, type: 3}
+  - key: KeyBinds2P
+    prefab: {fileID: 2883948444899245850, guid: a281c5caf943e6643b1ab24dc478a777, type: 3}
   rootCanvas: {fileID: 2049698534689748878}
   modalBlockerPrefab: {fileID: 6934398333403512065, guid: 9ad47cf24540f1e4890558f9f8ba970d, type: 3}

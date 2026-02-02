@@ -6215,7 +6215,7 @@ GameObject:
   - component: {fileID: 6114805197209585005}
   - component: {fileID: 6114805197209585006}
   m_Layer: 0
-  m_Name: Falling Tetromino P2
+  m_Name: Falling Tetromino P1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
