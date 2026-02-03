@@ -5,7 +5,7 @@ using UnityEngine;
 public class BlockSpawnDebugger : MonoBehaviour
 {
     [SerializeField] private GameManager gameManager;
-    private static BlockSpawnDebugger _instance;
+    [SerializeField] private Camera camera;
 
     public MapManager debuggedMap;
     public BlockID blockSpawned;
@@ -13,14 +13,6 @@ public class BlockSpawnDebugger : MonoBehaviour
 
     private void Awake()
     {
-        if (_instance == null)
-        {
-            _instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
     }
 
     void Update()
@@ -82,9 +74,7 @@ public class BlockSpawnDebugger : MonoBehaviour
     private void GetSelectedPosition()
     {
         Vector3 cursorScreenPosition = Input.mousePosition;
-        cursorScreenPosition.z = Mathf.Abs(Camera.main.transform.position.z);
-
-        cursorPosition = Camera.main.ScreenToWorldPoint(cursorScreenPosition);
+        cursorPosition = CoordinateSystems.GetMouseWorldPosition(camera, cursorScreenPosition);
         selectedGridPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToGrid(cursorPosition);        
     }
 
