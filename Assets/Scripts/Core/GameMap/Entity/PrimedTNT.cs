@@ -19,7 +19,6 @@ public class PrimedTNT : Entity
         spriteRenderer = GetComponent<SpriteRenderer>();
         material = GetComponent<Material>();
         props = new MaterialPropertyBlock();
-        map = FindObjectOfType<MapManager>();
     }
 
     protected void Start()

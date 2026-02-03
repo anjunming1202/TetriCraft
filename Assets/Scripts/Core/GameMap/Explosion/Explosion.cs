@@ -6,7 +6,7 @@ using static UnityEngine.UI.Image;
 
 public class Explosion : MonoBehaviour
 {
-    public Vector2 position;
+    public Vector2 mapPosition;
     public float radius;
     public int blastIntensity = 50;
     public float minDamagePerHit = 0.1f;
@@ -15,10 +15,10 @@ public class Explosion : MonoBehaviour
 
     public float repellingStrength = 5f;
 
-    public void Set(MapManager map, Vector2 position, float radius)
+    public void Set(MapManager map, Vector2 mapPosition, float radius)
     {
         this.map = map;
-        this.position = position;
+        this.mapPosition = mapPosition;
         this.radius = radius;
     }
 
@@ -57,6 +57,9 @@ public class Explosion : MonoBehaviour
             // random damage per hit
             float damagePerHit = Random.Range(minDamagePerHit, maxDamagePerHit);
 
+            // world position
+            Vector2 worldPosition = transform.position;
+
             // random direction
             Vector2 direction = Random.insideUnitCircle.normalized;
 
@@ -64,7 +67,7 @@ public class Explosion : MonoBehaviour
             float rayLength = Random.Range(minRayLength, radius);
 
             // ray detects all hits
-            RaycastHit2D[] hits = Physics2D.RaycastAll(position, direction, radius);
+            RaycastHit2D[] hits = Physics2D.RaycastAll(worldPosition, direction, radius);
 
             // sort by distance => hits from first to last
             System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
@@ -96,7 +99,7 @@ public class Explosion : MonoBehaviour
             }
 
             // visualisation
-            Debug.DrawRay(position, direction * rayLength, Color32.Lerp(Color.blue, Color.red, (damagePerHit - minDamagePerHit) / (maxDamagePerHit - minDamagePerHit)), 2f);
+            Debug.DrawRay(worldPosition, direction * rayLength, Color32.Lerp(Color.blue, Color.red, (damagePerHit - minDamagePerHit) / (maxDamagePerHit - minDamagePerHit)), 2f);
         }
 
         // kill dead targets & reset alived targets
