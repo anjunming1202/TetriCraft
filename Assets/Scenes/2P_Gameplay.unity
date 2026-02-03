@@ -3547,6 +3547,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 2464638}
+  camera: {fileID: 519420031}
   debuggedMap: {fileID: 157382677222920330}
   blockSpawned: 15
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
@@ -3563,6 +3564,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 2464638}
+  camera: {fileID: 0}
   debuggedMap: {fileID: 157382677222920330}
   lockedColor: {r: 0, g: 1, b: 0.054327965, a: 1}
   tetrominoColor: {r: 1, g: 0, b: 0, a: 1}
@@ -5830,6 +5832,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 1248932361}
+  camera: {fileID: 393701454}
   debuggedMap: {fileID: 87705843}
   blockSpawned: 15
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
@@ -5846,6 +5849,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 1248932361}
+  camera: {fileID: 0}
   debuggedMap: {fileID: 87705843}
   lockedColor: {r: 0, g: 1, b: 0.054327965, a: 1}
   tetrominoColor: {r: 1, g: 0, b: 0, a: 1}

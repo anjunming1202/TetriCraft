@@ -5,21 +5,8 @@ using UnityEditor;
 
 public class MapDebugger : MonoBehaviour
 {
-    [SerializeField] GameManager gameManager;
-
-    private static MapDebugger _instance;
-    public static MapDebugger Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                GameObject debuggerObject = new GameObject("Debugger");
-                _instance = debuggerObject.AddComponent<MapDebugger>();
-            }
-            return _instance;
-        }
-    }
+    [SerializeField] private GameManager gameManager;
+    [SerializeField] private Camera camera;
 
     public MapManager debuggedMap;
     public Color lockedColor;
@@ -41,14 +28,6 @@ public class MapDebugger : MonoBehaviour
 
     private void Awake()
     {
-        if (_instance != null && _instance != this)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            _instance = this;
-        }
     }
 
     private void Update()
@@ -149,8 +128,7 @@ public class MapDebugger : MonoBehaviour
     private void GetMousePositions()
     {
         Vector3 cursorScreenPosition = Input.mousePosition;
-        cursorScreenPosition.z = Mathf.Abs(Camera.main.transform.position.z);
-        cursorPosition = Camera.main.ScreenToWorldPoint(cursorScreenPosition);
+        cursorPosition = CoordinateSystems.GetMouseWorldPosition(camera, cursorScreenPosition);
         cursorGridPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToGrid(cursorPosition);
         cursorMapPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToMap(cursorPosition);
     }
