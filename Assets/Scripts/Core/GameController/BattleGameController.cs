@@ -9,6 +9,11 @@ public class BattleGameController : GameController
     [SerializeField] PlayerInput controllerPlayerInputP1;
     [SerializeField] PlayerInput controllerPlayerInputP2;
 
+    public override GameManager GetGameManager(PlayerID playerID)
+    {
+        return playerID == PlayerID.P1 ? gameManagerP1 : gameManagerP2;
+    }
+
     public override MapBoundaryData GetBoundaryData(PlayerID playerID)
     {
         return playerID == PlayerID.P1 ? gameManagerP1.boundaryData : gameManagerP2.boundaryData;

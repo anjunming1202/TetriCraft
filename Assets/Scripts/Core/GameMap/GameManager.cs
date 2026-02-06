@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // Game Manager for managing the whole game
+[RequireComponent(typeof(GameInputController))]
 public class GameManager : MonoBehaviour
 {
     [SerializeField] public PlayerID playerID;

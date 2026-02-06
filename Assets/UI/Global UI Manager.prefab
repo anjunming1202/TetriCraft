@@ -186,7 +186,7 @@ MonoBehaviour:
   m_LeftClickAction: {fileID: -1374413558646925839, guid: 0620e3752eff1ad4da6790a303a051aa, type: 3}
   m_MiddleClickAction: {fileID: 0}
   m_RightClickAction: {fileID: 0}
-  m_ScrollWheelAction: {fileID: 0}
+  m_ScrollWheelAction: {fileID: -5247994420379981698, guid: 0620e3752eff1ad4da6790a303a051aa, type: 3}
   m_TrackedDevicePositionAction: {fileID: 0}
   m_TrackedDeviceOrientationAction: {fileID: 0}
   m_DeselectOnBackgroundClick: 1
@@ -263,3 +263,4 @@ MonoBehaviour:
     prefab: {fileID: 2883948444899245850, guid: a281c5caf943e6643b1ab24dc478a777, type: 3}
   rootCanvas: {fileID: 2049698534689748878}
   modalBlockerPrefab: {fileID: 6934398333403512065, guid: 9ad47cf24540f1e4890558f9f8ba970d, type: 3}
+  backActionRef: {fileID: -8226266369479630806, guid: 0620e3752eff1ad4da6790a303a051aa, type: 3}

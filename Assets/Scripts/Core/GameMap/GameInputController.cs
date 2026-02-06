@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(GameManager))]
 public class GameInputController : MonoBehaviour
 {
-    private GameManager gameManager;
-    [SerializeField] private TetrominoController controller;
+    protected GameManager gameManager;
+    [SerializeField] protected TetrominoController controller;
 
-    private PlayerInput playerInput;
+    protected PlayerInput playerInput;
 
-    private void Awake()
+    protected void Awake()
     {
         gameManager = GetComponent<GameManager>();
         playerInput = controller.GetComponent<PlayerInput>();
@@ -19,29 +20,37 @@ public class GameInputController : MonoBehaviour
 
     private void OnEnable()
     {
-        gameManager.OnGameStart += () => playerInput.SwitchCurrentActionMap(controller.actionMapName);
-        gameManager.OnPause += () => playerInput.SwitchCurrentActionMap("UI");
-        gameManager.OnResume += () => playerInput.SwitchCurrentActionMap(controller.actionMapName);
-        gameManager.OnGameOver += () => playerInput.SwitchCurrentActionMap("UI");
+        gameManager.OnGameStart += OnGameStart;
+        gameManager.OnPause += OnGamePaused;
+        gameManager.OnResume += OnGameResumed;
+        gameManager.OnGameOver += OnGameOver;
     }
 
     private void OnDisable()
     {
-        gameManager.OnGameStart -= () => playerInput.SwitchCurrentActionMap(controller.actionMapName);
-        gameManager.OnPause -= () => playerInput.SwitchCurrentActionMap("UI");
-        gameManager.OnResume -= () => playerInput.SwitchCurrentActionMap(controller.actionMapName);
-        gameManager.OnGameOver -= () => playerInput.SwitchCurrentActionMap("UI");
+        gameManager.OnGameStart -= OnGameStart;
+        gameManager.OnPause -= OnGamePaused;
+        gameManager.OnResume -= OnGameResumed;
+        gameManager.OnGameOver -= OnGameOver;
     }
 
-    // Update is called once per frame
-    void Update()
+    protected virtual void OnGameStart()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (!gameManager.IsPaused)
-                gameManager.PauseGame();
-            else
-                gameManager.ResumeGame();
-        }
+        playerInput.SwitchCurrentActionMap(controller.actionMapName);
+    }
+
+    protected virtual void OnGamePaused()
+    {
+        playerInput.SwitchCurrentActionMap("UI");
+    }
+
+    protected virtual void OnGameResumed()
+    {
+        playerInput.SwitchCurrentActionMap(controller.actionMapName);
+    }
+
+    protected virtual void OnGameOver()
+    {
+        playerInput.SwitchCurrentActionMap("UI");
     }
 }

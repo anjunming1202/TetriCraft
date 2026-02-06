@@ -32,7 +32,7 @@ public class RebindManager : MonoBehaviour
 
     private void LoadBindings(SettingsData settingsData)
     {
-        Debug.Log($"try load bindings for {playerID}");
+        //Debug.Log($"try load bindings for {playerID}");
         string json = settingsData[playerID].inputBindingsJson;
         Debug.Log(json);
         if (string.IsNullOrEmpty(json))

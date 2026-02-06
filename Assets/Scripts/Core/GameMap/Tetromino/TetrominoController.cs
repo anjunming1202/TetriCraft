@@ -48,7 +48,7 @@ public class TetrominoController : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
-        //playerInput.actions = Instantiate(playerInput.actions);
+        //playerInput.actions = InputRoot.Instance.playerInput.actions;
     }
 
     private void OnEnable()

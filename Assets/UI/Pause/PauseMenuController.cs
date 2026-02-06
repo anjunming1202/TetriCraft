@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class PauseMenuController : MonoBehaviour
 {
-    [SerializeField] GameManager gameManager;
-    private PauseMenuPanel pauseManuPanel;
+    protected PauseManager pauseManager;
+
+    //[SerializeField] protected GameManager gameManager;
 
     private void Start()
     {
-        gameManager.OnPause += OnPause;
-        gameManager.OnResume += OnResume;
+        pauseManager = GetComponent<PauseManager>();
     }
 
-    public void OnResumeGame()
+    public virtual void OnResumeGame()
     {
-        gameManager.ResumeGame();
+        pauseManager.OnResumeTriggered();
     }
 
     public void OnSettings()
@@ -30,20 +30,5 @@ public class PauseMenuController : MonoBehaviour
         //GameManager.Instance.Save();
         SceneLoader.Instance.LoadScene("MainMenuScene");
         Time.timeScale = 1.0f;
-    }
-
-    private void OnPause()
-    {
-        if (pauseManuPanel != null && pauseManuPanel.IsShown)
-            return;
-        pauseManuPanel = UIManager.Instance.ShowPanel<PauseMenuPanel>("PauseMenu");
-        pauseManuPanel.Init(this);
-    }
-
-    private void OnResume()
-    {
-        if (pauseManuPanel == null || !pauseManuPanel.IsShown)
-            return;
-        UIManager.Instance.HidePanel("PauseMenu");
     }
 }

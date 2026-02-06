@@ -13,7 +13,7 @@ public class RebindSubpanel : SettingsPanel
     protected override void Awake()
     {
         base.Awake();
-        playerInput = GameController.Instance.GetPlayerInput(PlayerID);
+        playerInput = InputRoot.Instance.playerInput; // persistent PlayerInput => just for a actions template to populate, modify, and save bindings
         foreach (var button in rebindButtons)
         {
             // init
@@ -40,17 +40,14 @@ public class RebindSubpanel : SettingsPanel
 
     private void SaveBindings(PlayerInput playerInput, SettingsData settingsData)
     {
-        Debug.Log("update bindings");
+        //Debug.Log("update bindings");
         var actions = playerInput.actions;
         if (actions != null)
         {
-            Debug.Log("save bindings");
             string json = actions.SaveBindingOverridesAsJson();
             settingsData[PlayerID].inputBindingsJson = json;
+            Debug.Log($"Saved bindings: PlayerID: {PlayerID}, Pending: {Pending[PlayerID].inputBindingsJson}");
         }
-        Debug.Log($"Pending: {Pending[PlayerID].inputBindingsJson}");
-        Debug.Log($"PlayerInput: {playerInput.gameObject.name}");
-        Debug.Log($"PlayerID: {PlayerID}");
     }
 
     private void CheckConflicts()

@@ -5,9 +5,6 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.Events;
 using TMPro;
-using UnityEngine.EventSystems;
-using Unity.VisualScripting;
-using System.Collections.Generic;
 
 /// <summary>
 /// RebindButtonUI (PlayerInput 版本)
@@ -94,7 +91,7 @@ public class RebindButtonUI : MonoBehaviour
             return;
         }
 
-        var action = GetRuntimeAction(playerInput);
+        var action = InputSystemUtility.GetRuntimeAction(playerInput, actionReference);
         if (action == null)
         {
             Debug.LogError($"[{nameof(RebindButtonUI)}] actionReference.action 为 null（检查 InputActionReference 配置）。");
@@ -279,7 +276,7 @@ public class RebindButtonUI : MonoBehaviour
     {
         if (actionReference == null || bindingText == null) return;
 
-        var action = GetRuntimeAction(playerInput);
+        var action = InputSystemUtility.GetRuntimeAction(playerInput, actionReference);
         if (action == null) return;
 
         // 取 binding 的可读字符串，例如 "Space" / "Left Ctrl" / "Gamepad button south"
@@ -296,7 +293,7 @@ public class RebindButtonUI : MonoBehaviour
     {
         if (actionReference == null) return;
 
-        var action = GetRuntimeAction(playerInput);
+        var action = InputSystemUtility.GetRuntimeAction(playerInput, actionReference);
         action.RemoveBindingOverride(bindingIndex);
         // update display
         UpdateBindingDisplay();
@@ -318,15 +315,5 @@ public class RebindButtonUI : MonoBehaviour
             StopCoroutine(timeoutCoroutine);
             timeoutCoroutine = null;
         }
-    }
-
-    private InputAction GetRuntimeAction(PlayerInput playerInput)
-    {
-        //Debug.Log($"GetRuntimeAction {playerInput.actions.FindAction(actionReference.action.name,throwIfNotFound: true)}");
-        var map = playerInput.actions.FindActionMap(actionReference.action.actionMap.name);
-        return map.FindAction(
-            actionReference.action.name,
-            throwIfNotFound: true
-        );
     }
 }

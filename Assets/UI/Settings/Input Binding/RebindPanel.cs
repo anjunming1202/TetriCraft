@@ -15,7 +15,7 @@ public class RebindPanel : SettingsPanel
     protected override void Awake()
     {
         base.Awake();
-        playerInput = GameController.Instance.GetPlayerInput(PlayerID);
+        playerInput = GameController.Instance.GetPlayerInput(PlayerID); // !
         foreach (var button in rebindButtons)
         {
             // init

@@ -9,5 +9,6 @@ public class InputRoot : PersistentSingleton<InputRoot>
     {
         base.Awake();
         //if (playerInput == null) Debug.LogError("PlayerInput not set in InputRoot");
+        playerInput.actions.Disable();
     }
 }

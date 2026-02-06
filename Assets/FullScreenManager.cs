@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class FullScreenManager : PersistentSingleton<FullScreenManager>
 {
@@ -11,7 +12,7 @@ public class FullScreenManager : PersistentSingleton<FullScreenManager>
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F11))
+        if (Keyboard.current.f11Key.wasPressedThisFrame) // currently simple implementation
             SetFullScreen(!Screen.fullScreen);
     }
 

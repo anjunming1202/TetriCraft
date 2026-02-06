@@ -6,6 +6,11 @@ public class SingleGameController : GameController
     [SerializeField] GameManager gameManager;
     [SerializeField] PlayerInput controllerPlayerInput;
 
+    public override GameManager GetGameManager(PlayerID playerID = PlayerID.P1)
+    {
+        return gameManager;
+    }
+
     public override MapBoundaryData GetBoundaryData(PlayerID playerID = PlayerID.P1)
     {
         return gameManager.boundaryData;
