@@ -11,4 +11,16 @@ public class InputRoot : PersistentSingleton<InputRoot>
         //if (playerInput == null) Debug.LogError("PlayerInput not set in InputRoot");
         playerInput.actions.Disable();
     }
+
+    // test
+    /*private void Update()
+    {
+        if (Keyboard.current.f5Key.wasPressedThisFrame)
+        {
+            if (playerInput.actions.enabled)
+                playerInput.actions.Disable();
+            else
+                playerInput.actions.Enable();
+        }
+    }*/
 }

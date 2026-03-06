@@ -199,7 +199,6 @@ GameObject:
   - component: {fileID: 22394620}
   - component: {fileID: 22394619}
   - component: {fileID: 22394621}
-  - component: {fileID: 22394622}
   - component: {fileID: 22394623}
   m_Layer: 0
   m_Name: GameController
@@ -257,18 +256,6 @@ MonoBehaviour:
   playerInput: {fileID: 6114805197209585005}
   pauseActionRef: {fileID: -929586273043662629, guid: 0620e3752eff1ad4da6790a303a051aa, type: 3}
   resumeActionRef: {fileID: -8226266369479630806, guid: 0620e3752eff1ad4da6790a303a051aa, type: 3}
---- !u!114 &22394622
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 22394618}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 632743e4aa5893f4fb1ad9e6fd155ecf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &22394623
 MonoBehaviour:
   m_ObjectHideFlags: 0
