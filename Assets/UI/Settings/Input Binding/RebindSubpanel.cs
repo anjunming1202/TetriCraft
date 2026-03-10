@@ -13,7 +13,7 @@ public class RebindSubpanel : SettingsPanel
     protected override void Awake()
     {
         base.Awake();
-        playerInput = InputRoot.Instance.playerInput; // persistent PlayerInput => just for a actions template to populate, modify, and save bindings
+        playerInput = InputRoot.GetRootPlayerInput(PlayerID); // persistent PlayerInput => just for a actions template to populate, modify, and save bindings
         foreach (var button in rebindButtons)
         {
             // init
