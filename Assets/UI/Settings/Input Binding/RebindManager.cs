@@ -16,7 +16,7 @@ public class RebindManager : MonoBehaviour
 
     private void OnEnable()
     {
-        SettingsManager.Instance.OnSettingsChanged += LoadBindings;
+        //SettingsManager.Instance.OnSettingsChanged += LoadBindings;
     }
 
     private void OnDisable()
@@ -26,6 +26,8 @@ public class RebindManager : MonoBehaviour
 
     private void Start()
     {
+        SettingsManager.Instance.OnSettingsChanged += LoadBindings;
+
         Debug.Assert(playerInput != null, $"{gameObject.name} PlayerID not set!");
         LoadBindings(SettingsManager.Current); // load
     }

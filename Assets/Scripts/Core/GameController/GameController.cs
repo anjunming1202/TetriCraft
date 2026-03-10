@@ -14,13 +14,13 @@ public abstract class GameController : Singleton<GameController>
     {
         base.Awake();
         // TODO: (perhaps) control all existing game managers from this single entrance
-
-        InputRoot.EnableOutOfGameUIInput();
     }
 
     protected void Start()
     {
         // TODO: (perhaps) control all existing game managers from this single entrance
+
+        InputRoot.EnableOutOfGameUIInput();
     }
 
     protected void Update()
