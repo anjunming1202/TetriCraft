@@ -17,10 +17,7 @@ public class MainMenuPanel : MenuPanel
 
     public void Init(MainMenuController mainMenuController)
     {
-        newGameButton.onClick.AddListener(mainMenuController.OnNewGame);
-        continueButton.onClick.AddListener(mainMenuController.OnContinue);
-        settingsButton.onClick.AddListener(mainMenuController.OnSettings);
-        quitButton.onClick.AddListener(mainMenuController.OnQuit);
+        // set in the inspector
     }
 
     protected override void Awake()

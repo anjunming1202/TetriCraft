@@ -4,6 +4,8 @@
     {
         var panel = UIManager.Instance.ShowPanel<MainMenuPanel>("MainMenu");
         panel.transform.SetAsFirstSibling();
+
+        InputRoot.EnableOutOfGameUIInput();
     }
 
     protected override void OnExit()

@@ -41,16 +41,6 @@ public class GameManager : MonoBehaviour
         InitialiseResources();
     }
 
-    private void OnEnable()
-    {
-
-    }
-
-    private void OnDisable()
-    {
-
-    }
-
     void Start()
     {
         // New game
