@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(GameManager))]
-public class GameInputControllerPlayOnly : GameInputController
+public class GameInputControllerLocalP2 : GameInputController
 {
     protected override void OnGamePaused()
     {

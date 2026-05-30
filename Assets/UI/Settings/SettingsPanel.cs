@@ -19,6 +19,13 @@ public abstract class SettingsPanel : MenuPanel
         PopulateData(SettingsManager.Current);*/
     }
 
+    protected override void OnClose()
+    {
+        base.OnClose();
+
+        SettingsManager.Instance.CancelEdit();
+    }
+
     private void OnEnable()
     {
         // Populate panel data

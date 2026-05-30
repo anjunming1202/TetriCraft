@@ -39,6 +39,7 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
         Pending = null;
         UpdateSettings(Current);
         isEditting= false;
+        Debug.Log("Cancelled Editting");
     }
 
     public void ApplyEdit()
@@ -50,7 +51,7 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
         }
         Pending = null;
         UpdateSettings(Current);
-        Debug.Log("Apply Settings");
+        Debug.Log("Applied Settings");
 
         Save();
 

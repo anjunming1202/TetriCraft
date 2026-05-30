@@ -279,6 +279,8 @@ public class RebindButtonUI : MonoBehaviour
         var action = InputSystemUtility.GetRuntimeAction(playerInput, actionReference);
         if (action == null) return;
 
+        Debug.Log($"Player {playerInput.name}, {action.name}");
+
         // 取 binding 的可读字符串，例如 "Space" / "Left Ctrl" / "Gamepad button south"
         // bindingIndex 是你在 Inspector 里配置的索引
         bindingText.text = $"[{action.GetBindingDisplayString(bindingIndex, InputBinding.DisplayStringOptions.DontUseShortDisplayNames)}]";
