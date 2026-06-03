@@ -5,7 +5,7 @@ using UnityEngine;
 public class BlockSpawnDebugger : MonoBehaviour
 {
     [SerializeField] private GameManager gameManager;
-    private static BlockSpawnDebugger _instance;
+    [SerializeField] private Camera camera;
 
     public MapManager debuggedMap;
     public BlockID blockSpawned;
@@ -13,14 +13,6 @@ public class BlockSpawnDebugger : MonoBehaviour
 
     private void Awake()
     {
-        if (_instance == null)
-        {
-            _instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
     }
 
     void Update()
@@ -73,7 +65,7 @@ public class BlockSpawnDebugger : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Vector3 centre = MapBoundaryData.GridToWorld(selectedGridPosition);
+        Vector3 centre = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).GridToWorld(selectedGridPosition);
         float width = MapBoundaryData.unitSize;
         Gizmos.color = selectedGridColor;
         Gizmos.DrawWireCube(centre, Vector3.one * width);
@@ -82,10 +74,8 @@ public class BlockSpawnDebugger : MonoBehaviour
     private void GetSelectedPosition()
     {
         Vector3 cursorScreenPosition = Input.mousePosition;
-        cursorScreenPosition.z = Mathf.Abs(Camera.main.transform.position.z);
-
-        cursorPosition = Camera.main.ScreenToWorldPoint(cursorScreenPosition);
-        selectedGridPosition = MapBoundaryData.WorldToGrid(cursorPosition);        
+        cursorPosition = CoordinateSystems.GetMouseWorldPosition(camera, cursorScreenPosition);
+        selectedGridPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToGrid(cursorPosition);        
     }
 
     private Vector3 cursorPosition;

@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class MainMenuController : Singleton<MainMenuController>
 {
-    [SerializeField] private string gameplayScene;
+    [SerializeField] private string gameplayScene1P;
+    [SerializeField] private string gameplaySceneLocal2P;
 
     protected override void Awake()
     {
@@ -11,20 +12,26 @@ public class MainMenuController : Singleton<MainMenuController>
         GetComponent<MainMenuPanel>().Init(this);
     }
 
-    public void OnNewGame()
+    public void OnNewGame1P()
     {
         // Clean old data
 
         // Load game scene
-        SceneLoader.Instance.LoadScene(gameplayScene);
+        SceneLoader.Instance.LoadScene(gameplayScene1P);
     }
 
-    public void OnContinue()
+    public void OnContinue1P()
     {
         // Load archive
 
         // Load game scene
-        SceneLoader.Instance.LoadScene(gameplayScene);
+        SceneLoader.Instance.LoadScene(gameplayScene1P);
+    }
+
+    public void OnNewGameLocal2P()
+    {
+        // Load game scene
+        SceneLoader.Instance.LoadScene(gameplaySceneLocal2P);
     }
 
     public void OnSettings()

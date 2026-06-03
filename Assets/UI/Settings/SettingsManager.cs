@@ -6,26 +6,30 @@ using UnityEngine;
 
 public class SettingsManager : PersistentSingleton<SettingsManager>
 {
-    public SettingsData Current { get; private set; }
-    public SettingsData Pending { get; private set; }// // explosed to settings controller to adjust settings
+    public static SettingsData Current { get; private set; }
+    public static SettingsData Pending { get; private set; }// // explosed to settings controller to adjust settings
     public bool isEditting = false;
 
+    //public event Action<GlobalSettings> OnGlobalSettingsChanged;
     public event Action<SettingsData> OnSettingsChanged; // notify all managers to change values (can have a event for each manager)
 
     // path for storing option settings
     private const string PREF_KEY = "settings";
 
-    [SerializeField] private SettingsData defaultData;
+    [SerializeField] private SettingsData defaultData; 
+
+    private PlayerID modifierID;
 
     protected override void Awake()
     {
         base.Awake();
         Load();
-        OnSettingsChanged?.Invoke(Current);
+        UpdateSettings(Current);
     }
 
-    public void StartEdit()//
+    public void StartEdit(PlayerID modifier)//
     {
+        this.modifierID = modifier;
         Pending = Clone(Current);
         isEditting = true;
     }
@@ -33,8 +37,9 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
     public void CancelEdit()//
     {
         Pending = null;
-        OnSettingsChanged?.Invoke(Current);
+        UpdateSettings(Current);
         isEditting= false;
+        Debug.Log("Cancelled Editting");
     }
 
     public void ApplyEdit()
@@ -42,10 +47,11 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
         if (Pending != null)
         {
             Current = Clone(Pending);
+            Debug.Log($"Current: {JsonUtility.ToJson(Current)}");
         }
         Pending = null;
-        OnSettingsChanged?.Invoke(Current);
-        Debug.Log("Apply Settings");
+        UpdateSettings(Current);
+        Debug.Log("Applied Settings");
 
         Save();
 
@@ -57,7 +63,7 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
     /// </summary>
     public void UpdatePendingSettings()//
     {
-        OnSettingsChanged?.Invoke(Pending);
+        UpdateSettings(Pending);
     }
 
     public void Load()
@@ -87,6 +93,12 @@ public class SettingsManager : PersistentSingleton<SettingsManager>
         string json = JsonUtility.ToJson(Current);
         PlayerPrefs.SetString(PREF_KEY, json);
         PlayerPrefs.Save();
+    }
+
+    private void UpdateSettings(SettingsData settings)
+    {
+        //OnGlobalSettingsChanged?.Invoke(settings.GlobalSettings);
+        OnSettingsChanged?.Invoke(settings);
     }
 
     private SettingsData Clone(SettingsData src)

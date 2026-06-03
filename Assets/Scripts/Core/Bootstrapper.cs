@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Bootstrapper : PersistentSingleton<Bootstrapper>
 {
-    [SerializeField] GameObject[] orderedPersistentGameObjectPrefabs;
+    [SerializeField] GameObject resourcesLoader;
     [SerializeField] string firstScene;
 
     protected override void Awake()
@@ -10,8 +10,11 @@ public class Bootstrapper : PersistentSingleton<Bootstrapper>
         base.Awake();
 
         // Instantiate managers and register to ServiceLocator (manager will register itself when awake)
-        InstantiateAll();
+        Instantiate(resourcesLoader);
+    }
 
+    private void Start()
+    {
         // Initialisation
         InitialiseAll();
 
@@ -19,18 +22,9 @@ public class Bootstrapper : PersistentSingleton<Bootstrapper>
         SceneLoader.Instance.LoadScene(firstScene);
     }
 
-    private void InstantiateAll()
-    {
-        // avoid instantiation dependency problems
-        foreach (GameObject prefab in orderedPersistentGameObjectPrefabs)
-        {
-            if (prefab) Instantiate(prefab);
-        }
-    }
-
     private void InitialiseAll()
     {
-        CanvasScaleController.Instance.ChangeGUIScale(SettingsManager.Instance.Current.guiScale);
-        FullScreenManager.Instance.SetFullScreen(SettingsManager.Instance.Current.fullscreen);
+        CanvasScaleController.Instance.ChangeGUIScale(SettingsManager.Current.GlobalSettings.guiScale);
+        FullScreenManager.Instance.SetFullScreen(SettingsManager.Current.GlobalSettings.fullscreen);
     }
 }

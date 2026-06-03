@@ -19,22 +19,22 @@ public class AccessibilitySettingsPanel : SettingsPanel
     protected override void Awake()
     {
         base.Awake();
-        dropSpeedSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.dropSpeed = value; });
-        ghostPieceTypeButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.ghostPiece = value; });
-        dropAnimationSpeedSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.dropAnimationSpeed = value; });
-        ghostPieceOpaitySlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.ghostPieceOpacity = value; });
-        blockOutlinesButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.blockOutlines = value == OnOff.On; });
-        hardDropVibrationStrengthSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.hardDropVibrationStrength = value; });
+        dropSpeedSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending[PlayerID].dropSpeed = value; });
+        ghostPieceTypeButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending[PlayerID].ghostPiece = value; });
+        dropAnimationSpeedSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending[PlayerID].dropAnimationSpeed = value; });
+        ghostPieceOpaitySlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending[PlayerID].ghostPieceOpacity = value; });
+        blockOutlinesButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending[PlayerID].blockOutlines = value == OnOff.On; });
+        hardDropVibrationStrengthSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending[PlayerID].hardDropVibrationStrength = value; });
     }
 
     protected override void PopulateData(SettingsData data)
     {
         Debug.Log("Accessibility Settings Populating Data");
-        PopulateSliderData(dropSpeedSlider, data.dropSpeed);
-        ghostPieceTypeButton.Value = data.ghostPiece;
-        PopulateSliderData(dropAnimationSpeedSlider, data.dropAnimationSpeed);
-        PopulateSliderData(ghostPieceOpaitySlider, data.ghostPieceOpacity);
-        blockOutlinesButton.Value = data.blockOutlines ? OnOff.On : OnOff.Off;
-        PopulateSliderData(hardDropVibrationStrengthSlider, data.hardDropVibrationStrength);
+        PopulateSliderData(dropSpeedSlider, data[PlayerID].dropSpeed);
+        ghostPieceTypeButton.Value = data[PlayerID].ghostPiece;
+        PopulateSliderData(dropAnimationSpeedSlider, data[PlayerID].dropAnimationSpeed);
+        PopulateSliderData(ghostPieceOpaitySlider, data[PlayerID].ghostPieceOpacity);
+        blockOutlinesButton.Value = data[PlayerID].blockOutlines ? OnOff.On : OnOff.Off;
+        PopulateSliderData(hardDropVibrationStrengthSlider, data[PlayerID].hardDropVibrationStrength);
     }
 }

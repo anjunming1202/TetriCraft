@@ -6,6 +6,6 @@ public class ControlSettingsController : SettingsPanelController
 {
     public void OnKeyBinds()
     {
-        UIManager.Instance.ShowPanel<RebindPanel>("KeyBinds");
+        UIManager.Instance.ShowPanel<RebindPanel2P>("KeyBinds2P");
     }
 }

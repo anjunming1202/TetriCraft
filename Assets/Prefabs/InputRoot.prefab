@@ -31,6 +31,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3345143515958049812}
+  - {fileID: 8818546676668743250}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2015568729011126200
@@ -45,8 +46,161 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b354ea2263bac049a35233006974804, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerInput: {fileID: 2310245916282956940}
-  rebindManager: {fileID: 5705113784094189041}
+  playerInput1: {fileID: 2310245916282956940}
+  playerInput2: {fileID: 3740417827878944204}
+--- !u!1 &3470627300997941220
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8818546676668743250}
+  - component: {fileID: 3740417827878944204}
+  - component: {fileID: 1332342473112074840}
+  m_Layer: 0
+  m_Name: PlayerInput2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8818546676668743250
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3470627300997941220}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9217658466323281853}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3740417827878944204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3470627300997941220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: 0620e3752eff1ad4da6790a303a051aa, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: fa9f9143-e72f-423a-8ceb-cda86eceb8ab
+    m_ActionName: Gameplay/LeftShift[/Keyboard/a]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 25a31be4-883f-4b66-83d0-aa1633da51e9
+    m_ActionName: Gameplay/RightShift[/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f079d68f-a38d-4e97-8a8c-7c1b7d8a7db4
+    m_ActionName: Gameplay/LeftRotate[/Keyboard/q]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1802be66-e8cf-4000-bcef-1d16992fb274
+    m_ActionName: Gameplay/RightRotate[/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6df02731-aabe-4357-9d1f-60aceca7f113
+    m_ActionName: Gameplay/SoftDrop[/Keyboard/s]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 50ea2904-0211-4abe-ab72-a3d0b95abdb2
+    m_ActionName: Gameplay/HardDrop[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 4243bcc1-7b1f-4af5-946e-1b6960cd2436
+    m_ActionName: Gameplay/Pause[/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1d636d0c-4e1b-424b-ab16-7b1349a366b6
+    m_ActionName: UI/Navigate[/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow,/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 84e591ae-269d-418b-ac57-d32eecedab12
+    m_ActionName: UI/Submit[/Keyboard/space,/Keyboard/enter]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 34d99e7d-56de-4657-beb6-01e5b15b33dc
+    m_ActionName: UI/Cancel[/Keyboard/escape,/Keyboard/backspace]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f236acb9-e3dd-40c1-995b-d80404490da8
+    m_ActionName: UI/Point[/Mouse/position]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ffcb18c9-16d6-4a0c-a9a6-19fcc776cb0a
+    m_ActionName: UI/Click[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 616acc07-3736-4722-92c8-6fc68f3e85f7
+    m_ActionName: GameplayP2/Left[/Keyboard/leftArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 7262ad30-92f9-40a3-8d0d-440c4c48b619
+    m_ActionName: GameplayP2/Right[/Keyboard/rightArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 797c00fa-87d4-4a7f-97b1-7411010026f7
+    m_ActionName: GameplayP2/RotateCCW[/Keyboard/numpad1]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 84d4dd2b-5b0b-4a07-b80c-a50124b8e306
+    m_ActionName: GameplayP2/RotateCW[/Keyboard/numpad2]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b70e949d-68a0-44f1-a96e-c252e53ed60f
+    m_ActionName: GameplayP2/SoftDrop[/Keyboard/downArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c0f1ba06-ba0c-4109-9976-33c900486c0c
+    m_ActionName: GameplayP2/HardDrop[/Keyboard/numpad0]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ef16b892-03d5-4e84-bf4b-f95a4b4662c5
+    m_ActionName: UI/Wheel[/Mouse/scroll]
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: Keyboard
+  m_DefaultActionMap: UI
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
+--- !u!114 &1332342473112074840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3470627300997941220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffe1f82fb9a0a44478be90ba7d628ab9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerID: 1
+  isLoaded: 0
 --- !u!1 &8738915084044776381
 GameObject:
   m_ObjectHideFlags: 0
@@ -59,7 +213,7 @@ GameObject:
   - component: {fileID: 2310245916282956940}
   - component: {fileID: 5705113784094189041}
   m_Layer: 0
-  m_Name: PlayerInput
+  m_Name: PlayerInput1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -153,8 +307,36 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: ffcb18c9-16d6-4a0c-a9a6-19fcc776cb0a
     m_ActionName: UI/Click[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 616acc07-3736-4722-92c8-6fc68f3e85f7
+    m_ActionName: GameplayP2/Left[/Keyboard/leftArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 7262ad30-92f9-40a3-8d0d-440c4c48b619
+    m_ActionName: GameplayP2/Right[/Keyboard/rightArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 797c00fa-87d4-4a7f-97b1-7411010026f7
+    m_ActionName: GameplayP2/RotateCCW[/Keyboard/numpad1]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 84d4dd2b-5b0b-4a07-b80c-a50124b8e306
+    m_ActionName: GameplayP2/RotateCW[/Keyboard/numpad2]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b70e949d-68a0-44f1-a96e-c252e53ed60f
+    m_ActionName: GameplayP2/SoftDrop[/Keyboard/downArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: c0f1ba06-ba0c-4109-9976-33c900486c0c
+    m_ActionName: GameplayP2/HardDrop[/Keyboard/numpad0]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ef16b892-03d5-4e84-bf4b-f95a4b4662c5
+    m_ActionName: UI/Wheel[/Mouse/scroll]
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
+  m_DefaultControlScheme: Keyboard
   m_DefaultActionMap: UI
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -170,4 +352,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffe1f82fb9a0a44478be90ba7d628ab9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerID: 0
   isLoaded: 0

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // TODO: if need scene modal stack management => separate this ui manager
@@ -38,9 +39,15 @@ public class UIManager : PersistentSingleton<UIManager>
     [Tooltip("If empty, this script will attempt to find an existing Canvas in the scene or create a new ScreenSpaceOverlay Canvas.")]
     public Canvas rootCanvas;
 
-    [Header("Modal Blocker (optional)")]
+    [Header("Modal Blocker")]
     [Tooltip("Optional prefab to use as the modal blocker (full-screen Image that blocks raycasts). If left empty a default transparent blocker will be created.")]
     public GameObject modalBlockerPrefab;
+    public int ModalCount => modalStack.Count;
+
+    [Header("Input")]
+    [Tooltip("Input action references for operations")]
+    [SerializeField] private InputActionReference backActionRef;
+    private InputAction backAction;
 
     // Internal maps
     private Dictionary<string, GameObject> prefabMap = new Dictionary<string, GameObject>();
@@ -92,6 +99,19 @@ public class UIManager : PersistentSingleton<UIManager>
 
         // Ensure an EventSystem exists in the scene
         EnsureEventSystemExists();
+
+        // Input system listening
+        //InputSystem.onActionChange += OnActionChange;
+    }
+
+    private void OnEnable()
+    {
+        //backAction.performed += (ctx) => OnBack();
+    }
+
+    private void OnDisable()
+    {
+        //backAction.performed -= (ctx) => OnBack();
     }
 
     #region Panel Show/Hide API
@@ -111,6 +131,8 @@ public class UIManager : PersistentSingleton<UIManager>
             throw new InvalidOperationException($"UIManager.ShowPanel: Panel '{key}' prefab missing or failed to instantiate.");
         if (panel is not T panelT)
             throw new InvalidOperationException($"UIManager.ShowPanel: Panel '{key}' is not of type {typeof(T).Name}.");
+        if (IsPanelShown(key))
+            Debug.LogWarning($"Panel {key} has already been shown");
 
         if (panelT.isModal)
             PushModal(panelT);
@@ -351,14 +373,31 @@ public class UIManager : PersistentSingleton<UIManager>
 
     #endregion
 
-    #region Update - Back Key Handling
+    #region Input handling
 
     private void Update()
     {
         // Default Back/ESC handling: call OnBack when Escape is pressed
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             OnBack();
+        }
+    }
+
+    private void OnActionChange(object obj, InputActionChange change)
+    {
+        if (change == InputActionChange.ActionPerformed)
+        {
+            InputAction action = obj as InputAction;
+            if (action == null) return;
+
+            Debug.Log($"Action Performed: {action.name}, Map: {action.actionMap.name}");
+
+            // Back action
+            if (action.name == backActionRef.action.name)
+            {
+                OnBack();
+            }
         }
     }
 

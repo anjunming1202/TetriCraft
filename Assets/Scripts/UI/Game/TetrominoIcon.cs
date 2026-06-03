@@ -51,7 +51,7 @@ public class TetrominoIcon : MonoBehaviour
                 // block transform (set block size)
                 RectTransform blockTransform = blockUI.GetComponent<RectTransform>();
                 Vector2 pivotOffset = GetPivotOffset(tetromino.type); // make the centre of blocks at the tetromino icon pivot
-                blockTransform.anchoredPosition = MapBoundaryData.MapToWorld(new Vector2(c + 0.5f - (float)tetromino.size / 2, -r + 0.5f + (float)tetromino.size / 2) - pivotOffset) * blockPixelSize;
+                blockTransform.anchoredPosition = MapBoundaryData.MapToWorldRelative(new Vector2(c + 0.5f - (float)tetromino.size / 2, -r + 0.5f + (float)tetromino.size / 2) - pivotOffset) * blockPixelSize;
 
                 blockCount++;
             }

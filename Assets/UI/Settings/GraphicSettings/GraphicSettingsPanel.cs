@@ -14,15 +14,15 @@ public class GraphicSettingsPanel : SettingsPanel
     protected override void Awake()
     {
         base.Awake();
-        resolutionIndexSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.resolutionIndex = value; });
-        fullScreenButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.fullscreen = value == OnOff.On; });
-        guiScaleButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.guiScale = value; });
+        resolutionIndexSlider.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.GlobalSettings.resolutionIndex = value; });
+        fullScreenButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.GlobalSettings.fullscreen = value == OnOff.On; });
+        guiScaleButton.onValueChanged.AddListener(value => { if (Pending == null) return; Pending.GlobalSettings.guiScale = value; });
     }
 
     protected override void PopulateData(SettingsData data)
     {
-        resolutionIndexSlider.Value = data.resolutionIndex;
-        fullScreenButton.Value = data.fullscreen ? OnOff.On : OnOff.Off;
-        guiScaleButton.Value = data.guiScale;
+        resolutionIndexSlider.Value = data.GlobalSettings.resolutionIndex;
+        fullScreenButton.Value = data.GlobalSettings.fullscreen ? OnOff.On : OnOff.Off;
+        guiScaleButton.Value = data.GlobalSettings.guiScale;
     }
 }

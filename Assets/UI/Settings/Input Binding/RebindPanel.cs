@@ -15,9 +15,12 @@ public class RebindPanel : SettingsPanel
     protected override void Awake()
     {
         base.Awake();
-        playerInput = InputRoot.Instance.playerInput;
+        playerInput = GameController.Instance.GetPlayerInput(PlayerID); // !
         foreach (var button in rebindButtons)
         {
+            // init
+            button.Init(playerInput);
+
             // rebind button on changed => save to pending, check conflicts
             button.onBindingsUpdate.AddListener(() => SaveBindings(playerInput, Pending));
             button.onBindingsUpdate.AddListener(CheckConflicts);
@@ -37,16 +40,19 @@ public class RebindPanel : SettingsPanel
         CheckConflicts();
     }
 
-    private static void SaveBindings(PlayerInput playerInput, SettingsData settingsData)
+    private void SaveBindings(PlayerInput playerInput, SettingsData settingsData)
     {
         Debug.Log("update bindings");
         var actions = playerInput.actions;
         if (actions != null)
         {
-            Debug.Log("save");
+            Debug.Log("save bindings");
             string json = actions.SaveBindingOverridesAsJson();
-            settingsData.inputBindingsJson = json;
+            settingsData[PlayerID].inputBindingsJson = json;
         }
+        Debug.Log($"Pending: {Pending[PlayerID].inputBindingsJson}");
+        Debug.Log($"PlayerInput: {playerInput.gameObject.name}");
+        Debug.Log($"PlayerID: {PlayerID}");
     }
 
     private void CheckConflicts()

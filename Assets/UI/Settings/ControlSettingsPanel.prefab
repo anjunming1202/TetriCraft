@@ -547,6 +547,7 @@ MonoBehaviour:
   isModal: 1
   hideOnBack: 1
   transitionDuration: 0.1
+  PlayerID: 0
   keyBindsPanelButton: {fileID: 3389600162461843479}
   doneButton: {fileID: 8209483632756894879}
 --- !u!114 &2873148766721551775
@@ -1461,7 +1462,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 700, y: -120}
-  m_SizeDelta: {x: 1400, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &4627412811087160407
 MonoBehaviour:
