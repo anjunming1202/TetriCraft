@@ -46,6 +46,8 @@ public class PauseManager : MonoBehaviour
         foreach (var gameManager in gameManagers)
             if (!gameManager.IsPaused)
                 OnPause(gameManager);
+
+        Debug.Log("OnPauseTriggered");
     }
 
     // Handle resume
@@ -57,6 +59,8 @@ public class PauseManager : MonoBehaviour
         foreach (var gameManager in gameManagers)
             if (gameManager.IsPaused)
                 OnResume(gameManager);
+
+        Debug.Log("OnResumeTriggered");
     }
 
     private void OnPause(GameManager gameManager)

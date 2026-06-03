@@ -37,16 +37,22 @@ public class GameInputController : MonoBehaviour
     protected virtual void OnGameStart()
     {
         playerInput.SwitchCurrentActionMap(controller.actionMapName);
+
+        InputSystemUtility.LogActionMaps(playerInput);
     }
 
     protected virtual void OnGamePaused()
     {
         playerInput.SwitchCurrentActionMap("UI");
+
+        InputSystemUtility.LogActionMaps(playerInput);
     }
 
     protected virtual void OnGameResumed()
     {
         playerInput.SwitchCurrentActionMap(controller.actionMapName);
+
+        InputSystemUtility.LogActionMaps(playerInput);
     }
 
     protected virtual void OnGameOver()

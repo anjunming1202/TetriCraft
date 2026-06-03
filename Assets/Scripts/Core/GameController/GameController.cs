@@ -20,7 +20,7 @@ public abstract class GameController : Singleton<GameController>
     {
         // TODO: (perhaps) control all existing game managers from this single entrance
 
-        InputRoot.EnableOutOfGameUIInput();
+        InputRoot.DisableOutOfGameUIInput();
     }
 
     protected void Update()
@@ -32,7 +32,7 @@ public abstract class GameController : Singleton<GameController>
     {
         base.OnDestroy();
 
-        InputRoot.DisableOutOfGameUIInput();
+        InputRoot.EnableOutOfGameUIInput();
     }
 
     protected virtual void OnInitialise()

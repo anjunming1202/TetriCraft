@@ -11,5 +11,15 @@ namespace UnityEngine.InputSystem
                 throwIfNotFound: true
             );
         }
+
+        public static void LogActionMaps(PlayerInput playerInput)
+        {
+            Debug.Log($"Current Map: {playerInput.currentActionMap?.name}");
+
+            foreach (var map in playerInput.actions.actionMaps)
+            {
+                Debug.Log($"{map.name}: Enabled = {map.enabled}");
+            }
+        }
     }
 }

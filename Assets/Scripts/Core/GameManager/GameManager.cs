@@ -105,11 +105,11 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
-        OnGameStart?.Invoke();
-
         tetrisManager.StartNewMap();
         IsPaused = false;
         Time.timeScale = 1f;
+
+        OnGameStart?.Invoke();
     }
 
     private void GameOver()
