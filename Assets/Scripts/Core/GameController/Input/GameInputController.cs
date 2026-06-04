@@ -20,18 +20,18 @@ public class GameInputController : MonoBehaviour
 
     private void OnEnable()
     {
-        gameManager.OnGameStart += OnGameStart;
-        gameManager.OnPause += OnGamePaused;
-        gameManager.OnResume += OnGameResumed;
-        gameManager.OnGameOver += OnGameOver;
+        GameEvents.OnGameStart += OnGameStart;
+        GameEvents.OnGamePaused += OnGamePaused;
+        GameEvents.OnGameResumed += OnGameResumed;
+        GameEvents.OnGameOver += OnGameOver;
     }
 
     private void OnDisable()
     {
-        gameManager.OnGameStart -= OnGameStart;
-        gameManager.OnPause -= OnGamePaused;
-        gameManager.OnResume -= OnGameResumed;
-        gameManager.OnGameOver -= OnGameOver;
+        GameEvents.OnGameStart -= OnGameStart;
+        GameEvents.OnGamePaused -= OnGamePaused;
+        GameEvents.OnGameResumed -= OnGameResumed;
+        GameEvents.OnGameOver -= OnGameOver;
     }
 
     protected virtual void OnGameStart()

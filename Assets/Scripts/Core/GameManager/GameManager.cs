@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -20,15 +21,14 @@ public class GameManager : MonoBehaviour
     public ScoreManager scoreManager; // inspector
 
     [Header("Game State")]
-    public bool gameover = false; // Game over flag
-    public event Action OnGameStart;
-    public event Action OnGameOver;
-    public event Action OnPause;
-    public event Action OnResume;
+    public GameStateMachine gameStateMachine;
 
     [Header("Visual")]
     public AnimationCurveAsset blockMovementCurve;
     public AnimationCurveAsset blockLandCurve;
+
+    [Header("Controllers")]
+    [SerializeField] public IntroController introController;
 
 
     [Header("Debug")]
@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         // New game
-        NewGame();
+        _ = NewGame();
     }
 
     private void Update()
@@ -60,10 +60,14 @@ public class GameManager : MonoBehaviour
         CleanUp();
     }
 
-    public void NewGame()
+    public async UniTask NewGame()
     {
         // Init
-        InitNewGame();
+        await InitNewGame();
+
+        // Intro
+        await IntroGame();
+
         // Start
         StartGame();
     }
@@ -73,7 +77,8 @@ public class GameManager : MonoBehaviour
         IsPaused = true;
         tetrisManager.StopUpdating();
         Time.timeScale = 0f;
-        OnPause?.Invoke();
+        gameStateMachine.Pause();
+
         // debug
         debug = false;
     }
@@ -83,24 +88,34 @@ public class GameManager : MonoBehaviour
         IsPaused = false;
         tetrisManager.ResumeUpdating();
         Time.timeScale = 1f;
-        OnResume?.Invoke();
+        gameStateMachine.Resume();
+
         // debug
         debug = true;
     }
 
     ////////////////////////////////////////////////////
-    private void InitNewGame()
+    private UniTask InitNewGame()
     {
         // Initialise map
-        tetrisManager.InitMap(boundaryData.width, boundaryData.height, this);
+        tetrisManager.InitMap(boundaryData.width, boundaryData.height, playerID);
 
         // Initialise game state
         tetrisManager.OnGameOver += GameOver;
-        gameover = false;
+        gameStateMachine.Init();
 
         // Initialise scorer
         scoreManager.LinkToGame(tetrisManager);
         scoreManager.Reset();
+
+        return UniTask.CompletedTask;
+    }
+
+    private async UniTask IntroGame()
+    {
+        await introController.ActAsync();
+
+        gameStateMachine.Intro();
     }
 
     private void StartGame()
@@ -109,18 +124,17 @@ public class GameManager : MonoBehaviour
         IsPaused = false;
         Time.timeScale = 1f;
 
-        OnGameStart?.Invoke();
+        gameStateMachine.StartGame();
     }
 
     private void GameOver()
     {
         Debug.Log("Now Game Over!");
 
-        gameover = true;
         tetrisManager.StopUpdating();
         Time.timeScale = 0f;
 
-        OnGameOver?.Invoke();
+        gameStateMachine.GameOver();
     }
 
     private void CleanUp()

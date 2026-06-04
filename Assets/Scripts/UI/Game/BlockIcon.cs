@@ -16,6 +16,7 @@ public class BlockIcon : MonoBehaviour
     {
         rectTransform = GetComponent<RectTransform>();
         image = GetComponent<Image>();
+        image.color = new Color(1f, 1f, 1f, 0f); // transparent
     }
 
     public void Init(BlockID id, float size = DefaultSize)
@@ -31,5 +32,6 @@ public class BlockIcon : MonoBehaviour
         // image
         Sprite blockSprite = BlockResources.GetSprite(id);
         image.sprite = blockSprite;
+        image.color = new Color(1f, 1f, 1f, 1f);
     }
 }

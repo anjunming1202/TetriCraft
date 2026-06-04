@@ -59,10 +59,10 @@ public class TetrisManager : MonoBehaviour
         fallingTetromino.OnHardDrop += (MapTetromino tetromino) => OnTetrominoHardDrop?.Invoke(tetromino);
     }
 
-    public void InitMap(int Width, int height, GameManager gameManager)
+    public void InitMap(int Width, int height, PlayerID playerID)
     {
         // Player reference
-        this.PlayerID = gameManager.playerID;
+        this.PlayerID = playerID;
 
         // Initialise map
         map.InitMap(Width, height, this);

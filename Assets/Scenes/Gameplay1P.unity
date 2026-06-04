@@ -122,6 +122,52 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &24397266
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 24397267}
+  - component: {fileID: 24397268}
+  m_Layer: 0
+  m_Name: Intro Controller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &24397267
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24397266}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1544377064}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &24397268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24397266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 060672de95c330f48ad61d1253d72c74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCamera: {fileID: 921099054}
+  cameraScaler: {fileID: 921099055}
 --- !u!1 &45426579
 GameObject:
   m_ObjectHideFlags: 0
@@ -464,6 +510,10 @@ PrefabInstance:
       propertyPath: pivotOffset.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 1425435935428457062, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1762162956234020557, guid: 3ca276b461912a44fa539841891b8460, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -544,9 +594,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3454791985197739060, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4323040360040464543, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5259760965390717523, guid: 3ca276b461912a44fa539841891b8460, type: 3}
       propertyPath: m_Name
       value: TetrominoIcon (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8189453874409841792, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1344,7 +1406,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 921099058}
-  - {fileID: 1544377064}
   - {fileID: 1161971592}
   - {fileID: 1715508101}
   - {fileID: 1781916897}
@@ -1382,6 +1443,10 @@ PrefabInstance:
     - target: {fileID: -653533326346522107, guid: 3ca276b461912a44fa539841891b8460, type: 3}
       propertyPath: pivotOffset.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1425435935428457062, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1762162956234020557, guid: 3ca276b461912a44fa539841891b8460, type: 3}
       propertyPath: m_Pivot.x
@@ -1463,9 +1528,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3454791985197739060, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4323040360040464543, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5259760965390717523, guid: 3ca276b461912a44fa539841891b8460, type: 3}
       propertyPath: m_Name
       value: TetrominoIcon (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8189453874409841792, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1620,7 +1697,6 @@ GameObject:
   - component: {fileID: 921099058}
   - component: {fileID: 921099054}
   - component: {fileID: 921099057}
-  - component: {fileID: 921099056}
   - component: {fileID: 921099055}
   m_Layer: 0
   m_Name: Main Camera P1
@@ -1664,7 +1740,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 13
+  orthographic size: 10.734464
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1695,18 +1771,6 @@ MonoBehaviour:
   target: {fileID: 425377635}
   scaleMode: 2
   scale: 0.9
---- !u!114 &921099056
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 921099053}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fdbf933f0e4a95242809dc28f025754a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!81 &921099057
 AudioListener:
   m_ObjectHideFlags: 0
@@ -2075,6 +2139,10 @@ PrefabInstance:
       propertyPath: pivotOffset.y
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 1425435935428457062, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1762162956234020557, guid: 3ca276b461912a44fa539841891b8460, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -2155,9 +2223,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3454791985197739060, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4323040360040464543, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5259760965390717523, guid: 3ca276b461912a44fa539841891b8460, type: 3}
       propertyPath: m_Name
       value: TetrominoIcon (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8189453874409841792, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2371,6 +2451,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1425435935428457062, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1762162956234020557, guid: 3ca276b461912a44fa539841891b8460, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -2451,9 +2535,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3454791985197739060, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4323040360040464543, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5259760965390717523, guid: 3ca276b461912a44fa539841891b8460, type: 3}
       propertyPath: m_Name
       value: TetrominoIcon
+      objectReference: {fileID: 0}
+    - target: {fileID: 8189453874409841792, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8189453874409841792, guid: 3ca276b461912a44fa539841891b8460, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2667,6 +2767,7 @@ GameObject:
   - component: {fileID: 1544377064}
   - component: {fileID: 1544377066}
   - component: {fileID: 1544377065}
+  - component: {fileID: 1544377067}
   m_Layer: 0
   m_Name: Game Manager P1
   m_TagString: Untagged
@@ -2686,8 +2787,9 @@ Transform:
   m_LocalPosition: {x: 1.0514369, y: 0.8235589, z: 0.035261188}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 751685099}
+  m_Children:
+  - {fileID: 24397267}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1544377065
 MonoBehaviour:
@@ -2718,10 +2820,23 @@ MonoBehaviour:
   tetrisManager: {fileID: 854227531}
   boundaryRegion: {fileID: 1330299797}
   scoreManager: {fileID: 1161971593}
-  gameover: 0
+  gameStateMachine: {fileID: 1544377067}
   blockMovementCurve: {fileID: 11400000, guid: 175ca8d13feb6744885bbae30b9d5cdd, type: 2}
   blockLandCurve: {fileID: 11400000, guid: 4173132a645dac9489e29b5abcfc9058, type: 2}
+  introController: {fileID: 24397268}
   debug: 1
+--- !u!114 &1544377067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1544377063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66b3822333e578844844ccbb8dcc083b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1587548853
 GameObject:
   m_ObjectHideFlags: 0
@@ -3359,6 +3474,7 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 751685099}
+  - {fileID: 1544377064}
   - {fileID: 142866246}
+  - {fileID: 751685099}
   - {fileID: 861834265}

@@ -27,19 +27,25 @@ public class CameraScaler : MonoBehaviour
 
     private void Update()
     {
+        if (GameStateMachine.State == GameStateType.Playing)
+        {
+            _camera.orthographicSize = GetTargetSize();
+        }
+    }
+
+    public float GetTargetSize()
+    {
         switch (scaleMode)
         {
             case ScaleMode.ConstantWidthRatio:
-                _camera.orthographicSize = target.localScale.x / scale / 2 / _camera.aspect;
-                break;
+                return target.localScale.x / scale / 2 / _camera.aspect;
             case ScaleMode.ConstantHeightRatio:
-                _camera.orthographicSize = target.localScale.y / scale / 2;
-                break;
+                return target.localScale.y / scale / 2;
             case ScaleMode.MaximumFit:
                 float widthControlSize = target.localScale.x / scale / 2 / _camera.aspect;
                 float heightControlSize = target.localScale.y / scale / 2;
-                _camera.orthographicSize = Mathf.Max(widthControlSize, heightControlSize);
-                break;
+                return Mathf.Max(widthControlSize, heightControlSize);
         }
+        return -1;
     }
 }

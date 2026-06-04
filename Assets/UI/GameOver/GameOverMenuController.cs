@@ -9,7 +9,7 @@ public class GameOverMenuController : MonoBehaviour
 
     private void Start()
     {
-        gameManager.OnGameOver += OnGameOver;
+        GameEvents.OnGameOver += OnGameOver;
     }
 
     public void OnNewGame()
