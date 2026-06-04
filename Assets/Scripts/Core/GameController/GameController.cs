@@ -4,6 +4,9 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PauseManager))]
 public abstract class GameController : Singleton<GameController>
 {
+    //game state machine
+    //binding entry functions at game states, as the global only entrance
+
     public abstract GameManager GetGameManager(PlayerID playerID = PlayerID.P1);
 
     public abstract MapBoundaryData GetBoundaryData(PlayerID playerID = PlayerID.P1);
@@ -41,7 +44,8 @@ public abstract class GameController : Singleton<GameController>
     }
     protected virtual void OnStartGame()
     {
-
+        // start game tick
+        TickManager.Init();
     }
     protected virtual void OnQuitGame()
     {

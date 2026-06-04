@@ -6,7 +6,8 @@ using static Unity.Collections.AllocatorManager;
 
 public class NextTetrominoUIController : MonoBehaviour
 {
-    public bool isAnimated = true;
+    [SerializeField] private bool isAnimated = true;
+    [SerializeField] private float animationDuration = 0.4f;
 
     [SerializeField] private TetrisManager tetrisManager;
     [SerializeField] private TetrominoIcon[] icons;
@@ -70,7 +71,7 @@ public class NextTetrominoUIController : MonoBehaviour
         for (int i = 0; i < icons.Length; i++)
         {
             var icon = icons[i];
-            scrollAnimationTasks[i] = icon.gameObject.UIAnimator().MoveTo(iconPositions[i], 0.5f);
+            scrollAnimationTasks[i] = icon.gameObject.UIAnimator().MoveTo(iconPositions[i], animationDuration);
         }
 
         await UniTask.WhenAll(scrollAnimationTasks);

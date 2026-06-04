@@ -28,11 +28,11 @@ public class TetrisManager : MonoBehaviour
 
 
     // Line clear data
-    public uint lastClearLineCount = 0;
-    public uint combo = 0;
+    public uint lastClearLineCount { get; private set; }
+    public uint combo { get; private set; }
 
     // Updating state
-    public bool isUpdating /*{ get; private set; } */= false;
+    public bool isUpdating { get; private set; }
 
     // Turn state
     private bool isTurnFinished;
@@ -43,10 +43,10 @@ public class TetrisManager : MonoBehaviour
     public int blockCount => map.blockCount;    // debug
 
     // Events
-    public event Action OnGameOver;
+    public event Action OnGameDead;
 
-    public delegate void MapEvent(TetrisManager mapManager);
-    public event MapEvent OnLineClear;
+    public event Action<TetrisManager> OnLineClear;
+    public event Action<PlayerID, uint, uint, uint> OnLineClearWithInfo; // player id, new line count, total line count, combo, (clear type)
     public event MapTetromino.TetrominoEvent OnTetrominoSoftDrop;
     public event MapTetromino.TetrominoEvent OnTetrominoHardDrop;
 
@@ -74,13 +74,14 @@ public class TetrisManager : MonoBehaviour
         // Initialise data
         StopUpdating();
         lastClearLineCount = 0;
-        combo = 0;
+        combo = 0; 
+        isUpdating = false;
 
         // Initialise event
-        OnFinishedTurn += () => isTurnFinished = true;
+
 
         // Initialise map ticks
-        TickManager.Init();
+        //TickManager.Init();
     }
 
     public void OnUpdate()
@@ -108,8 +109,8 @@ public class TetrisManager : MonoBehaviour
             map.OnUpdate();
 
             // Check game over
-            if (CheckGameover())
-                OnGameOver?.Invoke();
+            if (CheckGameDead())
+                OnGameDead?.Invoke();
         }
     }
 
@@ -133,17 +134,18 @@ public class TetrisManager : MonoBehaviour
         tetrominoController.Activate();
     }
 
-    public bool CheckGameover()
+    public bool CheckGameDead()
     {
         int deathline = map.Height;
         bool gameover = !map.CheckRowEmpty(deathline);
         return gameover;
     }
 
-    public void Render()
+    public void QueueGarbage(int lines)
     {
 
     }
+
 
     //================================//
     //  Map game logic
@@ -202,6 +204,7 @@ public class TetrisManager : MonoBehaviour
         }
 
         // Finish this turn
+        isTurnFinished = true;
         OnFinishedTurn?.Invoke();
     }
 
@@ -251,8 +254,13 @@ public class TetrisManager : MonoBehaviour
         }
         if (newLineCount > 0)
         {
+            // accumulate count before next tetromino locked
             lastClearLineCount += newLineCount;
+
+            // events
             OnLineClear?.Invoke(this);
+            OnLineClearWithInfo?.Invoke(PlayerID, newLineCount, lastClearLineCount, combo);
+
             return true;
         }
         return false;

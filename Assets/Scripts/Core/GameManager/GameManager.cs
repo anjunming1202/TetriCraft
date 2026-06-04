@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Debug")]
     public bool debug = true;
-    public bool IsPaused { get; private set; } = false;
+    public bool IsPaused => GameStateMachine.State == GameStateType.Paused;
 
     private void Awake()
     {
@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour
     {
         if (!IsPaused)
         {
-            tetrisManager.OnUpdate();
+            UpdatePlaying();
         }
     }
 
@@ -72,11 +72,16 @@ public class GameManager : MonoBehaviour
         StartGame();
     }
 
+    public void UpdatePlaying()
+    {
+        tetrisManager.OnUpdate();
+    }
+
     public void PauseGame()
     {
-        IsPaused = true;
         tetrisManager.StopUpdating();
         Time.timeScale = 0f;
+
         gameStateMachine.Pause();
 
         // debug
@@ -85,9 +90,9 @@ public class GameManager : MonoBehaviour
 
     public void ResumeGame()
     {
-        IsPaused = false;
         tetrisManager.ResumeUpdating();
         Time.timeScale = 1f;
+
         gameStateMachine.Resume();
 
         // debug
@@ -101,7 +106,7 @@ public class GameManager : MonoBehaviour
         tetrisManager.InitMap(boundaryData.width, boundaryData.height, playerID);
 
         // Initialise game state
-        tetrisManager.OnGameOver += GameOver;
+        tetrisManager.OnGameDead += GameOver;
         gameStateMachine.Init();
 
         // Initialise scorer
@@ -121,7 +126,6 @@ public class GameManager : MonoBehaviour
     private void StartGame()
     {
         tetrisManager.StartNewMap();
-        IsPaused = false;
         Time.timeScale = 1f;
 
         gameStateMachine.StartGame();
