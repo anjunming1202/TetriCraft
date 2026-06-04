@@ -6,6 +6,8 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform), typeof(Image))]
 public class BlockIcon : MonoBehaviour
 {
+    public bool isInit => image.sprite != null;
+
     private RectTransform rectTransform;
     private Image image;
 

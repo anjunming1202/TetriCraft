@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class TetrominoIcon : MonoBehaviour
 {
+    public bool isInit => blockIcons[0].isInit;
+
     public BlockIcon[] blockIcons;
 
     private float blockSize;

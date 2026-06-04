@@ -1,25 +1,78 @@
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
 public class NextTetrominoUIController : MonoBehaviour
 {
+    public bool isAnimated = true;
+
     [SerializeField] private TetrisManager tetrisManager;
-    private TetrominoIcon[] icons = new TetrominoIcon[4];
+    [SerializeField] private TetrominoIcon[] icons;
 
     [SerializeField] private float blockSize;
 
+    private RectTransform[] rectTransforms;
+    private Vector2[] iconPositions = null;
+    private Vector2 spacing;
+
     private void Awake()
     {
-        icons = GetComponentsInChildren<TetrominoIcon>();
+        GameEvents.OnIntroStart += Init;
+    }
+
+    private void Init()
+    {
         tetrisManager.OnStartedTurn += UpdatePanel;
+
+        rectTransforms = new RectTransform[icons.Length];
+        for (int i = 0; i < icons.Length; i++)
+            rectTransforms[i] = icons[i].GetComponent<RectTransform>();
+
+        iconPositions = new Vector2[icons.Length];
+        for (int i = 0; i < icons.Length; i++)
+            iconPositions[i] = rectTransforms[i].anchoredPosition;
+
+        spacing = iconPositions[1] - iconPositions[0];
+        Debug.Assert(((iconPositions[iconPositions.Length - 1] - iconPositions[0]) / (iconPositions.Length - 1) - spacing).magnitude < float.Epsilon,
+            "Tetromino dispays are not equally spaced");
     }
 
     private void UpdatePanel()
     {
+        bool isInit = icons[0].isInit;
+
+        // update panel tetromino icons
         for (int i = 0; i < icons.Length; i++)
         {
             icons[i].Init(tetrisManager.nextTetrominos[i], blockSize);
         }
+
+        // set animation
+        if (isAnimated)
+        {
+            int offset = isInit ? 1 : 4;
+            ScrollAnimationOnSet(offset).Forget();
+        }
+    }
+
+    private async UniTask ScrollAnimationOnSet(int offset)
+    {
+        // offset
+        for (int i = 0; i < icons.Length; i++)
+        {
+            rectTransforms[i].anchoredPosition = iconPositions[i] + spacing * offset;
+        }
+
+        // scrolling animation
+        UniTask[] scrollAnimationTasks = new UniTask[icons.Length];
+        for (int i = 0; i < icons.Length; i++)
+        {
+            var icon = icons[i];
+            scrollAnimationTasks[i] = icon.gameObject.UIAnimator().MoveTo(iconPositions[i], 0.5f);
+        }
+
+        await UniTask.WhenAll(scrollAnimationTasks);
     }
 }
