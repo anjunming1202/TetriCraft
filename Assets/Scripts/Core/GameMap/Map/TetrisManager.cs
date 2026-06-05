@@ -76,12 +76,6 @@ public class TetrisManager : MonoBehaviour
         lastClearLineCount = 0;
         combo = 0; 
         isUpdating = false;
-
-        // Initialise event
-
-
-        // Initialise map ticks
-        //TickManager.Init();
     }
 
     public void OnUpdate()

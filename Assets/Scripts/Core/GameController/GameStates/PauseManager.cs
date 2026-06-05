@@ -6,8 +6,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PauseMenuController))]
 public class PauseManager : MonoBehaviour
 {
-    [Tooltip("The GameManager you want to pause running when the pause key is pressed")]
-    [SerializeField] private GameManager[] gameManagers;
+    [SerializeField] private GameController gameController;
     [SerializeField] private PlayerInput playerInput;
     [SerializeField] private InputActionReference pauseActionRef;
     [SerializeField] private InputActionReference resumeActionRef;
@@ -27,46 +26,40 @@ public class PauseManager : MonoBehaviour
 
     private void OnEnable()
     {
-        pauseAction.performed += (ctx) => OnPauseTriggered();
-        resumeAction.performed += (ctx) => OnResumeTriggered();
+        pauseAction.performed += OnPauseTriggered;
+        resumeAction.performed += OnResumeTriggered;
     }
 
     private void OnDisable()
     {
-        pauseAction.performed -= (ctx) => OnPauseTriggered();
-        resumeAction.performed -= (ctx) => OnResumeTriggered();
+        pauseAction.performed -= OnPauseTriggered;
+        resumeAction.performed -= OnResumeTriggered;
     }
 
     // Handle pause
-    public void OnPauseTriggered()
+    private void OnPauseTriggered()
     {
-        if (gameManagers == null || gameManagers.Length == 0)
-            return;
-
-        foreach (var gameManager in gameManagers)
-            if (!gameManager.IsPaused)
-                OnPause(gameManager);
+        if (!gameController.IsPaused)
+                OnPause();
 
         Debug.Log("OnPauseTriggered");
     }
+    private void OnPauseTriggered(InputAction.CallbackContext ctx) => OnPauseTriggered();
 
     // Handle resume
     public void OnResumeTriggered()
     {
-        if (gameManagers == null || gameManagers.Length == 0)
-            return;
-
-        foreach (var gameManager in gameManagers)
-            if (gameManager.IsPaused)
-                OnResume(gameManager);
+        if (gameController.IsPaused)
+            OnResume();
 
         Debug.Log("OnResumeTriggered");
     }
+    private void OnResumeTriggered(InputAction.CallbackContext ctx) => OnResumeTriggered();
 
-    private void OnPause(GameManager gameManager)
+    private void OnPause()
     {
         // pause game
-        gameManager.PauseGame();
+        gameController.PauseGame();
 
         // pause panel shown => return
         if (pauseMenuPanel != null && pauseMenuPanel.IsShown) 
@@ -76,13 +69,14 @@ public class PauseManager : MonoBehaviour
         pauseMenuPanel.Init(pauseMenuController); // init for dynamic panel
     }
 
-    private void OnResume(GameManager gameManager)
+    private void OnResume()
     {
         // other modal panel shown => return
         if (UIManager.Instance.ModalCount > 1) // pause panel is modal
             return;
+
         // resume game
-        gameManager.ResumeGame();
+        gameController.ResumeGame();
 
         // pause panel not shown => return
         if (pauseMenuPanel == null || !pauseMenuPanel.IsShown) 

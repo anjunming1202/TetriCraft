@@ -305,8 +305,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b93758faf6ca42a41909663b9ddcb897, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManagers:
-  - {fileID: 1544377066}
+  gameController: {fileID: 142866247}
   playerInput: {fileID: 2070201215}
   pauseActionRef: {fileID: -929586273043662629, guid: 0620e3752eff1ad4da6790a303a051aa, type: 3}
   resumeActionRef: {fileID: -8226266369479630806, guid: 0620e3752eff1ad4da6790a303a051aa, type: 3}
@@ -866,6 +865,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isAnimated: 1
+  animationDuration: 0.4
   tetrisManager: {fileID: 854227531}
   icons:
   - {fileID: 1262668490}
@@ -1621,9 +1621,6 @@ MonoBehaviour:
   - {fileID: 1303589550}
   - {fileID: 1324254214}
   sceneCanvas: {fileID: 144743219}
-  lastClearLineCount: 0
-  combo: 0
-  isUpdating: 0
 --- !u!114 &854227532
 MonoBehaviour:
   m_ObjectHideFlags: 0

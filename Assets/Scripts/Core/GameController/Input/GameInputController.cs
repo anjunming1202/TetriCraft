@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(GameManager))]
+[RequireComponent(typeof(PlayerGameManager))]
 public class GameInputController : MonoBehaviour
 {
-    protected GameManager gameManager;
+    protected PlayerGameManager gameManager;
     [SerializeField] protected TetrominoController controller;
 
     protected PlayerInput playerInput;
 
     protected void Awake()
     {
-        gameManager = GetComponent<GameManager>();
+        gameManager = GetComponent<PlayerGameManager>();
         playerInput = controller.GetComponent<PlayerInput>();
 
     }

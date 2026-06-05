@@ -5,7 +5,7 @@ using UnityEditor;
 
 public class MapDebugger : MonoBehaviour
 {
-    [SerializeField] private GameManager gameManager;
+    [SerializeField] private PlayerGameManager gameManager;
     [SerializeField] private Camera camera;
 
     public MapManager debuggedMap;

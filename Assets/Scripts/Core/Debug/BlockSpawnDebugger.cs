@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BlockSpawnDebugger : MonoBehaviour
 {
-    [SerializeField] private GameManager gameManager;
+    [SerializeField] private PlayerGameManager gameManager;
     [SerializeField] private Camera camera;
 
     public MapManager debuggedMap;

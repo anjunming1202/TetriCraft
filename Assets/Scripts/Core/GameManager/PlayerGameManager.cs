@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 // Game Manager for managing the whole game
 [RequireComponent(typeof(GameInputController))]
-public class GameManager : MonoBehaviour
+public class PlayerGameManager : MonoBehaviour
 {
     [SerializeField] public PlayerID playerID;
 
@@ -30,46 +30,29 @@ public class GameManager : MonoBehaviour
     [Header("Controllers")]
     [SerializeField] public IntroController introController;
 
+    // Events
+    public event Action<PlayerID> OnPlayerBoardDead;
+
 
     [Header("Debug")]
     public bool debug = true;
     public bool IsPaused => GameStateMachine.State == GameStateType.Paused;
 
-    private void Awake()
+
+
+    /// <summary>
+    /// Initialising all static data/resources
+    /// </summary>
+    public void Initialise()
     {
-        // Load static resources
-        InitialiseResources();
-    }
+        tetrisManager.OnGameDead += NotifyBoardGameDead;
 
-    void Start()
-    {
-        // New game
-        _ = NewGame();
-    }
+        // Initialise boundary data
+        boundaryData = MapBoundaryData.Create(boundaryRegion.transform);
 
-    private void Update()
-    {
-        if (!IsPaused)
-        {
-            UpdatePlaying();
-        }
-    }
-
-    private void OnDestroy()
-    {
-        CleanUp();
-    }
-
-    public async UniTask NewGame()
-    {
-        // Init
-        await InitNewGame();
-
-        // Intro
-        await IntroGame();
-
-        // Start
-        StartGame();
+        // Initialise block animator
+        BlockAnimator.MovingCurveAsset = blockMovementCurve;
+        BlockAnimator.FastMovingCurveAsset = blockLandCurve;
     }
 
     public void UpdatePlaying()
@@ -80,7 +63,6 @@ public class GameManager : MonoBehaviour
     public void PauseGame()
     {
         tetrisManager.StopUpdating();
-        Time.timeScale = 0f;
 
         gameStateMachine.Pause();
 
@@ -91,7 +73,6 @@ public class GameManager : MonoBehaviour
     public void ResumeGame()
     {
         tetrisManager.ResumeUpdating();
-        Time.timeScale = 1f;
 
         gameStateMachine.Resume();
 
@@ -100,13 +81,12 @@ public class GameManager : MonoBehaviour
     }
 
     ////////////////////////////////////////////////////
-    private UniTask InitNewGame()
+    public UniTask InitNewGame()
     {
         // Initialise map
         tetrisManager.InitMap(boundaryData.width, boundaryData.height, playerID);
 
         // Initialise game state
-        tetrisManager.OnGameDead += GameOver;
         gameStateMachine.Init();
 
         // Initialise scorer
@@ -116,51 +96,34 @@ public class GameManager : MonoBehaviour
         return UniTask.CompletedTask;
     }
 
-    private async UniTask IntroGame()
+    public async UniTask IntroGame()
     {
         await introController.ActAsync();
 
         gameStateMachine.Intro();
     }
 
-    private void StartGame()
+    public void StartGame()
     {
         tetrisManager.StartNewMap();
-        Time.timeScale = 1f;
 
         gameStateMachine.StartGame();
     }
 
-    private void GameOver()
+    public void GameOver()
     {
-        Debug.Log("Now Game Over!");
-
         tetrisManager.StopUpdating();
-        Time.timeScale = 0f;
 
         gameStateMachine.GameOver();
     }
 
-    private void CleanUp()
+    public void CleanUp()
     {
-        Time.timeScale = 1f;
+
     }
 
-
-    //================================//
-    // Game Resources
-    //================================//
-
-    /// <summary>
-    /// Initialising all static data/resources
-    /// </summary>
-    private void InitialiseResources()
+    public void NotifyBoardGameDead()
     {
-        // Initialise boundary data
-        boundaryData = MapBoundaryData.Create(boundaryRegion.transform);
-
-        // Initialise block animator
-        BlockAnimator.MovingCurveAsset = blockMovementCurve;
-        BlockAnimator.FastMovingCurveAsset = blockLandCurve;
+        OnPlayerBoardDead?.Invoke(playerID);
     }
 }

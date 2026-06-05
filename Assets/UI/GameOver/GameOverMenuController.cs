@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameOverMenuController : MonoBehaviour
 {
-    [SerializeField] GameManager gameManager;
+    [SerializeField] PlayerGameManager gameManager;
     private GameOverMenuPanel gameOverMenu;
 
     private void Start()
