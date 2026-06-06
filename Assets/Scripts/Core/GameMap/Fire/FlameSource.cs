@@ -15,7 +15,7 @@ public class FlameSource : MapObject
         MapRandomTickBehaviourObject mapObject = GetComponent<MapRandomTickBehaviourObject>();
         map = mapObject.GetMap();
 
-        mapObject.OnRandomTickUpdate += RandomTickUpdateSpread;
+        mapObject.OnRandomTickUpdate += RandomTickUpdate;
     }
 
     /*private void Update()
@@ -23,7 +23,7 @@ public class FlameSource : MapObject
         TrySpreadFlame();
     }*/
 
-    private void RandomTickUpdateSpread(int randomTick)
+    private void RandomTickUpdate(int randomTick)
     {
         Debug.Log("try spread fire");
 
