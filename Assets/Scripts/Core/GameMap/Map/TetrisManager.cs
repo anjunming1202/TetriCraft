@@ -57,6 +57,8 @@ public class TetrisManager : MonoBehaviour
     {
         map.Initialise();
 
+        tetrominoController.Initialise();
+
         fallingTetromino.OnLockdown += OnLockdown;
         fallingTetromino.OnSoftDrop += (MapTetromino tetromino) => OnTetrominoSoftDrop?.Invoke(tetromino);
         fallingTetromino.OnHardDrop += (MapTetromino tetromino) => OnTetrominoHardDrop?.Invoke(tetromino);
@@ -73,7 +75,7 @@ public class TetrisManager : MonoBehaviour
         // Initialise falling tetromino
         fallingTetromino.InitEmptyTetromino();
         fallingTetromino.Reset();
-        tetrominoController.Init(map, fallingTetromino);
+        tetrominoController.Reset(map, fallingTetromino);
 
         // Initialise ghost tetromino
         ghostTetromino.CreateGhostBlocks();
@@ -95,6 +97,8 @@ public class TetrisManager : MonoBehaviour
 
         ghostTetromino.ClearAllBlocks();
         fallingTetromino.ClearAllBlocks();
+        foreach (var tetromino in nextTetrominoList)
+            tetromino.ClearAllBlocks();
     }
 
     public void OnUpdate()

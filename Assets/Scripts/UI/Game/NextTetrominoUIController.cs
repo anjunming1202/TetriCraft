@@ -13,13 +13,16 @@ public class NextTetrominoUIController : MonoBehaviour
     [SerializeField] private float animationDuration = 0.4f;
 
     [SerializeField] private TetrisManager tetrisManager;
+
+    [SerializeField] private RectTransform[] slotTransforms;
     [SerializeField] private TetrominoIcon[] icons;
+    private RectTransform[] iconTransforms;
 
     [SerializeField] private float blockSize;
 
-    private RectTransform[] rectTransforms;
-    public Vector2[] iconPositions = null;
+    public Vector2[] slotPositions = null;
     private Vector2 spacing;
+    private Vector2[] iconPositions = null;
 
     private bool hasInit = false;
 
@@ -48,17 +51,31 @@ public class NextTetrominoUIController : MonoBehaviour
         if (hasInit)
             return; // only initialise once
 
-        rectTransforms = new RectTransform[icons.Length];
+        // record icon RectTransform reference
+        iconTransforms = new RectTransform[icons.Length];
         for (int i = 0; i < icons.Length; i++)
-            rectTransforms[i] = icons[i].GetComponent<RectTransform>();
+            iconTransforms[i] = icons[i].GetComponent<RectTransform>();
 
-        iconPositions = new Vector2[icons.Length];
+        // get slot anchored positions
+        slotPositions = new Vector2[icons.Length];
         for (int i = 0; i < icons.Length; i++)
-            iconPositions[i] = rectTransforms[i].anchoredPosition;
+            slotPositions[i] = slotTransforms[i].anchoredPosition;
 
-        spacing = iconPositions[1] - iconPositions[0];
-        Debug.Assert(((iconPositions[iconPositions.Length - 1] - iconPositions[0]) / (iconPositions.Length - 1) - spacing).magnitude < float.Epsilon,
+        // get spacing between slots
+        spacing = slotPositions[1] - slotPositions[0];
+        Debug.Assert(((slotPositions[slotPositions.Length - 1] - slotPositions[0]) / (slotPositions.Length - 1) - spacing).magnitude < float.Epsilon,
             "Tetromino dispays are not equally spaced");
+
+        // set icon anchored positions, at the slot centre
+        iconPositions = new Vector2[icons.Length];
+        for (int i = 2; i < icons.Length; i++)
+        {
+            iconTransforms[i].anchorMax = new Vector2(0.5f, 0.5f);
+            iconTransforms[i].anchorMin = new Vector2(0.5f, 0.5f);
+            iconTransforms[i].pivot = new Vector2(0.5f, 0.5f);
+            iconTransforms[i].anchoredPosition = new Vector2(0, 0);
+            iconPositions[i] = iconTransforms[i].anchoredPosition;
+        }
 
         hasInit = true;
     }
@@ -100,7 +117,7 @@ public class NextTetrominoUIController : MonoBehaviour
         // offset
         for (int i = 0; i < icons.Length; i++)
         {
-            rectTransforms[i].anchoredPosition = iconPositions[i] + spacing * offset;
+            iconTransforms[i].anchoredPosition = iconPositions[i] + spacing * offset;
         }
 
         // scrolling animation

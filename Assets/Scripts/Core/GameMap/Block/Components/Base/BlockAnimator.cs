@@ -55,6 +55,7 @@ public class BlockAnimator : MonoBehaviour
         // Stop current animation
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
+
         // Start moving animation
         float duration = curveAsset.duration / (speed / 10 + 0.5f);
         currentCurveAsset = curveAsset;

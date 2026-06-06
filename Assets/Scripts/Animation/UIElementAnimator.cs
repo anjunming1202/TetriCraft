@@ -18,7 +18,9 @@ public class UIElementAnimator : MonoBehaviour
     {
         _moveCts?.Cancel();
         _moveCts?.Dispose();
-        _moveCts = new CancellationTokenSource();
+
+        var cts = new CancellationTokenSource();
+        _moveCts = cts;
 
         try
         {
@@ -27,7 +29,7 @@ public class UIElementAnimator : MonoBehaviour
 
             while (elapsed < duration)
             {
-                _moveCts.Token.ThrowIfCancellationRequested();
+                cts.Token.ThrowIfCancellationRequested();
 
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
@@ -45,8 +47,15 @@ public class UIElementAnimator : MonoBehaviour
         }
         finally
         {
-            _moveCts?.Dispose();
-            _moveCts = null;
+            if (ReferenceEquals(_moveCts, cts))
+            {
+                _moveCts.Dispose();
+                _moveCts = null;
+            }
+            else
+            {
+                cts.Dispose();
+            }
         }
     }
 
