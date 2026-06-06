@@ -25,7 +25,7 @@ public class BlockIcon : MonoBehaviour
     {
         // size
         this.size = size;
-        float pixelSize = size * CoordinateSystems.PixelPerUnit;
+        float pixelSize = size * CoordinateSystems.FixedPixelsPerUnit;
 
         // transform (set size)
         rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, pixelSize);
@@ -35,5 +35,10 @@ public class BlockIcon : MonoBehaviour
         Sprite blockSprite = BlockResources.GetSprite(id);
         image.sprite = blockSprite;
         image.color = new Color(1f, 1f, 1f, 1f);
+    }
+
+    public void ClearIcon()
+    {
+        image.sprite = null;
     }
 }

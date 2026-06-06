@@ -44,6 +44,16 @@ public class FluidManager : MonoBehaviour
         entrainmentElements = new List<FluidElement>();
     }
 
+    public void ClearFluidSystem()
+    {
+        fluidSystem.ClearAllElements();
+
+        dummyBlockPositions = new List<Vector2Int>();
+        elementUpdateList = new List<FluidElement>();
+        lazilyMergedLists = new List<List<FluidElement>>();
+        entrainmentElements = new List<FluidElement>();
+    }
+
     public void OnUpdate()
     {
         // update tickwisely

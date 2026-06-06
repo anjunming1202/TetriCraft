@@ -29,6 +29,7 @@ public class PlayerGameManager : MonoBehaviour
 
     [Header("Controllers")]
     [SerializeField] public IntroController introController;
+    [SerializeField] private NextTetrominoUIController nextTetrominoUIController;
 
     // Events
     public event Action<PlayerID> OnPlayerBoardDead;
@@ -47,67 +48,76 @@ public class PlayerGameManager : MonoBehaviour
     {
         tetrisManager.OnGameDead += NotifyBoardGameDead;
 
+        // Initialise tetris manager
+        tetrisManager.Initialise();
+
+        // Initialise scorer manager
+        scoreManager.SubscribeMap(tetrisManager);
+
+        // Initialise ui controllers
+        nextTetrominoUIController.InitialiseAsync().Forget();
+
         // Initialise boundary data
         boundaryData = MapBoundaryData.Create(boundaryRegion.transform);
 
         // Initialise block animator
         BlockAnimator.MovingCurveAsset = blockMovementCurve;
         BlockAnimator.FastMovingCurveAsset = blockLandCurve;
+
+        gameStateMachine.Initialise();
     }
 
-    public void UpdatePlaying()
-    {
-        tetrisManager.OnUpdate();
-    }
-
-    public void PauseGame()
-    {
-        tetrisManager.StopUpdating();
-
-        gameStateMachine.Pause();
-
-        // debug
-        debug = false;
-    }
-
-    public void ResumeGame()
-    {
-        tetrisManager.ResumeUpdating();
-
-        gameStateMachine.Resume();
-
-        // debug
-        debug = true;
-    }
-
-    ////////////////////////////////////////////////////
-    public UniTask InitNewGame()
+    public UniTask PrepareNewPlayerGame()
     {
         // Initialise map
-        tetrisManager.InitMap(boundaryData.width, boundaryData.height, playerID);
-
-        // Initialise game state
-        gameStateMachine.Init();
+        tetrisManager.PrepareNewTetrisMap(boundaryData.width, boundaryData.height, playerID);
 
         // Initialise scorer
-        scoreManager.LinkToGame(tetrisManager);
         scoreManager.Reset();
+
+        // Initialise game state
+        gameStateMachine.PreparePreGame();
 
         return UniTask.CompletedTask;
     }
 
-    public async UniTask IntroGame()
+    public async UniTask PlayIntro()
     {
-        await introController.ActAsync();
+        await introController.PlayAsync();
 
         gameStateMachine.Intro();
     }
 
-    public void StartGame()
+    public void StartGameplay()
     {
         tetrisManager.StartNewMap();
 
         gameStateMachine.StartGame();
+    }
+
+    public void UpdateGameplay()
+    {
+        tetrisManager.OnUpdate();
+    }
+
+    public void PauseGameplay()
+    {
+        tetrisManager.StopUpdating();
+
+        // debug
+        debug = false;
+
+        gameStateMachine.Pause();
+    }
+
+    public void ResumeGameplay()
+    {
+        tetrisManager.ResumeUpdating();
+
+        // debug
+        debug = true;
+
+        gameStateMachine.Resume();
     }
 
     public void GameOver()
@@ -117,9 +127,13 @@ public class PlayerGameManager : MonoBehaviour
         gameStateMachine.GameOver();
     }
 
-    public void CleanUp()
+    public void CleanUpBoard()
     {
+        tetrisManager.CleanUpTetrisMap();
 
+        nextTetrominoUIController.ClearTetrominoIcons();
+
+        gameStateMachine.CleanUp();
     }
 
     public void NotifyBoardGameDead()

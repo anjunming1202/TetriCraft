@@ -2,10 +2,13 @@ using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using static Unity.Collections.AllocatorManager;
 
 public class NextTetrominoUIController : MonoBehaviour
 {
+    [SerializeField] private RectTransform layoutRoot;
+
     [SerializeField] private bool isAnimated = true;
     [SerializeField] private float animationDuration = 0.4f;
 
@@ -15,17 +18,35 @@ public class NextTetrominoUIController : MonoBehaviour
     [SerializeField] private float blockSize;
 
     private RectTransform[] rectTransforms;
-    private Vector2[] iconPositions = null;
+    public Vector2[] iconPositions = null;
     private Vector2 spacing;
 
-    private void Awake()
+    private bool hasInit = false;
+
+    public async UniTask InitialiseAsync()
     {
-        GameEvents.OnIntroStart += Init;
+        // subscribe
+        tetrisManager.OnTetrominoListInitialised += InitialisePanel;
+        tetrisManager.OnStartedTurn += UpdatePanel;
+
+        Canvas.ForceUpdateCanvases();
+        await UniTask.WaitForEndOfFrame(tetrisManager);
+
+        GetTetrominoTransformsInfo();
     }
 
-    private void Init()
+    public void ClearTetrominoIcons()
     {
-        tetrisManager.OnStartedTurn += UpdatePanel;
+        foreach (var icon in icons)
+        {
+            icon.ClearIcons();
+        }
+    }
+
+    public void GetTetrominoTransformsInfo()
+    {
+        if (hasInit)
+            return; // only initialise once
 
         rectTransforms = new RectTransform[icons.Length];
         for (int i = 0; i < icons.Length; i++)
@@ -38,6 +59,22 @@ public class NextTetrominoUIController : MonoBehaviour
         spacing = iconPositions[1] - iconPositions[0];
         Debug.Assert(((iconPositions[iconPositions.Length - 1] - iconPositions[0]) / (iconPositions.Length - 1) - spacing).magnitude < float.Epsilon,
             "Tetromino dispays are not equally spaced");
+
+        hasInit = true;
+    }
+
+    private void Dispose()
+    {
+        tetrisManager.OnTetrominoListInitialised -= InitialisePanel;
+        tetrisManager.OnStartedTurn -= UpdatePanel;
+    }
+
+    private void InitialisePanel()
+    {
+        for (int i = 0; i < icons.Length; i++)
+        {
+            icons[i].Init(tetrisManager.nextTetrominos[i], blockSize);
+        }
     }
 
     private void UpdatePanel()

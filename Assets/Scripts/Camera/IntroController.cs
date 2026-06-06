@@ -6,9 +6,9 @@ public class IntroController : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private CameraScaler cameraScaler;
 
-    public async UniTask ActAsync()
+    public async UniTask PlayAsync()
     {
         mainCamera.orthographicSize = cameraScaler.GetTargetSize() / 8f;
-        await CameraEffects.ZoomToAsync(mainCamera, cameraScaler.GetTargetSize(), 3f);
+        await mainCamera.ZoomToAsync(cameraScaler.GetTargetSize(), 3f);
     }
 }

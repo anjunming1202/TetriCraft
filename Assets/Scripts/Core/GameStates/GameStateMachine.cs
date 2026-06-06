@@ -11,7 +11,7 @@ public class GameStateMachine : StaticInstance<GameStateMachine>
 
     private static GameStateType _currentState = GameStateType.Loading;
 
-    public void Init()
+    public void Initialise()
     {
         ChangeState(GameStateType.Initialised);
         GameEvents.OnInitialised?.Invoke();
@@ -19,16 +19,29 @@ public class GameStateMachine : StaticInstance<GameStateMachine>
         Debug.Log("Game state: Initialised");
     }
 
-    public void Intro()
+    public void PreparePreGame()
     {
         if (State == GameStateType.Initialised)
+        {
+            ChangeState(GameStateType.PreGamePrepared);
+            GameEvents.OnPrepareNewGame?.Invoke();
+
+            Debug.Log("Game state: PreGamePrepared");
+        }
+        else
+            Debug.LogError($"Invalid state transition of Prepare, trying to transit from {State} to {GameStateType.PreGamePrepared}");
+    }
+
+    public void Intro()
+    {
+        if (State == GameStateType.PreGamePrepared)
         {
             GameEvents.OnIntroStart?.Invoke();
             ChangeState(GameStateType.Intro);
             Debug.Log("Game state: Intro");
         }
         else
-            Debug.LogError($"Invalid state transition of Countdown, trying to transit from {State} to {GameStateType.Intro}");
+            Debug.LogError($"Invalid state transition of Intro, trying to transit from {State} to {GameStateType.Intro}");
     }
 
     public void StartGame()
@@ -79,6 +92,13 @@ public class GameStateMachine : StaticInstance<GameStateMachine>
         }
         else
             Debug.LogError($"Invalid state transition of GameOver, trying to transit from {State} to {GameStateType.GameOver}");
+    }
+
+    public void CleanUp()
+    {
+        ChangeState(GameStateType.Initialised);
+        GameEvents.OnCleanUp?.Invoke();
+        Debug.Log("Game state: back to Initialised");
     }
 
     private void ChangeState(GameStateType nextState)

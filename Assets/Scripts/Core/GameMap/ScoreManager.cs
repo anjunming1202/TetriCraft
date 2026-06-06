@@ -14,23 +14,27 @@ public class ScoreManager : Singleton<ScoreManager>
         score = 0;
         UpdateScoreBoard();
     }
-    public void LinkToGame(TetrisManager mapManager)
+
+    public void SubscribeMap(TetrisManager mapManager)
     {
         playerID = mapManager.PlayerID;
         mapManager.OnLineClearWithInfo += ScoreLineClear;
         mapManager.OnTetrominoSoftDrop += ScoreSoftDrop;
         mapManager.OnTetrominoHardDrop += ScoreHardDrop;
     }
+
     private void ScoreSoftDrop(MapTetromino tetromino)
     {
         score += 1;
         UpdateScoreBoard();
     }
+
     private void ScoreHardDrop(MapTetromino tetromino)
     {
         score += tetromino.hardDrop * 2;
         UpdateScoreBoard();
     }
+
     private void ScoreLineClear(PlayerID id, uint newLineCount, uint totalLineCount, uint combo)
     {
         // for clearing multiple lines
@@ -42,10 +46,6 @@ public class ScoreManager : Singleton<ScoreManager>
         UpdateScoreBoard();
     }
 
-    protected override void Awake()
-    {
-        base.Awake();
-    }
     private void UpdateScoreBoard()
     {
         string output = $"{score}";

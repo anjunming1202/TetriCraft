@@ -7,9 +7,15 @@ public class GameOverMenuPanel : MenuPanel
     [SerializeField] private Button newGameButton;
     [SerializeField] private Button exitButton;
 
-    public void Init(GameOverMenuController gameOverManuController)
+    public void Subscribe(GameOverMenuController gameOverManuController)
     {
         newGameButton.onClick.AddListener(gameOverManuController.OnNewGame);
         exitButton.onClick.AddListener(gameOverManuController.OnExit);
+    }
+
+    public void Unsubscribe()
+    {
+        newGameButton.onClick.RemoveAllListeners();
+        exitButton.onClick.RemoveAllListeners();
     }
 }

@@ -37,23 +37,23 @@ public class SingleGameController : GameController
     {
         Debug.Log("Now New Game!");
 
-        await InitNewGame();
+        await PrepareNewGame();
         await IntroGame();
         StartGame();
     }
 
-    protected override async UniTask InitNewGame()
+    protected override async UniTask PrepareNewGame()
     {
         Debug.Log("Now Game Init!");
 
-        await gameManager.InitNewGame();
+        await gameManager.PrepareNewPlayerGame();
     }
 
     protected override async UniTask IntroGame()
     {
         Debug.Log("Now Game Intro!");
 
-        await gameManager.IntroGame();
+        await gameManager.PlayIntro();
     }
 
     protected override void StartGame()
@@ -67,12 +67,12 @@ public class SingleGameController : GameController
         TickManager.Init();
 
         // Start player game
-        gameManager.StartGame();
+        gameManager.StartGameplay();
     }
 
     protected override void PlayingUpdate()
     {
-        gameManager.UpdatePlaying();
+        gameManager.UpdateGameplay();
     }
 
     public override void PauseGame()
@@ -80,7 +80,7 @@ public class SingleGameController : GameController
         Debug.Log("Now Pause Game!");
 
         SetGlobalTimePaused(true);
-        gameManager.PauseGame();
+        gameManager.PauseGameplay();
     }
 
     public override void ResumeGame()
@@ -88,7 +88,7 @@ public class SingleGameController : GameController
         Debug.Log("Now Resume Game!");
 
         SetGlobalTimePaused(false);
-        gameManager.ResumeGame();
+        gameManager.ResumeGameplay();
     }
 
     protected override void GameOver()
@@ -99,11 +99,16 @@ public class SingleGameController : GameController
         gameManager.GameOver();
     }
 
-    protected override void CleanUp()
+    protected override void CleanUpMatch()
     {
         Debug.Log("Now Game Clean Up!");
 
         SetGlobalTimePaused(false);
-        gameManager.CleanUp();
+        gameManager.CleanUpBoard();
+    }
+
+    protected override void Dispose()
+    {
+        throw new System.NotImplementedException();
     }
 }

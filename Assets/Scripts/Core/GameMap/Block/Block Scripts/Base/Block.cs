@@ -115,6 +115,9 @@ public abstract class Block : MapRandomTickBehaviourObject
         return StartCoroutine(DisableOnSet(sec));
     }
 
+    /// <summary>
+    /// Init the block
+    /// </summary>
     public virtual void OnSpawn(MapManager map)
     {
         this.map = map;
@@ -169,7 +172,7 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     public virtual void OnReplacedBy(Block block)
     {
-        Debug.LogError($"block {this} at {position} wrongly replaced");
+        Debug.LogError($"block {this} wrongly replaced by {block} at {position}");
     }
 
     public virtual bool IsClearable()

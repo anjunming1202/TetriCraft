@@ -32,11 +32,6 @@ public class MapTetromino : Tetromino
     public TetrominoEvent OnHardDrop; // for player controlled drop: land (hard drop)
     public Action OnLockdown;
 
-    public void Init()
-    {
-        // all initialisation is in NewTetromino
-    }
-
     public override void Reset()
     {
         base.Reset();

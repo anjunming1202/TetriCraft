@@ -13,30 +13,72 @@ public class MapManager : MonoBehaviour
     public static float gravity = 15f;
     public int Width => width;
     public int Height => height;
+    private int width;
+    private int height;
 
-    // fluid
+
+    // Block grid
+    [SerializeField] public BlockGrid blockGrid;
+    public Block this[int x, int y] => blockGrid[x, y];
+    public int blockCount => blockGrid.blockCount;  // debug
+    public BlockGrid grid => blockGrid;
+
+
+    // Fluid systems
     public Dictionary<FluidID, FluidManager> fluidManager;
 
-    // redstone
+    [SerializeField] private FluidManager waterManager;
+    [SerializeField] private FluidManager lavaManager;
+
+    [SerializeField] private AudioClip fizzSound;
+    private static BlockID waterToLava = BlockID.Obsidian;
+    private static BlockID lavaToWater = BlockID.Cobblestone;
+
+
+    // Redstone system
     public RedstoneManager RedstoneManager;
 
-    // block update
+
+    // Block update system
     public BlockUpdateManager BlockUpdateManager;
 
+
+    // Random tick system
     public List<MapRandomTickBehaviourObject> mapRandomTickObjects;
     public int randomTickSelectionCount => width * height;
 
-    public Block this[int x, int y] => blockGrid[x, y];
+    
+    // events
+    public Action<MapManager, Block> OnGridPlace;
 
-    public int blockCount => blockGrid.blockCount;  // debug
-    public BlockGrid grid => blockGrid;
+
+    // Map update management
+    private List<Block> blockList;
+    private List<Block> blockUpdateBatch;
+    private List<Block> blockDestroyBatch;
     public List<Block> blocks => blockList;
     public List<Block> batchBlocks => blockUpdateBatch;
 
-    // event
-    public Action<MapManager, Block> OnGridPlace;
 
-    public void InitMap(int width, int height, TetrisManager tetrisManager)
+
+    public void Initialise()
+    {
+        Debug.Assert(waterManager != null);
+        Debug.Assert(lavaManager != null);
+        fluidManager = new Dictionary<FluidID, FluidManager>()
+        {
+            { FluidID.Water, waterManager },
+            { FluidID.Lava, lavaManager },
+        };
+
+        // Init map event
+        OnGridPlace += waterManager.BlockSqueeze; // squeeze fluid
+        OnGridPlace += lavaManager.BlockSqueeze;
+
+        OnGridPlace += Flame.TryExtinguishBy; // try extinguish fire
+    }
+
+    public void PrepareNewMap(int width, int height, TetrisManager tetrisManager)
     {
         // Player reference
         PlayerID = tetrisManager.PlayerID;
@@ -55,17 +97,25 @@ public class MapManager : MonoBehaviour
         // Init fluid system
         waterManager.Init(this);
         lavaManager.Init(this);
-        fluidManager = new Dictionary<FluidID, FluidManager>()
-        {
-            { FluidID.Water, waterManager },
-            { FluidID.Lava, lavaManager },
-        };
+    }
 
-        // Init map event
-        OnGridPlace += waterManager.BlockSqueeze; // squeeze fluid
-        OnGridPlace += lavaManager.BlockSqueeze;
+    public void ClearMap()
+    {
+        // block grid
+        blockGrid.ClearAllBlocksWithDestroy();
 
-        OnGridPlace += Flame.TryExtinguishBy; // try extinguish fire
+        // Fluid
+        waterManager.ClearFluidSystem();
+        lavaManager.ClearFluidSystem();
+
+        // Map update
+        blockList = new();
+        blockUpdateBatch = new();
+        blockDestroyBatch = new();
+        BlockUpdateManager = new(this);
+        RedstoneManager = new(this);
+
+        Debug.Log("Cleared all objects in the current map");
     }
 
     public Block GetBlock(int x, int y)
@@ -97,8 +147,9 @@ public class MapManager : MonoBehaviour
                 if (block == null)
                     continue;
                 Vector2Int gridPosition = tetromino.LocalToMap(r, c);
-                block.OnSpawn(this);
-                AddNewBlock(block, gridPosition.x, gridPosition.y, false);
+
+                AddNewBlock(block, gridPosition.x, gridPosition.y);
+
                 block.transform.SetParent(tetromino.transform);
             }
     }
@@ -108,8 +159,9 @@ public class MapManager : MonoBehaviour
         if (blockGrid[x, y] != null)
             blockGrid[x, y].OnReplacedBy(block);
 
-        block.OnSpawn(this);
-        AddNewBlock(block, x, y, true);
+        AddNewBlock(block, x, y);
+
+        block.OnLockdown();
     }
 
     public void DestroyBlock(Block block)
@@ -204,8 +256,10 @@ public class MapManager : MonoBehaviour
     /// <summary>
     /// Add new block into the map
     /// </summary>
-    private void AddNewBlock(Block block, int x, int y, bool lockdownState)
+    private void AddNewBlock(Block block, int x, int y)
     {
+        block.OnSpawn(this);
+
         block.SetPosition(x, y);
 
         blockGrid.Add(block);
@@ -214,9 +268,6 @@ public class MapManager : MonoBehaviour
         block.OnRemoved += RemoveFromUpdateBatch;
 
         blockList.Add(block);
-
-        if (lockdownState)
-            block.OnLockdown();
 
         //OnGridPlace?.Invoke(this, block); //
     }
@@ -248,27 +299,6 @@ public class MapManager : MonoBehaviour
             }
         }
     }
-
-    // Blocks
-    [SerializeField] public BlockGrid blockGrid;
-
-    // Fluid
-    [SerializeField] private FluidManager waterManager;
-    [SerializeField] private FluidManager lavaManager;
-
-    [SerializeField] private AudioClip fizzSound;
-    private BlockID waterToLava = BlockID.Obsidian;
-    private BlockID lavaToWater = BlockID.Cobblestone;
-
-    // Map Boundary Data
-    private int width;
-    private int height;
-
-    // Map update
-    private List<Block> blockList;
-    private List<Block> blockUpdateBatch;
-    private List<Block> blockDestroyBatch;
-
 
 
 

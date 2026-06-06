@@ -24,13 +24,28 @@ public class TetrominoGenerator
         dst.New(src.type, blocks[0], blocks[1], blocks[2], blocks[3]);
     }
 
-    private static Tetromino NewTetromino(Tetromino tetromino, TetrominoType tetroType, BlockID blockType)
+    public static Tetromino NewTetromino(Tetromino tetromino, TetrominoType tetroType, BlockID blockType)
     {
         // For intrinsic tetromino (same four blocks)
         Block[] blocks = new Block[4];
         for (int i = 0; i < 4; i++)
         {
             blocks[i] = BlockSpawner.NewBlock(blockType);
+        }
+
+        // New a tetromino
+        tetromino.New(tetroType, blocks[0], blocks[1], blocks[2], blocks[3]);
+
+        return tetromino;
+    }
+
+    public static Tetromino NewTetromino(Tetromino tetromino, TetrominoType tetroType, Block blockPrefab)
+    {
+        // For intrinsic tetromino (same four blocks)
+        Block[] blocks = new Block[4];
+        for (int i = 0; i < 4; i++)
+        {
+            blocks[i] = GameObject.Instantiate<Block>(blockPrefab);
         }
 
         // New a tetromino

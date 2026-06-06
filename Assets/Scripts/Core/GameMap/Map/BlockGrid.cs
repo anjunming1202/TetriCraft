@@ -59,6 +59,18 @@ public class BlockGrid : MonoBehaviour
         BlockUpdateManager.OnNeighbourChangedBlockUpdate(this, removedPos, block);
     }
 
+    public void ClearAllBlocksWithDestroy()
+    {
+        foreach (var block in grid)
+            if (block != null)
+                GameObject.Destroy(block.gameObject);
+
+        grid = new Block[width, height + 5];
+        positions = new Dictionary<Block, Vector2Int>();
+
+        Debug.Log("Cleared all blocks in the grid");
+    }
+
     public Block Get(int x, int y)
     {
         if (CheckInsideGrid(x, y))
@@ -88,9 +100,6 @@ public class BlockGrid : MonoBehaviour
 
     public bool CheckEmpty(int x, int y)
     {
-        if (y >= height)
-            return true;
-
         return grid[x, y] == null;
     }
 

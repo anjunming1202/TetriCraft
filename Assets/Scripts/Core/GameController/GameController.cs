@@ -17,6 +17,12 @@ public abstract class GameController : Singleton<GameController>
 
     public bool IsPaused => GameStateMachine.State == GameStateType.Paused;
 
+    public void RestartNewGame()
+    {
+        CleanUpMatch();
+        NewGame().Forget();
+    }
+
     protected override void Awake()
     {
         base.Awake();
@@ -51,7 +57,7 @@ public abstract class GameController : Singleton<GameController>
 
         InputRoot.EnableOutOfGameUIInput();
 
-        CleanUp();
+        CleanUpMatch();
     }
 
     /// <summary>
@@ -67,7 +73,7 @@ public abstract class GameController : Singleton<GameController>
     /// <summary>
     /// Init the new game, game state becomes initialised
     /// </summary>
-    protected abstract UniTask InitNewGame();
+    protected abstract UniTask PrepareNewGame();
 
     /// <summary>
     /// Intro play of the new game, game state at intro
@@ -101,9 +107,14 @@ public abstract class GameController : Singleton<GameController>
 
 
     /// <summary>
-    /// After gameover, before quit or new game, clean up the scene
+    /// After gameover, before new game, clean up the scene
     /// </summary>
-    protected abstract void CleanUp();
+    protected abstract void CleanUpMatch();
+
+    /// <summary>
+    /// Run before quit the scene
+    /// </summary>
+    protected abstract void Dispose();
 
 
 

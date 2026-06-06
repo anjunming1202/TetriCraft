@@ -35,7 +35,7 @@ public class BattleGameController : GameController
         throw new System.NotImplementedException();
     }
 
-    protected override UniTask InitNewGame()
+    protected override UniTask PrepareNewGame()
     {
         throw new System.NotImplementedException();
     }
@@ -70,7 +70,12 @@ public class BattleGameController : GameController
         throw new System.NotImplementedException();
     }
 
-    protected override void CleanUp()
+    protected override void CleanUpMatch()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    protected override void Dispose()
     {
         throw new System.NotImplementedException();
     }

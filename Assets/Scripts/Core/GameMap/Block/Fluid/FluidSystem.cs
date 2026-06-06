@@ -35,9 +35,22 @@ public class FluidSystem : MonoBehaviour
         elements.Remove(element);
 
         RemoveFromColumnLists(element);
-
+        
         GameObject.Destroy(element.gameObject);
     }
+
+    public void ClearAllElements()
+    {
+        foreach (FluidElement element in elements)
+        {
+            GameObject.Destroy(element.gameObject);
+            RemoveFromColumnLists(element);
+        }
+        elements = new List<FluidElement>();
+
+        Debug.Assert(columnElementLists[0].Count == 0);
+        Debug.Log("Cleared all elements in the fluid system");
+    }    
 
     public Vector2Int GetGridPosition(int column, int level)
     {

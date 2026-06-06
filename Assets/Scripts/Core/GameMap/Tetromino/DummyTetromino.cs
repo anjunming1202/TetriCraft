@@ -53,8 +53,3 @@ public class DummyTetromino : Tetromino
             }
     }
 }
-
-public class GhostTetromino : DummyTetromino
-{
-    public Tetromino shadowTetromino;
-}

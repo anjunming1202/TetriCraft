@@ -11,9 +11,6 @@ public class BlockSpawnDebugger : MonoBehaviour
     public BlockID blockSpawned;
     public Color selectedGridColor;
 
-    private void Awake()
-    {
-    }
 
     void Update()
     {

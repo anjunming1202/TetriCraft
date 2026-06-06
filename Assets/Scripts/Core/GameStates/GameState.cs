@@ -16,6 +16,7 @@ public enum GameStateType
 {
     Loading,
     Initialised,
+    PreGamePrepared,
     Intro,
     Playing,
     Paused,

@@ -95,7 +95,7 @@ public class TetrominoController : MonoBehaviour
         
     }
 
-    public void Initialise(MapManager map, MapTetromino tetromino)
+    public void Init(MapManager map, MapTetromino tetromino)
     {
         this.map = map;
         this.tetromino = tetromino;
