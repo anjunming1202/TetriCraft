@@ -94,7 +94,7 @@ public class Explosion : MonoBehaviour
                 Entity entityTarget = hit.collider.GetComponent<Entity>();
                 if (entityTarget != null)
                 {
-                    entityTarget.AddVelocity(GetRadiusIntensityFactor(hit) * repellingStrength * direction);
+                    entityTarget.AddMomentum(GetRadiusIntensityFactor(hit) * repellingStrength * direction);
                 }
             }
 

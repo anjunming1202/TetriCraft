@@ -30,7 +30,7 @@ MonoBehaviour:
   - blockID: 10
     weight: 1
   - blockID: 14
-    weight: 1
+    weight: 100.84
   - blockID: 15
     weight: 1
   - blockID: 16

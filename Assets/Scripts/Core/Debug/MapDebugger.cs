@@ -50,8 +50,8 @@ public class MapDebugger : MonoBehaviour
         // mark coordinates
         if (displayCoordinates)
         {
-            for (int x = 0; x < debuggedMap.Width; x++)
-                for (int y = 0; y < debuggedMap.Height; y++)
+            for (int x = 0; x < debuggedMap.BoundaryWidth; x++)
+                for (int y = 0; y < debuggedMap.BoundaryHeight; y++)
                 {
                     Vector2Int gridPosition = new Vector2Int(x, y);
                     Vector3 labelPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).MapToWorld(gridPosition) + new Vector3(0, 1f);

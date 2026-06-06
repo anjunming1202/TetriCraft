@@ -147,7 +147,7 @@ public class FluidSystem : MonoBehaviour
             /*if (y == element.upperGridPosition && element.localUpperLevel == 0)
                 continue;*/
 
-            if (mapManager.CheckInside(element.column, y) && mapManager.IsBlocked(element.column, y))
+            if (mapManager.CheckInsideWithoutCeiling(element.column, y) && mapManager.IsBlockedWithoutCeiling(element.column, y))
                 blockList.Add(mapManager[element.column, y]);
         }
         return blockList;

@@ -1,7 +1,34 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public abstract class Entity : MapObject
 {
+    // events
+    public event Action<Entity> OnKilled;
+
+    // collision box
+    protected virtual Vector2 size => Vector2.one;
+    protected Rect collisionBox => new Rect(position - size / 2, size);
+
+    // collision detection
+    private Vector2Int collideGrid;
+
+    // motion data
+    protected Vector2 position;
+    protected Vector2 velocity;
+
+    // motion states
+    protected bool isFalling;
+
+    // motion params
+    protected virtual float airResistance => 0.5f;
+    protected virtual float groundFriction => 10f;
+    protected virtual float inertia => 1;
+    protected virtual bool hasGravity => true;
+    //protected static float maximumSpeed = 20f;
+
+
+
     public virtual void OnSpawned(MapManager map, Vector2 position)
     {
         this.map = map;
@@ -10,19 +37,34 @@ public abstract class Entity : MapObject
         this.isFalling = false;
     }
 
-    public void AddVelocity(Vector2 velocity)
+    public virtual void Die()
     {
-        this.velocity += velocity;
+        OnKilled?.Invoke(this);
+        GameObject.Destroy(this.gameObject);
     }
 
-    protected virtual void Update()
+    public virtual void Removed()
     {
-        UpdateFalling(Time.deltaTime);
+        GameObject.Destroy(this.gameObject);
+    }
+
+    public virtual void TickUpdate(float dt)
+    {
+        //Debug.Assert(dt == Time.deltaTime, $"dt: {dt}, delta time: {Time.deltaTime}");
+        UpdateFalling(dt);
         transform.position = BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(this.position);
+    }
+
+    public void AddMomentum(Vector2 velocity)
+    {
+        this.velocity += velocity / (inertia + float.Epsilon);
     }
 
     protected void UpdateFalling(float deltaTime)
     {
+        if (!hasGravity)
+            return;
+
         // x direction
         float deltaX = velocity.x * deltaTime;
         position.x += deltaX;
@@ -40,7 +82,7 @@ public abstract class Entity : MapObject
             if (isFalling)
                 velocity.x -= velocity.x * airResistance * deltaTime;
             else
-                velocity.x -= velocity.x * groundResistance * deltaTime;
+                velocity.x -= velocity.x * groundFriction * deltaTime;
         }
 
         // y direction
@@ -75,7 +117,7 @@ public abstract class Entity : MapObject
                 if (collisionBox.yMax - y < Mathf.Epsilon)
                     continue;
 
-                if (map.IsBlocked(x, y))
+                if (map.IsBlockedWithoutCeiling(x, y))
                 {
                     collideGrid = new Vector2Int(x, y);
                     return true;
@@ -89,18 +131,4 @@ public abstract class Entity : MapObject
     {
         return BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(position);
     }
-
-    protected virtual Vector2 size => Vector2.one;
-    protected Rect collisionBox => new Rect(position - size / 2, size);
-
-    protected Vector2 position;
-    protected Vector2 velocity;
-
-    protected bool isFalling;
-
-    protected static float airResistance = 0.5f;
-    protected static float groundResistance = 10f;
-    //protected static float maximumSpeed = 20f;
-
-    private Vector2Int collideGrid;
 }

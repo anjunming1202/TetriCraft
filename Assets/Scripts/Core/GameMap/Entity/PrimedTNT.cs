@@ -23,7 +23,7 @@ public class PrimedTNT : Entity
 
     protected void Start()
     {
-        AddVelocity(RandomVelocity());        
+        AddMomentum(RandomVelocity());        
     }
 
     private IEnumerator FuseCountdown()
@@ -60,7 +60,9 @@ public class PrimedTNT : Entity
         // explode
         Explosion explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
         explosion.Set(map, position, blastRadius);
-        GameObject.Destroy(this.gameObject);
+
+        // remove entity
+        this.Removed();
     }
 
     private Vector2 RandomVelocity()

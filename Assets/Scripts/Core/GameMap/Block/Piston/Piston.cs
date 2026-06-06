@@ -121,7 +121,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         destroyedBlockList.Clear();
 
         bool successful = true;
-        if (map.IsBlocked(forwardPosition.x, forwardPosition.y))
+        if (map.IsBlockedWithoutCeiling(forwardPosition.x, forwardPosition.y))
         {
             Block forwardBlock = map.GetBlock(forwardPosition.x, forwardPosition.y);
             successful = TryPushBlock(forwardBlock);
@@ -190,7 +190,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
 
         // boundary condition: forward is air => true
         Vector2Int nextPosition = block.GridPosition + Facing;
-        if (!map.IsBlocked(nextPosition.x, nextPosition.y))
+        if (!map.IsBlockedWithoutCeiling(nextPosition.x, nextPosition.y))
             return true;
 
         // recursion: try push forward block
@@ -201,7 +201,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
     private bool CheckForwardAir(Block block)
     {
         Vector2Int nextPosition = block.GridPosition + Facing;
-        if (!map.IsBlocked(nextPosition.x, nextPosition.y))
+        if (!map.IsBlockedWithoutCeiling(nextPosition.x, nextPosition.y))
             return true;
         return false;
     }

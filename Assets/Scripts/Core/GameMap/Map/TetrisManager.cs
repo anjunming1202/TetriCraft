@@ -181,7 +181,7 @@ public class TetrisManager : MonoBehaviour
     private Vector2Int GetSpawnPosition()
     {
         // x position
-        int x = (map.Width - fallingTetromino.size) / 2;
+        int x = (map.BoundaryWidth - fallingTetromino.size) / 2;
 
         // y position        
         int distance = int.MaxValue; // distance tetromino need to move
@@ -190,7 +190,7 @@ public class TetrisManager : MonoBehaviour
             {
                 if (fallingTetromino.shape[r, c] != null)
                 {
-                    int distance_new = fallingTetromino.LocalToMap(r, c).y - map.Height;
+                    int distance_new = fallingTetromino.LocalToMap(r, c).y - map.BoundaryHeight;
                     if (distance_new < distance)
                         distance = distance_new;
                 }
@@ -250,7 +250,7 @@ public class TetrisManager : MonoBehaviour
 
     private bool CheckGameDead()
     {
-        int deathline = map.Height;
+        int deathline = map.BoundaryHeight;
         bool gameover = !map.CheckRowEmpty(deathline);
         return gameover;
     }
@@ -273,7 +273,7 @@ public class TetrisManager : MonoBehaviour
     private bool TryClearLines()
     {
         uint newLineCount = 0;
-        for (int i = 0; i < map.Height; i++)
+        for (int i = 0; i < map.BoundaryHeight; i++)
         {
             bool successful = TryClearLine(i);
             if (successful)
@@ -304,16 +304,16 @@ public class TetrisManager : MonoBehaviour
     private void ClearLine(int row)
     {
         // clear row
-        for (int i = 0; i < map.Width; i++)
+        for (int i = 0; i < map.BoundaryWidth; i++)
         {
             Block block = map.GetBlock(i, row);
             if (block != null)
                 map.DestroyBlock(block);
         }
         // move above rows down
-        for (int y = row + 1; y < map.Height; y++)
+        for (int y = row + 1; y < map.BoundaryHeight; y++)
         {
-            for (int x = 0; x < map.Width; x++)  // * must from bottom to top
+            for (int x = 0; x < map.BoundaryWidth; x++)  // * must from bottom to top
             {
                 if (map.CheckEmpty(x, y) || !map[x, y].isLocked)
                     continue;

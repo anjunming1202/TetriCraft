@@ -43,13 +43,13 @@ public abstract class FluidDummy : Block
         base.OnLockdown();
     }
 
-    public override void Remove()
+    public override void Removed()
     {
         FluidManager.dummyBlockPositions.Remove(GridPosition);
-        base.Remove();
+        base.Removed();
     }
 
-    public override void Destroy()
+    public override void Destroyed()
     {
         int x = GridPosition.x;
         int y = GridPosition.y;
@@ -65,7 +65,7 @@ public abstract class FluidDummy : Block
 
         FluidManager.fluidSystem.Remove(parentElement);
 
-        base.Destroy();
+        base.Destroyed();
     }
 
     protected FluidManager FluidManager { get; private set; }

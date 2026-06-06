@@ -5,17 +5,18 @@ using UnityEngine;
 [Serializable]
 public class BlockGrid : MonoBehaviour
 {
+    public Block this[int x, int y] => grid[x, y];
+    public int GridHeight => grid.GetLength(1);
+    public int GridWidth => grid.GetLength(0);
+    public int blockCount => positions.Count;   // debug
+
+
     public void Init(int width, int height)
     {
         // Init
-        this.width = width;
-        this.height = height;
-        grid = new Block[width, height + 5];
+        grid = new Block[width, height];
         positions = new Dictionary<Block, Vector2Int>();
     }
-
-    public Block this[int x, int y] => grid[x, y];
-    public int blockCount => positions.Count;   // debug
 
     public void Add(Block block)
     {
@@ -65,7 +66,7 @@ public class BlockGrid : MonoBehaviour
             if (block != null)
                 GameObject.Destroy(block.gameObject);
 
-        grid = new Block[width, height + 5];
+        grid = new Block[GridWidth, GridHeight];
         positions = new Dictionary<Block, Vector2Int>();
 
         Debug.Log("Cleared all blocks in the grid");
@@ -90,21 +91,20 @@ public class BlockGrid : MonoBehaviour
 
     public bool CheckInsideGrid(int x, int y)
     {
-        return x >= 0 && x < width && y >= 0 && y < height;
+        return x >= 0 && x < GridWidth && y >= 0 && y < GridHeight;
     }
 
-    public bool CheckInside(int x, int y)
+    public bool CheckInsideWithoudCeiling(int x, int y)
     {
-        return x >= 0 && x < width && y >= 0;
+        return x >= 0 && x < GridWidth && y >= 0;
     }
 
     public bool CheckEmpty(int x, int y)
     {
+        Debug.Assert(x<GridWidth && y<GridHeight, $"width: {GridWidth}, x = {x}, height: {GridHeight}, y = {y}");
         return grid[x, y] == null;
     }
 
-    private int width;
-    private int height;
     private Block[,] grid;
     private Dictionary<Block, Vector2Int> positions;
 }

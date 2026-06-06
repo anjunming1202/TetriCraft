@@ -36,7 +36,7 @@ public class FluidManager : MonoBehaviour
         // Init map reference
         mapManager = map;
         // Init fluid system
-        fluidSystem.Init(map.Width);
+        fluidSystem.Init(map.BoundaryWidth);
         // Init lists
         dummyBlockPositions = new List<Vector2Int>();
         elementUpdateList = new List<FluidElement>();
@@ -181,7 +181,7 @@ public class FluidManager : MonoBehaviour
 
                     targetX = i == 0 ? x - offsetX : x + offsetX;
 
-                    isCollidingWall[i] = isCollidingWall[i] || mapManager.IsBlocked(targetX, targetY);
+                    isCollidingWall[i] = isCollidingWall[i] || mapManager.IsBlockedWithoutCeiling(targetX, targetY);
                     if (isCollidingWall[i])
                         continue;
 
@@ -214,7 +214,7 @@ public class FluidManager : MonoBehaviour
                         Block firstCollidedBlock = isCollidingGround ? collidedBlocks[^1] : null;
                         int blockCollidingLevel = isCollidingGround ? FluidElement.Local2Level(firstCollidedBlock.GridPosition.y + 1, 0) : -1;
 
-                        if (!mapManager.CheckInside(elementSqueezed.column, elementSqueezed.lowerGridPosition)) // case that overflow at y = 0
+                        if (!mapManager.CheckInsideWithoutCeiling(elementSqueezed.column, elementSqueezed.lowerGridPosition)) // case that overflow at y = 0
                         {
                             isCollidingGround = true;
                             blockCollidingLevel = 0;
@@ -250,7 +250,8 @@ public class FluidManager : MonoBehaviour
             targetY = y;
             while (elementSqueezed != null)
             {
-                Debug.Assert(targetY < mapManager.Height, "iterate upwards exceeding the map");
+                if (targetY >= mapManager.BoundaryHeight)
+                    Debug.LogWarning("iterate upwards exceeding the boundary");
 
                 offsetX = 0;
                 isCollidingWall = new bool[2] { false, false };
@@ -277,7 +278,7 @@ public class FluidManager : MonoBehaviour
                         targetX = i == 0 ? x - offsetX : x + offsetX;
 
                         // check whether colliding wall => continue to next column
-                        isCollidingWall[i] = isCollidingWall[i] || mapManager.IsBlocked(targetX, targetY);
+                        isCollidingWall[i] = isCollidingWall[i] || mapManager.IsBlockedWithoutCeiling(targetX, targetY);
                         if (isCollidingWall[i])
                             continue;
 
@@ -464,7 +465,7 @@ public class FluidManager : MonoBehaviour
         // try flow downwards
         int targetLevel = element.lowerLevel - unitFlowingAmount;
         Vector2Int targetPositionDown = fluidSystem.GetGridPosition(element.column, targetLevel);
-        bool isTouchingGround = mapManager.IsBlocked(targetPositionDown.x, targetPositionDown.y);
+        bool isTouchingGround = mapManager.IsBlockedWithoutCeiling(targetPositionDown.x, targetPositionDown.y);
         if (!isTouchingGround) // fall above the ground
         {
             FluidElement elementDown = fluidSystem.GetCollidedFluid(element.column, targetLevel);
@@ -505,8 +506,8 @@ public class FluidManager : MonoBehaviour
                 int referenceGroundLevel = referenceLevel - element.localLowerLevel;
 
                 bool[] isWall = {
-                    mapManager.IsBlocked(targetPositions[0].x, targetPositions[0].y),
-                    mapManager.IsBlocked(targetPositions[1].x, targetPositions[1].y)
+                    mapManager.IsBlockedWithoutCeiling(targetPositions[0].x, targetPositions[0].y),
+                    mapManager.IsBlockedWithoutCeiling(targetPositions[1].x, targetPositions[1].y)
                 };
 
                 FluidElement[] elementsNext = {
@@ -654,7 +655,7 @@ public class FluidManager : MonoBehaviour
 
         int targetLevel = to.upperLevel + amount;
         Vector2Int targetPosition = fluidSystem.GetGridPosition(to.column, targetLevel - 1);
-        bool isAir = !mapManager.IsBlocked(targetPosition.x, targetPosition.y) && !fluidSystem.IsFluid(to.column, targetLevel);
+        bool isAir = !mapManager.IsBlockedWithoutCeiling(targetPosition.x, targetPosition.y) && !fluidSystem.IsFluid(to.column, targetLevel);
         if (isAir)
         {
             from.FlowTo(to, amount);
@@ -684,7 +685,7 @@ public class FluidManager : MonoBehaviour
 
         foreach (var (position, element) in positions)
         {
-            if (!mapManager.IsInsideGrid(position.x,position.y))
+            if (!mapManager.CheckInsideBlockGrid(position.x,position.y))
             {
                 continue;
             }
@@ -724,8 +725,8 @@ public class FluidManager : MonoBehaviour
 
     private void SpawnDummyBlock(Vector2Int position, FluidElement element)
     {
-        Debug.Assert(!mapManager.IsBlocked(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
-        if (mapManager.IsBlocked(position.x, position.y))
+        Debug.Assert(!mapManager.IsBlockedWithoutCeiling(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
+        if (mapManager.IsBlockedWithoutCeiling(position.x, position.y))
             return;
 
         Block newBlock = BlockSpawner.NewBlock(DummyID);

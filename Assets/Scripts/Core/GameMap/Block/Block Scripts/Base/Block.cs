@@ -121,7 +121,6 @@ public abstract class Block : MapRandomTickBehaviourObject
     public virtual void OnSpawn(MapManager map)
     {
         this.map = map;
-        transform.SetParent(map.blockGrid.transform);
 
         this.PlayerID = map.PlayerID;
 
@@ -132,6 +131,26 @@ public abstract class Block : MapRandomTickBehaviourObject
         isRemoved = false;
 
         isCharged = false;
+    }
+
+    /// <summary>
+    /// Removed with breaking, don't use directly
+    /// </summary>
+    public virtual void Destroyed()
+    {
+        isRemoved = true;
+        OnDestroyed?.Invoke();
+        Removed();
+    }
+
+    /// <summary>
+    /// Romove, don't use directly
+    /// </summary>
+    public virtual void Removed()
+    {
+        isRemoved = true;
+        OnRemoved?.Invoke(this);
+        GameObject.Destroy(gameObject);
     }
 
     public virtual void OnLockdown()
@@ -178,26 +197,6 @@ public abstract class Block : MapRandomTickBehaviourObject
     public virtual bool IsClearable()
     {
         return isLocked;
-    }
-
-    /// <summary>
-    /// Removed with breaking, don't use directly
-    /// </summary>
-    public virtual void Destroy()
-    {
-        isRemoved = true;
-        OnDestroyed?.Invoke();
-        Remove();
-    }
-
-    /// <summary>
-    /// Romove, don't use directly
-    /// </summary>
-    public virtual void Remove()
-    {
-        isRemoved = true;
-        OnRemoved?.Invoke(this);
-        GameObject.Destroy(gameObject);
     }
 
     public virtual void OnCharged(Vector2Int sourcePosition)

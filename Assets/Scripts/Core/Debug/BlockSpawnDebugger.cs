@@ -29,7 +29,7 @@ public class BlockSpawnDebugger : MonoBehaviour
         {
             int x = selectedGridPosition.x;
             int y = selectedGridPosition.y;
-            if (debuggedMap.IsBlocked(x, y))
+            if (debuggedMap.IsBlockedInsideGrid(x, y))
                 return;
             else if (hasSpawnedGrids.Contains(new Vector2Int(x, y)))
                 return;
@@ -51,7 +51,7 @@ public class BlockSpawnDebugger : MonoBehaviour
         {
             int x = selectedGridPosition.x;
             int y = selectedGridPosition.y;
-            if (!debuggedMap.CheckInside(x, y) || debuggedMap.CheckEmpty(x, y))
+            if (!debuggedMap.CheckInsideWithoutCeiling(x, y) || debuggedMap.CheckEmpty(x, y))
                 return;
             else
             {

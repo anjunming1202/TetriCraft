@@ -243,7 +243,7 @@ public class MapTetromino : Tetromino
                 if (shape[r, c] != null)
                 {
                     Vector2Int blockPos = LocalToMap(r, c);
-                    if (!map.CheckInside(blockPos.x, blockPos.y))
+                    if (!map.CheckInsideWithoutCeiling(blockPos.x, blockPos.y))
                         return false;
                 }
                 /*// special case: piston
