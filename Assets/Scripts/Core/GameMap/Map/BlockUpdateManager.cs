@@ -1,94 +1,124 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class BlockUpdateManager
 {
-    public BlockUpdateManager(MapManager map)
+    public BlockUpdateManager(MapManager map, BlockGrid blockGrid)
     {
         this.map = map;
+        this.blockGrid = blockGrid;
     }
 
-    public static void OnNeighbourChangedBlockUpdate(BlockGrid grid, Vector2Int pos, Block block = null)
+    /// <summary>
+    /// Send an NC update to the neighbour receivers
+    /// </summary>
+    public void SendNCUpdateRequestToNeighbours(Vector2Int pos)
     {
         // NC update triggered (other notifications other than neighbours)
-        Block self = grid.Get(pos.x, pos.y);
+        /*Block self = grid.Get(pos.x, pos.y);
         if (self == null && block != null)
             self = block;
         if (self != null)
         {
-            self.NeighbourChangedNotified(pos);
-            self.OnNCUpdateTriggered();
-        }
+            self.ReceiveNCUpdateRequest(pos);
+            self.SendNCUpdate();
+        }*/
 
         // notify neighbours (NC notification list)
         Vector2Int[] dirs = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
         foreach (var dir in dirs)
         {
             Vector2Int nPos = pos + dir;
-            Block neighbour = grid.Get(nPos.x, nPos.y);
+            Block neighbour = blockGrid.Get(nPos.x, nPos.y);
             if (neighbour != null)
             {
-                neighbour.NeighbourChangedNotified(pos);
+                AddToNCUpdateBatch(neighbour, pos);
+            }
+        }
+    }
+
+    public void SendNCUpdateRequestToExtraReceivers(Block notifier)
+    {
+        if (notifier ==  null)
+            return;
+
+        if (!NCListenerList.TryGetValue(notifier, out var listeners))
+            return;
+
+        foreach (Block listener in listeners)
+        {
+            if (listener != null)
+            {
+                AddToNCUpdateBatch(listener, notifier.GridPosition);
             }
         }
     }
 
     public static void SubscribeNCNotification(Block notifier, Block listener)
     {
-        notifier.OnNCBlockUpdated += listener.NeighbourChangedNotified;
-        if (NCSubscibeList.ContainsKey(listener))
-            NCSubscibeList[listener].Add(notifier);
+        if (NCListenerList.ContainsKey(notifier))
+            NCListenerList[notifier].Add(listener);
         else
-            NCSubscibeList.Add(listener, new List<Block> { notifier });
+            NCListenerList.Add(notifier, new List<Block> { listener });
+
+        if (NCNotifierList.ContainsKey(listener))
+            NCNotifierList[listener].Add(notifier);
+        else
+            NCNotifierList.Add(listener, new List<Block> { notifier });
+
         listener.OnRemoved += DesubscribeAllNCNotifications;
     }
 
     public static void DesubscribeNCNotification(Block notifier, Block listener)
     {
-        notifier.OnNCBlockUpdated -= listener.NeighbourChangedNotified;
-        NCSubscibeList[listener].Remove(notifier);
+        NCListenerList[notifier].Remove(listener);
+        NCNotifierList[listener].Remove(notifier);
     }
 
     public static void DesubscribeAllNCNotifications(Block listener)
     {
-        if (!NCSubscibeList.ContainsKey(listener))
+        if (!NCNotifierList.ContainsKey(listener))
             return;
 
-        for (int i = NCSubscibeList[listener].Count - 1; i >= 0; i--)
+        for (int i = NCNotifierList[listener].Count - 1; i >= 0; i--)
         {
-            Block notifier = NCSubscibeList[listener][i];
+            Block notifier = NCNotifierList[listener][i];
             DesubscribeNCNotification(notifier, listener);
         }
     }
 
     public void BlockUpdate()
     {
-        (Block, Vector2Int)[] copy = blockUpdateList.ToArray();
+        (Block, Vector2Int)[] copy = blockNCUpdateRecieverList.ToArray();
 
         Reset(); // prepare update list for next frame, some updates might occur in the following activations
 
         foreach (var (block, updateSrc) in copy)
         {
             if (block != null)
-                block.NCNotificationUpdate(updateSrc);
+                block.OnNCUpdateRespond(updateSrc);
         }
     }
 
-    public void AddUpdatedBlock(Block block, Vector2Int updateSource)
+    public void AddToNCUpdateBatch(Block receiverBlock, Vector2Int updateSource)
     {
-        if (blockUpdateList.Contains((block, updateSource)) || block.isRemoved)
+        if (blockNCUpdateRecieverList.Contains((receiverBlock, updateSource)) || receiverBlock.isRemoved)
             return;
-        blockUpdateList.Add((block, updateSource));
+        blockNCUpdateRecieverList.Add((receiverBlock, updateSource));
     }
 
     private MapManager map;
-    private List<(Block, Vector2Int)> blockUpdateList = new List<(Block, Vector2Int)>();
+    private BlockGrid blockGrid;
+    private readonly List<(Block, Vector2Int)> blockNCUpdateRecieverList = new List<(Block, Vector2Int)>();
 
-    private static Dictionary<Block, List<Block>> NCSubscibeList = new Dictionary<Block, List<Block>>();
+    private static readonly Dictionary<Block, List<Block>> NCListenerList = new(); // { notifier : { listeners }}
+    private static readonly Dictionary<Block, List<Block>> NCNotifierList = new(); // { listener : { notifiers }}
 
     private void Reset()
     {
-        blockUpdateList.Clear();
+        blockNCUpdateRecieverList.Clear();
     }
 }

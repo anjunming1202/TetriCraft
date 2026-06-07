@@ -60,9 +60,9 @@ public class Piston : GeneralBlock, IRedstoneActivatable
             pistonHead.SetPosition(x + Facing.x, y + Facing.y, animation);
     }
 
-    public override void NCNotificationUpdate(Vector2Int updateSrc)
+    public override void OnNCUpdateRespond(Vector2Int updateSrc)
     {
-        base.NCNotificationUpdate(updateSrc);
+        base.OnNCUpdateRespond(updateSrc);
 
         if (isActivated && !isExtending)
         {
@@ -234,8 +234,8 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         pistonHead.OnDestroyed += OnHeadDestroyed;
         map.SpawnBlock(pistonHead, forwardPosition.x, forwardPosition.y);
 
-        // piston NC update
-        BlockUpdateManager.OnNeighbourChangedBlockUpdate(map.grid, GridPosition);
+        // trigger piston NC update
+        map.RequestNCUpdate(GridPosition);
 
         // rendering and sound
         OnExtending?.Invoke();
@@ -252,7 +252,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         }
     }
 
-    private void OnHeadDestroyed()
+    private void OnHeadDestroyed(Block block)
     {
         if (!isRemoved)
             map.DestroyBlock(this);

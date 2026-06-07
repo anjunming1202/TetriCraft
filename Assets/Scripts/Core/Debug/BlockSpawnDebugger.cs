@@ -55,7 +55,7 @@ public class BlockSpawnDebugger : MonoBehaviour
                 return;
             else
             {
-                debuggedMap.DestroyBlock(debuggedMap[x, y]);
+                debuggedMap.DestroyBlock(debuggedMap.GetBlock(x, y));
             }
         }
     }

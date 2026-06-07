@@ -692,7 +692,7 @@ public class FluidManager : MonoBehaviour
 
             if (dummyBlockPositions.Contains(position))
             {
-                FluidDummy dummyBlock = mapManager[position.x, position.y] as FluidDummy;
+                FluidDummy dummyBlock = mapManager.GetBlock(position) as FluidDummy;
                 dummyBlock.SetSourceElement(element);
 
                 dummyBlockPositions.Remove(position);
@@ -705,7 +705,7 @@ public class FluidManager : MonoBehaviour
             }
             else
             {
-                if (mapManager[position.x, position.y] != null && mapManager[position.x, position.y].IsFluid)
+                if (mapManager.GetBlock(position) != null && mapManager.GetBlock(position).IsFluid)
                     continue;
 
                 SpawnDummyBlock(position, element);
@@ -737,9 +737,9 @@ public class FluidManager : MonoBehaviour
 
     private void RemoveDummyBlock(Vector2Int position)
     {
-        if (mapManager[position.x, position.y] != null && mapManager[position.x, position.y].IsDummy)
+        if (mapManager.GetBlock(position) != null && mapManager.GetBlock(position).IsDummy)
         {
-            mapManager.RemoveBlock(mapManager[position.x, position.y]);
+            mapManager.RemoveBlock(mapManager.GetBlock(position));
             return;
         }
         else

@@ -67,7 +67,7 @@ public class MapDebugger : MonoBehaviour
         }
 
         // mark blocks
-        foreach (Block block in debuggedMap.blocks)
+        foreach (Block block in debuggedMap.Blocks)
         {
             if (block == null)
                 continue;
@@ -93,7 +93,7 @@ public class MapDebugger : MonoBehaviour
         // check for lost reference block
         foreach (Block block in debuggedMap.GetComponentsInChildren<Block>())
         {
-            if (!debuggedMap.grid.Contains(block))
+            if (!debuggedMap.ContainBlock(block))
                 CrossBlock(block, Color.red);
         }
     }

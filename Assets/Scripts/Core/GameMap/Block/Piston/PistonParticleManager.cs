@@ -12,7 +12,7 @@ public class PistonParticleManager : BlockParticleManager
         headRenderer = transform.Find("head").GetComponent<SpriteRenderer>();
     }
 
-    protected override void SpawnBreakingParticles()
+    protected override void SpawnBreakingParticles(Block b)
     {
         SpawnBreakingParticles(baseRenderer.transform.position, baseRenderer.sprite.texture);
         SpawnBreakingParticles(headRenderer.transform.position, headRenderer.sprite.texture);

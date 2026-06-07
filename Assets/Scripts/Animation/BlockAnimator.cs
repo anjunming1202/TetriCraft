@@ -45,7 +45,7 @@ public class BlockAnimator : MonoBehaviour
     {
         AnimationOnSet(block.GetWorldPosition(), MovingCurveAsset, animationSpeed);
     }
-    public void LandAnimationOnSet()
+    public void LandAnimationOnSet(Block block)
     {
         AnimationOnSet(block.GetWorldPosition(), FastMovingCurveAsset, animationSpeed);
     }

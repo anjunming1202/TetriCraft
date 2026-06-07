@@ -39,9 +39,6 @@ public class TetrisManager : MonoBehaviour
     public event Action OnFinishedTurn;
     public event Action OnStartedTurn;
 
-    // Readonly Data
-    public int blockCount => map.blockCount;    // debug
-
     // Events
     public event Action OnTetrominoListInitialised;
     public event Action OnGameDead;
@@ -205,7 +202,7 @@ public class TetrisManager : MonoBehaviour
     {
         foreach(Block block in fallingTetromino.GetComponentsInChildren<Block>())
         {
-            block.transform.SetParent(map.blockGrid.transform, true);
+            map.ReparentBlock(block);
         }
 
         // Clear line & line-clear data logic
@@ -312,11 +309,11 @@ public class TetrisManager : MonoBehaviour
         {
             for (int x = 0; x < map.BoundaryWidth; x++)  // * must from bottom to top
             {
-                if (map.CheckEmpty(x, y) || !map[x, y].isLocked)
+                if (map.CheckEmpty(x, y) || !map.GetBlock(x, y).isLocked)
                     continue;
                 if (!map.CheckEmpty(x, y - 1))
                     continue;
-                map[x, y].SetPosition(x, y - 1, true);
+                map.GetBlock(x, y).SetPosition(x, y - 1, true);
             }
             map.BatchUpdateBlocks(); // update once for each row
         }

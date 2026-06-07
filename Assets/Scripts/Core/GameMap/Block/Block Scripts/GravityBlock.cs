@@ -46,7 +46,7 @@ public class GravityBlock : GeneralBlock
 
     private bool CheckCollide(MapManager map)
     {
-        bool collide = !map.CheckInsideBlockGrid(GridPosition.x, GridPosition.y) || (!map.CheckEmpty(GridPosition.x, GridPosition.y) && map[GridPosition.x, GridPosition.y] != this);
+        bool collide = !map.CheckInsideBlockGrid(GridPosition.x, GridPosition.y) || (!map.CheckEmpty(GridPosition.x, GridPosition.y) && map.GetBlock(GridPosition) != this);
         Debug.Log(collide);
         return collide;
     }

@@ -9,9 +9,9 @@ public class RedstoneBlock : Block
         return;
     }
 
-    public override void OnSpawn(MapManager map)
+    public override void OnSpawn(MapManager map, int x, int y)
     {
-        base.OnSpawn(map);
+        base.OnSpawn(map, x, y);
         OnCharged(GridPosition);
     }
 }

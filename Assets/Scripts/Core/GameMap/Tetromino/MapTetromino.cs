@@ -57,7 +57,7 @@ public class MapTetromino : Tetromino
 
                 // block in map at the position should be updated by tetromino
                 Vector2Int currPosition = LocalToMap(r, c);
-                Block mapBlock = map[currPosition.x, currPosition.y];
+                Block mapBlock = map.GetBlock(currPosition);
 
                 // check for replacing
                 if (mapBlock != null)
@@ -265,7 +265,7 @@ public class MapTetromino : Tetromino
                 if (tetrominoBlock != null)
                 {
                     Vector2Int mapBlockPos = LocalToMap(r, c);
-                    Block mapBlock = map[mapBlockPos.x, mapBlockPos.y];
+                    Block mapBlock = map.GetBlock(mapBlockPos);
                     if (mapBlock != null && mapBlock.isLocked)
                     {
                         // if can be replaced => ignore

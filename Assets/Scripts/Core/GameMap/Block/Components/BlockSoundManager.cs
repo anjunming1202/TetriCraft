@@ -15,7 +15,7 @@ public class BlockSoundManager : MonoBehaviour
         block.OnDestroyed += PlaySoundOnDestroyed;
     }
 
-    private void PlaySoundOnPlaced()
+    private void PlaySoundOnPlaced(Block b)
     {
         if (placedSounds.Length > 0)
         {
@@ -24,7 +24,7 @@ public class BlockSoundManager : MonoBehaviour
         }
     }
 
-    private void PlaySoundOnDestroyed()
+    private void PlaySoundOnDestroyed(Block b)
     {
         if (destroyedSounds.Length > 0)
         {

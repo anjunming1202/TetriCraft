@@ -5,6 +5,9 @@ using UnityEngine;
 [Serializable]
 public class BlockGrid : MonoBehaviour
 {
+    private Block[,] grid;
+    private Dictionary<Block, Vector2Int> positions;
+
     public Block this[int x, int y] => grid[x, y];
     public int GridHeight => grid.GetLength(1);
     public int GridWidth => grid.GetLength(0);
@@ -18,58 +21,124 @@ public class BlockGrid : MonoBehaviour
         positions = new Dictionary<Block, Vector2Int>();
     }
 
-    public void Add(Block block)
+    public bool TryAdd(Block block)
     {
-        if (block.isRemoved)
+        // null value check
+        if (block == null)
         {
-            Debug.LogError($"try add removed {block}");
-            return;
+            Debug.LogError($"Block to be added is a null, fail to add");
+            return false;
         }
 
+        // occupancy check
         int x = block.GridPosition.x;
         int y = block.GridPosition.y;
-
-        Debug.Assert(grid[x, y] == null, "Block position overlap!");
-        grid[x, y] = block;
-
-        positions.Add(block, block.GridPosition);
-
-        block.isInMap = true;
-
-        // grid block update
-        BlockUpdateManager.OnNeighbourChangedBlockUpdate(this, new Vector2Int(x, y), block);
-    }
-
-    public void Remove(Block block)
-    {
-        if (block == null || block.isRemoved)
+        if (!CheckEmpty(x, y))
         {
-            Debug.LogError($"try remove {block} at {block.GridPosition} twice");
-            return;
+            Debug.LogError($"Position {(x, y)} is already occupied, fail to add");
+            return false;
         }
 
-        Debug.Assert(grid[positions[block].x, positions[block].y] == block, "Block position inconsistent!");
-        Vector2Int removedPos = positions[block];
-        grid[removedPos.x, removedPos.y] = null;
+        // in grid check
+        if (positions.ContainsKey(block))
+        {
+            Debug.LogError($"Block {block} already exists in grid.");
+            return false;
+        }
 
-        positions.Remove(block);
+        // successful add
+        grid[x, y] = block;
+        positions.Add(block, block.GridPosition);
 
-        block.isInMap = false;
+        return true;
+
+        //block.isInMap = true;
 
         // grid block update
-        BlockUpdateManager.OnNeighbourChangedBlockUpdate(this, removedPos, block);
+        //BlockUpdateManager.OnNeighbourChangedBlockUpdate(this, new Vector2Int(x, y), block);
     }
 
-    public void ClearAllBlocksWithDestroy()
+    public bool TryRemove(Block block)
     {
-        foreach (var block in grid)
-            if (block != null)
-                GameObject.Destroy(block.gameObject);
+        // null value check
+        if (block == null)
+        {
+            Debug.LogError("Block to be removed is a null, fail to remove");
+            return false;
+        }
 
+        // in grid check
+        if (!positions.TryGetValue(block, out Vector2Int removedPos))
+        {
+            Debug.LogError($"Block {block} was not added to the grid, fail to remove");
+            return false;
+        }
+
+        // successful remove
+        grid[removedPos.x, removedPos.y] = null;
+        positions.Remove(block);
+
+        return true;
+
+        //block.isInMap = false;
+
+        // grid block update
+        //BlockUpdateManager.OnNeighbourChangedBlockUpdate(this, removedPos, block);
+    }
+
+    public bool TryMove(Block block)
+    {
+        // null value check
+        if (block == null)
+        {
+            Debug.LogError("Block to be removed is a null, fail to move");
+            return false;
+        }
+
+        // occupancy check
+        int x = block.GridPosition.x;
+        int y = block.GridPosition.y;
+        if (!CheckEmpty(x, y))
+        {
+            Debug.LogError($"Position {(x, y)} is occupied, fail to move");
+            return false;
+        }
+
+        // in grid check
+        if (!positions.TryGetValue(block, out Vector2Int originalPos))
+        {
+            Debug.LogError($"Block {block} was not added to the grid, fail to move");
+            return false;
+        }
+
+        // successful move
+        grid[originalPos.x, originalPos.y] = null;
+        grid[x, y] = block;
+        positions[block] = block.GridPosition;
+
+        return true;
+    }
+
+    public void Clear()
+    {
         grid = new Block[GridWidth, GridHeight];
         positions = new Dictionary<Block, Vector2Int>();
 
         Debug.Log("Cleared all blocks in the grid");
+    }
+
+    public void BatchMove(List<Block> blocks)
+    {
+        foreach (Block block in blocks)
+        {
+            TryRemove(block);
+        }
+
+        // Reinsert them at their new positions.
+        foreach (Block block in blocks)
+        {
+            TryAdd(block);
+        }
     }
 
     public Block Get(int x, int y)
@@ -104,7 +173,4 @@ public class BlockGrid : MonoBehaviour
         Debug.Assert(x<GridWidth && y<GridHeight, $"width: {GridWidth}, x = {x}, height: {GridHeight}, y = {y}");
         return grid[x, y] == null;
     }
-
-    private Block[,] grid;
-    private Dictionary<Block, Vector2Int> positions;
 }

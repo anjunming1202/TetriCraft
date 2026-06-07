@@ -18,13 +18,13 @@
 
     private Piston pistonBase;
 
-    private void OnBaseRemoved(Block block)
+    private void OnBaseRemoved(Block b)
     {
         if (!isRemoved)
             map.RemoveBlock(this);
     }
 
-    private void OnBaseDestroyed()
+    private void OnBaseDestroyed(Block b)
     {
         if (!isRemoved)
             map.DestroyBlock(this);

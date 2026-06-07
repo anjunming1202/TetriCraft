@@ -20,7 +20,7 @@ public class BlockParticleManager : MonoBehaviour
         block.OnDestroyed -= SpawnBreakingParticles;
     }
 
-    protected virtual void SpawnBreakingParticles()
+    protected virtual void SpawnBreakingParticles(Block block)
     {
         SpawnBreakingParticles(transform.position, spriteRenderer.sprite.texture);
     }
