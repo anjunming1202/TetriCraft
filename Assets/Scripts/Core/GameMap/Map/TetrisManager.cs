@@ -122,7 +122,7 @@ public class TetrisManager : MonoBehaviour
             TryClearLines();
 
             // Display ghost tetromino
-            SetGhostTetromino();
+            UpdateGhostTetromino();
 
             // Update map
             TickManager.Update();
@@ -235,9 +235,6 @@ public class TetrisManager : MonoBehaviour
         DummyTetromino tetrominoSpawned = nextTetrominos[0];
         SpawnTetromino(tetrominoSpawned);
 
-        // Update ghost block
-        UpdateGhostTetromino(tetrominoSpawned);
-
         // Create next new tetromino
         nextTetrominos.RemoveAt(0);
         nextTetrominos.Add(tetrominoSpawned);
@@ -325,16 +322,7 @@ public class TetrisManager : MonoBehaviour
         }
     }
 
-    private void UpdateGhostTetromino(Tetromino tetromino)
-    {
-        for (int i = 0; i < ghostTetromino.blocks.Length; i++)
-        {
-            GhostBlock block = ghostTetromino.blocks[i] as GhostBlock;
-            block.Shadow(tetromino.blocks[i]);
-        }
-    }
-
-    private void SetGhostTetromino()
+    private void UpdateGhostTetromino()
     {
         if (fallingTetromino.type == TetrominoType.None)
         {
@@ -355,7 +343,7 @@ public class TetrisManager : MonoBehaviour
         }
         fallingTetromino.Shift(0, 1); // step back by 1
 
-        ghostTetromino.Transform(fallingTetromino);
+        ghostTetromino.Shadow(fallingTetromino);
         ghostTetromino.SetPosition(fallingTetromino.position, map);
 
         fallingTetromino.SetPosition(fallingTetrominoPosition);

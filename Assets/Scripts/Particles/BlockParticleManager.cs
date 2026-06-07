@@ -2,7 +2,7 @@
 using UnityEngine;
 using static Unity.Collections.AllocatorManager;
 
-
+[RequireComponent(typeof(Block))]
 public class BlockParticleManager : MonoBehaviour
 {
     [SerializeField] private ParticleSystem breakingParticles;
@@ -15,6 +15,11 @@ public class BlockParticleManager : MonoBehaviour
         block.OnDestroyed += SpawnBreakingParticles;
     }
 
+    protected virtual void OnDestroy()
+    {
+        block.OnDestroyed -= SpawnBreakingParticles;
+    }
+
     protected virtual void SpawnBreakingParticles()
     {
         SpawnBreakingParticles(transform.position, spriteRenderer.sprite.texture);
@@ -25,7 +30,10 @@ public class BlockParticleManager : MonoBehaviour
         if (breakingParticles == null)
             return;
 
-        breakingParticlesInstance = Instantiate(breakingParticles, position, Quaternion.identity);
+        // spawn particle at the visual position
+        ParticleSystem breakingParticlesInstance = block.GetMap().SpawnParticle(breakingParticles, position);
+
+        // set particle renderer material
         breakingParticlesRenderer = breakingParticlesInstance.GetComponent<ParticleSystemRenderer>();
         Material material = new Material(breakingParticlesRenderer.material);
         material.mainTexture = texture;
@@ -35,6 +43,5 @@ public class BlockParticleManager : MonoBehaviour
     protected Block block;
     private SpriteRenderer spriteRenderer;
 
-    private ParticleSystem breakingParticlesInstance;
     private ParticleSystemRenderer breakingParticlesRenderer;
 }

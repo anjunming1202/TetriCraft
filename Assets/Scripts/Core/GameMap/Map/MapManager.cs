@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 /// <summary>
 /// Data of blocks in the game
@@ -16,7 +17,7 @@ public class MapManager : MonoBehaviour
     public int BoundaryHeight => boundaryHeight;
 
 
-    // Block system
+    // Block system manager
     [SerializeField] public BlockGrid blockGrid;
     public Block this[int x, int y] => blockGrid[x, y];
     public int blockCount => blockGrid.blockCount;  // debug
@@ -25,7 +26,7 @@ public class MapManager : MonoBehaviour
     private int boundaryHeight;
 
 
-    // Fluid systems
+    // Fluid system manager
     public Dictionary<FluidID, FluidManager> fluidManager;
 
     [SerializeField] private FluidManager waterManager;
@@ -35,8 +36,11 @@ public class MapManager : MonoBehaviour
     private static BlockID waterToLava = BlockID.Obsidian;
     private static BlockID lavaToWater = BlockID.Cobblestone;
 
-    // Entity system
+    // Entity system manager
     [SerializeField] private EntityManager entityManager;
+
+    // Particle system manager
+    [SerializeField] private ParticleManager particleManager;
 
 
     // Redstone system
@@ -117,6 +121,9 @@ public class MapManager : MonoBehaviour
 
         // Entity
         entityManager.Clear();
+
+        // Particle
+        particleManager.ClearAll();
 
         // Map update
         blockList = new();
@@ -251,6 +258,22 @@ public class MapManager : MonoBehaviour
     public void KillEntity(Entity entity)
     {
         entityManager.KillEntity(entity);
+    }
+
+    public ParticleSystem SpawnParticle(ParticleSystem prefab, float x, float y)
+    {
+        Vector3 worldPosition = BoundaryDataManager.GetBoundaryData(PlayerID).MapToWorld(new Vector2(x, y));
+        return particleManager.SpawnParticle(prefab, worldPosition);
+    }
+
+    public ParticleSystem SpawnParticle(ParticleSystem prefab, Vector3 worldPosition)
+    {
+        return particleManager.SpawnParticle(prefab, worldPosition);
+    }
+
+    public void DespawnParticle(ParticleSystem particle)
+    {
+        particleManager.DespawnParticle(particle);
     }
 
 

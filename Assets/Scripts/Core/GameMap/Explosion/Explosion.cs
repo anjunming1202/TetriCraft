@@ -127,7 +127,7 @@ public class Explosion : MonoBehaviour
 
     private void SpawnExplosionParticles()
     {
-        ParticleSystem explosionParticles = Instantiate(explosionParticlesPrefab, transform.position, Quaternion.identity);
+        map.SpawnParticle(explosionParticlesPrefab, transform.position);
     }
 
     private MapManager map;
