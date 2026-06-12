@@ -163,7 +163,7 @@ public class BlockGridManager : MonoBehaviour
         foreach (Block block in registeredBlocks)
         {
             if (block != null)
-                GameObject.Destroy(block);
+                GameObject.Destroy(block.gameObject);
         }
     }
 

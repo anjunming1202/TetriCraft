@@ -250,7 +250,7 @@ public class TetrisManager : MonoBehaviour
 
     private bool CheckGameDead()
     {
-        int deathline = map.GridHeight;
+        int deathline = boundaryHeight;
         bool gameover = !map.CheckRowEmpty(deathline);
         return gameover;
     }
