@@ -39,7 +39,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         }
 
         if (this != null)
-            redstoneCoroutine = StartCoroutine(DelayExecute(TryContract, delay));
+            redstoneCoroutine = StartCoroutine(DelayExecute(TryRetract, delay));
     }
 
     bool IRedstoneActivatable.CanActivatedBy(Block source)
@@ -52,12 +52,24 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         return source.isCharged;
     }
 
-    public override void SetPosition(int x, int y, bool animation = false)
+    public override void SetGridPosition(int x, int y, bool animation = false)
     {
-        base.SetPosition(x, y, animation);
+        base.SetGridPosition(x, y, animation);
 
         if (isExtending)
-            pistonHead.SetPosition(x + Facing.x, y + Facing.y, animation);
+            pistonHead.SetGridPosition(x + Facing.x, y + Facing.y, animation);
+    }
+
+    public override void OnRequestingDestroy()
+    {
+        base.OnRequestingDestroy();
+        //map.RequestDestroyBlock(pistonHead);
+    }
+
+    public override void OnRequestingRemove()
+    {
+        base.OnRequestingRemove();
+        //map.RequestRemoveBlock(pistonHead);
     }
 
     public override void OnNCUpdateRespond(Vector2Int updateSrc)
@@ -79,7 +91,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         {
             StopCoroutine(redstoneCoroutine);
         }
-        TryContract();
+        TryRetract();
         redstoneCoroutine = null;
     }
 
@@ -138,12 +150,12 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         {
             foreach (Block block in pushedBlockList)
             {
-                BlockUpdateManager.SubscribeNCNotification(block, this); 
+                BlockNCUpdateManager.SubscribeNCNotification(block, this); 
             }
         }
     }
 
-    private void TryContract()
+    private void TryRetract()
     {
         if (!isExtending)
         {
@@ -155,7 +167,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         isExtending = false;
 
         // take back piston head block
-        map.RemoveBlock(pistonHead);
+        map.RequestRemoveBlock(pistonHead);
 
         // rendering and sound
         OnContracting?.Invoke();
@@ -163,7 +175,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
 
     private void ResetPushedBlockList()
     {
-        BlockUpdateManager.DesubscribeAllNCNotifications(this);
+        BlockNCUpdateManager.DesubscribeAllNCNotifications(this);
         pushedBlockList.Clear();
     }
 
@@ -211,18 +223,18 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         // destroy blocks to be destroyed
         for (int i = destroyedBlockList.Count - 1; i >= 0; i--)
         {
-            map.DestroyBlock(destroyedBlockList[i]);
+            map.RequestDestroyBlock(destroyedBlockList[i]);
         }
 
         // set pushed blocks
         foreach (Block block in pushedBlockList)
         {
             Vector2Int targetPosition = block.GridPosition + Facing;
-            block.SetPosition(targetPosition.x, targetPosition.y, true);
+            block.SetGridPosition(targetPosition.x, targetPosition.y, true);
         }
 
         // update block positions in map
-        map.BatchUpdateBlocks();
+        //map.BatchUpdateBlocks();
 
         // set states
         isExtending = true;
@@ -230,9 +242,9 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         // set piston head block
         pistonHead = BlockSpawner.NewBlock(BlockID.PistonHead) as PistonHead;
         pistonHead.Init(this);
-        pistonHead.OnRemoved += OnHeadRemoved;
-        pistonHead.OnDestroyed += OnHeadDestroyed;
-        map.SpawnBlock(pistonHead, forwardPosition.x, forwardPosition.y);
+        pistonHead.OnPendingRemoved += OnHeadPendingRemoved;
+        pistonHead.OnPendingDestroyed += OnHeadPendingDestroyed;
+        map.RequestSpawnBlock(pistonHead, forwardPosition.x, forwardPosition.y);
 
         // trigger piston NC update
         map.RequestNCUpdate(GridPosition);
@@ -241,20 +253,18 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         OnExtending?.Invoke();
     }
 
-    private void OnHeadRemoved(Block block)
+    private void OnHeadPendingRemoved(Block block)
     {
         // if is extending: whole piston is removed
         // if not extending: is taking back the piston head for contraction
         if (isExtending)
         {
-            if (!isRemoved)
-                map.RemoveBlock(this);
+            //map.RequestRemoveBlock(this);
         }
     }
 
-    private void OnHeadDestroyed(Block block)
+    private void OnHeadPendingDestroyed(Block block)
     {
-        if (!isRemoved)
-            map.DestroyBlock(this);
+        //map.RequestDestroyBlock(this);
     }
 }

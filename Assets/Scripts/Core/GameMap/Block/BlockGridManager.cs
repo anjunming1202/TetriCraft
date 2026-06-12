@@ -1,403 +1,570 @@
 ﻿using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using static Unity.Collections.AllocatorManager;
+using UnityEngine.UIElements;
 
 public class BlockGridManager : MonoBehaviour
 {
-    // block grid data
-    [Header("Block grid")]
     [SerializeField] private BlockGrid blockGrid;
-    [SerializeField] public Transform blockRoot;
-
-    // map reference
-    private MapManager map;
-
-    // block grid params
-    private int boundaryWidth;
-    private int boundaryHeight;
+    private MapManager registedMap;
 
     // block grid update management
-    private List<Block> blockList;
-    private List<Block> blockUpdateBatch;
-    private List<Block> blockDestroyBatch;
+    private readonly HashSet<Block> registeredBlocks = new();
 
-    // block grid events
-    public event Action<MapManager, Block> OnGridPlace;
+    private readonly Dictionary<Block, SpawnRequest> blockSpawnBatch = new();
+    private readonly HashSet<Block> blockRemoveBatch = new();
+    private readonly HashSet<Block> blockDestroyBatch = new();
+    private readonly Dictionary<Block, Vector2Int> blockMoveBatch = new();
 
-    // grid param getters
-    public int BoundaryWidth => boundaryWidth;
-    public int BoundaryHeight => boundaryHeight;
+    public event Action<Block> OnRegisteredBlock;
+    public event Action<Block> OnUnregisteredBlock;
 
-    // block grid data getters
-    public BlockGrid Grid => blockGrid;
-    public Block this[int x, int y] => blockGrid[x, y];
-    public int BlockCount => blockGrid != null ? blockGrid.blockCount : 0;
+    public event Action<Vector2Int, Block> OnBlockPlacedUpdate;
 
-    // block grid update management getters
-    public IReadOnlyList<Block> Blocks => blockList;
-    public IReadOnlyList<Block> BatchBlocks => blockUpdateBatch;
+    public IReadonlyBlockGrid Grid => blockGrid;
+    public IReadOnlyList<Block> RegisteredBlocks => blockGrid.Blocks;
 
-    // Block update system
-    public BlockUpdateManager BlockUpdateManager { get; private set; }
-
-    // Redstone system
-    public RedstoneManager RedstoneManager { get; private set; }
-
-
-    public void Initialise(MapManager mapOwner)
+    private struct SpawnRequest
     {
-        Debug.Assert(mapOwner != null);
-        Debug.Assert(blockGrid != null);
-        Debug.Assert(blockRoot != null);
+        public Block block;
+        public Vector2Int spawnPosition;
+        public bool lockdownImmediately;
 
-        map = mapOwner;
-    }
-
-
-    public void PrepareNewMap(int width, int height)
-    {
-        boundaryWidth = width;
-        boundaryHeight = height;
-
-        blockGrid.Init(width, height + 5);
-
-        blockList = new List<Block>();
-        blockUpdateBatch = new List<Block>();
-
-        BlockUpdateManager = new BlockUpdateManager(map, blockGrid);
-        RedstoneManager = new RedstoneManager(map);
-    }
-
-    public void ClearMap()
-    {
-        foreach (var block in blockList)
-            if (block != null)
-                GameObject.Destroy(block.gameObject);
-
-        if (blockGrid != null)
+        public SpawnRequest(Block block, Vector2Int position, bool lockdownImmediately) : this()
         {
-            blockGrid.Clear();
-        }
-
-        blockList = new List<Block>();
-        blockUpdateBatch = new List<Block>();
-    }
-
-    public void OnUpdate()
-    {
-        // Framely block update
-        for (int i = 0; i < blockList.Count; i++)
-        {
-            if (blockList[i] != null)
-                blockList[i].OnUpdate();
-        }
-
-        // Deffered block grid update
-        if (blockUpdateBatch.Count > 0)
-        {
-            BatchUpdateBlocks();
-        }
-
-        // Block update
-        BlockUpdateManager.BlockUpdate();
-
-        // Redstone
-        RedstoneManager.RedstoneUpdate();
-    }
-
-    public void SpawnTetromino(MapTetromino tetromino)
-    {
-        for (int r = 0; r < tetromino.size; r++)
-            for (int c = 0; c < tetromino.size; c++)
-            {
-                // get block from the tetromino
-                Block block = tetromino.shape[r, c];
-                if (block == null)
-                    continue;
-                Vector2Int gridPosition = tetromino.LocalToMap(r, c);
-                int x = gridPosition.x;
-                int y = gridPosition.y;
-
-                // register to the block grid system
-                RegisterBlock(block, x, y);
-
-                // try add to grid data
-                if (!TryOccupyCell(block, x, y))
-                {
-                    UnregisterBlock(block);
-                    Debug.LogError($"Fail to spawn block {block}");
-                    return;
-                }
-
-                // parenting
-                block.transform.SetParent(tetromino.transform);
-            }
-    }
-
-    public void SpawnBlock(Block block, int x, int y)
-    {
-        // register to the block grid system
-        RegisterBlock(block, x, y);
-
-        // try add into grid data
-        if (!TryOccupyCell(block, x, y))
-        {
-            UnregisterBlock(block);
-            Debug.LogError($"Fail to spawn block {block}");
-            return;
-        }
-
-        // block lifecycle action
-        block.OnLockdown();
-        
-        // parenting
-        block.transform.SetParent(blockRoot);
-    }
-
-    public void DestroyBlock(Block block)
-    {
-        // release from grid data
-        TryReleaseCell(block);
-
-        // unregister from the system
-        UnregisterBlock(block);
-
-        // block lifecycle action
-        block.Destroyed();
-
-        // destroy
-        GameObject.Destroy(block.gameObject);
-    }
-
-    public void RemoveBlock(Block block)
-    {
-        // release grid data
-        TryReleaseCell(block);
-
-        // unregister from the system
-        UnregisterBlock(block);
-
-        // block lifecycle action
-        block.Removed();
-
-        // destroy
-        GameObject.Destroy(block.gameObject);
-    }
-
-    public void BatchUpdateBlocks()
-    {
-        // Remove all moving blocks from the grid first.
-        foreach (Block block in blockUpdateBatch)
-        {
-            TryReleaseCell(block);
-        }
-
-        // Reinsert them at their new positions.
-        foreach (Block block in blockUpdateBatch)
-        {
-            int x = block.GridPosition.x;
-            int y = block.GridPosition.y;
-
-            // dummy block => replaced ***
-            if (blockGrid[x, y] != null && blockGrid[x, y].IsDummy)
-            {
-                RemoveBlock(blockGrid[x, y]);
-            } // TODO
-
-            blockGrid.TryAdd(block);
-        }
-
-        // Batched placed events
-        foreach (Block block in blockUpdateBatch)
-        {
-            NotifyGridPlace(block);
-        }
-
-        blockUpdateBatch.Clear();
-    }
-
-    public Block GetBlock(int x, int y)
-    {
-        return blockGrid.Get(x, y);
-    }
-
-    public IEnumerable<Block> GetAdjacentBlocks(int x, int y, bool includeSelf = false)
-    {
-        if (includeSelf)
-        {
-            yield return GetBlock(x, y);
-        }
-
-        foreach (Vector2Int offset in new Vector2Int[]
-        {
-            Vector2Int.right,
-            Vector2Int.left,
-            Vector2Int.up,
-            Vector2Int.down
-        })
-        {
-            yield return GetBlock(x + offset.x, y + offset.y);
+            this.block = block;
+            this.spawnPosition = position;
+            this.lockdownImmediately = lockdownImmediately;
         }
     }
 
-    public bool CheckInsideWithoudCeiling(int x, int y)
+    private enum RequestProcessPhase
     {
-        return blockGrid.CheckInsideWithoudCeiling(x, y);
+        Waiting,
+        PreResolvingConflicts,
+        ProcessingRemove,
+        ProcessingMove,
+        ProcessingSpawn,
+    }
+    private RequestProcessPhase requestProcessPhase;
+
+    public void Init(MapManager registedMap, int width, int height)
+    {
+        this.registedMap = registedMap;
+
+        blockGrid.Init(width, height);
+
+        requestProcessPhase = RequestProcessPhase.Waiting;
+
+        Debug.Log("BlockGridManager reset for the game");
     }
 
-    public bool CheckEmpty(int x, int y)
+    public void ProcessPendingBlockRequests()
     {
-        return blockGrid.CheckEmpty(x, y) || blockGrid[x, y].IsDummy;
+        LogRequests();
+        requestProcessPhase = RequestProcessPhase.PreResolvingConflicts;
+        ResolveRequestConflicts();
+        ResolveOccupationConflicts();
+
+        LogRequests();
+
+        requestProcessPhase = RequestProcessPhase.ProcessingRemove;
+        ProcessDestroyBatch();
+        ProcessRemoveBatch();
+
+        requestProcessPhase = RequestProcessPhase.ProcessingMove;
+        ProcessMoveBatch();
+
+        requestProcessPhase = RequestProcessPhase.ProcessingSpawn;
+        ProcessSpawnBatch();
+
+        ClearAllBatches();
+        requestProcessPhase = RequestProcessPhase.Waiting;
     }
 
-    public bool CheckInsideGrid(int x, int y)
-    {
-        return blockGrid.CheckInsideGrid(x, y);
-    }
 
-    public bool CheckRowFull(int row)
-    {
-        for (int column = 0; column < boundaryWidth; column++)
-        {
-            Block block = blockGrid[column, row];
-            if (block == null || !block.IsClearable())
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public bool CheckRowEmpty(int row)
-    {
-        for (int column = 0; column < boundaryWidth; column++)
-        {
-            Block block = blockGrid[column, row];
-            if (block != null && block.isLocked)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public bool CheckMapEmpty()
-    {
-        for (int row = 0; row < boundaryHeight - 1; row++)
-        {
-            if (!CheckRowEmpty(row))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public void OnBlockNCUpdate(Block block)
+    public void RequestSpawnBlock(Block block, Vector2Int position, bool lockdownImmediately)
     {
         if (block == null)
             return;
-        BlockUpdateManager.SendNCUpdateRequestToNeighbours(block.GridPosition);
-        BlockUpdateManager.SendNCUpdateRequestToExtraReceivers(block);
+
+        if (blockSpawnBatch.ContainsKey(block))
+        {
+            Debug.LogError("Request spawning an registered existing block");
+            return;
+        }
+
+        // Last write wins
+        blockSpawnBatch[block] = new SpawnRequest(block, position, lockdownImmediately);
+
+        // A spawn request overrides a pending remove for the same block
+        blockRemoveBatch.Remove(block);
+
+        Debug.Assert(requestProcessPhase == RequestProcessPhase.Waiting, $"Try request spawn at {requestProcessPhase} phase");
     }
 
-
-
-    private void RegisterBlock(Block block, int x, int y)
+    public void RequestMoveBlock(Block block, Vector2Int position)
     {
-        block.OnSpawn(map, x, y);
+        if (block == null)
+            return;
 
-        blockList.Add(block);
+        // Last write wins
+        blockMoveBatch[block] = position;
 
-        block.OnMoved += AddToUpdateBatch;
-        block.OnRemoved += RemoveFromUpdateBatch;
+        Debug.Assert(requestProcessPhase == RequestProcessPhase.Waiting, $"Try request move at {requestProcessPhase} phase");
+    }
 
-        block.OnLockedDown += NotifyGridPlace;
-        block.OnLockedDown += OnBlockNCUpdate;
+    public void RequestRemoveBlock(Block block)
+    {
+        if (block == null)
+            return;
+
+        // Destroy has higher priority than remove.
+        if (blockDestroyBatch.Contains(block))
+            return;
+
+        // if request occurs during processing, immediately apply it
+        if (requestProcessPhase == RequestProcessPhase.ProcessingRemove || 
+            requestProcessPhase == RequestProcessPhase.ProcessingSpawn || 
+            requestProcessPhase == RequestProcessPhase.ProcessingMove)
+        {
+            ApplyRemove(block);
+            return;
+        }
+
+        blockRemoveBatch.Add(block);
+
+        Debug.Assert(requestProcessPhase == RequestProcessPhase.Waiting, $"Try request remove at {requestProcessPhase} phase");
+    }
+
+    public void RequestDestroyBlock(Block block)
+    {
+        if (block == null)
+            return;
+
+        // if request occurs during processing, immediately apply it
+        if (requestProcessPhase == RequestProcessPhase.ProcessingRemove ||
+            requestProcessPhase == RequestProcessPhase.ProcessingSpawn ||
+            requestProcessPhase == RequestProcessPhase.ProcessingMove)
+        {
+            ApplyDestroy(block);
+            return;
+        }
+
+        blockDestroyBatch.Add(block);
+        blockRemoveBatch.Remove(block);
+
+        Debug.Assert(requestProcessPhase == RequestProcessPhase.Waiting, $"Try request destroy at {requestProcessPhase} phase");
+    }
+
+    public void ClearForced()
+    {
+        foreach (Block block in registeredBlocks)
+        {
+            if (block != null)
+                GameObject.Destroy(block);
+        }
+    }
+
+    private void ProcessDestroyBatch()
+    {
+        if (blockDestroyBatch.Count == 0)
+            return;
+
+        foreach (Block block in blockDestroyBatch)
+        {
+            ApplyDestroy(block);
+        }
+    }
+
+    private void ProcessRemoveBatch()
+    {
+        if (blockRemoveBatch.Count == 0)
+            return;
+
+        foreach (Block block in blockRemoveBatch)
+        {
+            ApplyRemove(block);
+        }
+    }
+
+    private void ProcessSpawnBatch()
+    {
+        if (blockSpawnBatch.Count == 0)
+            return;
+
+        foreach (var (_, request) in blockSpawnBatch)
+        {
+            Block block = request.block;
+            Vector2Int position = request.spawnPosition;
+            bool lockdownImmediately = request.lockdownImmediately;
+
+            ApplySpawn(block, position, lockdownImmediately);
+        }
+    }
+
+    private void ProcessMoveBatch()
+    {
+        if (blockMoveBatch.Count == 0)
+            return;
+
+        ApplyMoves(blockMoveBatch);
+    }
+
+    private void RegisterBlock(Block block)
+    {
+        if (block == null)
+            return;
+
+        if (!registeredBlocks.Add(block))
+            return;
+
+        OnRegisteredBlock?.Invoke(block);
+
+        block.OnRegistered(registedMap);
     }
 
     private void UnregisterBlock(Block block)
     {
-        blockList.Remove(block);
-
-        block.OnMoved -= AddToUpdateBatch;
-        block.OnRemoved -= RemoveFromUpdateBatch;
-
-        block.OnLockedDown -= NotifyGridPlace;
-        block.OnLockedDown -= OnBlockNCUpdate;
-        block.OnDespawned();
-    }
-
-    private bool TryOccupyCell(Block block, int x, int y, bool allowTryReplace = true)
-    {
-        Debug.Assert(block != null);
-
-        // Cell is empty
-        Block existing = blockGrid.Get(x, y);
-        if (existing == null)
-        {
-            return blockGrid.TryAdd(block);
-        }
-
-        // Cannot replace
-        if (!allowTryReplace)
-        {
-            return false;
-        }
-
-        // Existing block refuses replacement
-        if (!existing.CanBeReplacedBy(block))
-        {
-            return false;
-        }
-
-        // Notify existing block
-        existing.OnReplacedBy(block);
-
-        // Remove old block
-        RemoveBlock(existing);
-
-        // Occupy cell with new block
-        return blockGrid.TryAdd(block);
-    }
-
-    private bool TryReleaseCell(Block block)
-    {
-        return blockGrid.TryRemove(block);
-    }
-
-    private void AddToUpdateBatch(Block block)
-    {
-        if (block == null || block.isRemoved)
-        {
+        if (block == null)
             return;
-        }
 
-        if (!blockUpdateBatch.Contains(block))
-        {
-            blockUpdateBatch.Add(block);
-        }
+        if (!registeredBlocks.Remove(block))
+            return;
+
+        OnUnregisteredBlock?.Invoke(block);
+
+        block.OnUnregistered();
     }
 
-    private void RemoveFromUpdateBatch(Block block)
+    private void ApplySpawn(Block block, Vector2Int position, bool lockdownImmediately)
     {
         if (block == null)
+            return;
+
+        // additional check making sure the spawn is valid
+        if (!CheckCanOccupy(block, position))
         {
+            Debug.LogError($"The position {position} cannot be occupied by {block} when spawned");
             return;
         }
 
-        if (blockUpdateBatch.Contains(block))
+        // Now occupy the cell
+        OccupyWithForcedReplacement(block, position);
+
+        // initialise block
+        RegisterBlock(block);
+
+        block.SetGridPosition(position, false);
+
+        block.OnPostSpawned();
+
+        if (lockdownImmediately)
+            block.OnLockdown();
+
+        OnBlockPlacedUpdate?.Invoke(position, block);
+
+        //Debug.Log($"{block} spawned at {position}, block position {block.Position}");
+    }
+
+    private void ApplyMoves(Dictionary<Block, Vector2Int> moves)
+    {
+        // remove moving blocks
+        Dictionary<Block, Vector2Int> successfulRemoves = new();
+        foreach (var (block, targetPosition) in moves)
         {
-            blockUpdateBatch.Remove(block);
+            if (block == null)
+                continue;
+
+            // designed for failed remove
+            Vector2Int lastPosition = blockGrid.GetPosition(block);
+
+            if (blockGrid.TryRemove(block))
+                successfulRemoves.Add(block, lastPosition);
+            else
+            {
+                foreach (var (removedBlock, removedPosition) in successfulRemoves)
+                {
+                    blockGrid.TryAdd(removedBlock, removedPosition);
+                }
+                Debug.LogError($"Failed to pre-remove {block} at {targetPosition} when applying moves!");
+                return;
+            }
+        }
+
+        // additional check making sure the moves are valid
+        foreach (var (block, targetPosition) in moves)
+        {
+            if (block == null)
+                continue;
+
+            if (!CheckCanOccupy(block, targetPosition))
+            {
+                Debug.LogError($"The position {targetPosition} cannot be occupied by {block} when moved");
+                continue;
+            }
+        }
+
+        // add moved blocks
+        HashSet<Block> successfulAdds = new();
+        foreach (var (block, targetPosition) in moves)
+        {
+            if (block == null)
+                continue;
+
+            OccupyWithForcedReplacement(block, targetPosition);
+
+            // originally designed for failed add, now is unesseccary 
+            if (CheckCanOccupy(block, targetPosition))
+                successfulAdds.Add(block);
+            else
+            {
+                foreach (var addedBlock in successfulAdds)
+                {
+                    blockGrid.TryRemove(addedBlock);
+                }
+                foreach (var (removedBlock, removedPosition) in successfulRemoves)
+                {
+                    blockGrid.TryAdd(removedBlock, removedPosition);
+                }
+                Debug.LogError($"Failed to add back {block} at {targetPosition} when applying moves!");
+                return;
+            }
+        }
+
+        foreach (var (block, targetPosition) in moves)
+        {
+            if (block == null)
+                continue;
+
+            block.SetGridPosition(targetPosition, true);
+            block.OnPostMoved();
+
+            OnBlockPlacedUpdate?.Invoke(targetPosition, block);
+
+            //Debug.Log($"{block} moved to {targetPosition}, block position {block.Position}");
         }
     }
 
-    private void NotifyGridPlace(Block block)
+    private void ApplyDestroy(Block block)
     {
-        OnGridPlace?.Invoke(map, block);
+        if (block == null)
+            return;
+
+        blockGrid.TryRemove(block);
+        UnregisterBlock(block);
+        block.OnPostDestroyed();
+
+        // destroy
+        GameObject.Destroy(block.gameObject);
+    }
+
+    private void ApplyRemove(Block block)
+    {
+        if (block == null)
+            return;
+
+        blockGrid.TryRemove(block);
+        UnregisterBlock(block);
+        block.OnPostRemoved();
+
+        // destroy
+        GameObject.Destroy(block.gameObject);
+    }
+
+    /// <summary>
+    /// resolve conflicts before processing
+    /// </summary>
+    private void ResolveRequestConflicts()
+    {
+        // destroy:remove => destroy
+        foreach (Block block in blockDestroyBatch)
+        {
+            bool conflict = blockRemoveBatch.Remove(block);
+        }
+
+        // spawn:move => spawn
+        foreach (Block block in blockSpawnBatch.Keys)
+        {
+            bool conflict = blockMoveBatch.Remove(block);
+        }
+
+        // move:destroy/remove => destroy/remove
+        // spawn:destroy/remove => reject all
+        List<Block> rejectedBlocks = new List<Block>();
+        foreach (Block block in blockDestroyBatch)
+        {
+            bool conflict = blockMoveBatch.Remove(block);
+
+            if (blockSpawnBatch.Remove(block))
+                rejectedBlocks.Add(block);
+        }
+        foreach (Block block in blockRemoveBatch)
+        {
+            bool conflict = blockMoveBatch.Remove(block);
+
+            if (blockSpawnBatch.Remove(block))
+                rejectedBlocks.Add(block);
+        }
+        foreach(Block block in rejectedBlocks)
+        {
+            blockDestroyBatch.Remove(block);
+            blockRemoveBatch.Remove(block);
+        }
+    }
+
+    private void ResolveOccupationConflicts()
+    {
+        HashSet<Block> rejectedBlocks = new();
+
+        Dictionary<Vector2Int, Block> occupations = new();
+
+        // Check spawn prior to move
+        foreach (var (block, spawnRequest) in blockSpawnBatch)
+        {
+            Block finalBlock = block;
+            Vector2Int position = spawnRequest.spawnPosition;
+
+            // check map block replacement
+            if (!blockGrid.IsEmpty(position))
+            {
+                Block existing = blockGrid.Get(position);
+                bool willLeave = blockMoveBatch.ContainsKey(existing) || blockRemoveBatch.Contains(existing) || blockDestroyBatch.Contains(existing);
+                if (!willLeave)
+                {
+                    if (!CheckCanOccupy(block, position))
+                    {
+                        finalBlock = existing;
+                        rejectedBlocks.Add(block);
+                        Debug.LogError($"The block {block} spawn request at {position} is invalid, as the position is occupied by block {existing} in the grid with no request of move/remove");
+                    }
+                    else
+                        rejectedBlocks.Add(existing);
+                }
+            }
+            // check prior spawn
+            if (occupations.TryGetValue(position, out var existingSpawn))
+            {
+                if (!CheckCanOccupy(block, position))
+                {
+                    finalBlock = existingSpawn;
+                    rejectedBlocks.Add(block);
+                    Debug.LogError($"The spawn request at {position} is invalid, as two blocks {block} and {existingSpawn} are trying to spawn at the same position with no replacement");
+                }
+                else
+                    rejectedBlocks.Add(existingSpawn);
+            }
+
+            occupations[position] = finalBlock;
+        }
+        
+        // Check move
+        foreach (var (block, position) in blockMoveBatch)
+        {
+            Block finalBlock = block;
+
+            // check map block replacement
+            if (!blockGrid.IsEmpty(position))
+            {
+                Block existing = blockGrid.Get(position);
+                bool willLeave = blockMoveBatch.ContainsKey(existing) || blockRemoveBatch.Contains(existing) || blockDestroyBatch.Contains(existing);
+                if (!willLeave)
+                {
+                    if (!CheckCanOccupy(block, position))
+                    {
+                        finalBlock = existing;
+                        rejectedBlocks.Add(block);
+                        Debug.LogError($"The block {block} move request to {position} is invalid, as the position is occupied by block {existing} in the grid with no request of move/remove");
+                    }
+                    else
+                        rejectedBlocks.Add(existing);
+                }
+            }
+            // check prior spawn or move
+            if (occupations.TryGetValue(position, out var existingSpawnOrMove))
+            {
+                if (!CheckCanOccupy(block, position))
+                {
+                    finalBlock = existingSpawnOrMove;
+                    rejectedBlocks.Add(block);
+                    bool isExistingMove = blockMoveBatch.ContainsKey(existingSpawnOrMove);
+                    Debug.LogError($"The block {block} move request to {position} is invalid, as the target position is occupied by another block {(isExistingMove ? "move" : "spawn")} request with no replacement");
+                }
+                else
+                    rejectedBlocks.Add(existingSpawnOrMove);
+            }
+
+            occupations[position] = finalBlock;
+        }
+
+        // Reject requests
+        foreach (Block block in rejectedBlocks)
+        {
+            if (blockSpawnBatch.ContainsKey(block))
+                Debug.LogWarning($"block {block} spawn request rejected");
+            if (blockMoveBatch.ContainsKey(block))
+                Debug.LogWarning($"block {block} move request rejected");
+            blockSpawnBatch.Remove(block);
+            blockMoveBatch.Remove(block);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns>whether replacement is allowed</returns>
+    private bool CheckCanOccupy(Block incoming, Vector2Int position)
+    {
+        if (!blockGrid.TryGet(position, out Block existing))
+            return true;
+
+        if (existing == incoming)
+            return true;
+
+        if (!existing.CanBeReplacedBy(incoming))
+            return false;
+
+        return true;
+    }
+
+    private void OccupyWithForcedReplacement(Block incoming, Vector2Int position)
+    {
+        blockGrid.TryGet(position, out var existing);
+
+        //if (existing == incoming)
+
+        if (existing == null)
+        {
+            blockGrid.TryAdd(incoming, position);
+        }
+        else
+        {
+            blockGrid.TryRemove(existing);
+            blockGrid.TryAdd(incoming, position);
+
+            // handling block being replaced
+            existing.OnReplacedBy(incoming);
+        }
+    }
+
+    private void ClearAllBatches()
+    {
+        blockSpawnBatch.Clear();
+        blockRemoveBatch.Clear();
+        blockDestroyBatch.Clear();
+        blockMoveBatch.Clear();
+    }
+
+    private void LogRequests()
+    {
+        if (blockSpawnBatch.Count == 0 && blockMoveBatch.Count == 0 && blockDestroyBatch.Count == 0 && blockRemoveBatch.Count == 0)
+            return;
+        Debug.Log($"Current Phase: {requestProcessPhase}");
+        Debug.Log($"Spawn Requests: {blockSpawnBatch.Count}");
+        Debug.Log($"Move Requests: {blockMoveBatch.Count}");
+        Debug.Log($"Destroy Requests: {blockDestroyBatch.Count}");
+        Debug.Log($"Remove Requests: {blockRemoveBatch.Count}");
+        Debug.Log($"Total Registered Blocks: {registeredBlocks.Count}");
     }
 }

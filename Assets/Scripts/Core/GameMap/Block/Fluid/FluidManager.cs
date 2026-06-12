@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class FluidManager : MonoBehaviour
@@ -19,39 +20,38 @@ public class FluidManager : MonoBehaviour
     public int wobbleTick = 2;
     public bool useWobbling = true;
 
-    public List<Vector2Int> dummyBlockPositions;
+    private readonly Dictionary<Vector2Int, FluidDummy> spawnedDummyBlocks = new();
 
     private MapManager mapManager;
 
     private int ticker;
-    private List<FluidElement> elementUpdateList = new List<FluidElement>();
-    private List<List<FluidElement>> lazilyMergedLists = new List<List<FluidElement>>();
-    private List<FluidElement> entrainmentElements = new List<FluidElement>();
+    private readonly List<FluidElement> elementUpdateList = new();
+    private readonly List<List<FluidElement>> lazilyMergedLists = new();
+    private readonly List<FluidElement> entrainmentElements = new();
 
     private int wobbleTicker;
     private bool isWobbleTriggered;
+
+    private readonly List<(Block, MapManager)> blockSqueezeRequests = new();
 
     public void Init(MapManager map)
     {
         // Init map reference
         mapManager = map;
         // Init fluid system
-        fluidSystem.Init(map.BoundaryWidth);
-        // Init lists
-        dummyBlockPositions = new List<Vector2Int>();
-        elementUpdateList = new List<FluidElement>();
-        lazilyMergedLists = new List<List<FluidElement>>();
-        entrainmentElements = new List<FluidElement>();
+        fluidSystem.Init(map.GridWidth);
     }
 
     public void ClearFluidSystem()
     {
         fluidSystem.ClearAllElements();
 
-        dummyBlockPositions = new List<Vector2Int>();
-        elementUpdateList = new List<FluidElement>();
-        lazilyMergedLists = new List<List<FluidElement>>();
-        entrainmentElements = new List<FluidElement>();
+        spawnedDummyBlocks.Clear();
+        elementUpdateList.Clear();
+        lazilyMergedLists.Clear();
+        entrainmentElements.Clear();
+
+        blockSqueezeRequests.Clear();
     }
 
     public void OnUpdate()
@@ -70,6 +70,8 @@ public class FluidManager : MonoBehaviour
         {
             ticker = 0;
 
+            ProcessBlockSqueezeRequests();
+
             double totalAmountOriginal = MonitorTotalFluidAmount();
 
             ResetFlowUpdates();
@@ -84,7 +86,7 @@ public class FluidManager : MonoBehaviour
             //
             double totalAmountUpdated = MonitorTotalFluidAmount();
             Debug.Assert(totalAmountUpdated - totalAmountOriginal < Mathf.Epsilon, $"total fluid amount error: {totalAmountOriginal} to {totalAmountUpdated}");
-            Debug.Log($"total fluid amount: {totalAmountUpdated}");
+            //Debug.Log($"total fluid amount: {totalAmountUpdated}");
         }
 
         if (isWobbleTriggered)
@@ -134,7 +136,21 @@ public class FluidManager : MonoBehaviour
         return element;
     }*/
 
-    public void BlockSqueeze(MapManager mapManager, Block block)
+    public void RequestBlockSqueeze(MapManager mapManager, Block block)
+    {
+        blockSqueezeRequests.Add((block, mapManager));
+    }
+
+    private void ProcessBlockSqueezeRequests()
+    {
+        foreach (var (block, map) in blockSqueezeRequests)
+        {
+            BlockSqueeze(map, block);
+        }
+        blockSqueezeRequests.Clear();
+    }
+
+    private void BlockSqueeze(MapManager mapManager, Block block)
     {
         // dummy / unlocked fluid => can't squeeze
         if (block.IsDummy || (block.IsFluid && (!block.isLocked || block.ID != ID)))
@@ -250,7 +266,7 @@ public class FluidManager : MonoBehaviour
             targetY = y;
             while (elementSqueezed != null)
             {
-                if (targetY >= mapManager.BoundaryHeight)
+                if (targetY >= mapManager.GridHeight)
                     Debug.LogWarning("iterate upwards exceeding the boundary");
 
                 offsetX = 0;
@@ -407,7 +423,8 @@ public class FluidManager : MonoBehaviour
 
     private void UpdateFlow()
     {
-        elementUpdateList = new List<FluidElement>(fluidSystem.elements);
+        elementUpdateList.Clear();
+        elementUpdateList.AddRange(fluidSystem.elements);
         elementUpdateList.Sort((e1, e2) => e1.column.CompareTo(e2.column));
         elementUpdateList.Sort((e1, e2) => e1.upperLevel.CompareTo(e2.upperLevel));
 
@@ -678,10 +695,10 @@ public class FluidManager : MonoBehaviour
 
     private void GenerateDummyBlocks()
     {
-        int pointer = 0;
-
         // spawn dummy blocks
         Dictionary<Vector2Int, FluidElement> positions = fluidSystem.CalculateBlockPositions();
+        Dictionary<Vector2Int, FluidDummy> invalidDummyBlocks = new();
+        invalidDummyBlocks.AddRange(spawnedDummyBlocks);
 
         foreach (var (position, element) in positions)
         {
@@ -690,64 +707,89 @@ public class FluidManager : MonoBehaviour
                 continue;
             }
 
-            if (dummyBlockPositions.Contains(position))
+            // if the position has been a dummy block in the map => update source element
+            if (mapManager.GetBlock(position) is FluidDummy dummyBlock)
             {
-                FluidDummy dummyBlock = mapManager.GetBlock(position) as FluidDummy;
+                // if it is fluid dummy but not in the spawned dummy list => not the same fluid system
+                if (!spawnedDummyBlocks.ContainsKey(position))
+                {
+                    continue;
+                }
+
                 dummyBlock.SetSourceElement(element);
 
-                dummyBlockPositions.Remove(position);
-                dummyBlockPositions.Insert(pointer, position);
-                pointer++;
+                // for updating recorded blocks collection
+                invalidDummyBlocks.Remove(position);
 
                 // reupdate dummy block when fluid touching floor/ceiling
                 if (element.localLowerLevel == 0 || element.localUpperLevel == 0)
                     mapManager.OnGridPlace?.Invoke(mapManager, dummyBlock);
             }
+            // if the position is a new position of dummy blocks
             else
             {
                 if (mapManager.GetBlock(position) != null && mapManager.GetBlock(position).IsFluid)
                     continue;
 
-                SpawnDummyBlock(position, element);
-
-                dummyBlockPositions.Remove(position);
-                dummyBlockPositions.Insert(pointer, position);
-                pointer++;
+                PendingSpawnDummyBlock(position, element);
             }
         }
 
-        // remove other invalid dummy blocks
-        for (int i = dummyBlockPositions.Count - 1; i >= pointer; i--)
+        // remove other currently invalid dummy blocks
+        foreach (var (position, block) in invalidDummyBlocks)
         {
-            RemoveDummyBlock(dummyBlockPositions[i]);
+            PendingRemoveDummyBlock(position);
         }
     }
 
-    private void SpawnDummyBlock(Vector2Int position, FluidElement element)
+    private void PendingSpawnDummyBlock(Vector2Int position, FluidElement sourceElement)
     {
-        Debug.Assert(!mapManager.IsBlockedWithoutCeiling(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
+        //Debug.Assert(!mapManager.IsBlockedWithoutCeiling(position.x, position.y), $"fail to spawn dummy fluid block, {position} occupied");
         if (mapManager.IsBlockedWithoutCeiling(position.x, position.y))
             return;
 
         Block newBlock = BlockSpawner.NewBlock(DummyID);
         FluidDummy newDummyBlock = newBlock as FluidDummy;
-        newDummyBlock.Init(this, element);
-        mapManager.SpawnBlock(newDummyBlock, position.x, position.y);
+        newDummyBlock.Init(this, sourceElement);
+
+        mapManager.RequestSpawnBlock(newDummyBlock, position.x, position.y);
+
+        newDummyBlock.OnSpawned += RegisterDummyBlock;
+        newDummyBlock.OnAfterRemoved += UnregisterDummyBlock;
     }
 
-    private void RemoveDummyBlock(Vector2Int position)
+    private void PendingRemoveDummyBlock(Vector2Int position)
     {
-        if (mapManager.GetBlock(position) != null && mapManager.GetBlock(position).IsDummy)
+        if (mapManager.GetBlock(position) is FluidDummy dummyBlock)
         {
-            mapManager.RemoveBlock(mapManager.GetBlock(position));
-            return;
+            mapManager.RequestRemoveBlock(mapManager.GetBlock(position));
         }
-        else
-            dummyBlockPositions.Remove(position);
     }
 
+    private void RegisterDummyBlock(Block block)
+    {
+        Debug.Assert(block is FluidDummy dummy && !spawnedDummyBlocks.ContainsValue(dummy));
+
+        if (spawnedDummyBlocks.ContainsKey(block.GridPosition))
+            Debug.Log(spawnedDummyBlocks);
+
+        spawnedDummyBlocks.Add(block.GridPosition, block as FluidDummy);
+    }
+
+    private void UnregisterDummyBlock(Block block)
+    {
+        Debug.Assert(block is FluidDummy dummy && spawnedDummyBlocks.ContainsValue(dummy));
+
+        Debug.Assert(spawnedDummyBlocks.Remove(block.GridPosition));
+    }
+
+
+    [SerializeField] private bool isDebugging = false;
     private void OnDrawGizmos()
     {
+        if (!isDebugging)
+            return;
+
         foreach (FluidElement element in fluidSystem.elements)
         {
             if (element.amount == 0)
@@ -764,6 +806,11 @@ public class FluidManager : MonoBehaviour
                 Gizmos.DrawWireCube(element.transform.position, element.GetComponent<SpriteRenderer>().bounds.size);
             }
         }
+        foreach (var (position, dummy) in spawnedDummyBlocks)
+        {
+            Gizmos.color = new Color(0, 1, 0, 0.2f);
+            Gizmos.DrawCube(BoundaryDataManager.GetBoundaryData(mapManager.PlayerID).GridToWorld(position), MapBoundaryData.MapToWorldRelative(Vector2.one));
+        }
     }
 
     private double MonitorTotalFluidAmount()
@@ -775,6 +822,4 @@ public class FluidManager : MonoBehaviour
         }
         return totalFluidAmount;
     }
-
-    public bool isDebugging = false;
 }

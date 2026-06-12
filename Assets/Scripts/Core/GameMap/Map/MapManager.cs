@@ -15,10 +15,10 @@ public class MapManager : MonoBehaviour
 
 
     // Block system manager
-    [SerializeField] BlockGridManager blockGridManager;
-    public int BoundaryWidth => blockGridManager.BoundaryWidth;
-    public int BoundaryHeight => blockGridManager.BoundaryHeight;
-    public IReadOnlyList<Block> Blocks => blockGridManager.Blocks;
+    [SerializeField] BlockSystemManager blockSystemManager;
+    public int GridWidth => blockSystemManager.GridWidth;
+    public int GridHeight => blockSystemManager.GridHeight;
+    public IReadOnlyList<Block> Blocks => blockSystemManager.Blocks;
 
 
     // Fluid system manager
@@ -42,7 +42,7 @@ public class MapManager : MonoBehaviour
 
     // Random tick system
     public List<MapRandomTickBehaviourObject> mapRandomTickObjects;
-    public int randomTickSelectionCount => BoundaryWidth * BoundaryHeight;
+    public int randomTickSelectionCount => GridWidth * GridHeight;
 
     
     // events
@@ -57,15 +57,15 @@ public class MapManager : MonoBehaviour
     {
         if (isInitialised) return;
 
-        Debug.Assert(blockGridManager != null);
+        Debug.Assert(blockSystemManager != null);
         Debug.Assert(waterManager != null);
         Debug.Assert(lavaManager != null);
         Debug.Assert(entityManager != null);
         Debug.Assert(particleManager != null);
 
         // Block subsystem initialise
-        blockGridManager.Initialise(this);
-        blockGridManager.OnGridPlace += HandleGridPlace;
+        blockSystemManager.Initialise(this);
+        blockSystemManager.OnGridPlace += HandleGridPlace;
 
         // Fluid subsystem initialise
         Debug.Assert(waterManager != null);
@@ -77,11 +77,21 @@ public class MapManager : MonoBehaviour
         };
 
         // Init map event
-        OnGridPlace += waterManager.BlockSqueeze; // squeeze fluid
-        OnGridPlace += lavaManager.BlockSqueeze;
+        OnGridPlace += waterManager.RequestBlockSqueeze; // squeeze fluid
+        OnGridPlace += lavaManager.RequestBlockSqueeze;
         OnGridPlace += Flame.TryExtinguishBy; // try extinguish fire
 
         isInitialised = true;
+    }
+
+    public void Dispose()
+    {
+        // Init map event
+        OnGridPlace -= waterManager.RequestBlockSqueeze; // squeeze fluid
+        OnGridPlace -= lavaManager.RequestBlockSqueeze;
+        OnGridPlace -= Flame.TryExtinguishBy; // try extinguish fire
+
+        isInitialised = false;
     }
 
     public void PrepareNewMap(int width, int height, TetrisManager tetrisManager)
@@ -90,7 +100,7 @@ public class MapManager : MonoBehaviour
         PlayerID = tetrisManager.PlayerID;
 
         // Block subsystem
-        blockGridManager.PrepareNewMap(width, height);
+        blockSystemManager.PrepareNewMap(width, height);
 
         // Fluid subsystem
         waterManager.Init(this);
@@ -103,7 +113,7 @@ public class MapManager : MonoBehaviour
     public void ClearMap()
     {
         // Block
-        blockGridManager.ClearMap();
+        blockSystemManager.ClearMap();
 
         // Fluid
         waterManager.ClearFluidSystem();
@@ -122,7 +132,7 @@ public class MapManager : MonoBehaviour
     public void OnUpdate()
     {
         // Block grid update
-        blockGridManager.OnUpdate();
+        blockSystemManager.OnUpdate();
 
         // Fluid update
         waterManager.OnUpdate();
@@ -138,51 +148,63 @@ public class MapManager : MonoBehaviour
 
     public Block GetBlock(int x, int y)
     {
-        return blockGridManager.GetBlock(x, y);
+        return blockSystemManager.GetBlock(x, y);
     }
     public Block GetBlock(Vector2Int gridPosition)
     {
-        return blockGridManager.GetBlock(gridPosition.x, gridPosition.y);
+        return blockSystemManager.GetBlock(gridPosition.x, gridPosition.y);
     }
 
     public IEnumerable<Block> GetAdjacentBlocks(int x, int y, bool includeSelf = false)
     {
-        return blockGridManager.GetAdjacentBlocks(x, y, includeSelf);
+        return blockSystemManager.GetAdjacentBlocks(x, y, includeSelf);
     }
 
     public void SpawnTetromino(MapTetromino tetromino)
     {
-        blockGridManager.SpawnTetromino(tetromino);
+        blockSystemManager.RequestSpawnTetromino(tetromino);
     }
 
-    public void SpawnBlock(Block block, int x, int y)
+    public void RequestSpawnBlock(Block block, int x, int y)
     {
-        blockGridManager.SpawnBlock(block, x, y);
+        blockSystemManager.RequestSpawnBlock(block, x, y);
     }
 
-    public void DestroyBlock(Block block)
+    public void RequestMoveBlock(Block block, int x, int y, bool animated = true)
     {
-        blockGridManager.DestroyBlock(block);
+        blockSystemManager.RequestMoveBlock(block, x, y, animated);
     }
 
-    public void RemoveBlock(Block block)
+    public void RequestDestroyBlock(Block block)
     {
-        blockGridManager.RemoveBlock(block);
+        blockSystemManager.RequestDestroyBlock(block);
+        block.OnRequestingDestroy();
     }
 
-    public void BatchUpdateBlocks()
+    public void RequestRemoveBlock(Block block)
     {
-        blockGridManager.BatchUpdateBlocks();
+        blockSystemManager.RequestRemoveBlock(block);
+        block.OnRequestingRemove();
+    }
+
+    public void ImmediatelyProcessGridPendingUpdates()
+    {
+        blockSystemManager.ImmediatelyProcessGridPendingUpdates();
     }
 
     public void ReparentBlock(Block block)
     {
-        block.transform.SetParent(blockGridManager.blockRoot, true);
+        block.transform.SetParent(blockSystemManager.blockRoot, true);
     }
 
     public void RequestNCUpdate(Vector2Int gridPosition)
     {
-        blockGridManager.OnBlockNCUpdate(GetBlock(gridPosition));
+        blockSystemManager.OnBlockRequestNCUpdate(GetBlock(gridPosition));
+    }
+
+    public void HandleBlockOnLockdown(Block block)
+    {
+
     }
 
 
@@ -241,7 +263,7 @@ public class MapManager : MonoBehaviour
                     spawnedBlock = BlockSpawner.NewBlock(waterToLava);
 
                 spawnedBlock.GetComponent<BlockSoundManager>().placedSounds = new AudioClip[] { fizzSound };
-                SpawnBlock(spawnedBlock, waterElement.column, waterElement.lowerGridPosition);
+                RequestSpawnBlock(spawnedBlock, waterElement.column, waterElement.lowerGridPosition);
             }
         }
     }
@@ -261,33 +283,33 @@ public class MapManager : MonoBehaviour
 
     public bool CheckInsideWithoutCeiling(int x, int y)
     {
-        return blockGridManager.CheckInsideWithoudCeiling(x, y);
+        return blockSystemManager.CheckInsideWithoudCeiling(x, y);
     }
     public bool CheckInsideBlockGrid(int x, int y)
     {
-        return blockGridManager.CheckInsideGrid(x, y);
+        return blockSystemManager.CheckInsideGrid(x, y);
     }
     public bool CheckEmpty(int x, int y)
     {
-        return blockGridManager.CheckEmpty(x, y) || blockGridManager[x, y].IsDummy;
+        return blockSystemManager.CheckEmpty(x, y) || blockSystemManager.GetBlock(x, y).IsDummy;
     }
 
     public bool CheckRowFull(int row)
     {
-        return blockGridManager.CheckRowFull(row);
+        return blockSystemManager.CheckRowFull(row);
     }
     public bool CheckRowEmpty(int row)
     {
-        return blockGridManager.CheckRowEmpty(row);
+        return blockSystemManager.CheckRowEmpty(row);
     }
 
     public bool CheckMapEmpty()
     {
-        return blockGridManager.CheckMapEmpty();
+        return blockSystemManager.CheckMapEmpty();
     }
 
     public bool ContainBlock(Block block)
     {
-        return blockGridManager.Grid.Contains(block);
+        return blockSystemManager.Contains(block);
     }
 }

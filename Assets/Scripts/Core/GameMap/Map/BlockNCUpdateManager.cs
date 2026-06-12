@@ -4,12 +4,24 @@ using UnityEngine;
 using static UnityEditor.PlayerSettings;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
-public class BlockUpdateManager
+public class BlockNCUpdateManager
 {
-    public BlockUpdateManager(MapManager map, BlockGrid blockGrid)
+    private MapManager map;
+    private IReadonlyBlockGrid blockGrid;
+    private readonly List<(Block, Vector2Int)> blockNCUpdateRecieverList = new List<(Block, Vector2Int)>();
+
+    private static readonly Dictionary<Block, List<Block>> NCListenerList = new(); // { notifier : { listeners }}
+    private static readonly Dictionary<Block, List<Block>> NCNotifierList = new(); // { listener : { notifiers }}
+
+    public BlockNCUpdateManager(MapManager map, IReadonlyBlockGrid blockGrid)
     {
         this.map = map;
         this.blockGrid = blockGrid;
+    }
+
+    private void Reset()
+    {
+        blockNCUpdateRecieverList.Clear();
     }
 
     /// <summary>
@@ -69,7 +81,7 @@ public class BlockUpdateManager
         else
             NCNotifierList.Add(listener, new List<Block> { notifier });
 
-        listener.OnRemoved += DesubscribeAllNCNotifications;
+        listener.OnAfterRemoved += DesubscribeAllNCNotifications;
     }
 
     public static void DesubscribeNCNotification(Block notifier, Block listener)
@@ -108,17 +120,5 @@ public class BlockUpdateManager
         if (blockNCUpdateRecieverList.Contains((receiverBlock, updateSource)) || receiverBlock.isRemoved)
             return;
         blockNCUpdateRecieverList.Add((receiverBlock, updateSource));
-    }
-
-    private MapManager map;
-    private BlockGrid blockGrid;
-    private readonly List<(Block, Vector2Int)> blockNCUpdateRecieverList = new List<(Block, Vector2Int)>();
-
-    private static readonly Dictionary<Block, List<Block>> NCListenerList = new(); // { notifier : { listeners }}
-    private static readonly Dictionary<Block, List<Block>> NCNotifierList = new(); // { listener : { notifiers }}
-
-    private void Reset()
-    {
-        blockNCUpdateRecieverList.Clear();
     }
 }

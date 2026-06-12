@@ -12,7 +12,7 @@ public class BlockSoundManager : MonoBehaviour
         block = GetComponent<Block>();
 
         block.OnLockedDown += PlaySoundOnPlaced;
-        block.OnDestroyed += PlaySoundOnDestroyed;
+        block.OnAfterDestroyed += PlaySoundOnDestroyed;
     }
 
     private void PlaySoundOnPlaced(Block b)

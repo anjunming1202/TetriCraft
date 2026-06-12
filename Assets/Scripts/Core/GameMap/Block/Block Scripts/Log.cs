@@ -22,7 +22,7 @@ public class Log : Block
         if (!map.IsBlockedInsideGrid(x, y))
         {
             Block leaf = BlockSpawner.NewBlock(BlockID.Leaf);
-            map.SpawnBlock(leaf, x, y);
+            map.RequestSpawnBlock(leaf, x, y);
         }
     }
 }

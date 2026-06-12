@@ -45,7 +45,7 @@ public class MapTetromino : Tetromino
     /// <summary>
     /// Update blocks in the map according to this tetromino data
     /// </summary>
-    public void UpdateBlocks(MapManager map, bool animation = true)
+    public void MoveBlocksToPendingPositions(MapManager map, bool animation = true)
     {
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
@@ -75,17 +75,17 @@ public class MapTetromino : Tetromino
                 }
 
                 // update the block
-                block.SetPosition(currPosition.x, currPosition.y, true);
+                map.RequestMoveBlock(block, currPosition.x, currPosition.y);
             }
-        map.BatchUpdateBlocks();
+        map.ImmediatelyProcessGridPendingUpdates();
     }
 
-    public void SetPosition(Vector2Int position)
+    public void SetPositionPending(Vector2Int position)
     {
         this.position = position;
     }
 
-    public void Shift(int x, int y)
+    public void ShiftPending(int x, int y)
     {
         position += new Vector2Int(x, y);
     }
@@ -142,13 +142,13 @@ public class MapTetromino : Tetromino
 
     private bool TryShift(MapManager map, int x, int y)
     {
-        Shift(x, y);
+        ShiftPending(x, y);
         if (!CheckValid(map))
         {
-            Shift(-x, -y);
+            ShiftPending(-x, -y);
             return false;
         }
-        UpdateBlocks(map, true);
+        MoveBlocksToPendingPositions(map, true);
         return true;
     }
     private bool TryRotate(MapManager map, bool clockwise = true)
@@ -157,22 +157,22 @@ public class MapTetromino : Tetromino
         // check for each wall kick position
         foreach (Vector2Int kick in Wallkick)
         {
-            Shift(kick.x, kick.y);
+            ShiftPending(kick.x, kick.y);
             if (CheckValid(map))
             {
-                UpdateBlocks(map, true);
+                MoveBlocksToPendingPositions(map, true);
                 return true;
             }
-            Shift(-kick.x, -kick.y);
+            ShiftPending(-kick.x, -kick.y);
         }
         RotateShape(!clockwise);
         return false;
     }
     public bool TryImmediateLockdown(MapManager map)
     {
-        Shift(0, -1);
+        ShiftPending(0, -1);
         bool canLockdown = !CheckValid(map);
-        Shift(0, 1);
+        ShiftPending(0, 1);
 
         if (canLockdown)
         {
@@ -243,7 +243,7 @@ public class MapTetromino : Tetromino
                 if (shape[r, c] != null)
                 {
                     Vector2Int blockPos = LocalToMap(r, c);
-                    if (!map.CheckInsideWithoutCeiling(blockPos.x, blockPos.y))
+                    if (!map.CheckInsideBlockGrid(blockPos.x, blockPos.y))
                         return false;
                 }
                 /*// special case: piston
@@ -273,6 +273,7 @@ public class MapTetromino : Tetromino
                         if (!collide)
                             continue;
 
+                        Debug.Log($"COLLIDING {position} {mapBlock} {mapBlock.isLocked}");
                         return true;
                     }
                 }

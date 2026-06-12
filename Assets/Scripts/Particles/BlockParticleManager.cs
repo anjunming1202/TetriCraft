@@ -12,12 +12,12 @@ public class BlockParticleManager : MonoBehaviour
         block = GetComponent<Block>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        block.OnDestroyed += SpawnBreakingParticles;
+        block.OnAfterDestroyed += SpawnBreakingParticles;
     }
 
     protected virtual void OnDestroy()
     {
-        block.OnDestroyed -= SpawnBreakingParticles;
+        block.OnAfterDestroyed -= SpawnBreakingParticles;
     }
 
     protected virtual void SpawnBreakingParticles(Block block)

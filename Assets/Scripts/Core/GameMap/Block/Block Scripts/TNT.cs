@@ -13,7 +13,7 @@ public class TNT : Block, IRedstoneActivatable
 
         map.SpawnEntity(primedTNTInstance, CentrePosition.x, CentrePosition.y);
 
-        map.RemoveBlock(this);
+        map.RequestRemoveBlock(this);
     }
 
     void IRedstoneActivatable.OnRedstoneActivated()

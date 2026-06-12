@@ -36,7 +36,7 @@ public class BlockSpawnDebugger : MonoBehaviour
             else
             {
                 Block spawnedBlock = BlockSpawner.NewBlock(blockSpawned);
-                debuggedMap.SpawnBlock(spawnedBlock, x, y);
+                debuggedMap.RequestSpawnBlock(spawnedBlock, x, y);
 
                 hasSpawnedGrids.Add(new Vector2Int(x, y));
             }
@@ -55,7 +55,7 @@ public class BlockSpawnDebugger : MonoBehaviour
                 return;
             else
             {
-                debuggedMap.DestroyBlock(debuggedMap.GetBlock(x, y));
+                debuggedMap.RequestDestroyBlock(debuggedMap.GetBlock(x, y));
             }
         }
     }

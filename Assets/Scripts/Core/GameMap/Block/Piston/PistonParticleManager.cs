@@ -6,7 +6,7 @@ public class PistonParticleManager : BlockParticleManager
     protected override void Awake()
     {
         block = GetComponent<Block>();
-        block.OnDestroyed += SpawnBreakingParticles;
+        block.OnAfterDestroyed += SpawnBreakingParticles;
 
         baseRenderer = transform.Find("base").GetComponent<SpriteRenderer>();
         headRenderer = transform.Find("head").GetComponent<SpriteRenderer>();

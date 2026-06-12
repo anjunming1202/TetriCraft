@@ -9,6 +9,6 @@ public class IntroController : MonoBehaviour
     public async UniTask PlayAsync()
     {
         mainCamera.orthographicSize = cameraScaler.GetTargetSize() / 8f;
-        await mainCamera.ZoomToAsync(cameraScaler.GetTargetSize(), 3f);
+        await mainCamera.ZoomToAsync(cameraScaler.GetTargetSize(), 0.2f);
     }
 }

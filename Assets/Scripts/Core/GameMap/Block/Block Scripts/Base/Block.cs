@@ -46,9 +46,12 @@ public abstract class Block : MapRandomTickBehaviourObject
     public event OnAnimationUpdateEvent OnInstantMove;
     public event OnAnimationUpdateEvent OnAnimatedMove;
 
+    public event OnChangedEvent OnSpawned;
     public event OnChangedEvent OnLockedDown;
-    public event OnChangedEvent OnDestroyed;
-    public event OnChangedEvent OnRemoved;
+    public event OnChangedEvent OnPendingDestroyed;
+    public event OnChangedEvent OnPendingRemoved;
+    public event OnChangedEvent OnAfterDestroyed;
+    public event OnChangedEvent OnAfterRemoved;
 
     /*public event Action<Vector2Int> OnNCUpdateSent;
     public event Action<Block, Vector2Int> OnNCUpdateRequestReceived;
@@ -59,7 +62,6 @@ public abstract class Block : MapRandomTickBehaviourObject
     public Vector2 Position => position;
     public Vector2 CentrePosition => position + Vector2.one * 0.5f;
     public Vector2Int GridPosition => GetGridPosition(position);
-    public Vector2Int LastGridPosition => GetGridPosition(lastPosition);
 
     public Vector3 GetWorldPosition()
     {
@@ -93,10 +95,11 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     public float Rotation => (int)orientation * 90;
 
-    public virtual void SetPosition(int x, int y, bool animation = false)
+    public virtual void SetGridPosition(int x, int y, bool animation = false)
     {
         SetPosition((float)x, (float)y, animation);
     }
+    public void SetGridPosition(Vector2Int pos, bool animation = false) => SetGridPosition(pos.x, pos.y, animation);
 
     public void Rotate(bool clockwise)
     {
@@ -114,13 +117,13 @@ public abstract class Block : MapRandomTickBehaviourObject
     /// <summary>
     /// Init the block
     /// </summary>
-    public virtual void OnSpawn(MapManager map, int x, int y)
+    public virtual void OnRegistered(MapManager map)
     {
         this.map = map;
 
         this.PlayerID = map.PlayerID;
 
-        SetPosition(x, y);
+        //SetPosition(x, y);
 
         isInMap = true;
         isLocked = false;
@@ -131,7 +134,7 @@ public abstract class Block : MapRandomTickBehaviourObject
         isCharged = false;
     }
 
-    public virtual void OnDespawned()
+    public virtual void OnUnregistered()
     {
         isInMap = false;
         isLocked = false;
@@ -142,21 +145,41 @@ public abstract class Block : MapRandomTickBehaviourObject
         isCharged = false;
     }
 
+    public virtual void OnPostSpawned()
+    {
+        OnSpawned?.Invoke(this);
+    }
+
+    public virtual void OnPostMoved()
+    {
+
+    }
+
+    public virtual void OnRequestingDestroy()
+    {
+        OnPendingDestroyed?.Invoke(this);
+    }
+
+    public virtual void OnRequestingRemove()
+    {
+        OnPendingRemoved?.Invoke(this);
+    }
+
     /// <summary>
     /// Removed with breaking, don't use directly
     /// </summary>
-    public virtual void Destroyed()
+    public virtual void OnPostDestroyed()
     {
-        OnDestroyed?.Invoke(this);
-        Removed();
+        OnAfterDestroyed?.Invoke(this);
+        OnPostRemoved();
     }
 
     /// <summary>
     /// Romove, don't use directly
     /// </summary>
-    public virtual void Removed()
+    public virtual void OnPostRemoved()
     {
-        OnRemoved?.Invoke(this);
+        OnAfterRemoved?.Invoke(this);
     }
 
     public virtual void OnLockdown()
@@ -262,12 +285,12 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     protected virtual void OnExploded()
     {
-        map.DestroyBlock(this);
+        map.RequestDestroyBlock(this);
     }
 
     protected virtual void OnBurnAway()
     {
-        map.RemoveBlock(this);
+        map.RequestRemoveBlock(this);
     }
 
     private ExplosionBlocker explosionTarget;

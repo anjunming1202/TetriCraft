@@ -15,7 +15,7 @@ public class Glass : Block
 
     public override void OnReplacedBy(Block block)
     {
-        map.DestroyBlock(this);
+        map.RequestDestroyBlock(this);
     }
 
     private List<BlockID> supportableBlock = new List<BlockID>()

@@ -55,7 +55,12 @@ public class GravityBlock : GeneralBlock
     {
         lastPosition = Position;
         Vector2 newPosition = lastPosition + Vector2.down * speed * dt;
-        SetPosition(newPosition.x, newPosition.y, false);
+
+        // TODO: set float position with animation, set grid position with no animation, needed to be refine later
+        SetPosition(newPosition.x, newPosition.y, true);
+        if (newPosition.y < GridPosition.y - 1)
+            map.RequestMoveBlock(this, (int)newPosition.x, (int)newPosition.y, false);
+
         speed += MapManager.gravity * dt;
         if (speed > maxSpeed)
             speed = maxSpeed;
@@ -64,7 +69,7 @@ public class GravityBlock : GeneralBlock
     private void OnCollide()
     {
         Vector2Int finalPosition = GetGridPosition(lastPosition);
-        SetPosition(finalPosition.x, finalPosition.y);
+        map.RequestMoveBlock(this, finalPosition.x, finalPosition.y, false);
         isFalling = false;
         Lockdown();
     }
