@@ -12,6 +12,7 @@ public abstract class FluidBlock : Block
     public override void OnLockdown()
     {
         base.OnLockdown();
+        map.ImmediateBlockSqueezeFluids(this);
         FluidManager.SpawnElement(GridPosition.x, FluidElement.Local2Level(GridPosition.y, 0));
         map.RequestRemoveBlock(this);
     }

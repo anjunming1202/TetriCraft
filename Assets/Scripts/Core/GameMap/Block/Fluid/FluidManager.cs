@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
 public class FluidManager : MonoBehaviour
 {
@@ -34,10 +35,21 @@ public class FluidManager : MonoBehaviour
 
     private readonly List<(Block, MapManager)> blockSqueezeRequests = new();
 
-    public void Init(MapManager map)
+    public void Initialise(MapManager map)
     {
         // Init map reference
         mapManager = map;
+
+        map.OnGridBlockPlaced += RequestBlockSqueeze;
+    }
+
+    public void Dispose()
+    {
+        mapManager.OnGridBlockPlaced -= RequestBlockSqueeze;
+    }
+
+    public void PrepareNewSystem(MapManager map)
+    {
         // Init fluid system
         fluidSystem.Init(map.GridWidth);
     }
@@ -141,6 +153,11 @@ public class FluidManager : MonoBehaviour
         blockSqueezeRequests.Add((block, mapManager));
     }
 
+    public void ImmediateBlockSqueeze(MapManager mapManager, Block block)
+    {
+        BlockSqueeze(mapManager, block);
+    }
+
     private void ProcessBlockSqueezeRequests()
     {
         foreach (var (block, map) in blockSqueezeRequests)
@@ -150,7 +167,7 @@ public class FluidManager : MonoBehaviour
         blockSqueezeRequests.Clear();
     }
 
-    private void BlockSqueeze(MapManager mapManager, Block block)
+    public void BlockSqueeze(MapManager mapManager, Block block)
     {
         // dummy / unlocked fluid => can't squeeze
         if (block.IsDummy || (block.IsFluid && (!block.isLocked || block.ID != ID)))
@@ -723,7 +740,7 @@ public class FluidManager : MonoBehaviour
 
                 // reupdate dummy block when fluid touching floor/ceiling
                 if (element.localLowerLevel == 0 || element.localUpperLevel == 0)
-                    mapManager.OnGridPlace?.Invoke(mapManager, dummyBlock);
+                    mapManager.HandleOnGridBlockPlaced(dummyBlock); //
             }
             // if the position is a new position of dummy blocks
             else
@@ -780,7 +797,7 @@ public class FluidManager : MonoBehaviour
     {
         //Debug.Assert(block is FluidDummy dummy && spawnedDummyBlocks.ContainsValue(dummy));
 
-        Debug.Assert(spawnedDummyBlocks.Remove(block.GridPosition));
+        Debug.Assert(spawnedDummyBlocks.Remove(block.GridPosition), $"{block}, {block.GridPosition}, {mapManager.GetBlock(block.GridPosition)}, {block == mapManager.GetBlock(block.GridPosition)}");
     }
 
 

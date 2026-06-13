@@ -18,7 +18,8 @@ public class BlockSystemManager : MonoBehaviour
     private MapManager map;
 
     // block grid events
-    public event Action<MapManager, Block> OnGridPlace;
+    //public event Action<MapManager, Block> OnBlockGridPlaced;
+    //public event Action<Block> OnBlockLockdown;
 
     // grid param getters
     public int GridWidth => blockGrid.GridWidth;
@@ -240,7 +241,7 @@ public class BlockSystemManager : MonoBehaviour
 
     private void NotifyGridPlace(Vector2Int position, Block block)
     {
-        OnGridPlace?.Invoke(map, block);
+        map.HandleOnGridBlockPlaced(block);
     }
 
     private void ReparentBlock(Block block)

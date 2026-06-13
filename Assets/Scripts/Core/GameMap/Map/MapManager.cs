@@ -15,7 +15,7 @@ public class MapManager : MonoBehaviour
 
 
     // Block system manager
-    [SerializeField] BlockSystemManager blockSystemManager;
+    [SerializeField] private BlockSystemManager blockSystemManager;
     public int GridWidth => blockSystemManager.GridWidth;
     public int GridHeight => blockSystemManager.GridHeight;
     public IReadOnlyList<Block> Blocks => blockSystemManager.Blocks;
@@ -28,8 +28,8 @@ public class MapManager : MonoBehaviour
     [SerializeField] private FluidManager lavaManager;
 
     [SerializeField] private AudioClip fizzSound;
-    private static BlockID waterToLava = BlockID.Obsidian;
-    private static BlockID lavaToWater = BlockID.Cobblestone;
+    private static readonly BlockID waterToLava = BlockID.Obsidian;
+    private static readonly BlockID lavaToWater = BlockID.Cobblestone;
 
 
     // Entity system manager
@@ -46,7 +46,9 @@ public class MapManager : MonoBehaviour
 
     
     // events
-    public Action<MapManager, Block> OnGridPlace;
+    public delegate void MapBlockEvent(MapManager map, Block block);
+    public event MapBlockEvent OnGridBlockPlaced;
+    public event MapBlockEvent OnBlockLockdown;
 
 
     // useful tag
@@ -65,9 +67,10 @@ public class MapManager : MonoBehaviour
 
         // Block subsystem initialise
         blockSystemManager.Initialise(this);
-        blockSystemManager.OnGridPlace += HandleGridPlace;
 
         // Fluid subsystem initialise
+        waterManager.Initialise(this);
+        lavaManager.Initialise(this);
         Debug.Assert(waterManager != null);
         Debug.Assert(lavaManager != null);
         fluidManager = new Dictionary<FluidID, FluidManager>()
@@ -76,20 +79,15 @@ public class MapManager : MonoBehaviour
             { FluidID.Lava, lavaManager },
         };
 
-        // Init map event
-        OnGridPlace += waterManager.RequestBlockSqueeze; // squeeze fluid
-        OnGridPlace += lavaManager.RequestBlockSqueeze;
-        OnGridPlace += Flame.TryExtinguishBy; // try extinguish fire
-
         isInitialised = true;
     }
 
     public void Dispose()
     {
-        // Init map event
-        OnGridPlace -= waterManager.RequestBlockSqueeze; // squeeze fluid
-        OnGridPlace -= lavaManager.RequestBlockSqueeze;
-        OnGridPlace -= Flame.TryExtinguishBy; // try extinguish fire
+        blockSystemManager.Dispose();
+
+        waterManager.Dispose();
+        lavaManager.Dispose();
 
         isInitialised = false;
     }
@@ -103,8 +101,8 @@ public class MapManager : MonoBehaviour
         blockSystemManager.PrepareNewMap(width, height);
 
         // Fluid subsystem
-        waterManager.Init(this);
-        lavaManager.Init(this);
+        waterManager.PrepareNewSystem(this);
+        lavaManager.PrepareNewSystem(this);
 
         // Entity subsystem
         entityManager.Init(this);
@@ -202,9 +200,16 @@ public class MapManager : MonoBehaviour
         blockSystemManager.OnBlockRequestNCUpdate(GetBlock(gridPosition));
     }
 
-    public void HandleBlockOnLockdown(Block block)
+    public void HandleOnGridBlockPlaced(Block block)
     {
+        OnGridBlockPlaced?.Invoke(this, block);
+        Flame.TryExtinguishBy(this, block); // try extinguish fire, move to fire system in the future
+    }
 
+    public void ImmediateBlockSqueezeFluids(Block block)
+    {
+        waterManager.ImmediateBlockSqueeze(this, block);
+        lavaManager.ImmediateBlockSqueeze(this, block);
     }
 
 
@@ -232,11 +237,6 @@ public class MapManager : MonoBehaviour
     public void DespawnParticle(ParticleSystem particle)
     {
         particleManager.DespawnParticle(particle);
-    }
-
-    private void HandleGridPlace(MapManager map, Block block)
-    {
-        OnGridPlace?.Invoke(map, block);
     }
 
     private void SpawnFluidConcretion()
