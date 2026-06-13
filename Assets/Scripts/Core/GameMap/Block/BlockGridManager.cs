@@ -452,22 +452,22 @@ public class BlockGridManager : MonoBehaviour
                         finalBlock = existing;
                         rejectedBlocks.Add(block);
 
-                        ReplacementDisposition replacementDisposition = block.GetReplacementDisposition(existing);
-                        switch (replacementDisposition)
+                        SpawnFailureDisposition spawnFailureDisposition = block.GetSpawnFailureDisposition();
+                        switch (spawnFailureDisposition)
                         {
-                            case ReplacementDisposition.Disallow:
+                            case SpawnFailureDisposition.None:
                                 // invalid spawn
-                                block.OnSpawnFailed(registedMap, position);
+                                block.OnPostSpawnFailed(registedMap, position);
                                 GameObject.Destroy(block.gameObject);
-                                Debug.LogError($"The block {block} spawn request at {position} is invalid, as the position is occupied by block {existing} in the grid with no request of move/remove");
+                                //Debug.LogError($"The block {block} spawn request at {position} is invalid, as the position is occupied by block {existing} in the grid with no request of move/remove");
                                 break;
-                            case ReplacementDisposition.Remove:
-                                block.OnSpawnFailed(registedMap, position);
+                            case SpawnFailureDisposition.Remove:
+                                block.OnPostSpawnFailed(registedMap, position);
                                 block.OnPostRemoved();
                                 GameObject.Destroy(block.gameObject);
                                 break;
-                            case ReplacementDisposition.Destroy:
-                                block.OnSpawnFailed(registedMap, position);
+                            case SpawnFailureDisposition.Destroy:
+                                block.OnPostSpawnFailed(registedMap, position);
                                 block.OnPostDestroyed();
                                 GameObject.Destroy(block.gameObject);
                                 break;
@@ -478,27 +478,27 @@ public class BlockGridManager : MonoBehaviour
             // check prior spawn
             if (occupations.TryGetValue(position, out var existingSpawn))
             {
-                // new spawn can replace another previous spawn => allow the latest spawn (replacement at applying spawn)
+                // new spawn can replace another previous spawn => allow the latest spawn
                 if (CheckCanOccupy(block, position))
                 {
                     rejectedBlocks.Add(existingSpawn);
 
                     // last spawn is failed because of multiple requests
-                    ReplacementDisposition replacementDisposition = existingSpawn.GetReplacementDisposition(block);
-                    switch (replacementDisposition)
+                    SpawnFailureDisposition spawnFailureDisposition = existingSpawn.GetSpawnFailureDisposition();
+                    switch (spawnFailureDisposition)
                     {
-                        case ReplacementDisposition.Disallow:
+                        case SpawnFailureDisposition.None:
                             // just reject failed block
-                            existingSpawn.OnSpawnFailed(registedMap, position);
+                            existingSpawn.OnPostSpawnFailed(registedMap, position);
                             GameObject.Destroy(existingSpawn.gameObject);
                             break;
-                        case ReplacementDisposition.Remove:
-                            existingSpawn.OnSpawnFailed(registedMap, position);
+                        case SpawnFailureDisposition.Remove:
+                            existingSpawn.OnPostSpawnFailed(registedMap, position);
                             existingSpawn.OnPostRemoved();
                             GameObject.Destroy(existingSpawn.gameObject);
                             break;
-                        case ReplacementDisposition.Destroy:
-                            existingSpawn.OnSpawnFailed(registedMap, position);
+                        case SpawnFailureDisposition.Destroy:
+                            existingSpawn.OnPostSpawnFailed(registedMap, position);
                             existingSpawn.OnPostDestroyed();
                             GameObject.Destroy(existingSpawn.gameObject);
                             break;
@@ -510,22 +510,22 @@ public class BlockGridManager : MonoBehaviour
                     finalBlock = existingSpawn;
                     rejectedBlocks.Add(block);
 
-                    ReplacementDisposition replacementDisposition = block.GetReplacementDisposition(existingSpawn);
-                    switch (replacementDisposition)
+                    SpawnFailureDisposition spawnFailureDisposition = block.GetSpawnFailureDisposition();
+                    switch (spawnFailureDisposition)
                     {
-                        case ReplacementDisposition.Disallow:
+                        case SpawnFailureDisposition.None:
                             // invalid spawn
-                            block.OnSpawnFailed(registedMap, position);
+                            block.OnPostSpawnFailed(registedMap, position);
                             GameObject.Destroy(block.gameObject);
-                            Debug.LogError($"The spawn request at {position} is invalid, as two blocks {block} and {existingSpawn} are trying to spawn at the same position with no replacement");
+                            //Debug.LogError($"The spawn request at {position} is invalid, as two blocks {block} and {existingSpawn} are trying to spawn at the same position with no replacement");
                             break;
-                        case ReplacementDisposition.Remove:
-                            block.OnSpawnFailed(registedMap, position);
+                        case SpawnFailureDisposition.Remove:
+                            block.OnPostSpawnFailed(registedMap, position);
                             block.OnPostRemoved();
                             GameObject.Destroy(block.gameObject);
                             break;
-                        case ReplacementDisposition.Destroy:
-                            block.OnSpawnFailed(registedMap, position);
+                        case SpawnFailureDisposition.Destroy:
+                            block.OnPostSpawnFailed(registedMap, position);
                             block.OnPostDestroyed();
                             GameObject.Destroy(block.gameObject);
                             break;

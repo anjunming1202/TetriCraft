@@ -31,12 +31,9 @@ public class GravityBlock : GeneralBlock
         return true;
     }
 
-    public override ReplacementDisposition GetReplacementDisposition(Block incoming)
+    public override SpawnFailureDisposition GetSpawnFailureDisposition()
     {
-        if (isInMap)
-            return ReplacementDisposition.Disallow;
-
-        return ReplacementDisposition.Destroy;
+        return SpawnFailureDisposition.Destroy;
     }
 
     private bool CheckFloating(MapManager map)

@@ -48,6 +48,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     public event OnAnimationUpdateEvent OnAnimatedMove;
 
     public event OnChangedEvent OnSpawned;
+    public event OnChangedEvent OnSpawnFailed;
     public event OnChangedEvent OnLockedDown;
     public event OnChangedEvent OnPendingDestroyed;
     public event OnChangedEvent OnPendingRemoved;
@@ -143,17 +144,23 @@ public abstract class Block : MapRandomTickBehaviourObject
         isCharged = false;
     }
 
-    public virtual void OnSpawnFailed(MapManager map, Vector2Int position)
+    public virtual void OnPostSpawned()
     {
+        OnSpawned?.Invoke(this);
+    }
+
+    public virtual void OnPostSpawnFailed(MapManager map, Vector2Int position)
+    {
+        // record the rejected state
         this.map = map;
         this.PlayerID = map.PlayerID;
 
         SetGridPosition(position.x, position.y, false);
     }
 
-    public virtual void OnPostSpawned()
+    public virtual SpawnFailureDisposition GetSpawnFailureDisposition()
     {
-        OnSpawned?.Invoke(this);
+        return SpawnFailureDisposition.None;
     }
 
     public virtual void OnPostMoved()
@@ -188,6 +195,21 @@ public abstract class Block : MapRandomTickBehaviourObject
         OnAfterRemoved?.Invoke(this);
     }
 
+    public virtual bool CanBeReplacedBy(Block block)
+    {
+        return false;
+    }
+
+    public virtual ReplacementDisposition GetReplacementDisposition(Block incoming)
+    {
+        return ReplacementDisposition.Disallow;
+    }
+
+    public virtual void OnReplacedBy(Block block)
+    {
+        
+    }
+
     public virtual void OnLockdown()
     {
         Lockdown();
@@ -205,31 +227,6 @@ public abstract class Block : MapRandomTickBehaviourObject
         // detect if the updated neighbour is a activation/charging source
         UpdateActivationState();
         UpdateChargingState();
-    }
-
-    public virtual bool CanBeReplacedBy(Block block)
-    {
-        return false;
-    }
-
-    public virtual ReplacementDisposition GetReplacementDisposition(Block incoming)
-    {
-        return ReplacementDisposition.Disallow;
-    }
-
-    public virtual void OnReplacedBy(Block block)
-    {
-        
-    }
-
-    public virtual bool CanReplace(Block block)
-    {
-        return block.CanBeReplacedBy(this);
-    }
-
-    public virtual void OnFailedToReplace(Block block)
-    {
-
     }
 
     public virtual bool IsClearable()
