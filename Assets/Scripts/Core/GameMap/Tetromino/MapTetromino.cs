@@ -59,13 +59,12 @@ public class MapTetromino : Tetromino
                 Vector2Int currPosition = LocalToMap(r, c);
                 Block mapBlock = map.GetBlock(currPosition);
 
-                // check for replacing
+                /*// check for replacing
                 if (mapBlock != null)
                 {
                     bool replaceable = mapBlock.CanBeReplacedBy(block);
-                    if (replaceable)
-                        mapBlock.OnReplacedBy(block);
-                }
+                    Debug.Assert(replaceable);
+                }*/
 
                 // special case: deactivate extending pistons
                 if (block is Piston piston && piston.isExtending)

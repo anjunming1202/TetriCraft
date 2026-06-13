@@ -1,4 +1,5 @@
 ﻿
+using BlockSystem;
 using UnityEngine;
 
 public abstract class FluidDummy : Block
@@ -23,9 +24,9 @@ public abstract class FluidDummy : Block
         return true;
     }
 
-    public override void OnReplacedBy(Block block)
+    public override ReplacementDisposition GetReplacementDisposition(Block incoming)
     {
-        map.RequestRemoveBlock(this);
+        return ReplacementDisposition.Remove;
     }
 
     public override bool IsClearable()

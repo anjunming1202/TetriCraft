@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using BlockSystem;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Glass : Block
@@ -6,6 +7,8 @@ public class Glass : Block
     [HideInInspector] public override BlockID ID => BlockID.Glass;
     public override bool CanBeReplacedBy(Block block)
     {
+        if (!block.isInMap)
+            return false;
         if (!isLocked || block.isLocked)
             return false;
         if (supportableBlock.Contains(block.ID))
@@ -13,12 +16,12 @@ public class Glass : Block
         return true;
     }
 
-    public override void OnReplacedBy(Block block)
+    public override ReplacementDisposition GetReplacementDisposition(Block incoming)
     {
-        map.RequestDestroyBlock(this);
+        return ReplacementDisposition.Destroy;
     }
 
-    private List<BlockID> supportableBlock = new List<BlockID>()
+    private readonly List<BlockID> supportableBlock = new List<BlockID>()
     {
         BlockID.Glass,
         BlockID.Water,

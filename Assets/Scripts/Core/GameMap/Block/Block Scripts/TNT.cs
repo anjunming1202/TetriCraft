@@ -9,9 +9,9 @@ public class TNT : Block, IRedstoneActivatable
     public void Ignite(float fuseTime = 4f)
     {        
         PrimedTNT primedTNTInstance = Instantiate(primedTNTPrefab, transform.position, Quaternion.identity);
-        primedTNTInstance.fuseTime = fuseTime;
+        primedTNTInstance.Init(fuseTime);
 
-        map.SpawnEntity(primedTNTInstance, CentrePosition.x, CentrePosition.y);
+        map.RequestSpawnEntity(primedTNTInstance, CentrePosition.x, CentrePosition.y);
 
         map.RequestRemoveBlock(this);
     }

@@ -1,4 +1,5 @@
 // Block, the most basic unit, one block occupies one grid
+using BlockSystem;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -120,10 +121,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     public virtual void OnRegistered(MapManager map)
     {
         this.map = map;
-
         this.PlayerID = map.PlayerID;
-
-        //SetPosition(x, y);
 
         isInMap = true;
         isLocked = false;
@@ -143,6 +141,14 @@ public abstract class Block : MapRandomTickBehaviourObject
         isRemoved = true;
 
         isCharged = false;
+    }
+
+    public virtual void OnSpawnFailed(MapManager map, Vector2Int position)
+    {
+        this.map = map;
+        this.PlayerID = map.PlayerID;
+
+        SetGridPosition(position.x, position.y, false);
     }
 
     public virtual void OnPostSpawned()
@@ -206,9 +212,24 @@ public abstract class Block : MapRandomTickBehaviourObject
         return false;
     }
 
+    public virtual ReplacementDisposition GetReplacementDisposition(Block incoming)
+    {
+        return ReplacementDisposition.Disallow;
+    }
+
     public virtual void OnReplacedBy(Block block)
     {
-        Debug.LogError($"{this} at {position} shouldn't be replaced by {block}");
+        
+    }
+
+    public virtual bool CanReplace(Block block)
+    {
+        return block.CanBeReplacedBy(this);
+    }
+
+    public virtual void OnFailedToReplace(Block block)
+    {
+
     }
 
     public virtual bool IsClearable()

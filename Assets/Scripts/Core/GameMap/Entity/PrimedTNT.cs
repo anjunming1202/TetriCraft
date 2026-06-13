@@ -6,6 +6,11 @@ public class PrimedTNT : Entity
     public Explosion explosionPrefab;
     public float fuseTime = 4f;
 
+    public void Init(float fuseTime)
+    {
+        this.fuseTime = fuseTime;
+    }
+
     public override void OnSpawned(MapManager map, Vector2 position)
     {
         base.OnSpawned(map, position);
@@ -23,7 +28,7 @@ public class PrimedTNT : Entity
 
     protected void Start()
     {
-        AddMomentum(RandomVelocity());        
+        AddMomentum(RandomVelocity());
     }
 
     private IEnumerator FuseCountdown()

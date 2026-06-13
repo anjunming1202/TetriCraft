@@ -4,6 +4,7 @@ using UnityEngine;
 public abstract class Entity : MapObject
 {
     // events
+    public event Action<Entity> OnAfterSpawned;
     public event Action<Entity> OnKilled;
 
     // collision box
@@ -35,6 +36,10 @@ public abstract class Entity : MapObject
         this.position = position;
         this.velocity = Vector2.zero;
         this.isFalling = false;
+
+        SetPosition(position);
+
+        OnAfterSpawned?.Invoke(this);
     }
 
     public virtual void Die()
@@ -48,11 +53,10 @@ public abstract class Entity : MapObject
         GameObject.Destroy(this.gameObject);
     }
 
-    public virtual void TickUpdate(float dt)
+    public virtual void OnTickUpdate(float dt)
     {
         //Debug.Assert(dt == Time.deltaTime, $"dt: {dt}, delta time: {Time.deltaTime}");
         UpdateFalling(dt);
-        transform.position = BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(this.position);
     }
 
     public void AddMomentum(Vector2 velocity)
@@ -60,20 +64,28 @@ public abstract class Entity : MapObject
         this.velocity += velocity / (inertia + float.Epsilon);
     }
 
+    protected void SetPosition(Vector2 position)
+    {
+        this.position = position;
+        transform.position = BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(this.position);
+    }
+
     protected void UpdateFalling(float deltaTime)
     {
         if (!hasGravity)
             return;
 
+        Vector2 newPosition = position;
+
         // x direction
         float deltaX = velocity.x * deltaTime;
-        position.x += deltaX;
+        newPosition.x += deltaX;
         if (CheckCollideBlocks(map))
         {
             if (collisionBox.xMax > collideGrid.x + 1)
-                position.x = collideGrid.x + 1f + collisionBox.width / 2;
+                newPosition.x = collideGrid.x + 1f + collisionBox.width / 2;
             else if (collisionBox.xMin < collideGrid.x)
-                position.x = collideGrid.x - collisionBox.width / 2;
+                newPosition.x = collideGrid.x - collisionBox.width / 2;
 
             velocity.x = 0f;
         }
@@ -87,22 +99,26 @@ public abstract class Entity : MapObject
 
         // y direction
         float deltaY = velocity.y * deltaTime;
-        position.y += deltaY;
+        newPosition.y += deltaY;
         if (CheckCollideBlocks(map))
         {
             if (collisionBox.yMax > collideGrid.y + 1)
-                position.y = collideGrid.y + 1 + collisionBox.height / 2; 
+                newPosition.y = collideGrid.y + 1 + collisionBox.height / 2; 
             else if (collisionBox.yMin < collideGrid.y)
-                position.y = collideGrid.y - collisionBox.height / 2;
+                newPosition.y = collideGrid.y - collisionBox.height / 2;
 
             velocity.y = 0f;
             isFalling = false;
+            OnLanded();
         }
         else
         {
             velocity.y -= MapManager.gravity * deltaTime;
             isFalling = true;
         }
+
+        // set position
+        SetPosition(newPosition);
     }
 
     protected bool CheckCollideBlocks(MapManager map)
@@ -130,5 +146,10 @@ public abstract class Entity : MapObject
     protected Vector3 GetWorldPosition()
     {
         return BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(position);
+    }
+
+    protected virtual void OnLanded()
+    {
+
     }
 }

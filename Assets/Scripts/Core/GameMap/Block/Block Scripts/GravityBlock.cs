@@ -1,33 +1,42 @@
+using BlockSystem;
+using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
 public class GravityBlock : GeneralBlock
 {
+    [SerializeField] private FallingBlockEntity fallingBlockEntityPrefab;
+    [SerializeField] private float maxSpeed;
+
     private float speed;
     private bool isFalling = false;
-    private static float maxSpeed = 20;
+
 
     public override void OnUpdate()
     {
         base.OnUpdate();
 
-        if (isFalling)
-        {
-            UpdateFalling(Time.deltaTime);
-            if (CheckCollide(map))
-            {
-                OnCollide();
-            }
-        }
-        else if (isLocked && CheckFloating(map))
-        {
+        if (!isLocked)
+            return;
+
+        bool floating = CheckFloating(map);
+        if (floating)
             StartFall();
-        }
+    }
+    public override bool CanBeReplacedBy(Block block)
+    {
+        if (isInMap)
+            return false;
+
+        return true;
     }
 
-    public override bool IsClearable()
+    public override ReplacementDisposition GetReplacementDisposition(Block incoming)
     {
-        return isLocked && !isFalling;
+        if (isInMap)
+            return ReplacementDisposition.Disallow;
+
+        return ReplacementDisposition.Destroy;
     }
 
     private bool CheckFloating(MapManager map)
@@ -39,38 +48,11 @@ public class GravityBlock : GeneralBlock
 
     private void StartFall()
     {
-        lastPosition = Position;
-        speed = 0;
-        isFalling = true;
-    }
+        FallingBlockEntity fallingBlockEntity = Instantiate(fallingBlockEntityPrefab);
+        fallingBlockEntity.Init(ID, maxSpeed);
 
-    private bool CheckCollide(MapManager map)
-    {
-        bool collide = !map.CheckInsideBlockGrid(GridPosition.x, GridPosition.y) || (!map.CheckEmpty(GridPosition.x, GridPosition.y) && map.GetBlock(GridPosition) != this);
-        Debug.Log(collide);
-        return collide;
-    }
+        map.RequestSpawnEntity(fallingBlockEntity, CentrePosition.x, CentrePosition.y);
 
-    private void UpdateFalling(float dt)
-    {
-        lastPosition = Position;
-        Vector2 newPosition = lastPosition + Vector2.down * speed * dt;
-
-        // TODO: set float position with animation, set grid position with no animation, needed to be refine later
-        SetPosition(newPosition.x, newPosition.y, true);
-        if (newPosition.y < GridPosition.y - 1)
-            map.RequestMoveBlock(this, (int)newPosition.x, (int)newPosition.y, false);
-
-        speed += MapManager.gravity * dt;
-        if (speed > maxSpeed)
-            speed = maxSpeed;
-    }
-
-    private void OnCollide()
-    {
-        Vector2Int finalPosition = GetGridPosition(lastPosition);
-        map.RequestMoveBlock(this, finalPosition.x, finalPosition.y, false);
-        isFalling = false;
-        Lockdown();
+        map.RequestRemoveBlock(this);
     }
 }

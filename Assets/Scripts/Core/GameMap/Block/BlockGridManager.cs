@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BlockSystem;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -58,6 +59,19 @@ public class BlockGridManager : MonoBehaviour
         requestProcessPhase = RequestProcessPhase.Waiting;
 
         Debug.Log("BlockGridManager reset for the game");
+    }
+
+    public void ClearForced()
+    {
+        foreach (Block block in registeredBlocks)
+        {
+            if (block != null)
+                GameObject.Destroy(block.gameObject);
+        }
+        blockSpawnBatch.Clear();
+        blockMoveBatch.Clear();
+        blockRemoveBatch.Clear();
+        blockDestroyBatch.Clear();
     }
 
     public void ProcessPendingBlockRequests()
@@ -158,15 +172,6 @@ public class BlockGridManager : MonoBehaviour
         Debug.Assert(requestProcessPhase == RequestProcessPhase.Waiting, $"Try request destroy at {requestProcessPhase} phase");
     }
 
-    public void ClearForced()
-    {
-        foreach (Block block in registeredBlocks)
-        {
-            if (block != null)
-                GameObject.Destroy(block.gameObject);
-        }
-    }
-
     private void ProcessDestroyBatch()
     {
         if (blockDestroyBatch.Count == 0)
@@ -251,8 +256,9 @@ public class BlockGridManager : MonoBehaviour
         }
 
         // Now occupy the cell
-        OccupyWithForcedReplacement(block, position);
+        OccupyWithReplacement(block, position);
 
+        // Successful spawn
         // initialise block
         RegisterBlock(block);
 
@@ -313,7 +319,7 @@ public class BlockGridManager : MonoBehaviour
             if (block == null)
                 continue;
 
-            OccupyWithForcedReplacement(block, targetPosition);
+            OccupyWithReplacement(block, targetPosition);
 
             // originally designed for failed add, now is unesseccary 
             if (CheckCanOccupy(block, targetPosition))
@@ -352,6 +358,7 @@ public class BlockGridManager : MonoBehaviour
         if (block == null)
             return;
 
+        // successful destroy
         blockGrid.TryRemove(block);
         UnregisterBlock(block);
         block.OnPostDestroyed();
@@ -365,6 +372,7 @@ public class BlockGridManager : MonoBehaviour
         if (block == null)
             return;
 
+        // successful remove
         blockGrid.TryRemove(block);
         UnregisterBlock(block);
         block.OnPostRemoved();
@@ -433,27 +441,96 @@ public class BlockGridManager : MonoBehaviour
                 bool willLeave = blockMoveBatch.ContainsKey(existing) || blockRemoveBatch.Contains(existing) || blockDestroyBatch.Contains(existing);
                 if (!willLeave)
                 {
-                    if (!CheckCanOccupy(block, position))
+                    // new spawn can replace existing block => allow spawn (replacement at applying spawn)
+                    if (CheckCanOccupy(block, position))
+                    {
+                        rejectedBlocks.Add(existing);
+                    }
+                    // fail to spawn (has not been registered, remove/destroy directly)
+                    else
                     {
                         finalBlock = existing;
                         rejectedBlocks.Add(block);
-                        Debug.LogError($"The block {block} spawn request at {position} is invalid, as the position is occupied by block {existing} in the grid with no request of move/remove");
+
+                        ReplacementDisposition replacementDisposition = block.GetReplacementDisposition(existing);
+                        switch (replacementDisposition)
+                        {
+                            case ReplacementDisposition.Disallow:
+                                // invalid spawn
+                                block.OnSpawnFailed(registedMap, position);
+                                GameObject.Destroy(block.gameObject);
+                                Debug.LogError($"The block {block} spawn request at {position} is invalid, as the position is occupied by block {existing} in the grid with no request of move/remove");
+                                break;
+                            case ReplacementDisposition.Remove:
+                                block.OnSpawnFailed(registedMap, position);
+                                block.OnPostRemoved();
+                                GameObject.Destroy(block.gameObject);
+                                break;
+                            case ReplacementDisposition.Destroy:
+                                block.OnSpawnFailed(registedMap, position);
+                                block.OnPostDestroyed();
+                                GameObject.Destroy(block.gameObject);
+                                break;
+                        }
                     }
-                    else
-                        rejectedBlocks.Add(existing);
                 }
             }
             // check prior spawn
             if (occupations.TryGetValue(position, out var existingSpawn))
             {
-                if (!CheckCanOccupy(block, position))
+                // new spawn can replace another previous spawn => allow the latest spawn (replacement at applying spawn)
+                if (CheckCanOccupy(block, position))
+                {
+                    rejectedBlocks.Add(existingSpawn);
+
+                    // last spawn is failed because of multiple requests
+                    ReplacementDisposition replacementDisposition = existingSpawn.GetReplacementDisposition(block);
+                    switch (replacementDisposition)
+                    {
+                        case ReplacementDisposition.Disallow:
+                            // just reject failed block
+                            existingSpawn.OnSpawnFailed(registedMap, position);
+                            GameObject.Destroy(existingSpawn.gameObject);
+                            break;
+                        case ReplacementDisposition.Remove:
+                            existingSpawn.OnSpawnFailed(registedMap, position);
+                            existingSpawn.OnPostRemoved();
+                            GameObject.Destroy(existingSpawn.gameObject);
+                            break;
+                        case ReplacementDisposition.Destroy:
+                            existingSpawn.OnSpawnFailed(registedMap, position);
+                            existingSpawn.OnPostDestroyed();
+                            GameObject.Destroy(existingSpawn.gameObject);
+                            break;
+                    }
+                }
+                // fail to spawn (has not been registered, remove/destroy directly)
+                else
                 {
                     finalBlock = existingSpawn;
                     rejectedBlocks.Add(block);
-                    Debug.LogError($"The spawn request at {position} is invalid, as two blocks {block} and {existingSpawn} are trying to spawn at the same position with no replacement");
+
+                    ReplacementDisposition replacementDisposition = block.GetReplacementDisposition(existingSpawn);
+                    switch (replacementDisposition)
+                    {
+                        case ReplacementDisposition.Disallow:
+                            // invalid spawn
+                            block.OnSpawnFailed(registedMap, position);
+                            GameObject.Destroy(block.gameObject);
+                            Debug.LogError($"The spawn request at {position} is invalid, as two blocks {block} and {existingSpawn} are trying to spawn at the same position with no replacement");
+                            break;
+                        case ReplacementDisposition.Remove:
+                            block.OnSpawnFailed(registedMap, position);
+                            block.OnPostRemoved();
+                            GameObject.Destroy(block.gameObject);
+                            break;
+                        case ReplacementDisposition.Destroy:
+                            block.OnSpawnFailed(registedMap, position);
+                            block.OnPostDestroyed();
+                            GameObject.Destroy(block.gameObject);
+                            break;
+                    }
                 }
-                else
-                    rejectedBlocks.Add(existingSpawn);
             }
 
             occupations[position] = finalBlock;
@@ -471,28 +548,32 @@ public class BlockGridManager : MonoBehaviour
                 bool willLeave = blockMoveBatch.ContainsKey(existing) || blockRemoveBatch.Contains(existing) || blockDestroyBatch.Contains(existing);
                 if (!willLeave)
                 {
-                    if (!CheckCanOccupy(block, position))
+                    if (CheckCanOccupy(block, position))
+                    {
+                        rejectedBlocks.Add(existing);
+                    }
+                    else
                     {
                         finalBlock = existing;
                         rejectedBlocks.Add(block);
                         Debug.LogError($"The block {block} move request to {position} is invalid, as the position is occupied by block {existing} in the grid with no request of move/remove");
                     }
-                    else
-                        rejectedBlocks.Add(existing);
                 }
             }
             // check prior spawn or move
             if (occupations.TryGetValue(position, out var existingSpawnOrMove))
             {
-                if (!CheckCanOccupy(block, position))
+                if (CheckCanOccupy(block, position))
+                {
+                    rejectedBlocks.Add(existingSpawnOrMove);
+                }
+                else
                 {
                     finalBlock = existingSpawnOrMove;
                     rejectedBlocks.Add(block);
                     bool isExistingMove = blockMoveBatch.ContainsKey(existingSpawnOrMove);
                     Debug.LogError($"The block {block} move request to {position} is invalid, as the target position is occupied by another block {(isExistingMove ? "move" : "spawn")} request with no replacement");
                 }
-                else
-                    rejectedBlocks.Add(existingSpawnOrMove);
             }
 
             occupations[position] = finalBlock;
@@ -528,7 +609,7 @@ public class BlockGridManager : MonoBehaviour
         return true;
     }
 
-    private void OccupyWithForcedReplacement(Block incoming, Vector2Int position)
+    private void OccupyWithReplacement(Block incoming, Vector2Int position)
     {
         blockGrid.TryGet(position, out var existing);
 
@@ -540,10 +621,23 @@ public class BlockGridManager : MonoBehaviour
         }
         else
         {
-            blockGrid.TryRemove(existing);
+            // handling block being replaced
+            ReplacementDisposition replacementDisposition = existing.GetReplacementDisposition(incoming);
+            switch (replacementDisposition)
+            {
+                case ReplacementDisposition.Disallow:
+                    Debug.LogError($"{existing} should not be replaced by {incoming}");
+                    break;
+                case ReplacementDisposition.Remove:
+                    ApplyRemove(existing);
+                    break;
+                case ReplacementDisposition.Destroy:
+                    ApplyDestroy(existing);
+                    break;
+            }
+
             blockGrid.TryAdd(incoming, position);
 
-            // handling block being replaced
             existing.OnReplacedBy(incoming);
         }
     }

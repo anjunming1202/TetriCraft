@@ -4,7 +4,11 @@ using UnityEngine;
 public class EntityManager : MonoBehaviour
 {
     // Entity system, currently just a list
-    private List<Entity> entities = new List<Entity>();
+    private readonly List<Entity> entities = new List<Entity>();
+
+    // batch updates
+    private readonly Dictionary<Entity, Vector2> spawnedEntityBatch = new();
+    private readonly HashSet<Entity> killedEntityBatch = new();
 
     // map reference
     private MapManager MapManager;
@@ -13,9 +17,6 @@ public class EntityManager : MonoBehaviour
     {
         // Map reference
         this.MapManager = mapManager;
-
-        // Init entity system
-        entities = new();
     }
 
     public void Clear()
@@ -27,6 +28,8 @@ public class EntityManager : MonoBehaviour
                 entity.Die();
         }
         entities.Clear();
+        spawnedEntityBatch.Clear();
+        killedEntityBatch.Clear();
     }
 
     public void OnUpdate()
@@ -34,20 +37,48 @@ public class EntityManager : MonoBehaviour
         foreach (var entity in entities)
         {
             if (entity != null)
-                entity.TickUpdate(Time.deltaTime);
+                entity.OnTickUpdate(Time.deltaTime);
         }
+        ProcessPendingEntityRequests();
     }
 
-    public void AddNewEntity(Entity entity, float x, float y)
+    public void RequestAddEntity(Entity entity, float x, float y)
+    {
+        spawnedEntityBatch.Add(entity, new(x, y));
+    }
+
+    public void RequestKillEntity(Entity entity)
+    {
+        killedEntityBatch.Add(entity);
+    }
+
+    private void ProcessPendingEntityRequests()
+    {
+        foreach (var (entity, position) in spawnedEntityBatch)
+        {
+            ApplySpawn(entity, position);
+        }
+        foreach (var entity in killedEntityBatch)
+        {
+            ApplyKill(entity);
+        }
+
+        spawnedEntityBatch.Clear();
+        killedEntityBatch.Clear();
+    }
+
+    private void ApplySpawn(Entity entity, Vector2 pos)
     {
         // spawn entity
-        entity.OnSpawned(MapManager, new(x, y));
+        entity.OnSpawned(MapManager, pos);
 
         // add to entity list
         entities.Add(entity);
-    }
 
-    public void KillEntity(Entity entity)
+        // reparent the entity object
+        entity.transform.SetParent(this.transform, true);
+    }
+    private void ApplyKill(Entity entity)
     {
         // kill entity
         entity.Die();

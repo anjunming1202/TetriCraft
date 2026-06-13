@@ -208,15 +208,14 @@ public class MapManager : MonoBehaviour
     }
 
 
-    public void SpawnEntity(Entity entity, float x, float y)
+    public void RequestSpawnEntity(Entity entity, float x, float y)
     {
-        entityManager.AddNewEntity(entity, x, y);
-        entity.transform.SetParent(entityManager.transform, false);
+        entityManager.RequestAddEntity(entity, x, y);
     }
 
-    public void KillEntity(Entity entity)
+    public void RequestKillEntity(Entity entity)
     {
-        entityManager.KillEntity(entity);
+        entityManager.RequestKillEntity(entity);
     }
 
     public ParticleSystem SpawnParticle(ParticleSystem prefab, float x, float y)

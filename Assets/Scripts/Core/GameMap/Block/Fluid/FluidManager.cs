@@ -768,17 +768,17 @@ public class FluidManager : MonoBehaviour
 
     private void RegisterDummyBlock(Block block)
     {
-        Debug.Assert(block is FluidDummy dummy && !spawnedDummyBlocks.ContainsValue(dummy));
+        //Debug.Assert(block is FluidDummy dummy && !spawnedDummyBlocks.ContainsValue(dummy));
 
         if (spawnedDummyBlocks.ContainsKey(block.GridPosition))
-            Debug.Log(spawnedDummyBlocks);
+            Debug.LogWarning(spawnedDummyBlocks);
 
         spawnedDummyBlocks.Add(block.GridPosition, block as FluidDummy);
     }
 
     private void UnregisterDummyBlock(Block block)
     {
-        Debug.Assert(block is FluidDummy dummy && spawnedDummyBlocks.ContainsValue(dummy));
+        //Debug.Assert(block is FluidDummy dummy && spawnedDummyBlocks.ContainsValue(dummy));
 
         Debug.Assert(spawnedDummyBlocks.Remove(block.GridPosition));
     }

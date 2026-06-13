@@ -43,4 +43,8 @@ public class MapBoundaryData : ScriptableObject
     {
         return (Vector3)(posMap * unitSize);
     }
+    public static Vector2Int MapToGrid(Vector2 posMap)
+    {
+        return new Vector2Int(Mathf.FloorToInt(posMap.x), Mathf.FloorToInt(posMap.y));
+    }
 }
