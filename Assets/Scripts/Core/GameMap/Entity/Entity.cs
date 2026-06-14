@@ -9,8 +9,6 @@ public abstract class Entity : MapObject
 
     // collision box
     protected virtual Vector2 size => Vector2.one;
-    protected Rect collisionBox => new Rect(position - size / 2, size);
-
     // collision detection
     private Vector2Int collideGrid;
 
@@ -75,17 +73,27 @@ public abstract class Entity : MapObject
         if (!hasGravity)
             return;
 
+        const float maxStepDisplacement = 0.4f;
+        float speed = velocity.magnitude;
+        int steps = Mathf.Max(1, Mathf.CeilToInt(speed * deltaTime / maxStepDisplacement));
+        float subDt = deltaTime / steps;
+        for (int i = 0; i < steps; i++)
+            UpdateFallingStep(subDt);
+    }
+
+    private void UpdateFallingStep(float deltaTime)
+    {
         Vector2 newPosition = position;
 
         // x direction
-        float deltaX = velocity.x * deltaTime;
-        newPosition.x += deltaX;
-        if (CheckCollideBlocks(map))
+        newPosition.x += velocity.x * deltaTime;
+        if (CheckCollideBlocks(map, newPosition))
         {
-            if (collisionBox.xMax > collideGrid.x + 1)
-                newPosition.x = collideGrid.x + 1f + collisionBox.width / 2;
-            else if (collisionBox.xMin < collideGrid.x)
-                newPosition.x = collideGrid.x - collisionBox.width / 2;
+            Rect box = new Rect(newPosition - size / 2, size);
+            if (box.xMax > collideGrid.x + 1)
+                newPosition.x = collideGrid.x + 1f + size.x / 2;
+            else if (box.xMin < collideGrid.x)
+                newPosition.x = collideGrid.x - size.x / 2;
 
             velocity.x = 0f;
         }
@@ -98,14 +106,14 @@ public abstract class Entity : MapObject
         }
 
         // y direction
-        float deltaY = velocity.y * deltaTime;
-        newPosition.y += deltaY;
-        if (CheckCollideBlocks(map))
+        newPosition.y += velocity.y * deltaTime;
+        if (CheckCollideBlocks(map, newPosition))
         {
-            if (collisionBox.yMax > collideGrid.y + 1)
-                newPosition.y = collideGrid.y + 1 + collisionBox.height / 2; 
-            else if (collisionBox.yMin < collideGrid.y)
-                newPosition.y = collideGrid.y - collisionBox.height / 2;
+            Rect box = new Rect(newPosition - size / 2, size);
+            if (box.yMax > collideGrid.y + 1)
+                newPosition.y = collideGrid.y + 1 + size.y / 2;
+            else if (box.yMin < collideGrid.y)
+                newPosition.y = collideGrid.y - size.y / 2;
 
             velocity.y = 0f;
             isFalling = false;
@@ -121,16 +129,17 @@ public abstract class Entity : MapObject
         SetPosition(newPosition);
     }
 
-    protected bool CheckCollideBlocks(MapManager map)
+    protected bool CheckCollideBlocks(MapManager map, Vector2 atPosition)
     {
-        for (int x = Mathf.FloorToInt(collisionBox.xMin); x <= Mathf.FloorToInt(collisionBox.xMax); x++)
+        Rect box = new Rect(atPosition - size / 2, size);
+        for (int x = Mathf.FloorToInt(box.xMin); x <= Mathf.FloorToInt(box.xMax); x++)
         {
-            if (collisionBox.xMax - x < Mathf.Epsilon)
+            if (box.xMax - x < 0.001f)
                 continue;
 
-            for (int y = Mathf.FloorToInt(collisionBox.yMin); y <= Mathf.FloorToInt(collisionBox.yMax); y++)
+            for (int y = Mathf.FloorToInt(box.yMin); y <= Mathf.FloorToInt(box.yMax); y++)
             {
-                if (collisionBox.yMax - y < Mathf.Epsilon)
+                if (box.yMax - y < 0.001f)
                     continue;
 
                 if (map.IsBlockedWithoutCeiling(x, y))

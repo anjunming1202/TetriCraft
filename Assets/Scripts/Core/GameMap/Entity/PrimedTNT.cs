@@ -14,6 +14,7 @@ public class PrimedTNT : Entity
     public override void OnSpawned(MapManager map, Vector2 position)
     {
         base.OnSpawned(map, position);
+        AddMomentum(RandomVelocity());
         AudioManager.Instance.PlaySFXFollowing(fuseSound, this.transform, 1f, AudioBus.Block);
         StartCoroutine(FuseCountdown());
     }
@@ -24,11 +25,6 @@ public class PrimedTNT : Entity
         spriteRenderer = GetComponent<SpriteRenderer>();
         material = GetComponent<Material>();
         props = new MaterialPropertyBlock();
-    }
-
-    protected void Start()
-    {
-        AddMomentum(RandomVelocity());
     }
 
     private IEnumerator FuseCountdown()
