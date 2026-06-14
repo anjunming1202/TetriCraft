@@ -158,13 +158,11 @@ public class MapManager : MonoBehaviour
     public void RequestDestroyBlock(Block block)
     {
         blockSystemManager.RequestDestroyBlock(block);
-        block.OnRequestingDestroy();
     }
 
     public void RequestRemoveBlock(Block block)
     {
         blockSystemManager.RequestRemoveBlock(block);
-        block.OnRequestingRemove();
     }
 
     public void ImmediatelyProcessGridPendingUpdates()

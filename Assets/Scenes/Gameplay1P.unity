@@ -656,6 +656,63 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 2
   m_SpriteSortPoint: 0
+--- !u!1 &486166997
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 486166998}
+  - component: {fileID: 486166999}
+  m_Layer: 0
+  m_Name: BlockGridDebugger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &486166998
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 486166997}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1250562637}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &486166999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 486166997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 208189a1d23a4774798778cc8156bae3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameManager: {fileID: 1544377066}
+  playerCamera: {fileID: 921099054}
+  debuggedMap: {fileID: 2093149376}
+  isDebugging: 1
+  displayFrame: 1
+  displayPosition: 1
+  displayCoordinates: 1
+  lockedColor: {r: 0, g: 1, b: 0.054327965, a: 1}
+  tetrominoColor: {r: 1, g: 0, b: 0, a: 1}
+  unclearableColor: {r: 1, g: 0.7153325, b: 0, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 1}
+  font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
+  textColor: {r: 1, g: 1, b: 1, a: 0.05882353}
 --- !u!1 &488623428
 GameObject:
   m_ObjectHideFlags: 0
@@ -1279,7 +1336,6 @@ Transform:
   - {fileID: 1781916897}
   - {fileID: 1330299796}
   - {fileID: 854227533}
-  - {fileID: 1692989731}
   - {fileID: 425377635}
   - {fileID: 144743218}
   m_Father: {fileID: 0}
@@ -1594,7 +1650,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 1.4236112
+  orthographic size: 2.46
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1648,6 +1704,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 751685099}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &978407586
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 978407587}
+  - component: {fileID: 978407588}
+  m_Layer: 0
+  m_Name: BlockNCUpdateDebugger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &978407587
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 978407586}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1250562637}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &978407588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 978407586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: daa5c443ebc398646977875df50367fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debuggedMap: {fileID: 2093149376}
+  showDebug: 1
+  holdDuration: 0.2
+  sourceColor: {r: 1, g: 0.75, b: 0, a: 0.55}
+  receiverColor: {r: 0, g: 0.55, b: 1, a: 0.4}
 --- !u!1 &980367557
 GameObject:
   m_ObjectHideFlags: 0
@@ -2005,6 +2110,40 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1250562636
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1250562637}
+  m_Layer: 0
+  m_Name: BlockSystemDebugger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1250562637
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1250562636}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1692989731}
+  - {fileID: 486166998}
+  - {fileID: 978407587}
+  m_Father: {fileID: 1476637303}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1262668489 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5259760965390717523, guid: 3ca276b461912a44fa539841891b8460, type: 3}
@@ -2517,6 +2656,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1719163819}
+  - {fileID: 1250562637}
   m_Father: {fileID: 2093149377}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1476637304
@@ -2602,7 +2742,6 @@ MonoBehaviour:
   blockLandCurve: {fileID: 11400000, guid: 4173132a645dac9489e29b5abcfc9058, type: 2}
   introController: {fileID: 24397268}
   nextTetrominoUIController: {fileID: 488623430}
-  debug: 1
 --- !u!114 &1544377067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3107,10 +3246,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1692989731}
-  - component: {fileID: 1692989733}
   - component: {fileID: 1692989732}
   m_Layer: 0
-  m_Name: Debugger
+  m_Name: BlockSpawnDebugger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3125,11 +3263,11 @@ Transform:
   m_GameObject: {fileID: 1692989730}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.5214157, y: 9.908382, z: 0.4330085}
+  m_LocalPosition: {x: 3.4699788, y: 9.084824, z: 0.3977473}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 751685099}
+  m_Father: {fileID: 1250562637}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1692989732
 MonoBehaviour:
@@ -3144,34 +3282,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 1544377066}
-  camera: {fileID: 921099054}
+  playerCamera: {fileID: 921099054}
   debuggedMap: {fileID: 2093149376}
+  isDebugging: 1
   blockSpawned: 5
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
---- !u!114 &1692989733
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1692989730}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 208189a1d23a4774798778cc8156bae3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameManager: {fileID: 1544377066}
-  camera: {fileID: 921099054}
-  debuggedMap: {fileID: 2093149376}
-  lockedColor: {r: 0, g: 1, b: 0.054327965, a: 1}
-  tetrominoColor: {r: 1, g: 0, b: 0, a: 1}
-  unclearableColor: {r: 1, g: 0.7153325, b: 0, a: 1}
-  disabledColor: {r: 1, g: 1, b: 1, a: 1}
-  font: {fileID: 12800000, guid: 652f7165b7c30ab46af6c4aad90a639b, type: 2}
-  textColor: {r: 1, g: 1, b: 1, a: 0.05882353}
-  displayFrame: 1
-  displayPosition: 1
-  displayCoordinates: 1
 --- !u!1 &1715508100
 GameObject:
   m_ObjectHideFlags: 0

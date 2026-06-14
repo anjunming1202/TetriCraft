@@ -150,6 +150,8 @@ public class BlockGridManager : MonoBehaviour
 
         blockRemoveBatch.Add(block);
 
+        block.OnRequestingRemove();
+
         Debug.Assert(requestProcessPhase == RequestProcessPhase.Waiting, $"Try request remove at {requestProcessPhase} phase");
     }
 
@@ -169,6 +171,8 @@ public class BlockGridManager : MonoBehaviour
 
         blockDestroyBatch.Add(block);
         blockRemoveBatch.Remove(block);
+
+        block.OnRequestingDestroy();
 
         Debug.Assert(requestProcessPhase == RequestProcessPhase.Waiting, $"Try request destroy at {requestProcessPhase} phase");
     }
@@ -345,10 +349,12 @@ public class BlockGridManager : MonoBehaviour
             if (block == null)
                 continue;
 
+            Vector2Int oldPos = block.GridPosition;
             block.SetGridPosition(targetPosition, true);
             block.OnPostMoved();
 
             OnGridBlockPlaced?.Invoke(targetPosition, block);
+            OnGridBlockRemoved?.Invoke(oldPos, block);
 
             //Debug.Log($"{block} moved to {targetPosition}, block position {block.Position}");
         }

@@ -16,6 +16,20 @@ public class Piston : GeneralBlock, IRedstoneActivatable
     public event Action OnExtending;
     public event Action OnContracting;
 
+    private PistonHead pistonHead;
+
+    private static readonly List<BlockID> destroyableBlocks = new(){
+        BlockID.Leaf
+    };
+
+    /// <summary>
+    /// every block in the pushed block list structure should be listened when NC updates for attempting re-extending
+    /// </summary>
+    private readonly List<Block> pushedBlockList = new List<Block>();
+    private readonly List<Block> destroyedBlockList = new List<Block>();
+
+    private Coroutine redstoneCoroutine;
+
     void IRedstoneActivatable.OnRedstoneActivated()
     {
         if (redstoneCoroutine != null)
@@ -59,13 +73,30 @@ public class Piston : GeneralBlock, IRedstoneActivatable
     public override void OnRequestingDestroy()
     {
         base.OnRequestingDestroy();
-        //map.RequestDestroyBlock(pistonHead);
+        ClearPushedBlockList(); // desubscribe NC listeners
+        if (isExtending && pistonHead != null)
+        {
+            isExtending = false;
+            map.RequestDestroyBlock(pistonHead);
+        }
     }
 
     public override void OnRequestingRemove()
     {
         base.OnRequestingRemove();
-        //map.RequestRemoveBlock(pistonHead);
+        ClearPushedBlockList(); // desubscribe NC listeners
+        if (isExtending && pistonHead != null)
+        {
+            isExtending = false;
+            map.RequestRemoveBlock(pistonHead);
+        }
+    }
+
+    public override void OnNCUpdateRespond(Vector2Int updateSrc)
+    {
+        base.OnNCUpdateRespond(updateSrc);
+        if (!isExtending && redstoneCoroutine == null && map.RedstoneManager.IsActivated(this))
+            redstoneCoroutine = StartCoroutine(DelayExecute(TryExtend, delay));
     }
 
     /// <summary>
@@ -81,19 +112,6 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         redstoneCoroutine = null;
     }
 
-    private PistonHead pistonHead;
-
-    private static readonly List<BlockID> destroyableBlocks = new(){
-        BlockID.Leaf
-    };
-
-    /// <summary>
-    /// every block in the pushed block list structure should be listened when NC updates for attempting re-extending
-    /// </summary>
-    private List<Block> pushedBlockList = new List<Block>();
-    private List<Block> destroyedBlockList = new List<Block>();
-
-    private Coroutine redstoneCoroutine;
     private IEnumerator DelayExecute(Action action, float delay)
     {
         if (delay <= 0f)
@@ -115,7 +133,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         }
 
         // check whether it's able to push
-        ResetPushedBlockList();
+        ClearPushedBlockList();
         destroyedBlockList.Clear();
 
         bool successful = true;
@@ -130,15 +148,6 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         {
             ExecuteExtension();
         }
-
-        // failed to execute => subscribe notifications
-        else
-        {
-            foreach (Block block in pushedBlockList)
-            {
-                BlockNCUpdateManager.SubscribeNCNotification(block, this); 
-            }
-        }
     }
 
     private void TryRetract()
@@ -152,16 +161,18 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         // set state
         isExtending = false;
 
-        // take back piston head block
+        // take back piston head block, after setting extending false
         map.RequestRemoveBlock(pistonHead);
+
+        // trigger piston NC update
+        TriggerSelfNCUpdate();
 
         // rendering and sound
         OnContracting?.Invoke();
     }
 
-    private void ResetPushedBlockList()
+    private void ClearPushedBlockList()
     {
-        BlockNCUpdateManager.DesubscribeAllNCNotifications(this);
         pushedBlockList.Clear();
     }
 
@@ -196,14 +207,6 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         return TryPushBlock(forwardBlock);
     }
 
-    private bool CheckForwardAir(Block block)
-    {
-        Vector2Int nextPosition = block.GridPosition + Facing;
-        if (!map.IsBlockedWithoutCeiling(nextPosition.x, nextPosition.y))
-            return true;
-        return false;
-    }
-
     private void ExecuteExtension()
     {
         // destroy blocks to be destroyed
@@ -216,7 +219,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         foreach (Block block in pushedBlockList)
         {
             Vector2Int targetPosition = block.GridPosition + Facing;
-            block.SetGridPosition(targetPosition.x, targetPosition.y, true);
+            map.RequestMoveBlock(block, targetPosition.x, targetPosition.y, true);
         }
 
         // update block positions in map
@@ -232,8 +235,11 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         pistonHead.OnPendingDestroyed += OnHeadPendingDestroyed;
         map.RequestSpawnBlock(pistonHead, forwardPosition.x, forwardPosition.y);
 
+        // flush grid updates immediately so subsequent pistons see the updated state
+        map.ImmediatelyProcessGridPendingUpdates();
+
         // trigger piston NC update
-        map.RequestNCUpdate(GridPosition);
+        TriggerSelfNCUpdate();
 
         // rendering and sound
         OnExtending?.Invoke();
@@ -241,16 +247,18 @@ public class Piston : GeneralBlock, IRedstoneActivatable
 
     private void OnHeadPendingRemoved(Block block)
     {
-        // if is extending: whole piston is removed
-        // if not extending: is taking back the piston head for contraction
         if (isExtending)
         {
-            //map.RequestRemoveBlock(this);
+            // external force removed the head: retract state + remove base
+            isExtending = false;
+            OnContracting?.Invoke();
+            map.RequestRemoveBlock(this);
         }
+        // else: self-initiated retraction (TryRetract already set state and fired OnContracting)
     }
 
     private void OnHeadPendingDestroyed(Block block)
     {
-        //map.RequestDestroyBlock(this);
+        map.RequestDestroyBlock(this);
     }
 }

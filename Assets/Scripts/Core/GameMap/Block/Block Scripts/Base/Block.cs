@@ -50,7 +50,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     public event OnChangedEvent OnPendingRemoved;
     public event OnChangedEvent OnAfterDestroyed;
     public event OnChangedEvent OnAfterRemoved;
-    public event Action<Block> OnSelfNCUpdateRequest;
+    public event Action<Block> OnRequestSendingSelfNCUpdate;
 
     /*public event Action<Vector2Int> OnNCUpdateSent;
     public event Action<Block, Vector2Int> OnNCUpdateRequestReceived;
@@ -149,6 +149,7 @@ public abstract class Block : MapRandomTickBehaviourObject
         this.PlayerID = map.PlayerID;
 
         SetGridPosition(position.x, position.y, false);
+        OnSpawnFailed?.Invoke(this);
     }
 
     public virtual SpawnFailureDisposition GetSpawnFailureDisposition()
@@ -215,7 +216,7 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     protected void TriggerSelfNCUpdate()
     {
-        OnSelfNCUpdateRequest?.Invoke(this);
+        OnRequestSendingSelfNCUpdate?.Invoke(this);
     }
 
     public virtual void OnNCUpdateRespond(Vector2Int updateSrc)

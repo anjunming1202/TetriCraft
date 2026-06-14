@@ -13,6 +13,8 @@ public class RedstoneManager
         this.map = map;
     }
 
+    public bool IsActivated(Block block) => activationStates.TryGetValue(block, out var v) && v;
+
     public void RequestUpdate(Block block)
     {
         if (block == null || block.isRemoved) return;

@@ -24,16 +24,16 @@ MonoBehaviour:
   - blockID: 6
     weight: 1
   - blockID: 7
-    weight: 276.2
+    weight: 1
   - blockID: 9
-    weight: 388.64
+    weight: 1
   - blockID: 10
-    weight: 269.8
+    weight: 1
   - blockID: 14
     weight: 1
   - blockID: 15
-    weight: 1
+    weight: 66.22
   - blockID: 16
     weight: 1
   - blockID: 17
-    weight: 0
+    weight: 164.38

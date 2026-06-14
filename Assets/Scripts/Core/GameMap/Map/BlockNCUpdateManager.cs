@@ -64,35 +64,70 @@ public class BlockNCUpdateManager
 
     public static void SubscribeNCNotification(Block notifier, Block listener)
     {
-        if (NCListenerList.ContainsKey(notifier))
-            NCListenerList[notifier].Add(listener);
-        else
-            NCListenerList.Add(notifier, new List<Block> { listener });
+        // Register notifier → listener
+        if (!NCListenerList.TryGetValue(notifier, out var listeners))
+        {
+            listeners = new List<Block>();
+            NCListenerList.Add(notifier, listeners);
+            notifier.OnAfterRemoved += OnNotifierRemoved; // clean up when notifier is removed
+        }
+        if (!listeners.Contains(listener))
+            listeners.Add(listener);
 
-        if (NCNotifierList.ContainsKey(listener))
-            NCNotifierList[listener].Add(notifier);
-        else
-            NCNotifierList.Add(listener, new List<Block> { notifier });
-
-        listener.OnAfterRemoved += DesubscribeAllNCNotifications;
+        // Register listener → notifier; hook OnAfterRemoved only on first registration
+        if (!NCNotifierList.TryGetValue(listener, out var notifiers))
+        {
+            notifiers = new List<Block>();
+            NCNotifierList.Add(listener, notifiers);
+            listener.OnAfterRemoved += DesubscribeAllNCNotifications; // subscribe exactly once
+        }
+        if (!notifiers.Contains(notifier))
+            notifiers.Add(notifier);
     }
 
     public static void DesubscribeNCNotification(Block notifier, Block listener)
     {
-        NCListenerList[notifier].Remove(listener);
-        NCNotifierList[listener].Remove(notifier);
+        if (NCListenerList.TryGetValue(notifier, out var listeners))
+        {
+            listeners.Remove(listener);
+            if (listeners.Count == 0)
+            {
+                NCListenerList.Remove(notifier);
+                notifier.OnAfterRemoved -= OnNotifierRemoved;
+            }
+        }
+
+        if (NCNotifierList.TryGetValue(listener, out var notifiers))
+            notifiers.Remove(notifier);
     }
 
     public static void DesubscribeAllNCNotifications(Block listener)
     {
-        if (!NCNotifierList.ContainsKey(listener))
+        if (!NCNotifierList.TryGetValue(listener, out var notifiers))
             return;
 
-        for (int i = NCNotifierList[listener].Count - 1; i >= 0; i--)
+        for (int i = notifiers.Count - 1; i >= 0; i--)
+            DesubscribeNCNotification(notifiers[i], listener);
+
+        NCNotifierList.Remove(listener);
+        listener.OnAfterRemoved -= DesubscribeAllNCNotifications;
+    }
+
+    private static void OnNotifierRemoved(Block notifier)
+    {
+        if (!NCListenerList.TryGetValue(notifier, out var listeners))
+            return;
+
+        // Remove this notifier from every listener's notifier-list
+        for (int i = listeners.Count - 1; i >= 0; i--)
         {
-            Block notifier = NCNotifierList[listener][i];
-            DesubscribeNCNotification(notifier, listener);
+            Block listener = listeners[i];
+            if (NCNotifierList.TryGetValue(listener, out var notifiers))
+                notifiers.Remove(notifier);
         }
+
+        NCListenerList.Remove(notifier);
+        notifier.OnAfterRemoved -= OnNotifierRemoved;
     }
 
     private void ClearReceiverList()

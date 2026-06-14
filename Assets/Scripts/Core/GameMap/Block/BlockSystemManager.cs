@@ -228,14 +228,14 @@ public class BlockSystemManager : MonoBehaviour
     {
         block.OnLockedDown += ReparentBlock;
         block.OnLockedDown += OnBlockRequestSendingNCUpdate;
-        block.OnSelfNCUpdateRequest += OnBlockRequestSendingNCUpdate;
+        block.OnRequestSendingSelfNCUpdate += OnBlockRequestSendingNCUpdate;
     }
 
     private void UnsubscribeBlock(Block block)
     {
         block.OnLockedDown -= ReparentBlock;
         block.OnLockedDown -= OnBlockRequestSendingNCUpdate;
-        block.OnSelfNCUpdateRequest -= OnBlockRequestSendingNCUpdate;
+        block.OnRequestSendingSelfNCUpdate -= OnBlockRequestSendingNCUpdate;
     }
 
     public void OnBlockRequestSendingNCUpdate(Block block)
@@ -247,12 +247,13 @@ public class BlockSystemManager : MonoBehaviour
     private void OnGridPlacedNCUpdate(Vector2Int pos, Block block)
     {
         if (block == null) return;
-        if (!block.isLocked) return;
+        if (!block.isLocked) return; // filter unlocked blocks
         BlockNCUpdateManager.RequestPendingNCUpdateSource(pos);
     }
 
     private void OnGridRemovedNCUpdate(Vector2Int pos, Block block)
     {
+        if (block != null && !block.isRemoved && !block.isLocked) return; // filter unlocked & not removed blocks
         BlockNCUpdateManager.RequestPendingNCUpdateSource(pos);
     }
 
