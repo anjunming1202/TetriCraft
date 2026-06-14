@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class BlockNCUpdateManager
 {
     private MapManager map;
     private IReadonlyBlockGrid blockGrid;
-    private readonly List<(Block, Vector2Int)> blockNCUpdateRecieverList = new List<(Block, Vector2Int)>();
+    private readonly List<(Block, Vector2Int)> blockNCUpdateReceiverList = new List<(Block, Vector2Int)>();
+    private readonly HashSet<Vector2Int> pendingNCUpdateSources = new();
 
     private static readonly Dictionary<Block, List<Block>> NCListenerList = new(); // { notifier : { listeners }}
     private static readonly Dictionary<Block, List<Block>> NCNotifierList = new(); // { listener : { notifiers }}
@@ -19,53 +18,28 @@ public class BlockNCUpdateManager
         this.blockGrid = blockGrid;
     }
 
-    private void Reset()
+    public void RequestPendingNCUpdateSource(Vector2Int pos)
     {
-        blockNCUpdateRecieverList.Clear();
+        pendingNCUpdateSources.Add(pos);
     }
 
-    /// <summary>
-    /// Send an NC update to the neighbour receivers
-    /// </summary>
-    public void SendNCUpdateRequestToNeighbours(Vector2Int pos)
+    public void BlockUpdate()
     {
-        // NC update triggered (other notifications other than neighbours)
-        /*Block self = grid.Get(pos.x, pos.y);
-        if (self == null && block != null)
-            self = block;
-        if (self != null)
+        // Phase 1: expand sources → receivers
+        foreach (var pos in pendingNCUpdateSources)
         {
-            self.ReceiveNCUpdateRequest(pos);
-            self.SendNCUpdate();
-        }*/
-
-        // notify neighbours (NC notification list)
-        Vector2Int[] dirs = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
-        foreach (var dir in dirs)
-        {
-            Vector2Int nPos = pos + dir;
-            Block neighbour = blockGrid.Get(nPos.x, nPos.y);
-            if (neighbour != null)
-            {
-                AddToNCUpdateBatch(neighbour, pos);
-            }
+            SendNCUpdateRequestToNeighbours(pos);
+            SendNCUpdateRequestToExtraReceivers(blockGrid.Get(pos.x, pos.y));
         }
-    }
+        pendingNCUpdateSources.Clear();
 
-    public void SendNCUpdateRequestToExtraReceivers(Block notifier)
-    {
-        if (notifier ==  null)
-            return;
-
-        if (!NCListenerList.TryGetValue(notifier, out var listeners))
-            return;
-
-        foreach (Block listener in listeners)
+        // Phase 2: process receivers
+        (Block, Vector2Int)[] copy = blockNCUpdateReceiverList.ToArray();
+        ClearReceiverList();
+        foreach (var (block, updateSrc) in copy)
         {
-            if (listener != null)
-            {
-                AddToNCUpdateBatch(listener, notifier.GridPosition);
-            }
+            if (block != null)
+                block.OnNCUpdateRespond(updateSrc);
         }
     }
 
@@ -102,23 +76,60 @@ public class BlockNCUpdateManager
         }
     }
 
-    public void BlockUpdate()
+    private void ClearReceiverList()
     {
-        (Block, Vector2Int)[] copy = blockNCUpdateRecieverList.ToArray();
+        blockNCUpdateReceiverList.Clear();
+    }
 
-        Reset(); // prepare update list for next frame, some updates might occur in the following activations
-
-        foreach (var (block, updateSrc) in copy)
+    /// <summary>
+    /// Send an NC update to the neighbour receivers
+    /// </summary>
+    private void SendNCUpdateRequestToNeighbours(Vector2Int pos)
+    {
+        // NC update triggered (other notifications other than neighbours)
+        /*Block self = grid.Get(pos.x, pos.y);
+        if (self == null && block != null)
+            self = block;
+        if (self != null)
         {
-            if (block != null)
-                block.OnNCUpdateRespond(updateSrc);
+            self.ReceiveNCUpdateRequest(pos);
+            self.SendNCUpdate();
+        }*/
+
+        // notify neighbours (NC notification list)
+        Vector2Int[] dirs = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+        foreach (var dir in dirs)
+        {
+            Vector2Int nPos = pos + dir;
+            Block neighbour = blockGrid.Get(nPos.x, nPos.y);
+            if (neighbour != null)
+            {
+                AddToNCUpdateReceiverBatch(neighbour, pos);
+            }
         }
     }
 
-    public void AddToNCUpdateBatch(Block receiverBlock, Vector2Int updateSource)
+    private void SendNCUpdateRequestToExtraReceivers(Block notifier)
     {
-        if (blockNCUpdateRecieverList.Contains((receiverBlock, updateSource)) || receiverBlock.isRemoved)
+        if (notifier ==  null)
             return;
-        blockNCUpdateRecieverList.Add((receiverBlock, updateSource));
+
+        if (!NCListenerList.TryGetValue(notifier, out var listeners))
+            return;
+
+        foreach (Block listener in listeners)
+        {
+            if (listener != null)
+            {
+                AddToNCUpdateReceiverBatch(listener, notifier.GridPosition);
+            }
+        }
+    }
+
+    private void AddToNCUpdateReceiverBatch(Block receiverBlock, Vector2Int updateSource)
+    {
+        if (blockNCUpdateReceiverList.Contains((receiverBlock, updateSource)) || receiverBlock.isRemoved)
+            return;
+        blockNCUpdateReceiverList.Add((receiverBlock, updateSource));
     }
 }

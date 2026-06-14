@@ -21,7 +21,8 @@ public class BlockGridManager : MonoBehaviour
     public event Action<Block> OnRegisteredBlock;
     public event Action<Block> OnUnregisteredBlock;
 
-    public event Action<Vector2Int, Block> OnBlockPlacedUpdate;
+    public event Action<Vector2Int, Block> OnGridBlockPlaced;
+    public event Action<Vector2Int, Block> OnGridBlockRemoved;
 
     public IReadonlyBlockGrid Grid => blockGrid;
     public IReadOnlyList<Block> RegisteredBlocks => blockGrid.Blocks;
@@ -269,7 +270,7 @@ public class BlockGridManager : MonoBehaviour
         if (lockdownImmediately)
             block.OnLockdown();
 
-        OnBlockPlacedUpdate?.Invoke(position, block);
+        OnGridBlockPlaced?.Invoke(position, block);
 
         //Debug.Log($"{block} spawned at {position}, block position {block.Position}");
     }
@@ -347,7 +348,7 @@ public class BlockGridManager : MonoBehaviour
             block.SetGridPosition(targetPosition, true);
             block.OnPostMoved();
 
-            OnBlockPlacedUpdate?.Invoke(targetPosition, block);
+            OnGridBlockPlaced?.Invoke(targetPosition, block);
 
             //Debug.Log($"{block} moved to {targetPosition}, block position {block.Position}");
         }
@@ -358,10 +359,13 @@ public class BlockGridManager : MonoBehaviour
         if (block == null)
             return;
 
+        Vector2Int pos = block.GridPosition;
+
         // successful destroy
         blockGrid.TryRemove(block);
         UnregisterBlock(block);
         block.OnPostDestroyed();
+        OnGridBlockRemoved?.Invoke(pos, block);
 
         // destroy
         GameObject.Destroy(block.gameObject);
@@ -372,10 +376,13 @@ public class BlockGridManager : MonoBehaviour
         if (block == null)
             return;
 
+        Vector2Int pos = block.GridPosition;
+
         // successful remove
         blockGrid.TryRemove(block);
         UnregisterBlock(block);
         block.OnPostRemoved();
+        OnGridBlockRemoved?.Invoke(pos, block);
 
         // destroy
         GameObject.Destroy(block.gameObject);

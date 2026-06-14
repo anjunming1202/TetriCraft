@@ -45,12 +45,16 @@ public class BlockSystemManager : MonoBehaviour
 
         blockGridManager.OnRegisteredBlock += SubscribeBlock;
         blockGridManager.OnUnregisteredBlock += UnsubscribeBlock;
+        blockGridManager.OnGridBlockPlaced += NotifyGridPlace;
+        blockGridManager.OnGridBlockRemoved += OnGridBlockRemovedHandler;
     }
 
     public void Dispose()
     {
         blockGridManager.OnRegisteredBlock -= SubscribeBlock;
         blockGridManager.OnUnregisteredBlock -= UnsubscribeBlock;
+        blockGridManager.OnGridBlockPlaced -= NotifyGridPlace;
+        blockGridManager.OnGridBlockRemoved -= OnGridBlockRemovedHandler;
     }
 
     public void PrepareNewMap(int width, int height)
@@ -220,23 +224,28 @@ public class BlockSystemManager : MonoBehaviour
 
     private void SubscribeBlock(Block block)
     {
-        blockGridManager.OnBlockPlacedUpdate += NotifyGridPlace;
-        block.OnLockedDown += OnBlockRequestNCUpdate;
+        block.OnLockedDown += OnBlockRequestSendingNCUpdate;
         block.OnLockedDown += ReparentBlock;
-    }
-    private void UnsubscribeBlock(Block block)
-    {
-        blockGridManager.OnBlockPlacedUpdate -= NotifyGridPlace;
-        block.OnLockedDown -= OnBlockRequestNCUpdate;
-        block.OnLockedDown -= ReparentBlock;
+        block.OnSelfNCUpdateRequest += OnBlockRequestSendingNCUpdate;
     }
 
-    public void OnBlockRequestNCUpdate(Block block)
+    private void UnsubscribeBlock(Block block)
+    {
+        block.OnLockedDown -= OnBlockRequestSendingNCUpdate;
+        block.OnLockedDown -= ReparentBlock;
+        block.OnSelfNCUpdateRequest -= OnBlockRequestSendingNCUpdate;
+    }
+
+    public void OnBlockRequestSendingNCUpdate(Block block)
     {
         if (block == null)
             return;
-        BlockNCUpdateManager.SendNCUpdateRequestToNeighbours(block.GridPosition);
-        BlockNCUpdateManager.SendNCUpdateRequestToExtraReceivers(block);
+        BlockNCUpdateManager.RequestPendingNCUpdateSource(block.GridPosition);
+    }
+
+    private void OnGridBlockRemovedHandler(Vector2Int pos, Block block)
+    {
+        BlockNCUpdateManager.RequestPendingNCUpdateSource(pos);
     }
 
     private void NotifyGridPlace(Vector2Int position, Block block)

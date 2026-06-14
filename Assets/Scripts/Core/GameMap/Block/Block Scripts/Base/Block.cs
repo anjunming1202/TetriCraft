@@ -54,6 +54,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     public event OnChangedEvent OnPendingRemoved;
     public event OnChangedEvent OnAfterDestroyed;
     public event OnChangedEvent OnAfterRemoved;
+    public event Action<Block> OnSelfNCUpdateRequest;
 
     /*public event Action<Vector2Int> OnNCUpdateSent;
     public event Action<Block, Vector2Int> OnNCUpdateRequestReceived;
@@ -237,15 +238,13 @@ public abstract class Block : MapRandomTickBehaviourObject
     public virtual void OnCharged(Vector2Int sourcePosition)
     {
         isCharged = true;
-
-        //BlockUpdateManager.OnNeighbourChangedBlockUpdate(map.grid, GridPosition);
+        OnSelfNCUpdateRequest?.Invoke(this);
     }
 
     public virtual void OnDischarged(Vector2Int sourcePosition)
     {
         isCharged = false;
-
-        //BlockUpdateManager.OnNeighbourChangedBlockUpdate(map.grid, GridPosition);
+        OnSelfNCUpdateRequest?.Invoke(this);
     }
 
     protected virtual void Awake()
