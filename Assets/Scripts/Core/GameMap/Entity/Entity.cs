@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[RequireComponent(typeof(SpriteRenderer), typeof(BoxCollider2D))]
 public abstract class Entity : MapObject
 {
     // events
@@ -12,7 +13,7 @@ public abstract class Entity : MapObject
     // collision detection
     private Vector2Int collideGrid;
 
-    // motion data
+    // motion dynamics
     protected Vector2 position;
     protected Vector2 velocity;
 
@@ -20,13 +21,12 @@ public abstract class Entity : MapObject
     protected bool isFalling;
 
     // motion params
-    protected virtual float airResistance => 0.5f;
-    protected virtual float groundFriction => 10f;
-    protected virtual float inertia => 1;
-    protected virtual bool hasGravity => true;
-    //protected static float maximumSpeed = 20f;
-
-
+    [Header("Dynamics Parameters")]
+    [SerializeField] protected float inertia = 1f;          // m
+    [SerializeField] protected float airResistance = 0.75f; // k/m => terminal vy = gravity / airResistance
+    [SerializeField] protected float groundFriction = 10f;  // k/m
+    [SerializeField] protected bool hasGravity = true;
+    protected const float gravity = MapManager.gravity;     // g
 
     public virtual void OnSpawned(MapManager map, Vector2 position)
     {
@@ -121,7 +121,7 @@ public abstract class Entity : MapObject
         }
         else
         {
-            velocity.y -= MapManager.gravity * deltaTime;
+            velocity.y -= gravity * deltaTime + velocity.y * airResistance * deltaTime;
             isFalling = true;
         }
 

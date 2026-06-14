@@ -11,7 +11,7 @@ public class MapManager : MonoBehaviour
     public PlayerID PlayerID { get; private set; }
 
     // map parameters
-    public static float gravity = 15f;
+    public const float gravity = 15f;
 
 
     // Block system manager

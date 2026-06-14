@@ -3,27 +3,16 @@ using UnityEngine;
 
 public class FallingBlockEntity : Entity
 {
-    private float maxSpeed;
     private Block originalBlockPrefab;
     private Sprite originalBlockTexture;
     private SpriteRenderer spriteRenderer;
 
-    public void Init(BlockID id, float maxSpeed)
+    public void Init(BlockID id)
     {
         originalBlockPrefab = BlockResources.GetPrefab(id).GetComponent<Block>();
         originalBlockTexture = originalBlockPrefab.GetComponent<SpriteRenderer>().sprite;
         spriteRenderer = GetComponent<SpriteRenderer>();
         Render();
-
-        this.maxSpeed = maxSpeed;
-    }
-
-    public override void OnTickUpdate(float dt)
-    {
-        if (velocity.magnitude > maxSpeed)
-            velocity = velocity.normalized * maxSpeed;
-
-        base.OnTickUpdate(dt);
     }
 
     protected override void OnLanded()

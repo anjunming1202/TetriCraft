@@ -6,10 +6,6 @@ using UnityEngine;
 public class GravityBlock : GeneralBlock
 {
     [SerializeField] private FallingBlockEntity fallingBlockEntityPrefab;
-    [SerializeField] private float maxSpeed;
-
-    private float speed;
-    private bool isFalling = false;
 
 
     public override void OnUpdate()
@@ -46,7 +42,7 @@ public class GravityBlock : GeneralBlock
     private void StartFall()
     {
         FallingBlockEntity fallingBlockEntity = Instantiate(fallingBlockEntityPrefab);
-        fallingBlockEntity.Init(ID, maxSpeed);
+        fallingBlockEntity.Init(ID);
 
         map.RequestSpawnEntity(fallingBlockEntity, CentrePosition.x, CentrePosition.y);
 
