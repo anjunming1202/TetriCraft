@@ -101,30 +101,23 @@ public class BlockNCUpdateManager
     }
 
     /// <summary>
-    /// Send an NC update to the neighbour receivers
+    /// Send an NC update to the source block itself and its four neighbours (mirrors Minecraft block update behavior).
     /// </summary>
     private void SendNCUpdateRequestToNeighbours(Vector2Int pos)
     {
-        // NC update triggered (other notifications other than neighbours)
-        /*Block self = grid.Get(pos.x, pos.y);
-        if (self == null && block != null)
-            self = block;
+        // Also notify the block at the source position itself
+        Block self = blockGrid.Get(pos.x, pos.y);
         if (self != null)
-        {
-            self.ReceiveNCUpdateRequest(pos);
-            self.SendNCUpdate();
-        }*/
+            AddToNCUpdateReceiverBatch(self, pos);
 
-        // notify neighbours (NC notification list)
+        // Notify the four neighbours
         Vector2Int[] dirs = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
         foreach (var dir in dirs)
         {
             Vector2Int nPos = pos + dir;
             Block neighbour = blockGrid.Get(nPos.x, nPos.y);
             if (neighbour != null)
-            {
                 AddToNCUpdateReceiverBatch(neighbour, pos);
-            }
         }
     }
 

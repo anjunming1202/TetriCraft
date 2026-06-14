@@ -42,14 +42,10 @@ public class Piston : GeneralBlock, IRedstoneActivatable
             redstoneCoroutine = StartCoroutine(DelayExecute(TryRetract, delay));
     }
 
-    bool IRedstoneActivatable.CanActivatedBy(Block source)
+    bool IRedstoneActivatable.CanReceivePowerFrom(Block source)
     {
-        // front is not valid
-        Vector2Int sourceFace = source.GridPosition - GridPosition;
-        if (sourceFace == Facing)
-            return false;
-
-        return source.isCharged;
+        // front face is not a valid activation direction
+        return source.GridPosition - GridPosition != Facing;
     }
 
     public override void SetGridPosition(int x, int y, bool animation = false)
@@ -70,16 +66,6 @@ public class Piston : GeneralBlock, IRedstoneActivatable
     {
         base.OnRequestingRemove();
         //map.RequestRemoveBlock(pistonHead);
-    }
-
-    public override void OnNCUpdateRespond(Vector2Int updateSrc)
-    {
-        base.OnNCUpdateRespond(updateSrc);
-
-        if (isActivated && !isExtending)
-        {
-            TryExtend();
-        }
     }
 
     /// <summary>

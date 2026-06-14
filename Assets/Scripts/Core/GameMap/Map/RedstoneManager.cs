@@ -1,57 +1,67 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class RedstoneManager
-{ 
+{
+    private readonly MapManager map;
+    private readonly HashSet<Block> pendingUpdate = new();
+    private readonly Dictionary<Block, bool> activationStates = new(); // block → wasActivated
+
     public RedstoneManager(MapManager map)
     {
         this.map = map;
     }
 
+    public void RequestUpdate(Block block)
+    {
+        if (block == null || block.isRemoved) return;
+        pendingUpdate.Add(block);
+    }
+
     public void RedstoneUpdate()
     {
-        Block[] copy = updatedBlocks.ToArray();
-
-        Reset(); // prepare update list for next frame, some updates might occur in the following activations
+        Block[] copy = pendingUpdate.ToArray();
+        pendingUpdate.Clear();
 
         foreach (var block in copy)
         {
-            if (block is IRedstoneOneShotActivatable)
+            if (block == null || block.isRemoved)
             {
+                activationStates.Remove(block);
+                continue;
+            }
+            if (block is not IRedstoneActivatable activatable) continue;
 
-            }
-            else if (block is IRedstoneActivatable component)
+            bool isNowActivated = EvaluateActivation(block, activatable);
+            activationStates.TryGetValue(block, out bool wasActivated);
+
+            if (!wasActivated && isNowActivated)
             {
-                if (!block.wasActivated && block.isActivated)
-                {
-                    block.wasActivated = true;
-                    component.OnRedstoneActivated();
-                }
-                if (block.wasActivated && !block.isActivated)
-                {
-                    block.wasActivated = false;
-                    component.OnRedstoneDeactivated();
-                }
+                activationStates[block] = true;
+                activatable.OnRedstoneActivated();
             }
-            else
+            else if (wasActivated && !isNowActivated)
             {
-                Debug.LogError("redstone updating an unactivatable object");
+                activationStates[block] = false;
+                // IRedstoneOneShotActivatable blocks do not respond to deactivation
+                if (block is not IRedstoneOneShotActivatable)
+                {
+                    activatable.OnRedstoneDeactivated();
+                }
             }
         }
     }
 
-    public void AddUpdatedBlock(Block block)
+    private bool EvaluateActivation(Block block, IRedstoneActivatable activatable)
     {
-        if (updatedBlocks.Contains(block) || block.isRemoved)
-            return;
-        updatedBlocks.Add(block);
-    }
-
-    private MapManager map;
-    private List<Block> updatedBlocks = new List<Block>();
-
-    private void Reset()
-    {
-        updatedBlocks.Clear();
+        foreach (var neighbor in map.GetAdjacentBlocks(block.GridPosition.x, block.GridPosition.y))
+        {
+            if (neighbor is IRedstonePowerSource source
+                && source.PowersPosition(neighbor.GridPosition, block.GridPosition)
+                && activatable.CanReceivePowerFrom(neighbor))
+                return true;
+        }
+        return false;
     }
 }

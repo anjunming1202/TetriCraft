@@ -70,7 +70,6 @@ public class MapTetromino : Tetromino
                 if (block is Piston piston && piston.isExtending)
                 {
                     piston.ForcedDeactivate();
-                    piston.isActivated = false;
                 }
 
                 // update the block

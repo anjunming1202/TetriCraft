@@ -20,6 +20,7 @@ public class MapManager : MonoBehaviour
     public int GridHeight => blockSystemManager.GridHeight;
     public IReadOnlyList<Block> Blocks => blockSystemManager.Blocks;
     public BlockNCUpdateManager BlockNCUpdateManager => blockSystemManager.BlockNCUpdateManager;
+    public RedstoneManager RedstoneManager => blockSystemManager.RedstoneManager;
 
 
     // Fluid system manager

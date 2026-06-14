@@ -34,10 +34,6 @@ public abstract class Block : MapRandomTickBehaviourObject
     public virtual bool isAnimating { get; set; }   // is moving with animation
     public virtual bool isRemoved { get; set; }
 
-    public bool isActivated = false;
-    public bool wasActivated = false;
-    public bool isCharged = false;
-
     // Events
     public delegate void OnChangedEvent(Block block);
     public event OnChangedEvent OnMoved;
@@ -130,8 +126,6 @@ public abstract class Block : MapRandomTickBehaviourObject
         isEnabled = true;
         isAnimating = false;
         isRemoved = false;
-
-        isCharged = false;
     }
 
     public virtual void OnUnregistered()
@@ -141,8 +135,6 @@ public abstract class Block : MapRandomTickBehaviourObject
         isEnabled = false;
         isAnimating = false;
         isRemoved = true;
-
-        isCharged = false;
     }
 
     public virtual void OnPostSpawned()
@@ -221,30 +213,20 @@ public abstract class Block : MapRandomTickBehaviourObject
         if (this == null) return;
     }
 
+    protected void TriggerSelfNCUpdate()
+    {
+        OnSelfNCUpdateRequest?.Invoke(this);
+    }
+
     public virtual void OnNCUpdateRespond(Vector2Int updateSrc)
     {
-        //Debug.Log($"neighbour updated {GridPosition}");
-
-        // detect if the updated neighbour is a activation/charging source
-        UpdateActivationState();
-        UpdateChargingState();
+        if (this is IRedstoneActivatable)
+            map.RedstoneManager.RequestUpdate(this);
     }
 
     public virtual bool IsClearable()
     {
         return isLocked;
-    }
-
-    public virtual void OnCharged(Vector2Int sourcePosition)
-    {
-        isCharged = true;
-        OnSelfNCUpdateRequest?.Invoke(this);
-    }
-
-    public virtual void OnDischarged(Vector2Int sourcePosition)
-    {
-        isCharged = false;
-        OnSelfNCUpdateRequest?.Invoke(this);
     }
 
     protected virtual void Awake()
@@ -313,32 +295,4 @@ public abstract class Block : MapRandomTickBehaviourObject
     private ExplosionBlocker explosionTarget;
     private FlammableObject flammableObject;
 
-    // Redstone
-    /// <summary>
-    /// 
-    /// </summary>
-    private void UpdateActivationState()
-    {
-        if (this is not IRedstoneActivatable component)
-            return;
-
-        bool activated = false;
-        foreach (var block in map.GetAdjacentBlocks(GridPosition.x, GridPosition.y, true))
-        {
-            if (block != null && component.CanActivatedBy(block))
-            {
-                activated = true;
-                break;
-            }
-        }
-
-        isActivated = activated;
-
-        //map.RedstoneManager.AddUpdatedBlock(this);
-    }
-
-    private void UpdateChargingState()
-    {
-
-    }
 }
