@@ -179,7 +179,7 @@ public class MapManager : MonoBehaviour
 
     public void RequestNCUpdate(Vector2Int gridPosition)
     {
-        blockSystemManager.OnBlockRequestSendingNCUpdate(GetBlock(gridPosition));
+        blockSystemManager.BlockNCUpdateManager.RequestPendingNCUpdateSource(gridPosition);
     }
 
     public void HandleOnGridBlockPlaced(Block block)

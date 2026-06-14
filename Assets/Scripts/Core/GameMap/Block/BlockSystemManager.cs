@@ -46,7 +46,8 @@ public class BlockSystemManager : MonoBehaviour
         blockGridManager.OnRegisteredBlock += SubscribeBlock;
         blockGridManager.OnUnregisteredBlock += UnsubscribeBlock;
         blockGridManager.OnGridBlockPlaced += NotifyGridPlace;
-        blockGridManager.OnGridBlockRemoved += OnGridBlockRemovedHandler;
+        blockGridManager.OnGridBlockPlaced += OnGridPlacedNCUpdate;
+        blockGridManager.OnGridBlockRemoved += OnGridRemovedNCUpdate;
     }
 
     public void Dispose()
@@ -54,7 +55,8 @@ public class BlockSystemManager : MonoBehaviour
         blockGridManager.OnRegisteredBlock -= SubscribeBlock;
         blockGridManager.OnUnregisteredBlock -= UnsubscribeBlock;
         blockGridManager.OnGridBlockPlaced -= NotifyGridPlace;
-        blockGridManager.OnGridBlockRemoved -= OnGridBlockRemovedHandler;
+        blockGridManager.OnGridBlockPlaced -= OnGridPlacedNCUpdate;
+        blockGridManager.OnGridBlockRemoved -= OnGridRemovedNCUpdate;
     }
 
     public void PrepareNewMap(int width, int height)
@@ -224,26 +226,32 @@ public class BlockSystemManager : MonoBehaviour
 
     private void SubscribeBlock(Block block)
     {
-        block.OnLockedDown += OnBlockRequestSendingNCUpdate;
         block.OnLockedDown += ReparentBlock;
+        block.OnLockedDown += OnBlockRequestSendingNCUpdate;
         block.OnSelfNCUpdateRequest += OnBlockRequestSendingNCUpdate;
     }
 
     private void UnsubscribeBlock(Block block)
     {
-        block.OnLockedDown -= OnBlockRequestSendingNCUpdate;
         block.OnLockedDown -= ReparentBlock;
+        block.OnLockedDown -= OnBlockRequestSendingNCUpdate;
         block.OnSelfNCUpdateRequest -= OnBlockRequestSendingNCUpdate;
     }
 
     public void OnBlockRequestSendingNCUpdate(Block block)
     {
-        if (block == null)
-            return;
+        if (block == null) return;
         BlockNCUpdateManager.RequestPendingNCUpdateSource(block.GridPosition);
     }
 
-    private void OnGridBlockRemovedHandler(Vector2Int pos, Block block)
+    private void OnGridPlacedNCUpdate(Vector2Int pos, Block block)
+    {
+        if (block == null) return;
+        if (!block.isLocked) return;
+        BlockNCUpdateManager.RequestPendingNCUpdateSource(pos);
+    }
+
+    private void OnGridRemovedNCUpdate(Vector2Int pos, Block block)
     {
         BlockNCUpdateManager.RequestPendingNCUpdateSource(pos);
     }
