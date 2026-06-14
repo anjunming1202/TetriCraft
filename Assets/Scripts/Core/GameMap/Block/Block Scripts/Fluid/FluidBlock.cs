@@ -17,5 +17,5 @@ public abstract class FluidBlock : Block
         map.RequestRemoveBlock(this);
     }
 
-    protected FluidManager FluidManager => map.fluidManager[FluidID];
+    protected FluidManager FluidManager => map.FluidSystem[FluidID];
 }

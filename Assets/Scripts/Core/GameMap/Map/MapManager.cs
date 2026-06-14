@@ -22,14 +22,8 @@ public class MapManager : MonoBehaviour
 
 
     // Fluid system manager
-    public Dictionary<FluidID, FluidManager> fluidManager;
-
-    [SerializeField] private FluidManager waterManager;
-    [SerializeField] private FluidManager lavaManager;
-
-    [SerializeField] private AudioClip fizzSound;
-    private static readonly BlockID waterToLava = BlockID.Obsidian;
-    private static readonly BlockID lavaToWater = BlockID.Cobblestone;
+    [SerializeField] private FluidSystemManager fluidSystemManager;
+    public FluidSystemManager FluidSystem => fluidSystemManager;
 
 
     // Entity system manager
@@ -60,8 +54,7 @@ public class MapManager : MonoBehaviour
         if (isInitialised) return;
 
         Debug.Assert(blockSystemManager != null);
-        Debug.Assert(waterManager != null);
-        Debug.Assert(lavaManager != null);
+        Debug.Assert(fluidSystemManager != null);
         Debug.Assert(entityManager != null);
         Debug.Assert(particleManager != null);
 
@@ -69,15 +62,7 @@ public class MapManager : MonoBehaviour
         blockSystemManager.Initialise(this);
 
         // Fluid subsystem initialise
-        waterManager.Initialise(this);
-        lavaManager.Initialise(this);
-        Debug.Assert(waterManager != null);
-        Debug.Assert(lavaManager != null);
-        fluidManager = new Dictionary<FluidID, FluidManager>()
-        {
-            { FluidID.Water, waterManager },
-            { FluidID.Lava, lavaManager },
-        };
+        fluidSystemManager.Initialise(this);
 
         isInitialised = true;
     }
@@ -86,8 +71,7 @@ public class MapManager : MonoBehaviour
     {
         blockSystemManager.Dispose();
 
-        waterManager.Dispose();
-        lavaManager.Dispose();
+        fluidSystemManager.Dispose();
 
         isInitialised = false;
     }
@@ -101,8 +85,7 @@ public class MapManager : MonoBehaviour
         blockSystemManager.PrepareNewMap(width, height);
 
         // Fluid subsystem
-        waterManager.PrepareNewSystem(this);
-        lavaManager.PrepareNewSystem(this);
+        fluidSystemManager.PrepareNew(this);
 
         // Entity subsystem
         entityManager.Init(this);
@@ -114,8 +97,7 @@ public class MapManager : MonoBehaviour
         blockSystemManager.ClearMap();
 
         // Fluid
-        waterManager.ClearFluidSystem();
-        lavaManager.ClearFluidSystem();
+        fluidSystemManager.Clear();
 
         // Entity
         entityManager.Clear();
@@ -133,9 +115,7 @@ public class MapManager : MonoBehaviour
         blockSystemManager.OnUpdate();
 
         // Fluid update
-        waterManager.OnUpdate();
-        lavaManager.OnUpdate();
-        SpawnFluidConcretion();
+        fluidSystemManager.OnUpdate();
 
         // Random tick behaviours
         RandomTick.InvokeRandomBehaviours(this);
@@ -208,8 +188,7 @@ public class MapManager : MonoBehaviour
 
     public void ImmediateBlockSqueezeFluids(Block block)
     {
-        waterManager.ImmediateBlockSqueeze(this, block);
-        lavaManager.ImmediateBlockSqueeze(this, block);
+        fluidSystemManager.ImmediateBlockSqueeze(this, block);
     }
 
 
@@ -237,34 +216,6 @@ public class MapManager : MonoBehaviour
     public void DespawnParticle(ParticleSystem particle)
     {
         particleManager.DespawnParticle(particle);
-    }
-
-    private void SpawnFluidConcretion()
-    {
-        for (int i =  waterManager.fluidSystem.elements.Count - 1; i >= 0; i--)
-        {
-            FluidElement waterElement = waterManager.fluidSystem.elements[i];
-            List<FluidElement> collidedLavaElements = lavaManager.fluidSystem.GetCollidedElements(waterElement);
-            FluidElement lavaElement = collidedLavaElements.Count > 0 ? collidedLavaElements[0] : null;
-            if (lavaElement != null && lavaElement.amount > 0 && waterElement.amount > 0)
-            {
-                // Spawn block
-                int concretionAmount = Mathf.Min(waterElement.upperLevel, lavaElement.upperLevel) - Mathf.Max(waterElement.lowerLevel, lavaElement.lowerLevel);
-                waterElement.amount -= concretionAmount;
-                lavaElement.amount -= concretionAmount;
-
-                Block spawnedBlock;
-                if (waterElement.hasFlown)
-                    spawnedBlock = BlockSpawner.NewBlock(waterToLava);
-                else if (lavaElement.hasFlown)
-                    spawnedBlock = BlockSpawner.NewBlock(lavaToWater);
-                else //
-                    spawnedBlock = BlockSpawner.NewBlock(waterToLava);
-
-                spawnedBlock.GetComponent<BlockSoundManager>().placedSounds = new AudioClip[] { fizzSound };
-                RequestSpawnBlock(spawnedBlock, waterElement.column, waterElement.lowerGridPosition);
-            }
-        }
     }
 
 
