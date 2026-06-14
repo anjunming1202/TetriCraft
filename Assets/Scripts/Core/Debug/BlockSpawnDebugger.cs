@@ -5,16 +5,24 @@ using UnityEngine;
 public class BlockSpawnDebugger : MonoBehaviour
 {
     [SerializeField] private PlayerGameManager gameManager;
-    [SerializeField] private Camera camera;
+    [SerializeField] private Camera playerCamera;
 
-    public MapManager debuggedMap;
-    public BlockID blockSpawned;
-    public Color selectedGridColor;
+    [SerializeField] private MapManager debuggedMap;
+
+    [Header("Options")]
+    [SerializeField] private bool isDebugging = true;
+    [SerializeField] private BlockID blockSpawned;
+
+    [Header("Colors")]
+    [SerializeField] private Color selectedGridColor;
 
 
     void Update()
     {
-        if (!gameManager.debug)
+        if (!isDebugging)
+            return;
+
+        if (gameManager.IsPaused)
             return;
 
         if (debuggedMap == null)
@@ -71,7 +79,7 @@ public class BlockSpawnDebugger : MonoBehaviour
     private void GetSelectedPosition()
     {
         Vector3 cursorScreenPosition = Input.mousePosition;
-        cursorPosition = CoordinateSystems.GetMouseWorldPosition(camera, cursorScreenPosition);
+        cursorPosition = CoordinateSystems.GetMouseWorldPosition(playerCamera, cursorScreenPosition);
         selectedGridPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToGrid(cursorPosition);        
     }
 

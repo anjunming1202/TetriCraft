@@ -3,24 +3,28 @@
 using UnityEditor;
 #endif
 
-public class MapDebugger : MonoBehaviour
+public class BlockGridDebugger : MonoBehaviour
 {
     [SerializeField] private PlayerGameManager gameManager;
-    [SerializeField] private Camera camera;
+    [SerializeField] private Camera playerCamera;
 
-    public MapManager debuggedMap;
-    public Color lockedColor;
-    public Color tetrominoColor;
-    public Color unclearableColor;
-    public Color disabledColor;
-
-    public Font font;
-    public Color textColor;
+    [SerializeField] private MapManager debuggedMap;
 
     [Header("Options")]
-    public bool displayFrame = true;
-    public bool displayPosition = true;
-    public bool displayCoordinates = true;
+    [SerializeField] private bool isDebugging = true;
+    [SerializeField] private bool displayFrame = true;
+    [SerializeField] private bool displayPosition = true;
+    [SerializeField] private bool displayCoordinates = true;
+
+    [Header("Colors")]
+    [SerializeField] private Color lockedColor;
+    [SerializeField] private Color tetrominoColor;
+    [SerializeField] private Color unclearableColor;
+    [SerializeField] private Color disabledColor;
+
+    [Header("Text")]
+    [SerializeField] private Font font;
+    [SerializeField] private Color textColor;
 
     private Vector3 cursorPosition;
     private Vector2 cursorMapPosition;
@@ -32,7 +36,10 @@ public class MapDebugger : MonoBehaviour
 
     private void Update()
     {
-        if (!gameManager.debug)
+        if (!isDebugging)
+            return;
+
+        if (gameManager.IsPaused)
             return;
 
         if (debuggedMap == null)
@@ -47,6 +54,8 @@ public class MapDebugger : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        if (!isDebugging) return;
+
         // mark coordinates
         if (displayCoordinates)
         {
@@ -128,7 +137,7 @@ public class MapDebugger : MonoBehaviour
     private void GetMousePositions()
     {
         Vector3 cursorScreenPosition = Input.mousePosition;
-        cursorPosition = CoordinateSystems.GetMouseWorldPosition(camera, cursorScreenPosition);
+        cursorPosition = CoordinateSystems.GetMouseWorldPosition(playerCamera, cursorScreenPosition);
         cursorGridPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToGrid(cursorPosition);
         cursorMapPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToMap(cursorPosition);
     }

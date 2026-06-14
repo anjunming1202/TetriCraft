@@ -12,6 +12,14 @@ public class BlockNCUpdateManager
     private static readonly Dictionary<Block, List<Block>> NCListenerList = new(); // { notifier : { listeners }}
     private static readonly Dictionary<Block, List<Block>> NCNotifierList = new(); // { listener : { notifiers }}
 
+    // Debug snapshots (previous frame)
+    private HashSet<Vector2Int> debugLastSources = new();
+    private List<Vector2Int> debugLastReceiverPositions = new();
+
+    public IReadOnlyCollection<Vector2Int> DebugLastSources => debugLastSources;
+    public IReadOnlyList<Vector2Int> DebugLastReceiverPositions => debugLastReceiverPositions;
+    public float DebugLastSnapshotTime { get; private set; } = -1f;
+
     public BlockNCUpdateManager(MapManager map, IReadonlyBlockGrid blockGrid)
     {
         this.map = map;
@@ -25,6 +33,11 @@ public class BlockNCUpdateManager
 
     public void BlockUpdate()
     {
+        // Snapshot sources before clearing (only update timestamp when there is actual data)
+        debugLastSources = new HashSet<Vector2Int>(pendingNCUpdateSources);
+        if (pendingNCUpdateSources.Count > 0)
+            DebugLastSnapshotTime = UnityEngine.Time.realtimeSinceStartup;
+
         // Phase 1: expand sources → receivers
         foreach (var pos in pendingNCUpdateSources)
         {
@@ -32,6 +45,12 @@ public class BlockNCUpdateManager
             SendNCUpdateRequestToExtraReceivers(blockGrid.Get(pos.x, pos.y));
         }
         pendingNCUpdateSources.Clear();
+
+        // Snapshot receivers before processing and clearing
+        debugLastReceiverPositions.Clear();
+        foreach (var (block, _) in blockNCUpdateReceiverList)
+            if (block != null)
+                debugLastReceiverPositions.Add(block.GridPosition);
 
         // Phase 2: process receivers
         (Block, Vector2Int)[] copy = blockNCUpdateReceiverList.ToArray();

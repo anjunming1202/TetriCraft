@@ -34,9 +34,6 @@ public class PlayerGameManager : MonoBehaviour
     // Events
     public event Action<PlayerID> OnPlayerBoardDead;
 
-
-    [Header("Debug")]
-    public bool debug = true;
     public bool IsPaused => GameStateMachine.State == GameStateType.Paused;
 
 
@@ -104,18 +101,12 @@ public class PlayerGameManager : MonoBehaviour
     {
         tetrisManager.StopUpdating();
 
-        // debug
-        debug = false;
-
         gameStateMachine.Pause();
     }
 
     public void ResumeGameplay()
     {
         tetrisManager.ResumeUpdating();
-
-        // debug
-        debug = true;
 
         gameStateMachine.Resume();
     }
