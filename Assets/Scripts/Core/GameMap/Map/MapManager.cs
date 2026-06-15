@@ -32,6 +32,11 @@ public class MapManager : MonoBehaviour
     [SerializeField] private EntityManager entityManager;
 
 
+    // Fire system manager
+    [SerializeField] private FireManager fireManager;
+    public FireManager FireManager => fireManager;
+
+
     // Particle system manager
     [SerializeField] private ParticleManager particleManager;
 
@@ -58,6 +63,7 @@ public class MapManager : MonoBehaviour
         Debug.Assert(blockSystemManager != null);
         Debug.Assert(fluidSystemManager != null);
         Debug.Assert(entityManager != null);
+        Debug.Assert(fireManager != null);
         Debug.Assert(particleManager != null);
 
         // Block subsystem initialise
@@ -91,6 +97,9 @@ public class MapManager : MonoBehaviour
 
         // Entity subsystem
         entityManager.Init(this);
+
+        // Fire subsystem
+        fireManager.Init(this);
     }
 
     public void ClearMap()
@@ -103,6 +112,9 @@ public class MapManager : MonoBehaviour
 
         // Entity
         entityManager.Clear();
+
+        // Fire
+        fireManager.Clear();
 
         // Particle
         particleManager.ClearAll();
@@ -124,6 +136,10 @@ public class MapManager : MonoBehaviour
 
         // Entity update
         entityManager.OnUpdate();
+
+        // Flush any block spawn requests queued by fluid/entity systems this frame,
+        // so OnRegistered (and random tick registration) runs in the same frame.
+        blockSystemManager.ImmediatelyProcessGridPendingUpdates();
     }
 
     public Block GetBlock(int x, int y)
@@ -183,7 +199,7 @@ public class MapManager : MonoBehaviour
     public void HandleOnGridBlockPlaced(Block block)
     {
         OnGridBlockPlaced?.Invoke(this, block);
-        Flame.TryExtinguishBy(this, block); // try extinguish fire, move to fire system in the future
+        fireManager.TryExtinguishAt(block);
     }
 
     public void ImmediateBlockSqueezeFluids(Block block)

@@ -126,16 +126,21 @@ public abstract class Block : MapRandomTickBehaviourObject
         isEnabled = true;
         isAnimating = false;
         isRemoved = false;
+
+        map.mapRandomTickObjects.Add(this);
     }
 
     public virtual void OnUnregistered()
     {
+        map?.mapRandomTickObjects.Remove(this);
+
         isInMap = false;
         isLocked = false;
         isEnabled = false;
         isAnimating = false;
         isRemoved = true;
     }
+
 
     public virtual void OnPostSpawned()
     {

@@ -9,16 +9,4 @@ public class MapRandomTickBehaviourObject : MapObject
     {
         OnRandomTickUpdate?.Invoke(randomTick);
     }
-
-    protected virtual void Start()
-    {
-        if (map != null)
-            map.mapRandomTickObjects.Add(this);
-    }
-
-    protected virtual void OnDestroy()
-    {
-        if (map != null)
-            map.mapRandomTickObjects.Remove(this);
-    }
 }

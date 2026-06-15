@@ -1,11 +1,13 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Fire-spreading source component (e.g. on lava blocks).
+/// Data: sourceStrength, spreadableArea.
+/// Spreading logic runs here via random tick; Flame creation is delegated to FireManager.
+/// </summary>
 public class FlameSource : MapObject
 {
-    public Flame sideFlamePrefab;
-    public Flame topFlamePrefab;
     public float sourceStrength;
     public RectInt spreadableArea;
     public Vector2Int position => BoundaryDataManager.GetBoundaryData(map.PlayerID).WorldToGrid(transform.position);
@@ -13,20 +15,18 @@ public class FlameSource : MapObject
     protected void Start()
     {
         MapRandomTickBehaviourObject mapObject = GetComponent<MapRandomTickBehaviourObject>();
-        map = mapObject.GetMap();
+        if (mapObject == null)
+        {
+            Debug.LogError($"[FlameSource] No MapRandomTickBehaviourObject on {gameObject.name} — FlameSource must be on a Block GameObject");
+            return;
+        }
 
+        map = mapObject.GetMap();
         mapObject.OnRandomTickUpdate += RandomTickUpdate;
     }
 
-    /*private void Update()
-    {
-        TrySpreadFlame();
-    }*/
-
     private void RandomTickUpdate(int randomTick)
     {
-        Debug.Log("try spread fire");
-
         if (randomTick % 1 == 0)
         {
             for (int i = 0; i < spreadAttempts; i++)
@@ -38,20 +38,16 @@ public class FlameSource : MapObject
     {
         for (int i = 0; i < reattempts; i++)
         {
-            if (TrySpreadFlame(randomTick))
+            if (TrySpreadFlameOnce(randomTick))
                 return true;
         }
         return false;
     }
 
-    private bool TrySpreadFlame(int randomTick)
+    private bool TrySpreadFlameOnce(int randomTick)
     {
         int targetX = position.x + Random.Range(spreadableArea.xMin, spreadableArea.xMax + 1);
         int targetY = position.y + Random.Range(spreadableArea.yMin, spreadableArea.yMax + 1);
-        /*if (targetX == spreadableArea.xMin || targetX == spreadableArea.xMax)
-            targetY = position.y + Random.Range(spreadableArea.yMin + 1, spreadableArea.yMax);
-        else
-            targetY = position.y + Random.Range(spreadableArea.yMin, spreadableArea.yMax + 1);*/
 
         if (targetX == position.x && targetY == position.y)
             return false;
@@ -70,32 +66,23 @@ public class FlameSource : MapObject
 
             if (!target.IsBurningAt(flameOffset))
             {
-                // a position able to set fire => try to ignite, depends on adjacent flammability
                 if (target.TryIgnite(distance, sourceStrength, adjacentFlammableBlocks))
                     if (!hasSpread && (map.GetBlock(targetX, targetY) == null || flameOffset == Vector2Int.zero))
                     {
-                        SetFire(target, flameOffset, randomTick);
+                        map.FireManager.SetFire(target, flameOffset, randomTick);
                         hasSpread = true;
                     }
             }
             else
             {
-                // ... probability reset fire (reset flame)
-                if (randomTick % (1600) == 0)
+                // probability reset fire
+                if (randomTick % 1600 == 0)
                 {
                     target.GetFlame(flameOffset).ResetFlame(randomTick);
                 }
             }
         }
         return hasSpread;
-    }
-
-    private void SetFire(FlammableObject attachedBlock, Vector2Int offset, int randomTick)
-    {
-        Flame flame = Instantiate(offset == Vector2Int.zero ? sideFlamePrefab : topFlamePrefab);
-        flame.Init(map, attachedBlock, offset);
-        // burn once when set
-        flame.Burn(randomTick);
     }
 
     private List<FlammableObject> GetAdjacentFlammableBlocksAll(int posX, int posY)
