@@ -94,6 +94,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
 
     public override void OnNCUpdateRespond(Vector2Int updateSrc)
     {
+        if (isRemoved) return;
         base.OnNCUpdateRespond(updateSrc);
         if (!isExtending && redstoneCoroutine == null && map.RedstoneManager.IsActivated(this))
             redstoneCoroutine = StartCoroutine(DelayExecute(TryExtend, delay));
@@ -148,6 +149,14 @@ public class Piston : GeneralBlock, IRedstoneActivatable
         {
             ExecuteExtension();
         }
+        // failed to execute => subscribe notifications
+        else
+        {
+            foreach (Block block in pushedBlockList)
+            {
+                BlockNCUpdateManager.SubscribeNCNotification(block, this);
+            }
+        }
     }
 
     private void TryRetract()
@@ -173,6 +182,7 @@ public class Piston : GeneralBlock, IRedstoneActivatable
 
     private void ClearPushedBlockList()
     {
+        BlockNCUpdateManager.DesubscribeAllNCNotifications(this);
         pushedBlockList.Clear();
     }
 

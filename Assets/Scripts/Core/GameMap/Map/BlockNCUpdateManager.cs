@@ -31,6 +31,15 @@ public class BlockNCUpdateManager
         pendingNCUpdateSources.Add(pos);
     }
 
+    /// <summary>
+    /// Immediately add NC listeners of <paramref name="notifier"/> to the receiver batch.
+    /// Must be called while NCListenerList is still intact (before OnAfterRemoved fires).
+    /// </summary>
+    public void ImmediatelyQueueExtraReceivers(Block notifier)
+    {
+        SendNCUpdateRequestToExtraReceivers(notifier);
+    }
+
     public void BlockUpdate()
     {
         // Snapshot sources before clearing (only update timestamp when there is actual data)

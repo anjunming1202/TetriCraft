@@ -370,8 +370,8 @@ public class BlockGridManager : MonoBehaviour
         // successful destroy
         blockGrid.TryRemove(block);
         UnregisterBlock(block);
+        OnGridBlockRemoved?.Invoke(pos, block); // fire before OnPostDestroyed so NCListenerList is still intact
         block.OnPostDestroyed();
-        OnGridBlockRemoved?.Invoke(pos, block);
 
         // destroy
         GameObject.Destroy(block.gameObject);
@@ -387,8 +387,8 @@ public class BlockGridManager : MonoBehaviour
         // successful remove
         blockGrid.TryRemove(block);
         UnregisterBlock(block);
+        OnGridBlockRemoved?.Invoke(pos, block); // fire before OnPostRemoved so NCListenerList is still intact
         block.OnPostRemoved();
-        OnGridBlockRemoved?.Invoke(pos, block);
 
         // destroy
         GameObject.Destroy(block.gameObject);

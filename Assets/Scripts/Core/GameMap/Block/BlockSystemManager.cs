@@ -247,14 +247,15 @@ public class BlockSystemManager : MonoBehaviour
     private void OnGridPlacedNCUpdate(Vector2Int pos, Block block)
     {
         if (block == null) return;
-        if (!block.isLocked) return; // filter unlocked blocks
+        //if (!block.isLocked) return; // filter unlocked blocks
         BlockNCUpdateManager.RequestPendingNCUpdateSource(pos);
     }
 
     private void OnGridRemovedNCUpdate(Vector2Int pos, Block block)
     {
-        if (block != null && !block.isRemoved && !block.isLocked) return; // filter unlocked & not removed blocks
+        //if (block != null && !block.isRemoved && !block.isLocked) return; // filter unlocked & not removed blocks
         BlockNCUpdateManager.RequestPendingNCUpdateSource(pos);
+        BlockNCUpdateManager.ImmediatelyQueueExtraReceivers(block); // notify subscribers immediately while NCListenerList is intact
     }
 
     private void NotifyGridPlace(Vector2Int position, Block block)

@@ -3285,7 +3285,7 @@ MonoBehaviour:
   playerCamera: {fileID: 921099054}
   debuggedMap: {fileID: 2093149376}
   isDebugging: 1
-  blockSpawned: 5
+  blockSpawned: 15
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
 --- !u!1 &1715508100
 GameObject:
