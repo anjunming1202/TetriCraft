@@ -37,15 +37,15 @@ public class MapManager : MonoBehaviour
     public FireManager FireManager => fireManager;
 
 
+    // Random tick manager
+    [SerializeField] private RandomTickManager randomTickManager;
+    public RandomTickManager RandomTickManager => randomTickManager;
+
+
     // Particle system manager
     [SerializeField] private ParticleManager particleManager;
 
 
-    // Random tick system
-    public List<MapRandomTickBehaviourObject> mapRandomTickObjects;
-    public int randomTickSelectionCount => GridWidth * GridHeight;
-
-    
     // events
     public delegate void MapBlockEvent(MapManager map, Block block);
     public event MapBlockEvent OnGridBlockPlaced;
@@ -65,6 +65,7 @@ public class MapManager : MonoBehaviour
         Debug.Assert(entityManager != null);
         Debug.Assert(fireManager != null);
         Debug.Assert(particleManager != null);
+        Debug.Assert(randomTickManager != null);
 
         // Block subsystem initialise
         blockSystemManager.Initialise(this);
@@ -100,6 +101,9 @@ public class MapManager : MonoBehaviour
 
         // Fire subsystem
         fireManager.Init(this);
+
+        // Random tick subsystem
+        randomTickManager.Init(this);
     }
 
     public void ClearMap()
@@ -115,6 +119,9 @@ public class MapManager : MonoBehaviour
 
         // Fire
         fireManager.Clear();
+
+        // Random tick
+        randomTickManager.Clear();
 
         // Particle
         particleManager.ClearAll();
@@ -132,7 +139,7 @@ public class MapManager : MonoBehaviour
         fluidSystemManager.OnUpdate();
 
         // Random tick behaviours
-        RandomTick.InvokeRandomBehaviours(this);
+        randomTickManager.OnUpdate();
 
         // Entity update
         entityManager.OnUpdate();

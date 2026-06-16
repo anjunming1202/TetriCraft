@@ -1340,6 +1340,51 @@ Transform:
   - {fileID: 144743218}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &827636820
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 827636821}
+  - component: {fileID: 827636822}
+  m_Layer: 0
+  m_Name: RandomTickManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &827636821
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827636820}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2093149377}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &827636822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 827636820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0b7583aa6df488489858c62bba6e905, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  randomTickSpeed: 1
 --- !u!1 &837640149
 GameObject:
   m_ObjectHideFlags: 0
@@ -1650,7 +1695,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 2.46
+  orthographic size: 4.931389
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -4059,8 +4104,8 @@ MonoBehaviour:
   fluidSystemManager: {fileID: 1853148012}
   entityManager: {fileID: 49221718}
   fireManager: {fileID: 1369485242}
+  randomTickManager: {fileID: 827636822}
   particleManager: {fileID: 1900801232}
-  mapRandomTickObjects: []
 --- !u!4 &2093149377
 Transform:
   m_ObjectHideFlags: 0
@@ -4078,6 +4123,7 @@ Transform:
   - {fileID: 1853148011}
   - {fileID: 49221719}
   - {fileID: 1369485241}
+  - {fileID: 827636821}
   - {fileID: 1900801233}
   m_Father: {fileID: 854227533}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

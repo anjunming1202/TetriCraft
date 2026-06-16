@@ -21,8 +21,6 @@ public static class TickManager
 
         lastTickTime = 0f;
         lastTick = 0;
-
-        RandomTick.randomTickSpeed = 1;
     }
 
     public static void Update()
@@ -36,9 +34,6 @@ public static class TickManager
             lastTick = GameTick;
 
             IsGameTickUpdate = true;
-
-            // random tick
-            RandomTick.GenerateRandomTick();
 
             DeltaTickTime = timer - lastTickTime;
             timer %= gameTickTime;

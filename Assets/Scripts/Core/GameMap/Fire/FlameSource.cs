@@ -6,26 +6,34 @@ using UnityEngine;
 /// Data: sourceStrength, spreadableArea.
 /// Spreading logic runs here via random tick; Flame creation is delegated to FireManager.
 /// </summary>
+[RequireComponent(typeof(IRandomTickable))]
 public class FlameSource : MapObject
 {
     public float sourceStrength;
     public RectInt spreadableArea;
     public Vector2Int position => BoundaryDataManager.GetBoundaryData(map.PlayerID).WorldToGrid(transform.position);
 
+    private IRandomTickable host;
+
     protected void Start()
     {
-        MapRandomTickBehaviourObject mapObject = GetComponent<MapRandomTickBehaviourObject>();
-        if (mapObject == null)
+        host = GetComponent<IRandomTickable>();
+        if (host == null)
         {
-            Debug.LogError($"[FlameSource] No MapRandomTickBehaviourObject on {gameObject.name} — FlameSource must be on a Block GameObject");
+            Debug.LogError($"[FlameSource] No IRandomTickable on {gameObject.name}");
             return;
         }
 
-        map = mapObject.GetMap();
-        mapObject.OnRandomTickUpdate += RandomTickUpdate;
+        map = ((MapObject)host).GetMap();
+        host.OnRandomTickUpdate += Spread;
     }
 
-    private void RandomTickUpdate(int randomTick)
+    private void OnDestroy()
+    {
+        if (host != null) host.OnRandomTickUpdate -= Spread;
+    }
+
+    private void Spread(int randomTick)
     {
         if (randomTick % 1 == 0)
         {

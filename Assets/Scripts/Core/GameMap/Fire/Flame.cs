@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,8 +6,10 @@ using UnityEngine;
 /// A single fire instance. Handles aging, burn damage, and visual/audio.
 /// Lifecycle (spawn/destroy) is owned by FireManager — Flame never destroys itself directly.
 /// </summary>
-public class Flame : MapRandomTickBehaviourObject
+public class Flame : MapObject, IRandomTickable
 {
+    public event Action<int> OnRandomTickUpdate;
+
     public Vector2Int position => BoundaryDataManager.GetBoundaryData(map.PlayerID).WorldToGrid(transform.position);
     public int age;
     public float damage = 1f;
@@ -33,7 +36,7 @@ public class Flame : MapRandomTickBehaviourObject
 
         age = 0;
 
-        map.mapRandomTickObjects.Add(this);
+        map.RandomTickManager.Register(this);
     }
 
     /// <summary>
@@ -42,7 +45,7 @@ public class Flame : MapRandomTickBehaviourObject
     public void DetachFromFlammable()
     {
         attachedFlammable.StopBurningAt(offset);
-        map.mapRandomTickObjects.Remove(this);
+        map.RandomTickManager.Unregister(this);
     }
 
     /// <summary>
@@ -51,7 +54,7 @@ public class Flame : MapRandomTickBehaviourObject
     /// </summary>
     private void OnDestroy()
     {
-        map?.mapRandomTickObjects.Remove(this);
+        map?.RandomTickManager?.Unregister(this);
         fireManager?.UnregisterFlame(this);
     }
 
@@ -62,14 +65,14 @@ public class Flame : MapRandomTickBehaviourObject
         Burn(randomTick);
     }
 
-    public override void RandomTickUpdate(int randomTick)
+    public void RandomTickUpdate(int randomTick)
     {
         if (randomTick % 7 == 0)
             Burn(randomTick);
         if (randomTick % 1 == 0)
             AgeGrow(randomTick);
 
-        base.RandomTickUpdate(randomTick);
+        OnRandomTickUpdate?.Invoke(randomTick);
     }
 
     /// <summary>

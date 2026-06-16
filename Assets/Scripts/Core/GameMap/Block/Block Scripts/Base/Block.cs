@@ -8,7 +8,7 @@ using UnityEngine;
 using static Unity.Collections.AllocatorManager;
 using static Unity.VisualScripting.Member;
 
-public abstract class Block : MapRandomTickBehaviourObject
+public abstract class Block : MapObject, IRandomTickable
 {
     // Identity
     public abstract BlockID ID { get; }
@@ -51,6 +51,7 @@ public abstract class Block : MapRandomTickBehaviourObject
     public event OnChangedEvent OnAfterDestroyed;
     public event OnChangedEvent OnAfterRemoved;
     public event Action<Block> OnRequestSendingSelfNCUpdate;
+    public event Action<int> OnRandomTickUpdate;
 
     /*public event Action<Vector2Int> OnNCUpdateSent;
     public event Action<Block, Vector2Int> OnNCUpdateRequestReceived;
@@ -113,6 +114,12 @@ public abstract class Block : MapRandomTickBehaviourObject
         OnAppearanceChanged?.Invoke(this);
     }
 
+    public virtual void RandomTickUpdate(int randomTick)
+    {
+        OnRandomTickUpdate?.Invoke(randomTick);
+    }
+
+
     /// <summary>
     /// Init the block
     /// </summary>
@@ -127,12 +134,12 @@ public abstract class Block : MapRandomTickBehaviourObject
         isAnimating = false;
         isRemoved = false;
 
-        map.mapRandomTickObjects.Add(this);
+        map.RandomTickManager.Register(this);
     }
 
     public virtual void OnUnregistered()
     {
-        map?.mapRandomTickObjects.Remove(this);
+        map?.RandomTickManager.Unregister(this);
 
         isInMap = false;
         isLocked = false;
