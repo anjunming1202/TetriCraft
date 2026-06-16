@@ -20,9 +20,6 @@ public class PlayerGameManager : MonoBehaviour
     [Header("Score")]
     public ScoreManager scoreManager; // inspector
 
-    [Header("Game State")]
-    public GameStateMachine gameStateMachine;
-
     [Header("Visual")]
     public AnimationCurveAsset blockMovementCurve;
     public AnimationCurveAsset blockLandCurve;
@@ -60,8 +57,6 @@ public class PlayerGameManager : MonoBehaviour
         // Initialise block animator
         BlockAnimator.MovingCurveAsset = blockMovementCurve;
         BlockAnimator.FastMovingCurveAsset = blockLandCurve;
-
-        gameStateMachine.Initialise();
     }
 
     public UniTask PrepareNewPlayerGame()
@@ -72,24 +67,17 @@ public class PlayerGameManager : MonoBehaviour
         // Initialise scorer
         scoreManager.Reset();
 
-        // Initialise game state
-        gameStateMachine.PreparePreGame();
-
         return UniTask.CompletedTask;
     }
 
     public async UniTask PlayIntro()
     {
         await introController.PlayAsync();
-
-        gameStateMachine.Intro();
     }
 
     public void StartGameplay()
     {
         tetrisManager.StartNewMap();
-
-        gameStateMachine.StartGame();
     }
 
     public void UpdateGameplay()
@@ -100,22 +88,16 @@ public class PlayerGameManager : MonoBehaviour
     public void PauseGameplay()
     {
         tetrisManager.StopUpdating();
-
-        gameStateMachine.Pause();
     }
 
     public void ResumeGameplay()
     {
         tetrisManager.ResumeUpdating();
-
-        gameStateMachine.Resume();
     }
 
     public void GameOver()
     {
         tetrisManager.StopUpdating();
-
-        gameStateMachine.GameOver();
     }
 
     public void CleanUpBoard()
@@ -123,8 +105,6 @@ public class PlayerGameManager : MonoBehaviour
         tetrisManager.CleanUpTetrisMap();
 
         nextTetrominoUIController.ClearTetrominoIcons();
-
-        gameStateMachine.CleanUp();
     }
 
     public void NotifyBoardGameDead()

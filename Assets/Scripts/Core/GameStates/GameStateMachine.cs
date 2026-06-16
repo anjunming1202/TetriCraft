@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,7 +25,6 @@ public class GameStateMachine : StaticInstance<GameStateMachine>
         {
             ChangeState(GameStateType.PreGamePrepared);
             GameEvents.OnPrepareNewGame?.Invoke();
-
             Debug.Log("Game state: PreGamePrepared");
         }
         else
@@ -65,9 +64,7 @@ public class GameStateMachine : StaticInstance<GameStateMachine>
             Debug.Log("Game state: Paused");
         }
         else
-        {
             Debug.LogError($"Invalid state transition of Pause, trying to transit from {State} to {GameStateType.Paused}");
-        }
     }
 
     public void Resume()

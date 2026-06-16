@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -29,8 +29,10 @@ public class SingleGameController : GameController
         // init static resources
         gameManager.Initialise();
 
-        // supscribe events
-        gameManager.OnPlayerBoardDead += (PlayerID) => GameOver();
+        // subscribe events
+        gameManager.OnPlayerBoardDead += _ => GameOver();
+
+        matchStateMachine.Initialise();
     }
 
     protected override async UniTask NewGame()
@@ -47,6 +49,7 @@ public class SingleGameController : GameController
         Debug.Log("Now Game Init!");
 
         await gameManager.PrepareNewPlayerGame();
+        matchStateMachine.PreparePreGame();
     }
 
     protected override async UniTask IntroGame()
@@ -54,6 +57,7 @@ public class SingleGameController : GameController
         Debug.Log("Now Game Intro!");
 
         await gameManager.PlayIntro();
+        matchStateMachine.Intro();
     }
 
     protected override void StartGame()
@@ -68,6 +72,7 @@ public class SingleGameController : GameController
 
         // Start player game
         gameManager.StartGameplay();
+        matchStateMachine.StartGame();
     }
 
     protected override void PlayingUpdate()
@@ -81,6 +86,7 @@ public class SingleGameController : GameController
 
         SetGlobalTimePaused(true);
         gameManager.PauseGameplay();
+        matchStateMachine.Pause();
     }
 
     public override void ResumeGame()
@@ -89,6 +95,7 @@ public class SingleGameController : GameController
 
         SetGlobalTimePaused(false);
         gameManager.ResumeGameplay();
+        matchStateMachine.Resume();
     }
 
     protected override void GameOver()
@@ -97,6 +104,7 @@ public class SingleGameController : GameController
 
         SetGlobalTimePaused(true);
         gameManager.GameOver();
+        matchStateMachine.GameOver();
     }
 
     protected override void CleanUpMatch()
@@ -105,10 +113,11 @@ public class SingleGameController : GameController
 
         SetGlobalTimePaused(false);
         gameManager.CleanUpBoard();
+        matchStateMachine.CleanUp();
     }
 
     protected override void Dispose()
     {
-        throw new System.NotImplementedException();
+        gameManager.OnPlayerBoardDead -= _ => GameOver();
     }
 }

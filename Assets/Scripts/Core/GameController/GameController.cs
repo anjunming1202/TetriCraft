@@ -9,6 +9,8 @@ public abstract class GameController : Singleton<GameController>
     //game state machine
     //binding entry functions at game states, as the global only entrance
 
+    [SerializeField] protected GameStateMachine matchStateMachine;
+
     public abstract PlayerGameManager GetGameManager(PlayerID playerID = PlayerID.P1);
 
     public abstract MapBoundaryData GetBoundaryData(PlayerID playerID = PlayerID.P1);
