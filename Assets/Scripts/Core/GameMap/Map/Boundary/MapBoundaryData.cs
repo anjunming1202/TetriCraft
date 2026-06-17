@@ -16,7 +16,7 @@ public class MapBoundaryData : ScriptableObject
     public static MapBoundaryData Create(Transform boundaryRegion)
     {
         var instance = CreateInstance<MapBoundaryData>();
-        instance.boundary.size = boundaryRegion.transform.localScale;
+        instance.boundary.size = boundaryRegion.transform.lossyScale;
         instance.boundary.center = boundaryRegion.transform.position;
         return instance;
     }
