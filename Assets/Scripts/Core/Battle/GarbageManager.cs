@@ -50,6 +50,7 @@ public class GarbageManager : MonoBehaviour
         ShiftRowsUp(count);
         map.FluidSystem.ShiftElementsUp(count);
         SpawnGarbageRows(count, holeX);
+        AnimateGarbageRise(count);
         Debug.Log($"[GarbageManager] Insert complete");
     }
 
@@ -78,6 +79,33 @@ public class GarbageManager : MonoBehaviour
             map.ImmediatelyProcessGridPendingUpdates();
         }
         Debug.Log($"[GarbageManager] ShiftRowsUp: shifted={shifted}, destroyed={destroyed}");
+    }
+
+    /// <summary>
+    /// After garbage rows have been committed to the grid, sets each block's visual start
+    /// position to <paramref name="count"/> rows below its target and triggers an animated
+    /// move upward using the existing BlockAnimator / OnAnimatedMove pipeline.
+    /// Grid data is already correct at this point — only the visual transform is changed.
+    /// </summary>
+    private void AnimateGarbageRise(int count)
+    {
+        MapBoundaryData bd = BoundaryDataManager.GetBoundaryData(map.PlayerID);
+        for (int row = 0; row < count; row++)
+        {
+            for (int x = 0; x < boundaryWidth; x++)
+            {
+                Block block = map.GetBlock(x, row);
+                if (block == null || block.IsDummy) continue;
+
+                // Place the visual start point count rows below the target position
+                block.transform.position = bd.MapToWorld(
+                    new Vector2(block.CentrePosition.x, block.CentrePosition.y - count));
+
+                // Re-trigger animated move — BlockAnimator interpolates from current
+                // transform.position (below) to block.GetWorldPosition() (target row)
+                block.SetGridPosition(block.GridPosition.x, block.GridPosition.y, animation: true);
+            }
+        }
     }
 
     private void SpawnGarbageRows(int count, int holeX)

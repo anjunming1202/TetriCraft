@@ -141,6 +141,13 @@ public class TetrisManager : MonoBehaviour
         OnNextTurn();
     }
 
+    public bool AnyBlockAnimating()
+    {
+        foreach (Block block in map.Blocks)
+            if (block.isAnimating) return true;
+        return false;
+    }
+
     public void StopUpdating()
     {
         isUpdating = false;

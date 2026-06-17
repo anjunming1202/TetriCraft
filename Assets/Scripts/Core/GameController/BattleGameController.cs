@@ -134,9 +134,18 @@ public class BattleGameController : GameController
     {
         Debug.Log($"[Battle] Game Over! Winner: {_winner?.ToString() ?? "Draw"}");
 
-        SetGlobalTimePaused(true);
         gameManagerP1.GameOver();
         gameManagerP2.GameOver();
+        GameOverAsync().Forget();
+    }
+
+    private async UniTask GameOverAsync()
+    {
+        await UniTask.WaitUntil(
+            () => !BattleTetrisP1.AnyBlockAnimating() && !BattleTetrisP2.AnyBlockAnimating(),
+            cancellationToken: this.GetCancellationTokenOnDestroy()
+        );
+        SetGlobalTimePaused(true);
         matchStateMachine.GameOver();
     }
 
