@@ -10,7 +10,12 @@ public class BattleGameController : GameController
     [SerializeField] PlayerInput controllerPlayerInputP1;
     [SerializeField] PlayerInput controllerPlayerInputP2;
 
+    [SerializeField] private GarbageConfig garbageConfig;
+
     private PlayerID? _winner;
+
+    private BattleTetrisManager BattleTetrisP1 => (BattleTetrisManager)gameManagerP1.tetrisManager;
+    private BattleTetrisManager BattleTetrisP2 => (BattleTetrisManager)gameManagerP2.tetrisManager;
 
     public override PlayerGameManager GetGameManager(PlayerID playerID)
     {
@@ -29,10 +34,15 @@ public class BattleGameController : GameController
 
     protected override void Initialise()
     {
-        Debug.Log("Now Initialise Resources!");
+        Debug.Log("[BattleGameController] Initialise — P1 tetrisManager type: " + gameManagerP1.tetrisManager?.GetType().Name);
+        Debug.Log("[BattleGameController] Initialise — P2 tetrisManager type: " + gameManagerP2.tetrisManager?.GetType().Name);
 
         gameManagerP1.Initialise();
         gameManagerP2.Initialise();
+
+        BattleTetrisP1.OnTurnLineClearsComplete += HandleCycleCompleteP1;
+        BattleTetrisP2.OnTurnLineClearsComplete += HandleCycleCompleteP2;
+        Debug.Log("[BattleGameController] Subscribed to OnCycleComplete for both players");
 
         gameManagerP1.OnPlayerBoardDead += HandlePlayerDead;
         gameManagerP2.OnPlayerBoardDead += HandlePlayerDead;
@@ -58,6 +68,10 @@ public class BattleGameController : GameController
             gameManagerP1.PrepareNewPlayerGame(),
             gameManagerP2.PrepareNewPlayerGame()
         );
+
+        BattleTetrisP1.SetGarbageConfig(garbageConfig);
+        BattleTetrisP2.SetGarbageConfig(garbageConfig);
+
         matchStateMachine.PreparePreGame();
     }
 
@@ -141,5 +155,22 @@ public class BattleGameController : GameController
     {
         gameManagerP1.OnPlayerBoardDead -= HandlePlayerDead;
         gameManagerP2.OnPlayerBoardDead -= HandlePlayerDead;
+        BattleTetrisP1.OnTurnLineClearsComplete -= HandleCycleCompleteP1;
+        BattleTetrisP2.OnTurnLineClearsComplete -= HandleCycleCompleteP2;
+    }
+
+    private void HandleCycleCompleteP1(uint cycleClears, uint cycleCombo)
+        => SendGarbage(BattleTetrisP2, cycleClears, cycleCombo);
+
+    private void HandleCycleCompleteP2(uint cycleClears, uint cycleCombo)
+        => SendGarbage(BattleTetrisP1, cycleClears, cycleCombo);
+
+    private void SendGarbage(BattleTetrisManager opponent, uint cycleClears, uint cycleCombo)
+    {
+        if (garbageConfig == null) return;
+        int garbage = garbageConfig.CalculateGarbage(cycleClears, cycleCombo);
+        Debug.Log($"[BattleGameController] Cycle clears={cycleClears}, combo={cycleCombo} → sending {garbage} garbage to {opponent.PlayerID}");
+        if (garbage > 0)
+            opponent.QueueGarbage(garbage);
     }
 }

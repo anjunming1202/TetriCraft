@@ -149,6 +149,29 @@ public class FluidManager : MonoBehaviour
         return element;
     }*/
 
+    /// <summary>
+    /// Shifts all fluid elements up by <paramref name="count"/> grid rows.
+    /// Elements that exceed the map boundary are removed from the system; elements that
+    /// partially exceed are clamped. FluidDummy reconciliation happens automatically on
+    /// the next fluid tick via GenerateDummyBlocks().
+    /// </summary>
+    public void ShiftElementsUp(int count)
+    {
+        int levelShift = count * FluidElement.BlockAmount;
+        int maxLevel   = mapManager.GridHeight * FluidElement.BlockAmount;
+
+        for (int i = fluidSystem.elements.Count - 1; i >= 0; i--)
+        {
+            FluidElement e = fluidSystem.elements[i];
+            e.lowerLevel += levelShift;
+            if (e.lowerLevel >= maxLevel)
+                fluidSystem.Remove(e);
+            else if (e.upperLevel > maxLevel)
+                e.amount = maxLevel - e.lowerLevel;
+        }
+        fluidSystem.OrganiseElements();
+    }
+
     public void RequestBlockSqueeze(MapManager mapManager, Block block)
     {
         blockSqueezeRequests.Add((block, mapManager));

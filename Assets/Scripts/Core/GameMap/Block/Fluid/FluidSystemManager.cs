@@ -45,6 +45,16 @@ public class FluidSystemManager : MonoBehaviour
         lavaManager.ClearFluidSystem();
     }
 
+    /// <summary>
+    /// Shifts all fluid elements (water and lava) up by <paramref name="count"/> grid rows.
+    /// Call this after ShiftRowsUp in GarbageManager.
+    /// </summary>
+    public void ShiftElementsUp(int count)
+    {
+        waterManager.ShiftElementsUp(count);
+        lavaManager.ShiftElementsUp(count);
+    }
+
     public void OnUpdate()
     {
         waterManager.OnUpdate();

@@ -12,7 +12,10 @@ public class NextTetrominoUIController : MonoBehaviour
     [SerializeField] private bool isAnimated = true;
     [SerializeField] private float animationDuration = 0.4f;
 
+    // Injected by PlayerGameManager; the Inspector field is a fallback for standalone use.
     [SerializeField] private TetrisManager tetrisManager;
+
+    public void SetTetrisManager(TetrisManager tm) => tetrisManager = tm;
 
     [SerializeField] private RectTransform[] slotTransforms;
     [SerializeField] private TetrominoIcon[] icons;

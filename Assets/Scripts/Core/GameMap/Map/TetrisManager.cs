@@ -14,6 +14,7 @@ public class TetrisManager : MonoBehaviour
 
     [Header("Map Objects")]
     [SerializeField] private MapManager map;
+    protected MapManager Map => map;
 
     [SerializeField] private MapTetromino fallingTetromino;
     [SerializeField] private TetrominoController tetrominoController;
@@ -28,11 +29,11 @@ public class TetrisManager : MonoBehaviour
 
 
     // Tetris map data
-    private int boundaryWidth;
+    protected int boundaryWidth;
     private int boundaryHeight;
 
     // Line clear data
-    public uint lastClearLineCount { get; private set; }
+    public uint totalClearLineCount { get; private set; }
     public uint combo { get; private set; }
 
     // Updating state
@@ -89,7 +90,7 @@ public class TetrisManager : MonoBehaviour
         // Initialise data
         StopUpdating();
         isTurnFinished = false;
-        lastClearLineCount = 0;
+        totalClearLineCount = 0;
         combo = 0; 
         isUpdating = false;
     }
@@ -161,12 +162,6 @@ public class TetrisManager : MonoBehaviour
         OnGameDead?.Invoke();
     }
 
-    public void QueueGarbage(int lines)
-    {
-
-    }
-
-
     //================================//
     //  Map game logic
     //================================//
@@ -204,7 +199,7 @@ public class TetrisManager : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
-    private void OnLockdown()
+    protected virtual void OnLockdown()
     {
         foreach(Block block in fallingTetromino.GetComponentsInChildren<Block>())
         {
@@ -212,7 +207,7 @@ public class TetrisManager : MonoBehaviour
         }
 
         // Clear line & line-clear data logic
-        lastClearLineCount = 0;
+        totalClearLineCount = 0;
         bool successfulClear = TryClearLines();
         if (successfulClear)
         {
@@ -228,7 +223,7 @@ public class TetrisManager : MonoBehaviour
         OnFinishedTurn?.Invoke();
     }
 
-    private void OnNextTurn()
+    protected virtual void OnNextTurn()
     {
         // Stop when game over
         if (!isUpdating)
@@ -282,11 +277,11 @@ public class TetrisManager : MonoBehaviour
         if (newLineCount > 0)
         {
             // accumulate count before next tetromino locked
-            lastClearLineCount += newLineCount;
+            totalClearLineCount += newLineCount;
 
             // events
             OnLineClear?.Invoke(this);
-            OnLineClearWithInfo?.Invoke(PlayerID, newLineCount, lastClearLineCount, combo);
+            OnLineClearWithInfo?.Invoke(PlayerID, newLineCount, totalClearLineCount, combo);
 
             return true;
         }

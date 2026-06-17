@@ -49,6 +49,7 @@ public class PlayerGameManager : MonoBehaviour
         scoreManager.SubscribeMap(tetrisManager);
 
         // Initialise ui controllers
+        nextTetrominoUIController.SetTetrisManager(tetrisManager);
         nextTetrominoUIController.InitialiseAsync().Forget();
 
         // Initialise boundary data

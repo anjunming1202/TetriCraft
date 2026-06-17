@@ -131,37 +131,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1167152}
-  - component: {fileID: 1167150}
+  - component: {fileID: 1167153}
   - component: {fileID: 1167151}
   m_Layer: 0
-  m_Name: Tetris Map Manager
+  m_Name: Tetris Map Manager P2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1167150
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1167149}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df4ef17e4ddd81745849f5a4c5606ced, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  map: {fileID: 348702461}
-  fallingTetromino: {fileID: 2080737545}
-  tetrominoController: {fileID: 2080737541}
-  ghostTetromino: {fileID: 127137531}
-  nextTetrominoList:
-  - {fileID: 697218337}
-  - {fileID: 821650080}
-  - {fileID: 1745661495}
-  - {fileID: 1109146202}
-  sceneCanvas: {fileID: 530171378}
 --- !u!114 &1167151
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,6 +173,29 @@ Transform:
   - {fileID: 174300294}
   m_Father: {fileID: 1212774957}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1167153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0997956fa6fcf2e4b87f359dfa2f1e33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  map: {fileID: 348702461}
+  fallingTetromino: {fileID: 2080737545}
+  tetrominoController: {fileID: 2080737541}
+  ghostTetromino: {fileID: 127137531}
+  nextTetrominoList:
+  - {fileID: 697218337}
+  - {fileID: 821650080}
+  - {fileID: 1745661495}
+  - {fileID: 1109146202}
+  sceneCanvas: {fileID: 530171378}
+  garbageManager: {fileID: 1923885433}
 --- !u!1 &22394618
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,6 +232,7 @@ MonoBehaviour:
   gameManagerP2: {fileID: 1210152287}
   controllerPlayerInputP1: {fileID: 1470811888}
   controllerPlayerInputP2: {fileID: 2080737543}
+  garbageConfig: {fileID: 11400000, guid: 538395880ba3ae9478868125a3e639c3, type: 2}
 --- !u!4 &22394620
 Transform:
   m_ObjectHideFlags: 0
@@ -726,7 +728,7 @@ MonoBehaviour:
   layoutRoot: {fileID: 114019543}
   isAnimated: 1
   animationDuration: 0.4
-  tetrisManager: {fileID: 1167150}
+  tetrisManager: {fileID: 0}
   slotTransforms:
   - {fileID: 1506705050}
   - {fileID: 1103428129}
@@ -1673,7 +1675,7 @@ MonoBehaviour:
   layoutRoot: {fileID: 289503437}
   isAnimated: 1
   animationDuration: 0.4
-  tetrisManager: {fileID: 1106322966}
+  tetrisManager: {fileID: 0}
   slotTransforms:
   - {fileID: 1439887486}
   - {fileID: 727301321}
@@ -1801,7 +1803,7 @@ GameObject:
   - component: {fileID: 348702462}
   - component: {fileID: 348702461}
   m_Layer: 0
-  m_Name: Block Map Manager
+  m_Name: Block Map Manager P2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2395,7 +2397,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10.893657
+  orthographic size: 1.6015625
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -3577,7 +3579,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1091644335}
   debuggedMap: {fileID: 1637309553}
   isDebugging: 1
-  blockSpawned: 10
+  blockSpawned: 15
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
 --- !u!1 &821650078
 GameObject:
@@ -4421,7 +4423,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10.893657
+  orthographic size: 1.6015625
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -4475,6 +4477,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 274629830}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1101825226
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1101825227}
+  - component: {fileID: 1101825228}
+  m_Layer: 0
+  m_Name: GarbageManager P1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1101825227
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1101825226}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1106322968}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1101825228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1101825226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2477cde89736c1c47bcd28e32a102582, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  map: {fileID: 1637309553}
 --- !u!1 &1103428128
 GameObject:
   m_ObjectHideFlags: 0
@@ -4520,37 +4567,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1106322968}
-  - component: {fileID: 1106322966}
+  - component: {fileID: 1106322969}
   - component: {fileID: 1106322967}
   m_Layer: 0
-  m_Name: Tetris Map Manager
+  m_Name: Tetris Map Manager P1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1106322966
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1106322965}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df4ef17e4ddd81745849f5a4c5606ced, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  map: {fileID: 1637309553}
-  fallingTetromino: {fileID: 1470811890}
-  tetrominoController: {fileID: 1470811889}
-  ghostTetromino: {fileID: 718720227}
-  nextTetrominoList:
-  - {fileID: 366783391}
-  - {fileID: 264316339}
-  - {fileID: 1305638256}
-  - {fileID: 2031295483}
-  sceneCanvas: {fileID: 1148377019}
 --- !u!114 &1106322967
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4582,8 +4607,32 @@ Transform:
   - {fileID: 1470811891}
   - {fileID: 718720228}
   - {fileID: 1961995800}
+  - {fileID: 1101825227}
   m_Father: {fileID: 274629830}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1106322969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1106322965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0997956fa6fcf2e4b87f359dfa2f1e33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  map: {fileID: 1637309553}
+  fallingTetromino: {fileID: 1470811890}
+  tetrominoController: {fileID: 1470811889}
+  ghostTetromino: {fileID: 718720227}
+  nextTetrominoList:
+  - {fileID: 366783391}
+  - {fileID: 264316339}
+  - {fileID: 1305638256}
+  - {fileID: 2031295483}
+  sceneCanvas: {fileID: 1148377019}
+  garbageManager: {fileID: 1101825228}
 --- !u!1 &1109146201
 GameObject:
   m_ObjectHideFlags: 0
@@ -4865,7 +4914,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerID: 1
-  tetrisManager: {fileID: 1167150}
+  tetrisManager: {fileID: 1167153}
   boundaryRegion: {fileID: 1082312784}
   scoreManager: {fileID: 1999694012}
   blockMovementCurve: {fileID: 11400000, guid: 175ca8d13feb6744885bbae30b9d5cdd, type: 2}
@@ -4936,6 +4985,7 @@ Transform:
   - {fileID: 200340371}
   - {fileID: 2106409063}
   - {fileID: 1167152}
+  - {fileID: 1923885434}
   - {fileID: 530171377}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6094,7 +6144,7 @@ GameObject:
   - component: {fileID: 1637309554}
   - component: {fileID: 1637309553}
   m_Layer: 0
-  m_Name: Block Map Manager
+  m_Name: Block Map Manager P1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6430,7 +6480,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerID: 0
-  tetrisManager: {fileID: 1106322966}
+  tetrisManager: {fileID: 1106322969}
   boundaryRegion: {fileID: 110032790}
   scoreManager: {fileID: 1913160253}
   blockMovementCurve: {fileID: 11400000, guid: 175ca8d13feb6744885bbae30b9d5cdd, type: 2}
@@ -6847,6 +6897,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scoreText: {fileID: 276222011}
   digit: 8
+--- !u!1 &1923885432
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1923885434}
+  - component: {fileID: 1923885433}
+  m_Layer: 0
+  m_Name: GarbageManager P2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1923885433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923885432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2477cde89736c1c47bcd28e32a102582, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  map: {fileID: 1637309553}
+--- !u!4 &1923885434
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923885432}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -28.948563, y: 0.8235589, z: 0.035261188}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1212774957}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1957636761 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5259760965390717523, guid: 3ca276b461912a44fa539841891b8460, type: 3}
