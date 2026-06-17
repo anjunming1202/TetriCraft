@@ -20,7 +20,8 @@ public class BattleTetrisManager : TetrisManager
     public void SetGarbageConfig(GarbageConfig cfg)
         => garbageManager.Initialise(boundaryWidth, cfg, Map);
 
-    public void QueueGarbage(int lines) => garbageManager.Queue(lines);
+    public void QueueGarbage(int lines, uint sourceClears = 0, uint sourceCombo = 0)
+        => garbageManager.Queue(lines, sourceClears, sourceCombo);
 
     /// <summary>
     /// Attempts to cancel <paramref name="attack"/> lines of incoming garbage with a line-clear attack.

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GarbageManager : MonoBehaviour
@@ -5,41 +6,59 @@ public class GarbageManager : MonoBehaviour
     private MapManager map;
 
     private GarbageConfig config;
-    private int pending;
     private int boundaryWidth;
+
+    private struct GarbageWave
+    {
+        public int  lines;
+        public uint sourceClears;
+        public uint sourceCombo;
+    }
+    private readonly List<GarbageWave> _pendingWaves = new();
 
     public void Initialise(int width, GarbageConfig cfg, MapManager targetMap)
     {
         boundaryWidth = width;
         config = cfg;
         map = targetMap;
-        pending = 0;
+        _pendingWaves.Clear();
         Debug.Log($"[GarbageManager] Initialised — width={width}, config={(cfg != null ? cfg.name : "NULL")}, map={(targetMap != null ? targetMap.name : "NULL")}");
     }
 
-    public void Reset() => pending = 0;
+    public void Reset() => _pendingWaves.Clear();
 
     /// <summary>
-    /// Cancels up to <paramref name="attack"/> lines from the pending incoming garbage.
+    /// Cancels up to <paramref name="attack"/> lines from the front of the pending incoming garbage.
     /// Returns the overflow — lines remaining after all pending is cancelled.
-    /// overflow = 0 means the attack was fully absorbed; overflow > 0 means a net counter-attack.
+    /// overflow == 0 means the attack was fully absorbed; overflow > 0 means a net counter-attack.
     /// </summary>
     public int CancelIncoming(int attack)
     {
-        if (pending <= 0) return attack;
-        int cancelled = Mathf.Min(attack, pending);
-        pending -= cancelled;
-        Debug.Log($"[GarbageManager] Cancelled {cancelled} incoming line(s), overflow={attack - cancelled}, remaining pending={pending}");
-        return attack - cancelled;
+        int totalPending = 0;
+        foreach (var w in _pendingWaves) totalPending += w.lines;
+        if (totalPending <= 0) return attack;
+
+        int remaining = attack;
+        while (remaining > 0 && _pendingWaves.Count > 0)
+        {
+            var wave = _pendingWaves[0];
+            int cancel = Mathf.Min(remaining, wave.lines);
+            wave.lines -= cancel;
+            remaining  -= cancel;
+            if (wave.lines <= 0)
+                _pendingWaves.RemoveAt(0);
+            else
+                _pendingWaves[0] = wave;
+        }
+        Debug.Log($"[GarbageManager] Cancelled {attack - remaining} incoming line(s), overflow={remaining}, remaining pending={totalPending - (attack - remaining)}");
+        return remaining;
     }
 
-    public void Queue(int lines)
+    public void Queue(int lines, uint sourceClears = 0, uint sourceCombo = 0)
     {
-        if (lines > 0)
-        {
-            pending += lines;
-            Debug.Log($"[GarbageManager] Queued {lines} line(s), total pending={pending}");
-        }
+        if (lines <= 0) return;
+        _pendingWaves.Add(new GarbageWave { lines = lines, sourceClears = sourceClears, sourceCombo = sourceCombo });
+        Debug.Log($"[GarbageManager] Queued {lines} line(s), waves={_pendingWaves.Count}");
     }
 
     /// <summary>Call this in TetrisManager.OnNextTurn() before SpawnTetromino.</summary>
@@ -50,21 +69,35 @@ public class GarbageManager : MonoBehaviour
             Debug.LogWarning("[GarbageManager] InsertPending skipped — config is null");
             return;
         }
-        if (pending <= 0)
-            return;
+        if (_pendingWaves.Count == 0) return;
 
-        int count = pending;
-        pending = 0;
-        Debug.Log($"[GarbageManager] Inserting {count} garbage row(s), boundaryWidth={boundaryWidth}");
+        // Merge all pending waves into one insert, picking the dominant attack context
+        int  totalLines = 0;
+        uint maxClears  = 0;
+        uint maxCombo   = 0;
+        foreach (var w in _pendingWaves)
+        {
+            totalLines += w.lines;
+            if (w.sourceClears > maxClears) { maxClears = w.sourceClears; maxCombo = w.sourceCombo; }
+        }
+        _pendingWaves.Clear();
 
-        int holeX = config.consistentHolePerWave
-            ? Random.Range(0, boundaryWidth)
-            : -1;
+        Debug.Log($"[GarbageManager] Inserting {totalLines} garbage row(s), boundaryWidth={boundaryWidth}");
 
-        ShiftRowsUp(count);
-        map.FluidSystem.ShiftElementsUp(count);
-        SpawnGarbageRows(count, holeX);
-        AnimateGarbageRise(count);
+        var ctx = new GarbageInsertContext
+        {
+            totalRows    = totalLines,
+            boardWidth   = boundaryWidth,
+            sourceClears = maxClears,
+            sourceCombo  = maxCombo,
+        };
+
+        BlockID?[,] layout = config.GetGarbageLayout(ctx);
+
+        ShiftRowsUp(totalLines);
+        map.FluidSystem.ShiftElementsUp(totalLines);
+        SpawnGarbageRows(layout);
+        AnimateGarbageRise(totalLines);
         Debug.Log($"[GarbageManager] Insert complete");
     }
 
@@ -122,20 +155,20 @@ public class GarbageManager : MonoBehaviour
         }
     }
 
-    private void SpawnGarbageRows(int count, int holeX)
+    private void SpawnGarbageRows(BlockID?[,] layout)
     {
-        Debug.Log($"[GarbageManager] SpawnGarbageRows: count={count}, holeX={holeX}, blockID={config.garbageBlockID}");
-        for (int row = 0; row < count; row++)
+        int rowCount = layout.GetLength(0);
+        int width    = layout.GetLength(1);
+        for (int row = 0; row < rowCount; row++)
         {
-            int rowHole = holeX >= 0 ? holeX : Random.Range(0, boundaryWidth);
-            for (int x = 0; x < boundaryWidth; x++)
+            for (int x = 0; x < width; x++)
             {
-                if (x == rowHole) continue;
-                Block garb = BlockSpawner.NewBlock(config.garbageBlockID);
+                if (layout[row, x] is not BlockID blockID) continue;
+                Block garb = BlockSpawner.NewBlock(blockID);
                 map.RequestSpawnBlock(garb, x, row);
             }
             map.ImmediatelyProcessGridPendingUpdates();
-            Debug.Log($"[GarbageManager] Spawned garbage row {row} (hole at x={rowHole})");
+            Debug.Log($"[GarbageManager] Spawned garbage row {row}");
         }
     }
 }

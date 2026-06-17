@@ -193,7 +193,7 @@ public class BattleGameController : GameController
         Debug.Log($"[BattleGameController] {attacker.PlayerID}: base={baseAttack}, cancelled={cancelled}, final={finalAttack} → {opponent.PlayerID}");
 
         if (finalAttack > 0)
-            opponent.QueueGarbage(finalAttack);
+            opponent.QueueGarbage(finalAttack, cycleClears, cycleCombo);
     }
 
     /// <summary>
