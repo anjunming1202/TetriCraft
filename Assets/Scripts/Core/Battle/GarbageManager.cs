@@ -19,6 +19,20 @@ public class GarbageManager : MonoBehaviour
 
     public void Reset() => pending = 0;
 
+    /// <summary>
+    /// Cancels up to <paramref name="attack"/> lines from the pending incoming garbage.
+    /// Returns the overflow — lines remaining after all pending is cancelled.
+    /// overflow = 0 means the attack was fully absorbed; overflow > 0 means a net counter-attack.
+    /// </summary>
+    public int CancelIncoming(int attack)
+    {
+        if (pending <= 0) return attack;
+        int cancelled = Mathf.Min(attack, pending);
+        pending -= cancelled;
+        Debug.Log($"[GarbageManager] Cancelled {cancelled} incoming line(s), overflow={attack - cancelled}, remaining pending={pending}");
+        return attack - cancelled;
+    }
+
     public void Queue(int lines)
     {
         if (lines > 0)

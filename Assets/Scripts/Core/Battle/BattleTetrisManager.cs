@@ -22,6 +22,12 @@ public class BattleTetrisManager : TetrisManager
 
     public void QueueGarbage(int lines) => garbageManager.Queue(lines);
 
+    /// <summary>
+    /// Attempts to cancel <paramref name="attack"/> lines of incoming garbage with a line-clear attack.
+    /// Returns the overflow — lines that exceed the pending garbage and can be sent to the opponent.
+    /// </summary>
+    public int CancelIncomingGarbage(int attack) => garbageManager.CancelIncoming(attack);
+
     protected override void OnLockdown()
     {
         // Read previous cycle stats before base resets totalClearLineCount and updates combo

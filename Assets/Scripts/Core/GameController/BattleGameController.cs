@@ -169,17 +169,42 @@ public class BattleGameController : GameController
     }
 
     private void HandleCycleCompleteP1(uint cycleClears, uint cycleCombo)
-        => SendGarbage(BattleTetrisP2, cycleClears, cycleCombo);
+        => ProcessAttack(BattleTetrisP1, BattleTetrisP2, cycleClears, cycleCombo);
 
     private void HandleCycleCompleteP2(uint cycleClears, uint cycleCombo)
-        => SendGarbage(BattleTetrisP1, cycleClears, cycleCombo);
+        => ProcessAttack(BattleTetrisP2, BattleTetrisP1, cycleClears, cycleCombo);
 
-    private void SendGarbage(BattleTetrisManager opponent, uint cycleClears, uint cycleCombo)
+    private void ProcessAttack(BattleTetrisManager attacker, BattleTetrisManager opponent,
+                                uint cycleClears, uint cycleCombo)
     {
         if (garbageConfig == null) return;
-        int garbage = garbageConfig.CalculateGarbage(cycleClears, cycleCombo);
-        Debug.Log($"[BattleGameController] Cycle clears={cycleClears}, combo={cycleCombo} → sending {garbage} garbage to {opponent.PlayerID}");
-        if (garbage > 0)
-            opponent.QueueGarbage(garbage);
+
+        int baseAttack = garbageConfig.CalculateGarbage(cycleClears, cycleCombo);
+        if (baseAttack <= 0) return;
+
+        // Cancel attacker's own incoming garbage first; overflow is the net outgoing attack.
+        int overflow    = attacker.CancelIncomingGarbage(baseAttack);
+        int cancelled   = baseAttack - overflow;
+
+        // Extension point: override ModifyFinalAttack() to add bonuses
+        // (e.g. counter-attack bonus when cancelled > 0)
+        int finalAttack = ModifyFinalAttack(overflow, cycleClears, cycleCombo, cancelled);
+
+        Debug.Log($"[BattleGameController] {attacker.PlayerID}: base={baseAttack}, cancelled={cancelled}, final={finalAttack} → {opponent.PlayerID}");
+
+        if (finalAttack > 0)
+            opponent.QueueGarbage(finalAttack);
     }
+
+    /// <summary>
+    /// Override to add bonus modifiers on top of the net overflow attack after cancellation.
+    /// <para>Parameters:</para>
+    /// <list type="bullet">
+    ///   <item><paramref name="overflow"/> — lines left after cancelling own incoming garbage (≥ 0).</item>
+    ///   <item><paramref name="cycleClears"/> / <paramref name="cycleCombo"/> — raw cycle stats for special-clear logic.</item>
+    ///   <item><paramref name="cancelledLines"/> — how many incoming lines were absorbed (> 0 = counter-attack occurred).</item>
+    /// </list>
+    /// </summary>
+    protected virtual int ModifyFinalAttack(int overflow, uint cycleClears, uint cycleCombo, int cancelledLines)
+        => overflow;
 }
