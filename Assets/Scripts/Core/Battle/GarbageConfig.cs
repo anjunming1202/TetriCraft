@@ -27,7 +27,7 @@ public class GarbageConfig : ScriptableObject
     [SerializeField] public int[] comboBonusTable = { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5 };
 
     [Header("Garbage Block")]
-    [SerializeField] public BlockID garbageBlockID = BlockID.Garbage;
+    [SerializeField] public BlockID garbageBlockID = BlockID.Bedrock;
 
     [Header("Garbage Hole")]
     [SerializeField] private int holeCount = 1;

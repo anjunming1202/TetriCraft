@@ -9,11 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a39489f68325ccd45a54bb0b65955764, type: 3}
-  m_Name: DefaultGarbageConfig
+  m_Script: {fileID: 11500000, guid: b86752d26f947984396a1e376978db1f, type: 3}
+  m_Name: BedrockDistributionConfig
   m_EditorClassIdentifier: 
   attackTable: 000000000000000001000000020000000400000006000000080000000a0000000c0000000c0000000c0000000c0000000c000000
   comboBonusTable: 000000000000000001000000010000000200000002000000030000000300000004000000040000000400000005000000
   garbageBlockID: 19
   holeCount: 1
-  consistentHolePerWave: 0
+  consistentHolePerWave: 1
+  style: 0
+  denseDensity: 1
+  sparseDensity: 0.7
+  maxBedrockLayers: 5
+  minHolesPerRow: 1
