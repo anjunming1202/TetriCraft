@@ -165,7 +165,8 @@ public class BlockGridManager : MonoBehaviour
             requestProcessPhase == RequestProcessPhase.ProcessingSpawn ||
             requestProcessPhase == RequestProcessPhase.ProcessingMove)
         {
-            ApplyDestroy(block);
+            if (block.CanBeDestroyed())
+                ApplyDestroy(block);
             return;
         }
 
@@ -184,7 +185,8 @@ public class BlockGridManager : MonoBehaviour
 
         foreach (Block block in blockDestroyBatch)
         {
-            ApplyDestroy(block);
+            if (block.CanBeDestroyed())
+                ApplyDestroy(block);
         }
     }
 

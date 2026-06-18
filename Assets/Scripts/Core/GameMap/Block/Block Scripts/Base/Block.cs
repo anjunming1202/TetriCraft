@@ -242,6 +242,12 @@ public abstract class Block : MapObject, IRandomTickable
         return isLocked;
     }
 
+    /// <summary>
+    /// Called just before a destroy is applied. Return false to cancel the destroy;
+    /// the block stays in the map unchanged. Override to implement multi-hit behaviour.
+    /// </summary>
+    public virtual bool CanBeDestroyed() => true;
+
     protected virtual void Awake()
     {
         // set explosion responses
