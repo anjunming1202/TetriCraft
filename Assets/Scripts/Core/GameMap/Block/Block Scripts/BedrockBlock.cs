@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -6,8 +7,6 @@ using UnityEngine;
 /// First destroy attempt: 50 % chance to succeed outright; on failure the block becomes
 /// "cracked" and the attempt is cancelled.
 /// While cracked: the next destroy attempt is guaranteed to succeed.
-///
-/// Visual feedback for the cracked state is not yet implemented.
 /// </summary>
 public class BedrockBlock : Block
 {
@@ -19,8 +18,14 @@ public class BedrockBlock : Block
     public bool IsCracked => _cracked;
 
     /// <summary>
+    /// Fired when a destroy attempt fails and the block transitions to the cracked state.
+    /// Carries this block as the argument so subscribers can read its world position.
+    /// </summary>
+    public event Action<BedrockBlock> OnBecameCracked;
+
+    /// <summary>
     /// Returns whether this destroy attempt actually goes through.
-    /// First hit: 50 % chance. On failure, marks the block as cracked and notifies the renderer.
+    /// First hit: 50 % chance. On failure, marks the block as cracked and fires OnBecameCracked.
     /// Cracked block: always destroyed.
     /// </summary>
     public override bool CanBeDestroyed()
@@ -28,11 +33,12 @@ public class BedrockBlock : Block
         if (_cracked)
             return true;
 
-        bool succeeds = Random.value < 0.5f;
+        bool succeeds = UnityEngine.Random.value < 0.5f;
         if (!succeeds)
         {
             _cracked = true;
             OnTriggerAppearanceChanged();
+            OnBecameCracked?.Invoke(this);
         }
         return succeeds;
     }

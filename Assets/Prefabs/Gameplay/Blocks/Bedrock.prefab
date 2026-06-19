@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8626266194775307220}
   - component: {fileID: 9028015919182796587}
   - component: {fileID: 2341808955676992956}
-  - component: {fileID: 9170696589410686349}
+  - component: {fileID: -8398930043949228319}
   - component: {fileID: -9009503282852880812}
   m_Layer: 0
   m_Name: Bedrock
@@ -205,7 +205,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 7c787eded87b61347bd511bfd1dc4233, type: 3}
   - {fileID: 8300000, guid: d92969c14d64a4842adedca3250289e2, type: 3}
   - {fileID: 8300000, guid: 6d871d558047fe24abffb686dd53bee7, type: 3}
---- !u!114 &9170696589410686349
+--- !u!114 &-8398930043949228319
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -214,10 +214,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6118796901473174655}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c64fff6d2c61293468fdf8af9bbab426, type: 3}
+  m_Script: {fileID: 11500000, guid: 4a052f48e815204478a045061e3ac6ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   breakingParticles: {fileID: 7021957719075297926, guid: 8b40618432a6d2d428f4acdcc47c12c0, type: 3}
+  crackedParticles: {fileID: 7021957719075297926, guid: 8667ee1a593ff594db280f5955423cf0, type: 3}
 --- !u!114 &-9009503282852880812
 MonoBehaviour:
   m_ObjectHideFlags: 0

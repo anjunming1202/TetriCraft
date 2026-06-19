@@ -962,6 +962,7 @@ Transform:
   m_Children:
   - {fileID: 1241836251}
   - {fileID: 1277678185}
+  - {fileID: 2001859715}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &172956369
@@ -7085,6 +7086,62 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1212774957}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2001859714
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2001859715}
+  - component: {fileID: 2001859716}
+  m_Layer: 0
+  m_Name: GarbageDebugger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2001859715
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2001859714}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 165705759}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2001859716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2001859714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d263ed8172df1b4baf0775f503cb01e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tetrisP1: {fileID: 1106322969}
+  tetrisP2: {fileID: 1167153}
+  gameManagerP1: {fileID: 1806570350}
+  gameManagerP2: {fileID: 1210152287}
+  showDebug: 1
+  fillAlpha: 0.35
+  waveColors:
+  - {r: 1, g: 0.25, b: 0.2, a: 1}
+  - {r: 1, g: 0.55, b: 0.1, a: 1}
+  - {r: 1, g: 0.9, b: 0.15, a: 1}
+  - {r: 0.3, g: 0.8, b: 0.25, a: 1}
+  - {r: 0.2, g: 0.6, b: 1, a: 1}
 --- !u!1 &2031295482
 GameObject:
   m_ObjectHideFlags: 0
