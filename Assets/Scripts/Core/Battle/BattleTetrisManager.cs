@@ -29,6 +29,12 @@ public class BattleTetrisManager : TetrisManager
     /// </summary>
     public int CancelIncomingGarbage(int attack) => garbageManager.CancelIncoming(attack);
 
+#if UNITY_EDITOR
+    public int DebugGarbagePendingTotal => garbageManager != null ? garbageManager.DebugTotalPending : 0;
+    public void DebugGetGarbageWaves(System.Collections.Generic.List<int> result)
+        => garbageManager?.DebugGetWaveLines(result);
+#endif
+
     protected override void OnLockdown()
     {
         // Read previous cycle stats before base resets totalClearLineCount and updates combo

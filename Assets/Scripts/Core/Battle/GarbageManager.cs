@@ -27,6 +27,20 @@ public class GarbageManager : MonoBehaviour
 
     public void Reset() => _pendingWaves.Clear();
 
+#if UNITY_EDITOR
+    public int DebugTotalPending
+    {
+        get { int t = 0; foreach (var w in _pendingWaves) t += w.lines; return t; }
+    }
+
+    // Fills result with one entry per pending wave (line count only).
+    public void DebugGetWaveLines(System.Collections.Generic.List<int> result)
+    {
+        result.Clear();
+        foreach (var w in _pendingWaves) result.Add(w.lines);
+    }
+#endif
+
     /// <summary>
     /// Cancels up to <paramref name="attack"/> lines from the front of the pending incoming garbage.
     /// Returns the overflow — lines remaining after all pending is cancelled.
