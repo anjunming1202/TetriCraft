@@ -23,6 +23,7 @@ public enum BlockID
     NormalPiston,
     PistonHead,
     Bedrock,
+    Wool,
 
     Count
 }
