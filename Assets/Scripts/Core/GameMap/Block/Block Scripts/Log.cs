@@ -19,10 +19,10 @@ public class Log : Block
     {
         int x = GridPosition.x + dirX;
         int y = GridPosition.y + dirY;
-        if (!map.IsBlocked(x, y))
+        if (!map.IsBlockedInsideGrid(x, y))
         {
             Block leaf = BlockSpawner.NewBlock(BlockID.Leaf);
-            map.SpawnBlock(leaf, x, y);
+            map.RequestSpawnBlock(leaf, x, y);
         }
     }
 }

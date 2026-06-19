@@ -6,6 +6,8 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform), typeof(Image))]
 public class BlockIcon : MonoBehaviour
 {
+    public bool isInit => image.sprite != null;
+
     private RectTransform rectTransform;
     private Image image;
 
@@ -16,13 +18,14 @@ public class BlockIcon : MonoBehaviour
     {
         rectTransform = GetComponent<RectTransform>();
         image = GetComponent<Image>();
+        image.color = new Color(1f, 1f, 1f, 0f); // transparent
     }
 
     public void Init(BlockID id, float size = DefaultSize)
     {
         // size
         this.size = size;
-        float pixelSize = size * CoordinateSystems.PixelPerUnit;
+        float pixelSize = size * CoordinateSystems.FixedPixelsPerUnit;
 
         // transform (set size)
         rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, pixelSize);
@@ -31,5 +34,11 @@ public class BlockIcon : MonoBehaviour
         // image
         Sprite blockSprite = BlockResources.GetSprite(id);
         image.sprite = blockSprite;
+        image.color = new Color(1f, 1f, 1f, 1f);
+    }
+
+    public void ClearIcon()
+    {
+        image.sprite = null;
     }
 }

@@ -4,20 +4,25 @@ using UnityEngine;
 
 public class BlockSpawnDebugger : MonoBehaviour
 {
-    [SerializeField] private GameManager gameManager;
-    [SerializeField] private Camera camera;
+    [SerializeField] private PlayerGameManager gameManager;
+    [SerializeField] private Camera playerCamera;
 
-    public MapManager debuggedMap;
-    public BlockID blockSpawned;
-    public Color selectedGridColor;
+    [SerializeField] private MapManager debuggedMap;
 
-    private void Awake()
-    {
-    }
+    [Header("Options")]
+    [SerializeField] private bool isDebugging = true;
+    [SerializeField] private BlockID blockSpawned;
+
+    [Header("Colors")]
+    [SerializeField] private Color selectedGridColor;
+
 
     void Update()
     {
-        if (!gameManager.debug)
+        if (!isDebugging)
+            return;
+
+        if (gameManager.IsPaused)
             return;
 
         if (debuggedMap == null)
@@ -32,14 +37,14 @@ public class BlockSpawnDebugger : MonoBehaviour
         {
             int x = selectedGridPosition.x;
             int y = selectedGridPosition.y;
-            if (debuggedMap.IsBlocked(x, y))
+            if (debuggedMap.IsBlockedInsideGrid(x, y))
                 return;
             else if (hasSpawnedGrids.Contains(new Vector2Int(x, y)))
                 return;
             else
             {
                 Block spawnedBlock = BlockSpawner.NewBlock(blockSpawned);
-                debuggedMap.SpawnBlock(spawnedBlock, x, y);
+                debuggedMap.RequestSpawnBlock(spawnedBlock, x, y);
 
                 hasSpawnedGrids.Add(new Vector2Int(x, y));
             }
@@ -54,11 +59,11 @@ public class BlockSpawnDebugger : MonoBehaviour
         {
             int x = selectedGridPosition.x;
             int y = selectedGridPosition.y;
-            if (!debuggedMap.CheckInside(x, y) || debuggedMap.CheckEmpty(x, y))
+            if (!debuggedMap.CheckInsideWithoutCeiling(x, y) || debuggedMap.CheckEmpty(x, y))
                 return;
             else
             {
-                debuggedMap.DestroyBlock(debuggedMap[x, y]);
+                debuggedMap.RequestDestroyBlock(debuggedMap.GetBlock(x, y));
             }
         }
     }
@@ -74,7 +79,7 @@ public class BlockSpawnDebugger : MonoBehaviour
     private void GetSelectedPosition()
     {
         Vector3 cursorScreenPosition = Input.mousePosition;
-        cursorPosition = CoordinateSystems.GetMouseWorldPosition(camera, cursorScreenPosition);
+        cursorPosition = CoordinateSystems.GetMouseWorldPosition(playerCamera, cursorScreenPosition);
         selectedGridPosition = BoundaryDataManager.GetBoundaryData(debuggedMap.PlayerID).WorldToGrid(cursorPosition);        
     }
 

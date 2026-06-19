@@ -1,4 +1,7 @@
 ﻿
+using BlockSystem;
+using UnityEngine;
+
 public abstract class FluidDummy : Block
 {
     public override bool IsDummy => true;
@@ -21,9 +24,9 @@ public abstract class FluidDummy : Block
         return true;
     }
 
-    public override void OnReplacedBy(Block block)
+    public override ReplacementDisposition GetReplacementDisposition(Block incoming)
     {
-        map.RemoveBlock(this);
+        return ReplacementDisposition.Remove;
     }
 
     public override bool IsClearable()
@@ -37,19 +40,13 @@ public abstract class FluidDummy : Block
         return true;
     }
 
-    public override void OnLockdown()
+    public override void OnPostMoved()
     {
-        FluidManager.dummyBlockPositions.Add(GridPosition);
-        base.OnLockdown();
+        base.OnPostMoved();
+        Debug.LogError($"Shouldn't move the fluid dummy block, {GridPosition}");
     }
 
-    public override void Remove()
-    {
-        FluidManager.dummyBlockPositions.Remove(GridPosition);
-        base.Remove();
-    }
-
-    public override void Destroy()
+    public override void OnPostDestroyed()
     {
         int x = GridPosition.x;
         int y = GridPosition.y;
@@ -65,7 +62,7 @@ public abstract class FluidDummy : Block
 
         FluidManager.fluidSystem.Remove(parentElement);
 
-        base.Destroy();
+        base.OnPostDestroyed();
     }
 
     protected FluidManager FluidManager { get; private set; }

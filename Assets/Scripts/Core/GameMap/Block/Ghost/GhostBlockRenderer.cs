@@ -38,7 +38,8 @@ public class GhostBlockRenderer : BlockRenderer
             case GhostPieceType.Block:
                 spriteRenderer.color = new Color(1, 1, 1, opacity);
                 spriteRenderer.sprite = mainTexture;
-                ghostBlock.orientation = ghostBlock.shadowedBlock.orientation;
+                if (ghostBlock != null && ghostBlock.shadowedBlock != null)
+                    ghostBlock.orientation = ghostBlock.shadowedBlock.orientation;
                 break;
         }
 

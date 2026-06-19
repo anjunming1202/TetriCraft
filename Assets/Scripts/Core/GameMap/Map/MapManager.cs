@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 /// <summary>
 /// Data of blocks in the game
@@ -10,316 +11,278 @@ public class MapManager : MonoBehaviour
     public PlayerID PlayerID { get; private set; }
 
     // map parameters
-    public static float gravity = 15f;
-    public int Width => width;
-    public int Height => height;
+    public const float gravity = 15f;
 
-    // fluid
-    public Dictionary<FluidID, FluidManager> fluidManager;
 
-    // redstone
-    public RedstoneManager RedstoneManager;
+    // Block system manager
+    [SerializeField] private BlockSystemManager blockSystemManager;
+    public int GridWidth => blockSystemManager.GridWidth;
+    public int GridHeight => blockSystemManager.GridHeight;
+    public IReadOnlyList<Block> Blocks => blockSystemManager.Blocks;
+    public BlockNCUpdateManager BlockNCUpdateManager => blockSystemManager.BlockNCUpdateManager;
+    public RedstoneManager RedstoneManager => blockSystemManager.RedstoneManager;
 
-    // block update
-    public BlockUpdateManager BlockUpdateManager;
 
-    public List<MapRandomTickBehaviourObject> mapRandomTickObjects;
-    public int randomTickSelectionCount => width * height;
+    // Fluid system manager
+    [SerializeField] private FluidSystemManager fluidSystemManager;
+    public FluidSystemManager FluidSystem => fluidSystemManager;
 
-    public Block this[int x, int y] => blockGrid[x, y];
 
-    public int blockCount => blockGrid.blockCount;  // debug
-    public BlockGrid grid => blockGrid;
-    public List<Block> blocks => blockList;
-    public List<Block> batchBlocks => blockUpdateBatch;
+    // Entity system manager
+    [SerializeField] private EntityManager entityManager;
 
-    // event
-    public Action<MapManager, Block> OnGridPlace;
 
-    public void InitMap(int width, int height, TetrisManager tetrisManager)
+    // Fire system manager
+    [SerializeField] private FireManager fireManager;
+    public FireManager FireManager => fireManager;
+
+
+    // Random tick manager
+    [SerializeField] private RandomTickManager randomTickManager;
+    public RandomTickManager RandomTickManager => randomTickManager;
+
+
+    // Particle system manager
+    [SerializeField] private ParticleManager particleManager;
+
+
+    // events
+    public delegate void MapBlockEvent(MapManager map, Block block);
+    public event MapBlockEvent OnGridBlockPlaced;
+    public event MapBlockEvent OnBlockLockdown;
+
+
+    // useful tag
+    private bool isInitialised;
+
+
+    public void Initialise()
+    {
+        if (isInitialised) return;
+
+        Debug.Assert(blockSystemManager != null);
+        Debug.Assert(fluidSystemManager != null);
+        Debug.Assert(entityManager != null);
+        Debug.Assert(fireManager != null);
+        Debug.Assert(particleManager != null);
+        Debug.Assert(randomTickManager != null);
+
+        // Block subsystem initialise
+        blockSystemManager.Initialise(this);
+
+        // Fluid subsystem initialise
+        fluidSystemManager.Initialise(this);
+
+        isInitialised = true;
+    }
+
+    public void Dispose()
+    {
+        blockSystemManager.Dispose();
+
+        fluidSystemManager.Dispose();
+
+        isInitialised = false;
+    }
+
+    public void PrepareNewMap(int width, int height, TetrisManager tetrisManager)
     {
         // Player reference
         PlayerID = tetrisManager.PlayerID;
 
-        // Init blocks
-        this.width = width;
-        this.height = height;
-        blockGrid.Init(width, height); // all null
-        blockList = new List<Block>();
-        blockUpdateBatch = new List<Block>();
-        blockDestroyBatch = new List<Block>();
+        // Block subsystem
+        blockSystemManager.PrepareNewMap(width, height);
 
-        BlockUpdateManager = new BlockUpdateManager(this); // block update system
-        RedstoneManager = new RedstoneManager(this); // redstone system
+        // Fluid subsystem
+        fluidSystemManager.PrepareNew(this);
 
-        // Init fluid system
-        waterManager.Init(this);
-        lavaManager.Init(this);
-        fluidManager = new Dictionary<FluidID, FluidManager>()
-        {
-            { FluidID.Water, waterManager },
-            { FluidID.Lava, lavaManager },
-        };
+        // Entity subsystem
+        entityManager.Init(this);
 
-        // Init map event
-        OnGridPlace += waterManager.BlockSqueeze; // squeeze fluid
-        OnGridPlace += lavaManager.BlockSqueeze;
+        // Fire subsystem
+        fireManager.Init(this);
 
-        OnGridPlace += Flame.TryExtinguishBy; // try extinguish fire
+        // Random tick subsystem
+        randomTickManager.Init(this);
     }
 
-    public Block GetBlock(int x, int y)
+    public void ClearMap()
     {
-        if (CheckInsideGrid(x, y))
-            return blockGrid[x, y];
-        return null;
-    }
+        // Block
+        blockSystemManager.ClearMap();
 
-    public IEnumerable<Block> GetAdjacentBlocks(int x, int y, bool includeSelf = false)
-    {
-        if (includeSelf)
-            yield return GetBlock(x, y);
-        foreach (Vector2Int offset in new Vector2Int[] {Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down})
-            yield return GetBlock(x + offset.x, y + offset.y);
-    }
+        // Fluid
+        fluidSystemManager.Clear();
 
-    public bool IsBlocked(int x, int y)
-    {
-        return !CheckInside(x, y) || !CheckEmpty(x, y);
-    }
+        // Entity
+        entityManager.Clear();
 
-    public void SpawnTetromino(MapTetromino tetromino)
-    {
-        for (int r = 0; r < tetromino.size; r++)
-            for (int c = 0; c < tetromino.size; c++)
-            {
-                Block block = tetromino.shape[r, c];
-                if (block == null)
-                    continue;
-                Vector2Int gridPosition = tetromino.LocalToMap(r, c);
-                block.OnSpawn(this);
-                AddNewBlock(block, gridPosition.x, gridPosition.y, false);
-                block.transform.SetParent(tetromino.transform);
-            }
-    }
+        // Fire
+        fireManager.Clear();
 
-    public void SpawnBlock(Block block, int x, int y)
-    {
-        if (blockGrid[x, y] != null)
-            blockGrid[x, y].OnReplacedBy(block);
+        // Random tick
+        randomTickManager.Clear();
 
-        block.OnSpawn(this);
-        AddNewBlock(block, x, y, true);
-    }
+        // Particle
+        particleManager.ClearAll();
 
-    public void DestroyBlock(Block block)
-    {
-        blockGrid.Remove(block);
-        block.Destroy();
-        blockList.Remove(block);
-    }
-
-    public void RemoveBlock(Block block)
-    {
-        blockGrid.Remove(block);
-        block.Remove();
-        blockList.Remove(block);
+        Debug.Log("Cleared all objects in the current map");
     }
 
     // map one frame update
     public void OnUpdate()
     {
-        // Framely block update
-        for (int i = 0; i < blockList.Count; i++)
-        {
-            blockList[i].OnUpdate();
-        }
+        // Block grid update
+        blockSystemManager.OnUpdate();
 
-        if (blockUpdateBatch.Count > 0)
-        {
-            BatchUpdateBlocks();
-        }
-
-        // Fluid Update
-        waterManager.OnUpdate();
-        lavaManager.OnUpdate();
-        SpawnFluidConcretion();
+        // Fluid update
+        fluidSystemManager.OnUpdate();
 
         // Random tick behaviours
-        RandomTick.InvokeRandomBehaviours(this);
+        randomTickManager.OnUpdate();
 
-        // Block update
-        BlockUpdateManager.BlockUpdate();
+        // Entity update
+        entityManager.OnUpdate();
 
-        // Redstone
-        RedstoneManager.RedstoneUpdate();
+        // Flush any block spawn requests queued by fluid/entity systems this frame,
+        // so OnRegistered (and random tick registration) runs in the same frame.
+        blockSystemManager.ImmediatelyProcessGridPendingUpdates();
     }
 
-    public void BatchUpdateBlocks()
+    public Block GetBlock(int x, int y)
     {
-        foreach (Block block in blockUpdateBatch)
-        {
-            blockGrid.Remove(block);
-        }
-        foreach (Block block in blockUpdateBatch)
-        {
-            // if dummy
-            int x = block.GridPosition.x;
-            int y = block.GridPosition.y;
-            if (blockGrid[x, y] != null && blockGrid[x, y].IsDummy)
-            {
-                RemoveBlock(blockGrid[x, y]);
-            }
-            blockGrid.Add(block);
-        }
-        foreach (Block block in blockUpdateBatch)
-        {
-            OnGridPlace?.Invoke(this, block);
-        }
-        blockUpdateBatch.Clear();
+        return blockSystemManager.GetBlock(x, y);
+    }
+    public Block GetBlock(Vector2Int gridPosition)
+    {
+        return blockSystemManager.GetBlock(gridPosition.x, gridPosition.y);
     }
 
-    /*private void Update()
+    public IEnumerable<Block> GetAdjacentBlocks(int x, int y, bool includeSelf = false)
     {
-        if (blockUpdateBatch.Count > 0)
-        {
-            BatchUpdateBlocks();
-        }
-    }*/
-
-    private void AddToUpdateBatch(Block block)
-    {
-        if (block.isRemoved)
-            return;
-        if (!blockUpdateBatch.Contains(block))
-            blockUpdateBatch.Add(block);
+        return blockSystemManager.GetAdjacentBlocks(x, y, includeSelf);
     }
 
-    private void RemoveFromUpdateBatch(Block block)
+    public void SpawnTetromino(MapTetromino tetromino)
     {
-        if (blockUpdateBatch.Contains(block))
-            blockUpdateBatch.Remove(block);
+        blockSystemManager.RequestSpawnTetromino(tetromino);
     }
 
-    /// <summary>
-    /// Add new block into the map
-    /// </summary>
-    private void AddNewBlock(Block block, int x, int y, bool lockdownState)
+    public void RequestSpawnBlock(Block block, int x, int y)
     {
-        block.SetPosition(x, y);
-
-        blockGrid.Add(block);
-
-        block.OnMoved += AddToUpdateBatch;
-        block.OnRemoved += RemoveFromUpdateBatch;
-
-        blockList.Add(block);
-
-        if (lockdownState)
-            block.OnLockdown();
-
-        //OnGridPlace?.Invoke(this, block); //
+        blockSystemManager.RequestSpawnBlock(block, x, y);
     }
 
-    private void SpawnFluidConcretion()
+    public void RequestMoveBlock(Block block, int x, int y, bool animated = true)
     {
-        for (int i =  waterManager.fluidSystem.elements.Count - 1; i >= 0; i--)
-        {
-            FluidElement waterElement = waterManager.fluidSystem.elements[i];
-            List<FluidElement> collidedLavaElements = lavaManager.fluidSystem.GetCollidedElements(waterElement);
-            FluidElement lavaElement = collidedLavaElements.Count > 0 ? collidedLavaElements[0] : null;
-            if (lavaElement != null && lavaElement.amount > 0 && waterElement.amount > 0)
-            {
-                // Spawn block
-                int concretionAmount = Mathf.Min(waterElement.upperLevel, lavaElement.upperLevel) - Mathf.Max(waterElement.lowerLevel, lavaElement.lowerLevel);
-                waterElement.amount -= concretionAmount;
-                lavaElement.amount -= concretionAmount;
-
-                Block spawnedBlock;
-                if (waterElement.hasFlown)
-                    spawnedBlock = BlockSpawner.NewBlock(waterToLava);
-                else if (lavaElement.hasFlown)
-                    spawnedBlock = BlockSpawner.NewBlock(lavaToWater);
-                else //
-                    spawnedBlock = BlockSpawner.NewBlock(waterToLava);
-
-                spawnedBlock.GetComponent<BlockSoundManager>().placedSounds = new AudioClip[] { fizzSound };
-                SpawnBlock(spawnedBlock, waterElement.column, waterElement.lowerGridPosition);
-            }
-        }
+        blockSystemManager.RequestMoveBlock(block, x, y, animated);
     }
 
-    // Blocks
-    [SerializeField] public BlockGrid blockGrid;
+    public void RequestDestroyBlock(Block block)
+    {
+        blockSystemManager.RequestDestroyBlock(block);
+    }
 
-    // Fluid
-    [SerializeField] private FluidManager waterManager;
-    [SerializeField] private FluidManager lavaManager;
+    public void RequestRemoveBlock(Block block)
+    {
+        blockSystemManager.RequestRemoveBlock(block);
+    }
 
-    [SerializeField] private AudioClip fizzSound;
-    private BlockID waterToLava = BlockID.Obsidian;
-    private BlockID lavaToWater = BlockID.Cobblestone;
+    public void ImmediatelyProcessGridPendingUpdates()
+    {
+        blockSystemManager.ImmediatelyProcessGridPendingUpdates();
+    }
 
-    // Map Boundary Data
-    private int width;
-    private int height;
+    public void ReparentBlock(Block block)
+    {
+        block.transform.SetParent(blockSystemManager.blockRoot, true);
+    }
 
-    // Map update
-    private List<Block> blockList;
-    private List<Block> blockUpdateBatch;
-    private List<Block> blockDestroyBatch;
+    public void RequestNCUpdate(Vector2Int gridPosition)
+    {
+        blockSystemManager.BlockNCUpdateManager.RequestPendingNCUpdateSource(gridPosition);
+    }
 
+    public void HandleOnGridBlockPlaced(Block block)
+    {
+        OnGridBlockPlaced?.Invoke(this, block);
+        fireManager.TryExtinguishAt(block);
+    }
+
+    public void ImmediateBlockSqueezeFluids(Block block)
+    {
+        fluidSystemManager.ImmediateBlockSqueeze(this, block);
+    }
+
+
+    public void RequestSpawnEntity(Entity entity, float x, float y)
+    {
+        entityManager.RequestAddEntity(entity, x, y);
+    }
+
+    public void RequestKillEntity(Entity entity)
+    {
+        entityManager.RequestKillEntity(entity);
+    }
+
+    public ParticleSystem SpawnParticle(ParticleSystem prefab, float x, float y)
+    {
+        Vector3 worldPosition = BoundaryDataManager.GetBoundaryData(PlayerID).MapToWorld(new Vector2(x, y));
+        return particleManager.SpawnParticle(prefab, worldPosition);
+    }
+
+    public ParticleSystem SpawnParticle(ParticleSystem prefab, Vector3 worldPosition)
+    {
+        return particleManager.SpawnParticle(prefab, worldPosition);
+    }
+
+    public void DespawnParticle(ParticleSystem particle)
+    {
+        particleManager.DespawnParticle(particle);
+    }
 
 
 
     // Check map data
-    /// <summary>
-    /// Check for bottom, left, and right boundaries
-    /// </summary>
-    public bool CheckInside(int x, int y)
+    public bool IsBlockedWithoutCeiling(int x, int y)
     {
-        return blockGrid.CheckInside(x, y);
+        return (!CheckInsideWithoutCeiling(x, y) || (CheckInsideBlockGrid(x, y) && !CheckEmpty(x, y)));
+    }
+
+    public bool IsBlockedInsideGrid(int x, int y)
+    {
+        return !CheckInsideBlockGrid(x, y) || !CheckEmpty(x, y);
+    }
+
+    public bool CheckInsideWithoutCeiling(int x, int y)
+    {
+        return blockSystemManager.CheckInsideWithoudCeiling(x, y);
+    }
+    public bool CheckInsideBlockGrid(int x, int y)
+    {
+        return blockSystemManager.CheckInsideGrid(x, y);
     }
     public bool CheckEmpty(int x, int y)
     {
-        return blockGrid.CheckEmpty(x, y) || blockGrid[x, y].IsDummy;
-    }
-    public bool CheckInsideGrid(int x, int y)
-    {
-        return blockGrid.CheckInsideGrid(x, y);
+        return blockSystemManager.CheckEmpty(x, y) || blockSystemManager.GetBlock(x, y).IsDummy;
     }
 
     public bool CheckRowFull(int row)
     {
-        for (int column = 0; column < width; column++)
-        {
-            if (blockGrid[column, row] == null || !blockGrid[column, row].IsClearable())
-                return false;
-        }
-        return true;
+        return blockSystemManager.CheckRowFull(row);
     }
     public bool CheckRowEmpty(int row)
     {
-        for (int column = 0; column < width; column++)
-        {
-            if (blockGrid[column, row] != null && blockGrid[column, row].isLocked)
-                return false;
-        }
-        return true;
-    }
-
-    public bool IsInsideGrid(int x, int y)
-    {
-        return x >= 0 && x < width && y >= 0 && y < height;
+        return blockSystemManager.CheckRowEmpty(row);
     }
 
     public bool CheckMapEmpty()
     {
-        for (int row = 0; row < height - 1; row++)
-        {
-            if (!CheckRowEmpty(row))
-                return false;
-        }
-        return true;
+        return blockSystemManager.CheckMapEmpty();
+    }
+
+    public bool ContainBlock(Block block)
+    {
+        return blockSystemManager.Contains(block);
     }
 }

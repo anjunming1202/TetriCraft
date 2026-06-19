@@ -1,17 +1,16 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class RedstoneBlock : Block
+public class RedstoneBlock : Block, IRedstonePowerSource
 {
     public override BlockID ID => BlockID.RedstoneBlock;
 
-    public override void OnDischarged(Vector2Int sourcePosition)
-    {
-        return;
-    }
+    // RedstoneBlock always emits power in all directions
+    public bool PowersPosition(Vector2Int myPos, Vector2Int neighborPos) => true;
 
-    public override void OnSpawn(MapManager map)
+    public override void OnPostSpawned()
     {
-        base.OnSpawn(map);
-        OnCharged(GridPosition);
+        base.OnPostSpawned();
+        // Notify adjacent blocks that a power source appeared
+        TriggerSelfNCUpdate();
     }
 }

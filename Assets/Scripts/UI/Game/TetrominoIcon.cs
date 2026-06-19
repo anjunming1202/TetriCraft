@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class TetrominoIcon : MonoBehaviour
 {
+    public bool isInit => blockIcons[0].isInit;
+
     public BlockIcon[] blockIcons;
 
     private float blockSize;
@@ -27,7 +29,7 @@ public class TetrominoIcon : MonoBehaviour
     {
         // size data
         this.blockSize = blockSize;
-        float blockPixelSize = blockSize * CoordinateSystems.PixelPerUnit;
+        float blockPixelSize = blockSize * CoordinateSystems.FixedPixelsPerUnit;
 
         // tetromino transform (set tetromino size)
         RectTransform tetrominoTransform = GetComponent<RectTransform>();
@@ -55,6 +57,14 @@ public class TetrominoIcon : MonoBehaviour
 
                 blockCount++;
             }
+    }
+
+    public void ClearIcons()
+    {
+        foreach (var blockIcon in blockIcons)
+        {
+            blockIcon.ClearIcon();
+        }
     }
 
     public bool CheckChildBlocksExisting() => blockIcons.Length == 4;

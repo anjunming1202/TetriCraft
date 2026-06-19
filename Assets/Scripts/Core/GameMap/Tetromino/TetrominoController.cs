@@ -45,24 +45,30 @@ public class TetrominoController : MonoBehaviour
     private Coroutine rotateCCWCoroutine;
     private Coroutine rotateCWCoroutine;
 
-    private void Awake()
+    private Action<InputAction.CallbackContext> _leftStartedHandler;
+    private Action<InputAction.CallbackContext> _leftCanceledHandler;
+    private Action<InputAction.CallbackContext> _rightStartedHandler;
+    private Action<InputAction.CallbackContext> _rightCanceledHandler;
+    private Action<InputAction.CallbackContext> _rotateCCWStartedHandler;
+    private Action<InputAction.CallbackContext> _rotateCCWCanceledHandler;
+    private Action<InputAction.CallbackContext> _rotateCWStartedHandler;
+    private Action<InputAction.CallbackContext> _rotateCWCanceledHandler;
+    private Action<InputAction.CallbackContext> _softDropStartedHandler;
+    private Action<InputAction.CallbackContext> _softDropCanceledHandler;
+    private Action<InputAction.CallbackContext> _hardDropPerformedHandler;
+
+    /*private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
         //playerInput.actions = InputRoot.Instance.playerInput.actions;
-    }
+    }*/
 
-    private void OnEnable()
+    public void Initialise()
     {
-        
-    }
+        // player input reference
+        playerInput = GetComponent<PlayerInput>();
 
-    private void OnDisable()
-    {
-        
-    }
-
-    private void Start()
-    {
+        // input action references
         var actionMap = playerInput.actions.FindActionMap(actionMapName, throwIfNotFound: true);
 
         left = actionMap?.FindAction("Left");
@@ -72,44 +78,69 @@ public class TetrominoController : MonoBehaviour
         softDrop = actionMap?.FindAction("SoftDrop");
         hardDrop = actionMap?.FindAction("HardDrop");
 
-        left.started += ctx => OnStartRepeatingAction(ref leftCoroutine, OnLeft, left);
-        left.canceled += ctx => OnCancelRepeatingAction(ref leftCoroutine);
+        // controller action handlers
+        _leftStartedHandler = ctx => OnStartRepeatingAction(ref leftCoroutine, OnLeft, left);
+        _leftCanceledHandler = ctx => OnCancelRepeatingAction(ref leftCoroutine);
+        _rightStartedHandler = ctx => OnStartRepeatingAction(ref rightCoroutine, OnRight, right);
+        _rightCanceledHandler = ctx => OnCancelRepeatingAction(ref rightCoroutine);
+        _rotateCCWStartedHandler = ctx => OnStartRepeatingAction(ref rotateCCWCoroutine, OnRotateCCW, rotateCCW);
+        _rotateCCWCanceledHandler = ctx => OnCancelRepeatingAction(ref rotateCCWCoroutine);
+        _rotateCWStartedHandler = ctx => OnStartRepeatingAction(ref rotateCWCoroutine, OnRotateCW, rotateCW);
+        _rotateCWCanceledHandler = ctx => OnCancelRepeatingAction(ref rotateCWCoroutine);
+        _softDropStartedHandler = ctx => OnSoftDropStart();
+        _softDropCanceledHandler = ctx => OnSoftDropStop();
+        _hardDropPerformedHandler = ctx => OnHardDrop();
 
-        right.started += ctx => OnStartRepeatingAction(ref rightCoroutine, OnRight, right);
-        right.canceled += ctx => OnCancelRepeatingAction(ref rightCoroutine);
+        // binding input actions
+        left.started += _leftStartedHandler;
+        left.canceled += _leftCanceledHandler;
 
-        rotateCCW.started += ctx => OnStartRepeatingAction(ref rotateCCWCoroutine, OnRotateCCW, rotateCCW);
-        rotateCCW.canceled += ctx => OnCancelRepeatingAction(ref rotateCCWCoroutine);
+        right.started += _rightStartedHandler;
+        right.canceled += _rightCanceledHandler;
 
-        rotateCW.started += ctx => OnStartRepeatingAction(ref rotateCWCoroutine, OnRotateCW, rotateCW);
-        rotateCW.canceled += ctx => OnCancelRepeatingAction(ref rotateCWCoroutine);
+        rotateCCW.started += _rotateCCWStartedHandler;
+        rotateCCW.canceled += _rotateCCWCanceledHandler;
 
-        softDrop.started += ctx => OnSoftDropStart();
-        softDrop.canceled += ctx => OnSoftDropStop();
+        rotateCW.started += _rotateCWStartedHandler;
+        rotateCW.canceled += _rotateCWCanceledHandler;
 
-        hardDrop.performed += ctx => OnHardDrop();
+        softDrop.started += _softDropStartedHandler;
+        softDrop.canceled += _softDropCanceledHandler;
+
+        hardDrop.performed += _hardDropPerformedHandler;
     }
 
-    void OnDestroy()
+    public void Dispose()
     {
-        
+        left.started -= _leftStartedHandler;
+        left.canceled -= _leftCanceledHandler;
+
+        right.started -= _rightStartedHandler;
+        right.canceled -= _rightCanceledHandler;
+
+        rotateCCW.started -= _rotateCCWStartedHandler;
+        rotateCCW.canceled -= _rotateCCWCanceledHandler;
+
+        rotateCW.started -= _rotateCWStartedHandler;
+        rotateCW.canceled -= _rotateCWCanceledHandler;
+
+        softDrop.started -= _softDropStartedHandler;
+        softDrop.canceled -= _softDropCanceledHandler;
+
+        hardDrop.performed -= _hardDropPerformedHandler;
     }
 
-    public void Initialise(MapManager map, MapTetromino tetromino)
+    public void Reset(MapManager map, MapTetromino tetromino)
     {
         this.map = map;
         this.tetromino = tetromino;
 
         InitPlayerInput();
 
-        Reset();
-        Deactivate();
-    }
-
-    private void Reset()
-    {
         isAccelerating = false;
         dropTimer = 0;
+
+        Deactivate();
     }
 
     public void Activate()

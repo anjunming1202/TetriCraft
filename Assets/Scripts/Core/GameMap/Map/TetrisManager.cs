@@ -14,79 +14,104 @@ public class TetrisManager : MonoBehaviour
 
     [Header("Map Objects")]
     [SerializeField] private MapManager map;
+    protected MapManager Map => map;
 
     [SerializeField] private MapTetromino fallingTetromino;
     [SerializeField] private TetrominoController tetrominoController;
 
-    [SerializeField] private DummyTetromino ghostTetromino;
+    [SerializeField] private GhostTetromino ghostTetromino;
 
     [SerializeField] private DummyTetromino[] nextTetrominoList = new DummyTetromino[4];
-    public List<DummyTetromino> nextTetrominos { get; private set; } = new List<DummyTetromino>(); // inner reference
+    public List<DummyTetromino> nextTetrominos { get; private set; } = new List<DummyTetromino>();
 
     [Header("Rendering Data")]
     [SerializeField] private Canvas sceneCanvas;
 
 
+    // Tetris map data
+    protected int boundaryWidth;
+    private int boundaryHeight;
+
     // Line clear data
-    public uint lastClearLineCount = 0;
-    public uint combo = 0;
+    public uint totalClearLineCount { get; private set; }
+    public uint combo { get; private set; }
 
     // Updating state
-    public bool isUpdating /*{ get; private set; } */= false;
+    public bool isUpdating { get; private set; }
 
-    // Turn state
+    // Tetris map states
     private bool isTurnFinished;
     public event Action OnFinishedTurn;
     public event Action OnStartedTurn;
 
-    // Readonly Data
-    public int blockCount => map.blockCount;    // debug
-
     // Events
-    public event Action OnGameOver;
+    public event Action OnTetrominoListInitialised;
+    public event Action OnGameDead;
 
-    public delegate void MapEvent(TetrisManager mapManager);
-    public event MapEvent OnLineClear;
+    public event Action<TetrisManager> OnLineClear;
+    public event Action<PlayerID, uint, uint, uint> OnLineClearWithInfo; // player id, new line count, total line count, combo, (clear type)
     public event MapTetromino.TetrominoEvent OnTetrominoSoftDrop;
     public event MapTetromino.TetrominoEvent OnTetrominoHardDrop;
 
 
 
-    private void Awake()
+    public void Initialise()
     {
+        map.Initialise();
+
+        tetrominoController.Initialise();
+
         fallingTetromino.OnLockdown += OnLockdown;
         fallingTetromino.OnSoftDrop += (MapTetromino tetromino) => OnTetrominoSoftDrop?.Invoke(tetromino);
         fallingTetromino.OnHardDrop += (MapTetromino tetromino) => OnTetrominoHardDrop?.Invoke(tetromino);
     }
 
-    public void InitMap(int Width, int height, GameManager gameManager)
+    public void PrepareNewTetrisMap(int boundaryWidth, int boundaryHeight, PlayerID playerID)
     {
         // Player reference
-        this.PlayerID = gameManager.playerID;
+        this.PlayerID = playerID;
 
         // Initialise map
-        map.InitMap(Width, height, this);
+        map.PrepareNewMap(boundaryWidth, boundaryHeight + 5, this);
+        this.boundaryWidth = boundaryWidth;
+        this.boundaryHeight = boundaryHeight;
 
-        // Initialise tetrominos
-        fallingTetromino.Init();
-        tetrominoController.Initialise(map, fallingTetromino);
+        // Initialise falling tetromino
+        fallingTetromino.InitEmptyTetromino();
+        fallingTetromino.Reset();
+        tetrominoController.Reset(map, fallingTetromino);
+
+        // Initialise ghost tetromino
+        ghostTetromino.CreateGhostBlocks();
+
+        // Initialise next tetrominos
+        InitNextTetrominoList();
 
         // Initialise data
         StopUpdating();
-        lastClearLineCount = 0;
-        combo = 0;
+        isTurnFinished = false;
+        totalClearLineCount = 0;
+        combo = 0; 
+        isUpdating = false;
+    }
 
-        // Initialise event
-        OnFinishedTurn += () => isTurnFinished = true;
+    public void CleanUpTetrisMap()
+    {
+        map.ClearMap();
 
-        // Initialise map ticks
-        TickManager.Init();
+        ghostTetromino.ClearAllBlocks();
+        fallingTetromino.ClearAllBlocks();
+        foreach (var tetromino in nextTetrominoList)
+            tetromino.ClearAllBlocks();
     }
 
     public void OnUpdate()
     {
         if (isUpdating)
         {
+            // Check game is not dead
+            TryEndGame();
+
             // Update turn
             if (isTurnFinished)
             {
@@ -101,15 +126,11 @@ public class TetrisManager : MonoBehaviour
             TryClearLines();
 
             // Display ghost tetromino
-            SetGhostTetromino();
+            UpdateGhostTetromino();
 
             // Update map
             TickManager.Update();
             map.OnUpdate();
-
-            // Check game over
-            if (CheckGameover())
-                OnGameOver?.Invoke();
         }
     }
 
@@ -117,8 +138,14 @@ public class TetrisManager : MonoBehaviour
     {
         ResumeUpdating();
         // Start first turn
-        InitNextTetrominoList();
         OnNextTurn();
+    }
+
+    public bool AnyBlockAnimating()
+    {
+        foreach (Block block in map.Blocks)
+            if (block.isAnimating) return true;
+        return false;
     }
 
     public void StopUpdating()
@@ -133,16 +160,13 @@ public class TetrisManager : MonoBehaviour
         tetrominoController.Activate();
     }
 
-    public bool CheckGameover()
+    public void TryEndGame()
     {
-        int deathline = map.Height;
-        bool gameover = !map.CheckRowEmpty(deathline);
-        return gameover;
-    }
+        if (!CheckGameDead())
+            return;
 
-    public void Render()
-    {
-
+        StopUpdating();
+        OnGameDead?.Invoke();
     }
 
     //================================//
@@ -155,14 +179,14 @@ public class TetrisManager : MonoBehaviour
 
         // Set tetromino to the spawn position
         Vector2Int spawnPosition = GetSpawnPosition();
-        fallingTetromino.SetPosition(spawnPosition);
+        fallingTetromino.SetPositionPending(spawnPosition);
         map.SpawnTetromino(fallingTetromino);
     }
 
     private Vector2Int GetSpawnPosition()
     {
         // x position
-        int x = (map.Width - fallingTetromino.size) / 2;
+        int x = (boundaryWidth - fallingTetromino.size) / 2;
 
         // y position        
         int distance = int.MaxValue; // distance tetromino need to move
@@ -171,7 +195,7 @@ public class TetrisManager : MonoBehaviour
             {
                 if (fallingTetromino.shape[r, c] != null)
                 {
-                    int distance_new = fallingTetromino.LocalToMap(r, c).y - map.Height;
+                    int distance_new = fallingTetromino.LocalToMap(r, c).y - boundaryHeight;
                     if (distance_new < distance)
                         distance = distance_new;
                 }
@@ -182,15 +206,15 @@ public class TetrisManager : MonoBehaviour
         return new Vector2Int(x, y);
     }
 
-    private void OnLockdown()
+    protected virtual void OnLockdown()
     {
         foreach(Block block in fallingTetromino.GetComponentsInChildren<Block>())
         {
-            block.transform.SetParent(map.blockGrid.transform, true);
+            map.ReparentBlock(block);
         }
 
         // Clear line & line-clear data logic
-        lastClearLineCount = 0;
+        totalClearLineCount = 0;
         bool successfulClear = TryClearLines();
         if (successfulClear)
         {
@@ -201,11 +225,12 @@ public class TetrisManager : MonoBehaviour
             combo = 0;
         }
 
-        // Finish this turn
+        // Turn state to finish
+        isTurnFinished = true;
         OnFinishedTurn?.Invoke();
     }
 
-    private void OnNextTurn()
+    protected virtual void OnNextTurn()
     {
         // Stop when game over
         if (!isUpdating)
@@ -215,16 +240,21 @@ public class TetrisManager : MonoBehaviour
         DummyTetromino tetrominoSpawned = nextTetrominos[0];
         SpawnTetromino(tetrominoSpawned);
 
-        // Init ghost block
-        InitGhostTetromino(tetrominoSpawned);
-
         // Create next new tetromino
         nextTetrominos.RemoveAt(0);
         nextTetrominos.Add(tetrominoSpawned);
         TetrominoGenerator.NewRandomTetromino(tetrominoSpawned);
 
-        // Start the turn
+        // Turn state to start
+        isTurnFinished = false;
         OnStartedTurn?.Invoke();
+    }
+
+    private bool CheckGameDead()
+    {
+        int deathline = boundaryHeight;
+        bool gameover = !map.CheckRowEmpty(deathline);
+        return gameover;
     }
 
     private void InitNextTetrominoList()
@@ -235,6 +265,8 @@ public class TetrisManager : MonoBehaviour
             nextTetrominos.Add(tetromino);
             tetromino.gameObject.SetActive(false);
         }
+
+        OnTetrominoListInitialised?.Invoke();
     }
 
     /// <summary>
@@ -243,7 +275,7 @@ public class TetrisManager : MonoBehaviour
     private bool TryClearLines()
     {
         uint newLineCount = 0;
-        for (int i = 0; i < map.Height; i++)
+        for (int i = 0; i < map.GridHeight; i++)
         {
             bool successful = TryClearLine(i);
             if (successful)
@@ -251,8 +283,13 @@ public class TetrisManager : MonoBehaviour
         }
         if (newLineCount > 0)
         {
-            lastClearLineCount += newLineCount;
+            // accumulate count before next tetromino locked
+            totalClearLineCount += newLineCount;
+
+            // events
             OnLineClear?.Invoke(this);
+            OnLineClearWithInfo?.Invoke(PlayerID, newLineCount, totalClearLineCount, combo);
+
             return true;
         }
         return false;
@@ -269,37 +306,32 @@ public class TetrisManager : MonoBehaviour
     private void ClearLine(int row)
     {
         // clear row
-        for (int i = 0; i < map.Width; i++)
+        for (int i = 0; i < map.GridWidth; i++)
         {
             Block block = map.GetBlock(i, row);
             if (block != null)
-                map.DestroyBlock(block);
+                map.RequestDestroyBlock(block);
         }
+        map.ImmediatelyProcessGridPendingUpdates();
+
         // move above rows down
-        for (int y = row + 1; y < map.Height; y++)
+        for (int y = row + 1; y < map.GridHeight; y++)
         {
-            for (int x = 0; x < map.Width; x++)  // * must from bottom to top
+            for (int x = 0; x < map.GridWidth; x++)  // * must from bottom to top
             {
-                if (map.CheckEmpty(x, y) || !map[x, y].isLocked)
+                if (map.CheckEmpty(x, y) || !map.GetBlock(x, y).isLocked)
                     continue;
                 if (!map.CheckEmpty(x, y - 1))
                     continue;
-                map[x, y].SetPosition(x, y - 1, true);
+
+                Block block = map.GetBlock(x, y);
+                map.RequestMoveBlock(block, x, y - 1);
             }
-            map.BatchUpdateBlocks(); // update once for each row
+            map.ImmediatelyProcessGridPendingUpdates(); // update once for each row
         }
     }
 
-    private void InitGhostTetromino(Tetromino tetromino)
-    {
-        for (int i = 0; i < ghostTetromino.blocks.Length; i++)
-        {
-            GhostBlock block = ghostTetromino.blocks[i] as GhostBlock;
-            block.Shadow(tetromino.blocks[i]);
-        }
-    }
-
-    private void SetGhostTetromino()
+    private void UpdateGhostTetromino()
     {
         if (fallingTetromino.type == TetrominoType.None)
         {
@@ -315,14 +347,14 @@ public class TetrisManager : MonoBehaviour
             iter++;
             Debug.Assert(iter < 10000, "infinite while");
 
-            fallingTetromino.Shift(0, -1);
+            fallingTetromino.ShiftPending(0, -1);
             reachedBottom = !fallingTetromino.CheckValid(map);
         }
-        fallingTetromino.Shift(0, 1); // step back by 1
+        fallingTetromino.ShiftPending(0, 1); // step back by 1
 
-        ghostTetromino.Transform(fallingTetromino);
+        ghostTetromino.Shadow(fallingTetromino);
         ghostTetromino.SetPosition(fallingTetromino.position, map);
 
-        fallingTetromino.SetPosition(fallingTetrominoPosition);
+        fallingTetromino.SetPositionPending(fallingTetrominoPosition);
     }
 }

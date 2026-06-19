@@ -2,7 +2,14 @@ using UnityEngine;
 
 public static class CoordinateSystems
 {
-    public static float PixelPerUnit => (Camera.main.WorldToScreenPoint(new Vector3(1,0,0)) - Camera.main.WorldToScreenPoint(Vector3.zero)).x;
+    public static float FixedPixelsPerUnit => 64f;
+
+    public static float UnitToPixel(float unit, float cameraOrthographicSize = -1)
+    {
+        float orthographicSize = cameraOrthographicSize == -1 ? Camera.main.orthographicSize : cameraOrthographicSize;
+        float pixelsPerWorldUnit = Screen.height / (cameraOrthographicSize * 2f);
+        return unit * pixelsPerWorldUnit;
+    }
 
     /// <summary>
     /// 

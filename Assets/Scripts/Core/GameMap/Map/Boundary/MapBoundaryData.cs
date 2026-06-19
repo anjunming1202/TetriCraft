@@ -16,7 +16,7 @@ public class MapBoundaryData : ScriptableObject
     public static MapBoundaryData Create(Transform boundaryRegion)
     {
         var instance = CreateInstance<MapBoundaryData>();
-        instance.boundary.size = boundaryRegion.transform.localScale;
+        instance.boundary.size = boundaryRegion.transform.lossyScale;
         instance.boundary.center = boundaryRegion.transform.position;
         return instance;
     }
@@ -42,5 +42,9 @@ public class MapBoundaryData : ScriptableObject
     public static Vector3 MapToWorldRelative(Vector2 posMap)
     {
         return (Vector3)(posMap * unitSize);
+    }
+    public static Vector2Int MapToGrid(Vector2 posMap)
+    {
+        return new Vector2Int(Mathf.FloorToInt(posMap.x), Mathf.FloorToInt(posMap.y));
     }
 }

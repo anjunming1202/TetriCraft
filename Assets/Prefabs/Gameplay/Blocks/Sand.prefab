@@ -153,6 +153,8 @@ MonoBehaviour:
   wasActivated: 0
   isCharged: 0
   id: 5
+  fallingBlockEntityPrefab: {fileID: 2853008798035718692, guid: 94429aea71815174d84423cb2ff56a0a, type: 3}
+  maxSpeed: 10
 --- !u!114 &671932412832912740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180,6 +182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83cde78856fb25741acdccb7ca2d5758, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerID: 0
   startPosition: {x: 0, y: 0, z: 0}
   endPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &-4112071912644774665

@@ -35,9 +35,22 @@ public class FluidSystem : MonoBehaviour
         elements.Remove(element);
 
         RemoveFromColumnLists(element);
-
+        
         GameObject.Destroy(element.gameObject);
     }
+
+    public void ClearAllElements()
+    {
+        foreach (FluidElement element in elements)
+        {
+            GameObject.Destroy(element.gameObject);
+            RemoveFromColumnLists(element);
+        }
+        elements = new List<FluidElement>();
+
+        Debug.Assert(columnElementLists[0].Count == 0);
+        Debug.Log("Cleared all elements in the fluid system");
+    }    
 
     public Vector2Int GetGridPosition(int column, int level)
     {
@@ -134,8 +147,8 @@ public class FluidSystem : MonoBehaviour
             /*if (y == element.upperGridPosition && element.localUpperLevel == 0)
                 continue;*/
 
-            if (mapManager.CheckInside(element.column, y) && mapManager.IsBlocked(element.column, y))
-                blockList.Add(mapManager[element.column, y]);
+            if (mapManager.CheckInsideWithoutCeiling(element.column, y) && mapManager.IsBlockedWithoutCeiling(element.column, y))
+                blockList.Add(mapManager.GetBlock(element.column, y));
         }
         return blockList;
     }

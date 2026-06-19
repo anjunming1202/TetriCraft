@@ -1,25 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public interface IRedstoneActivatable
 {
     /// <summary>
-    /// Activate only if it's deactivated when source is added
+    /// Called when this block becomes activated by an adjacent power source.
     /// </summary>
-    public void OnRedstoneActivated();
+    void OnRedstoneActivated();
 
     /// <summary>
-    /// Deactivate only if it's activated when source is removed
+    /// Called when this block loses all adjacent power sources.
     /// </summary>
-    public void OnRedstoneDeactivated();
+    void OnRedstoneDeactivated();
 
     /// <summary>
-    /// 
+    /// Optional filter: whether this block accepts power from the given source.
+    /// Default is true. Override to block specific directions (e.g. Piston front face).
     /// </summary>
-    public virtual bool CanActivatedBy(Block source)
-    {
-        return source.isCharged;
-    }
+    bool CanReceivePowerFrom(Block source) => true;
 }

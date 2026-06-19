@@ -4,18 +4,20 @@ using UnityEngine;
 
 public class GameOverMenuController : MonoBehaviour
 {
-    [SerializeField] GameManager gameManager;
+    [SerializeField] GameController gameController;
     private GameOverMenuPanel gameOverMenu;
 
     private void Start()
     {
-        gameManager.OnGameOver += OnGameOver;
+        GameEvents.OnGameOver += OnGameOver;
     }
 
     public void OnNewGame()
     {
         UIManager.Instance.CloseAll();
-        SceneLoader.Instance.LoadScene("GameplayScene");
+        gameController.RestartNewGame();
+
+        //SceneLoader.Instance.LoadScene("GameplayScene");
     }
 
     public void OnExit()
@@ -29,6 +31,7 @@ public class GameOverMenuController : MonoBehaviour
     private void OnGameOver()
     {
         gameOverMenu = UIManager.Instance.ShowPanel<GameOverMenuPanel>("GameOverMenu");
-        gameOverMenu.Init(this);
+        gameOverMenu.Unsubscribe();
+        gameOverMenu.Subscribe(this);
     }
 }

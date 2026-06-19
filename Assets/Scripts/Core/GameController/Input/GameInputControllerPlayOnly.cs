@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(GameManager))]
+[RequireComponent(typeof(PlayerGameManager))]
 public class GameInputControllerLocalP2 : GameInputController
 {
     protected override void OnGamePaused()

@@ -3,35 +3,35 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(GameManager))]
+[RequireComponent(typeof(PlayerGameManager))]
 public class GameInputController : MonoBehaviour
 {
-    protected GameManager gameManager;
+    protected PlayerGameManager gameManager;
     [SerializeField] protected TetrominoController controller;
 
     protected PlayerInput playerInput;
 
     protected void Awake()
     {
-        gameManager = GetComponent<GameManager>();
+        gameManager = GetComponent<PlayerGameManager>();
         playerInput = controller.GetComponent<PlayerInput>();
 
     }
 
     private void OnEnable()
     {
-        gameManager.OnGameStart += OnGameStart;
-        gameManager.OnPause += OnGamePaused;
-        gameManager.OnResume += OnGameResumed;
-        gameManager.OnGameOver += OnGameOver;
+        GameEvents.OnGameStart += OnGameStart;
+        GameEvents.OnGamePaused += OnGamePaused;
+        GameEvents.OnGameResumed += OnGameResumed;
+        GameEvents.OnGameOver += OnGameOver;
     }
 
     private void OnDisable()
     {
-        gameManager.OnGameStart -= OnGameStart;
-        gameManager.OnPause -= OnGamePaused;
-        gameManager.OnResume -= OnGameResumed;
-        gameManager.OnGameOver -= OnGameOver;
+        GameEvents.OnGameStart -= OnGameStart;
+        GameEvents.OnGamePaused -= OnGamePaused;
+        GameEvents.OnGameResumed -= OnGameResumed;
+        GameEvents.OnGameOver -= OnGameOver;
     }
 
     protected virtual void OnGameStart()

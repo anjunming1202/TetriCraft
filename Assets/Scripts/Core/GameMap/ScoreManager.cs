@@ -1,7 +1,10 @@
 using TMPro;
+using UnityEngine;
 
 public class ScoreManager : Singleton<ScoreManager>
 {
+    private PlayerID playerID;
+
     private uint score;
     public TextMeshProUGUI scoreText; // inspector
     public uint digit = 8;
@@ -11,55 +14,38 @@ public class ScoreManager : Singleton<ScoreManager>
         score = 0;
         UpdateScoreBoard();
     }
-    public void LinkToGame(TetrisManager mapManager)
+
+    public void SubscribeMap(TetrisManager mapManager)
     {
-        mapManager.OnLineClear += ScoreLineClear;
+        playerID = mapManager.PlayerID;
+        mapManager.OnLineClearWithInfo += ScoreLineClear;
         mapManager.OnTetrominoSoftDrop += ScoreSoftDrop;
         mapManager.OnTetrominoHardDrop += ScoreHardDrop;
     }
+
     private void ScoreSoftDrop(MapTetromino tetromino)
     {
         score += 1;
         UpdateScoreBoard();
     }
+
     private void ScoreHardDrop(MapTetromino tetromino)
     {
         score += tetromino.hardDrop * 2;
         UpdateScoreBoard();
     }
-    private void ScoreLineClear(TetrisManager mapManager)
+
+    private void ScoreLineClear(PlayerID id, uint newLineCount, uint totalLineCount, uint combo)
     {
         // for clearing multiple lines
-        switch (mapManager.lastClearLineCount)
-        {
-            case 0:
-                break;
-            case 1:
-                score += 500;
-                break;
-            case 2:
-                score += 1000;
-                break;
-            case 3:
-                score += 2500;
-                break;
-            case 4:
-                score += 8000;
-                break;
-            case > 4:
-                score += 8000 + (mapManager.lastClearLineCount - 4) * 2000;                
-                break;
-        }
+        score = score + GetSingleClearScore(totalLineCount) - GetSingleClearScore(totalLineCount - newLineCount); // count for total line count in one turn
+
         // for combo of clearing
-        score += mapManager.combo * 500;
+        score += combo * 500;
 
         UpdateScoreBoard();
     }
 
-    protected override void Awake()
-    {
-        base.Awake();
-    }
     private void UpdateScoreBoard()
     {
         string output = $"{score}";
@@ -69,5 +55,24 @@ public class ScoreManager : Singleton<ScoreManager>
             output = 0 + output;
         }
         scoreText.text = output;
+    }
+
+    private uint GetSingleClearScore(uint lineCount)
+    {
+        switch (lineCount)
+        {
+            case 0:
+                return 0;
+            case 1:
+                return 500;
+            case 2:
+                return 1200;
+            case 3:
+                return 2500;
+            case 4:
+                return 8000;
+            case > 4:
+                return 8000 + (lineCount - 4) * 5000;
+        }
     }
 }

@@ -1,4 +1,5 @@
 // Block, the most basic unit, one block occupies one grid
+using BlockSystem;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using UnityEngine;
 using static Unity.Collections.AllocatorManager;
 using static Unity.VisualScripting.Member;
 
-public abstract class Block : MapRandomTickBehaviourObject
+public abstract class Block : MapObject, IRandomTickable
 {
     // Identity
     public abstract BlockID ID { get; }
@@ -33,10 +34,6 @@ public abstract class Block : MapRandomTickBehaviourObject
     public virtual bool isAnimating { get; set; }   // is moving with animation
     public virtual bool isRemoved { get; set; }
 
-    public bool isActivated = false;
-    public bool wasActivated = false;
-    public bool isCharged = false;
-
     // Events
     public delegate void OnChangedEvent(Block block);
     public event OnChangedEvent OnMoved;
@@ -46,19 +43,25 @@ public abstract class Block : MapRandomTickBehaviourObject
     public event OnAnimationUpdateEvent OnInstantMove;
     public event OnAnimationUpdateEvent OnAnimatedMove;
 
-    public event Action OnLockedDown;
-    public event Action OnDestroyed;
-    public event OnChangedEvent OnRemoved;
+    public event OnChangedEvent OnSpawned;
+    public event OnChangedEvent OnSpawnFailed;
+    public event OnChangedEvent OnLockedDown;
+    public event OnChangedEvent OnPendingDestroyed;
+    public event OnChangedEvent OnPendingRemoved;
+    public event OnChangedEvent OnAfterDestroyed;
+    public event OnChangedEvent OnAfterRemoved;
+    public event Action<Block> OnRequestSendingSelfNCUpdate;
+    public event Action<int> OnRandomTickUpdate;
 
-    public event Action<Vector2Int> OnNCBlockUpdated;
-    public event Action<Vector2Int> OnPPBlockUpdated;
+    /*public event Action<Vector2Int> OnNCUpdateSent;
+    public event Action<Block, Vector2Int> OnNCUpdateRequestReceived;
+    public event Action<Vector2Int> OnPPBlockUpdated;*/
 
 
 
     public Vector2 Position => position;
     public Vector2 CentrePosition => position + Vector2.one * 0.5f;
     public Vector2Int GridPosition => GetGridPosition(position);
-    public Vector2Int LastGridPosition => GetGridPosition(lastPosition);
 
     public Vector3 GetWorldPosition()
     {
@@ -92,10 +95,11 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     public float Rotation => (int)orientation * 90;
 
-    public virtual void SetPosition(int x, int y, bool animation = false)
+    public virtual void SetGridPosition(int x, int y, bool animation = false)
     {
         SetPosition((float)x, (float)y, animation);
     }
+    public void SetGridPosition(Vector2Int pos, bool animation = false) => SetGridPosition(pos.x, pos.y, animation);
 
     public void Rotate(bool clockwise)
     {
@@ -110,16 +114,18 @@ public abstract class Block : MapRandomTickBehaviourObject
         OnAppearanceChanged?.Invoke(this);
     }
 
-    public Coroutine Disable(float sec)
+    public virtual void RandomTickUpdate(int randomTick)
     {
-        return StartCoroutine(DisableOnSet(sec));
+        OnRandomTickUpdate?.Invoke(randomTick);
     }
 
-    public virtual void OnSpawn(MapManager map)
+
+    /// <summary>
+    /// Init the block
+    /// </summary>
+    public virtual void OnRegistered(MapManager map)
     {
         this.map = map;
-        transform.SetParent(map.blockGrid.transform);
-
         this.PlayerID = map.PlayerID;
 
         isInMap = true;
@@ -128,38 +134,71 @@ public abstract class Block : MapRandomTickBehaviourObject
         isAnimating = false;
         isRemoved = false;
 
-        isCharged = false;
+        map.RandomTickManager.Register(this);
     }
 
-    public virtual void OnLockdown()
+    public virtual void OnUnregistered()
     {
-        Lockdown();
-        map.OnGridPlace?.Invoke(map, this);
-        BlockUpdateManager.OnNeighbourChangedBlockUpdate(map.grid, GridPosition); // lockdown triggers a block update
+        map?.RandomTickManager.Unregister(this);
+
+        isInMap = false;
+        isLocked = false;
+        isEnabled = false;
+        isAnimating = false;
+        isRemoved = true;
     }
 
-    public virtual void OnUpdate()
+
+    public virtual void OnPostSpawned()
     {
-        if (this == null) return;
+        OnSpawned?.Invoke(this);
     }
 
-    public virtual void OnNCUpdateTriggered()
+    public virtual void OnPostSpawnFailed(MapManager map, Vector2Int position)
     {
-        OnNCBlockUpdated?.Invoke(GridPosition);
+        // record the rejected state
+        this.map = map;
+        this.PlayerID = map.PlayerID;
+
+        SetGridPosition(position.x, position.y, false);
+        OnSpawnFailed?.Invoke(this);
     }
 
-    public void NeighbourChangedNotified(Vector2Int updateSrc)
+    public virtual SpawnFailureDisposition GetSpawnFailureDisposition()
     {
-        map.BlockUpdateManager.AddUpdatedBlock(this, updateSrc);
+        return SpawnFailureDisposition.None;
     }
 
-    public virtual void NCNotificationUpdate(Vector2Int updateSrc)
+    public virtual void OnPostMoved()
     {
-        //Debug.Log($"neighbour updated {GridPosition}");
 
-        // detect if the updated neighbour is a activation/charging source
-        UpdateActivationState();
-        UpdateChargingState();
+    }
+
+    public virtual void OnRequestingDestroy()
+    {
+        OnPendingDestroyed?.Invoke(this);
+    }
+
+    public virtual void OnRequestingRemove()
+    {
+        OnPendingRemoved?.Invoke(this);
+    }
+
+    /// <summary>
+    /// Removed with breaking, don't use directly
+    /// </summary>
+    public virtual void OnPostDestroyed()
+    {
+        OnAfterDestroyed?.Invoke(this);
+        OnPostRemoved();
+    }
+
+    /// <summary>
+    /// Romove, don't use directly
+    /// </summary>
+    public virtual void OnPostRemoved()
+    {
+        OnAfterRemoved?.Invoke(this);
     }
 
     public virtual bool CanBeReplacedBy(Block block)
@@ -167,9 +206,35 @@ public abstract class Block : MapRandomTickBehaviourObject
         return false;
     }
 
+    public virtual ReplacementDisposition GetReplacementDisposition(Block incoming)
+    {
+        return ReplacementDisposition.Disallow;
+    }
+
     public virtual void OnReplacedBy(Block block)
     {
-        Debug.LogError($"block {this} at {position} wrongly replaced");
+        
+    }
+
+    public virtual void OnLockdown()
+    {
+        Lockdown();
+    }
+
+    public virtual void OnUpdate()
+    {
+        if (this == null) return;
+    }
+
+    protected void TriggerSelfNCUpdate()
+    {
+        OnRequestSendingSelfNCUpdate?.Invoke(this);
+    }
+
+    public virtual void OnNCUpdateRespond(Vector2Int updateSrc)
+    {
+        if (this is IRedstoneActivatable)
+            map.RedstoneManager.RequestUpdate(this);
     }
 
     public virtual bool IsClearable()
@@ -178,38 +243,10 @@ public abstract class Block : MapRandomTickBehaviourObject
     }
 
     /// <summary>
-    /// Removed with breaking, don't use directly
+    /// Called just before a destroy is applied. Return false to cancel the destroy;
+    /// the block stays in the map unchanged. Override to implement multi-hit behaviour.
     /// </summary>
-    public virtual void Destroy()
-    {
-        isRemoved = true;
-        OnDestroyed?.Invoke();
-        Remove();
-    }
-
-    /// <summary>
-    /// Romove, don't use directly
-    /// </summary>
-    public virtual void Remove()
-    {
-        isRemoved = true;
-        OnRemoved?.Invoke(this);
-        GameObject.Destroy(gameObject);
-    }
-
-    public virtual void OnCharged(Vector2Int sourcePosition)
-    {
-        isCharged = true;
-
-        BlockUpdateManager.OnNeighbourChangedBlockUpdate(map.grid, GridPosition);
-    }
-
-    public virtual void OnDischarged(Vector2Int sourcePosition)
-    {
-        isCharged = false;
-
-        BlockUpdateManager.OnNeighbourChangedBlockUpdate(map.grid, GridPosition);
-    }
+    public virtual bool CanBeDestroyed() => true;
 
     protected virtual void Awake()
     {
@@ -253,9 +290,11 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     protected void Lockdown()
     {
+        // lock down state
         isLocked = true;
-        OnLockedDown?.Invoke();
+        OnLockedDown?.Invoke(this);
 
+        //
         if (explosionTarget != null)
             explosionTarget.isUnbreakable = false;
         if (flammableObject != null)
@@ -264,50 +303,15 @@ public abstract class Block : MapRandomTickBehaviourObject
 
     protected virtual void OnExploded()
     {
-        map.DestroyBlock(this);
+        map.RequestDestroyBlock(this);
     }
 
     protected virtual void OnBurnAway()
     {
-        map.RemoveBlock(this);
+        map.RequestRemoveBlock(this);
     }
 
     private ExplosionBlocker explosionTarget;
     private FlammableObject flammableObject;
 
-    // Redstone
-    /// <summary>
-    /// 
-    /// </summary>
-    private void UpdateActivationState()
-    {
-        if (this is not IRedstoneActivatable component)
-            return;
-
-        bool activated = false;
-        foreach (var block in map.GetAdjacentBlocks(GridPosition.x, GridPosition.y, true))
-        {
-            if (block != null && component.CanActivatedBy(block))
-            {
-                activated = true;
-                break;
-            }
-        }
-
-        isActivated = activated;
-
-        map.RedstoneManager.AddUpdatedBlock(this);
-    }
-
-    private void UpdateChargingState()
-    {
-
-    }
-
-    private IEnumerator DisableOnSet(float sec)
-    {
-        isEnabled = false;
-        yield return new WaitForSeconds(sec);
-        isEnabled = true;
-    }
 }

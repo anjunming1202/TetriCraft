@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1547219688338364849}
-  - component: {fileID: -8207819388808640242}
-  - component: {fileID: 8875295649956835888}
   - component: {fileID: 2248703179976296038}
+  - component: {fileID: 8875295649956835888}
+  - component: {fileID: -8207819388808640242}
   m_Layer: 0
   m_Name: Primed TNT
   m_TagString: Untagged
@@ -35,51 +35,58 @@ Transform:
   - {fileID: 4280561523641514272}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &-8207819388808640242
-BoxCollider2D:
+--- !u!114 &2248703179976296038
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8420852016900756583}
   m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08fa1c6246b1f5a469df349a0df300f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inertia: 1
+  airResistance: 0.5
+  groundFriction: 10
+  hasGravity: 1
+  explosionPrefab: {fileID: 790108225933080204, guid: a691a2cc5a5a71e4fbc8e6ed01005ec5, type: 3}
+  fuseTime: 4
+  expansionCurve:
     serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.59213996
+      value: 0.120290875
+      inSlope: 0.53656614
+      outSlope: 0.53656614
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.2389228
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 3.6020665
+      outSlope: 3.6020665
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.0754302
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  fuseSound: {fileID: 8300000, guid: 6ea36e0d08b40904690b9b3306c39f2d, type: 3}
 --- !u!212 &8875295649956835888
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -132,54 +139,51 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2248703179976296038
-MonoBehaviour:
+--- !u!61 &-8207819388808640242
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8420852016900756583}
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 08fa1c6246b1f5a469df349a0df300f2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  explosionPrefab: {fileID: 790108225933080204, guid: a691a2cc5a5a71e4fbc8e6ed01005ec5, type: 3}
-  fuseTime: 4
-  expansionCurve:
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
     serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.59213996
-      value: 0.120290875
-      inSlope: 0.53656614
-      outSlope: 0.53656614
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.2389228
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 3.6020665
-      outSlope: 3.6020665
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.0754302
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  fuseSound: {fileID: 8300000, guid: 6ea36e0d08b40904690b9b3306c39f2d, type: 3}
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
 --- !u!1001 &6062334318571590448
 PrefabInstance:
   m_ObjectHideFlags: 0

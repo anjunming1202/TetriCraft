@@ -6,9 +6,15 @@ public class PrimedTNT : Entity
     public Explosion explosionPrefab;
     public float fuseTime = 4f;
 
+    public void Init(float fuseTime)
+    {
+        this.fuseTime = fuseTime;
+    }
+
     public override void OnSpawned(MapManager map, Vector2 position)
     {
         base.OnSpawned(map, position);
+        AddMomentum(RandomVelocity());
         AudioManager.Instance.PlaySFXFollowing(fuseSound, this.transform, 1f, AudioBus.Block);
         StartCoroutine(FuseCountdown());
     }
@@ -19,11 +25,6 @@ public class PrimedTNT : Entity
         spriteRenderer = GetComponent<SpriteRenderer>();
         material = GetComponent<Material>();
         props = new MaterialPropertyBlock();
-    }
-
-    protected void Start()
-    {
-        AddVelocity(RandomVelocity());        
     }
 
     private IEnumerator FuseCountdown()
@@ -60,7 +61,9 @@ public class PrimedTNT : Entity
         // explode
         Explosion explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
         explosion.Set(map, position, blastRadius);
-        GameObject.Destroy(this.gameObject);
+
+        // remove entity
+        this.Removed();
     }
 
     private Vector2 RandomVelocity()

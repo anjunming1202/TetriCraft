@@ -28,6 +28,12 @@ public class Tetromino : MonoBehaviour
     // Tetromino default shape 
     //public static readonly Dictionary<TetrominoType, Block[,]> Shapes = new Dictionary<TetrominoType, Block[,]>();
 
+    public void InitEmptyTetromino()
+    {
+        shape = null;
+        blocks = new Block[4];
+    }
+
     public void New(TetrominoType type, Block block1, Block block2, Block block3, Block block4)
     {
         // Initialise tetromino data
@@ -149,6 +155,16 @@ public class Tetromino : MonoBehaviour
     {
         Block[] blocks = tetromino.blocks;
         New(tetromino.type, blocks[0], blocks[1], blocks[2], blocks[3]);
+    }
+
+    public void ClearAllBlocks()
+    {
+        foreach (Block block in blocks)
+            if (block != null)
+            {
+                GameObject.Destroy(block.gameObject);
+            }
+        blocks = new Block[4];
     }
 
     public virtual void Reset()

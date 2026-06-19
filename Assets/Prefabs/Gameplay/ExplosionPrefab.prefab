@@ -44,13 +44,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0c7dd80a4fa4f240a323c51a8983f00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  position: {x: 0, y: 0}
+  mapPosition: {x: 0, y: 0}
   radius: 0
   blastIntensity: 200
   minDamagePerHit: 0.1
   maxDamagePerHit: 1
   minRayLength: 1
-  repellingStrength: 2.5
+  repellingStrength: 2
   explodeSounds:
   - {fileID: 8300000, guid: fd4e6cdbeea95cb438335798d7371006, type: 3}
   - {fileID: 8300000, guid: 4cae32d0b412fb340b58f5932ccb01af, type: 3}

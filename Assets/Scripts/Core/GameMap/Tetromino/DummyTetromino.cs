@@ -30,31 +30,4 @@ public class DummyTetromino : Tetromino
         position = mapPosition;
         Display(map);
     }
-
-    public void Transform(Tetromino tetrominoShape)
-    {
-        //Vector2Int position = this.position;
-        //this.position = position;
-
-        type = tetrominoShape.type;
-        size = tetrominoShape.size;
-        shape = new Block[size, size];
-        int blockCount = 0;
-        for (int r = 0; r < tetrominoShape.size; r++)
-            for (int c = 0; c < tetrominoShape.size; c++)
-            {
-                if (tetrominoShape.shape[r, c] != null)
-                {
-                    Block block = blocks[blockCount];
-                    shape[r, c] = block;
-                    block.OnTriggerAppearanceChanged();
-                    blockCount++;
-                }
-            }
-    }
-}
-
-public class GhostTetromino : DummyTetromino
-{
-    public Tetromino shadowTetromino;
 }
