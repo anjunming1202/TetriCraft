@@ -164,7 +164,7 @@ public class Flame : MapObject, IRandomTickable
             int maxEncouragement = GetMaxNeighborEncouragement(spreadPos);
             if (maxEncouragement <= 0) continue;
             float spreadChance = (maxEncouragement + 40f) / (age + 30f);
-            if (UnityEngine.Random.value < spreadChance / (baseChance * fireManager.SpreadRateMultiplier))
+            if (UnityEngine.Random.value < spreadChance * fireManager.SpreadRateMultiplier / baseChance)
                 TryPlaceFireAt(spreadPos, randomTick);
         }
     }
@@ -229,7 +229,7 @@ public class Flame : MapObject, IRandomTickable
 
             // Wiki: up/down use /250, sides (including zero) use /300
             float divisor = (dir == Vector2Int.up || dir == Vector2Int.down) ? 250f : 300f;
-            if (UnityEngine.Random.value < f.flammability / (divisor * fireManager.BurnRateMultiplier))
+            if (UnityEngine.Random.value < f.flammability * fireManager.BurnRateMultiplier / divisor)
             {
                 f.BurnAway();
                 TrySpawnFireAfterBurn(b, position + dir);

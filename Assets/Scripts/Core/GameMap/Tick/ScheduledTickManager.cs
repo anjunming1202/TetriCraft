@@ -18,7 +18,14 @@ public class ScheduledTickManager : MonoBehaviour
     /// <summary>Fired just before an entry's callback is invoked. Parameters: (targetTick, worldPos).</summary>
     public event Action<uint, Vector3> OnEntryFired;
 
-    public void Clear() => queue.Clear();
+    /// <summary>Fired when the queue is cleared (e.g. on map reset). Observers should discard all tracked pending entries.</summary>
+    public event Action OnCleared;
+
+    public void Clear()
+    {
+        queue.Clear();
+        OnCleared?.Invoke();
+    }
 
     /// <summary>
     /// Schedules <paramref name="callback"/> to run after <paramref name="delayTicks"/> game ticks.

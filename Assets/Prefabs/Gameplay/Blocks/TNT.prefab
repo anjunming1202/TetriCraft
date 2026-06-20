@@ -246,3 +246,4 @@ MonoBehaviour:
   isFlammable: 1
   encouragement: 15
   flammability: 100
+  lavaIgnitability: 15

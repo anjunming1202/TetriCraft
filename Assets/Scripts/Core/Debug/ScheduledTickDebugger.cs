@@ -46,6 +46,7 @@ public class ScheduledTickDebugger : MonoBehaviour
         if (stm == null) return;
         stm.OnEntryScheduled += HandleEntryScheduled;
         stm.OnEntryFired     += HandleEntryFired;
+        stm.OnCleared        += HandleCleared;
     }
 
     private void OnDestroy()
@@ -54,6 +55,13 @@ public class ScheduledTickDebugger : MonoBehaviour
         if (stm == null) return;
         stm.OnEntryScheduled -= HandleEntryScheduled;
         stm.OnEntryFired     -= HandleEntryFired;
+        stm.OnCleared        -= HandleCleared;
+    }
+
+    private void HandleCleared()
+    {
+        pendingEntries.Clear();
+        activeFlashes.Clear();
     }
 
     private void HandleEntryScheduled(uint targetTick, Vector3 pos)

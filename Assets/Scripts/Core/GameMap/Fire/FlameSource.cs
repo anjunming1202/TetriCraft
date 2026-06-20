@@ -1,15 +1,15 @@
 using UnityEngine;
 
 /// <summary>
-/// Fire-spreading source component (e.g. on lava blocks).
-/// Ignites adjacent flammable blocks on a fixed game-tick interval via ScheduledTickManager,
-/// mirroring Minecraft lava's scheduled-tick behavior (~30 ticks = 1.5 s at 20 Hz).
+/// Lava fire-spreading source. Mirrors Minecraft lava ignition behavior:
+///   - Checks the 3-wide row at y+1 and the 5-wide row at y+2 (2D adaptation of 3×3 / 5×5).
+///   - Occupied cell with lavaIgnitability > 0  →  side flame on that block.
+///   - Empty cell whose neighbor has lavaIgnitability > 0  →  top flame on the block below.
+/// This maps directly to how Flame.TryPlaceFireAt handles side vs. top flames.
 /// </summary>
 public class FlameSource : MapObject
 {
-    public float sourceStrength = 1f;
-
-    /// <summary>How many game ticks between ignition checks. Default 30 = 1.5 s, matching Minecraft lava tick rate.</summary>
+    /// <summary>How many game ticks between ignition checks. Default 30 = 1.5 s at 20 Hz.</summary>
     [SerializeField] private int spreadInterval = 30;
 
     public Vector2Int position => BoundaryDataManager.GetBoundaryData(map.PlayerID).WorldToGrid(transform.position);
@@ -22,7 +22,6 @@ public class FlameSource : MapObject
     private void Start()
     {
         map = GetComponent<Block>().GetMap();
-        // Stagger initial tick so multiple lava sources don't all fire on the same tick.
         int initialDelay = Random.Range(1, spreadInterval + 1);
         map.ScheduledTickManager.Schedule(OnScheduledTick, initialDelay, transform.position);
     }
@@ -41,19 +40,60 @@ public class FlameSource : MapObject
 
     private void Spread()
     {
+        Vector2Int lavaPos = position;
+
+        // 2D adaptation: y+1 → ±1 in x (3 cells), y+2 → ±2 in x (5 cells)
+        for (int dx = -1; dx <= 1; dx++)
+            TryIgniteAt(new Vector2Int(lavaPos.x + dx, lavaPos.y + 1));
+
+        for (int dx = -2; dx <= 2; dx++)
+            TryIgniteAt(new Vector2Int(lavaPos.x + dx, lavaPos.y + 2));
+    }
+
+    private void TryIgniteAt(Vector2Int pos)
+    {
+        Block blockAtPos = map.GetBlock(pos.x, pos.y);
+
+        if (blockAtPos != null)
+        {
+            // Occupied cell: try side flame if the block itself is lava-igniteable.
+            if (blockAtPos.GetComponent<FlammableObject>() is FlammableObject sideFlammable
+                && sideFlammable.lavaIgnitability > 0
+                && !sideFlammable.IsBurningAt(Vector2Int.zero))
+            {
+                float chance = sideFlammable.lavaIgnitability * map.FireManager.SpreadRateMultiplier / 300f;
+                if (Random.value < chance)
+                    map.FireManager.SetFire(sideFlammable, Vector2Int.zero, 0);
+            }
+        }
+        else
+        {
+            // Empty cell: fire can appear here if any neighbor is lava-igniteable.
+            int maxIgnitability = GetMaxNeighborLavaIgnitability(pos);
+            if (maxIgnitability <= 0) return;
+
+            // Attach top flame to the block directly below the empty cell.
+            Block blockBelow = map.GetBlock(pos.x, pos.y - 1);
+            if (blockBelow?.GetComponent<FlammableObject>() is FlammableObject topFlammable
+                && topFlammable.isFlammable
+                && !topFlammable.IsBurningAt(Vector2Int.up))
+            {
+                float chance = maxIgnitability * map.FireManager.SpreadRateMultiplier / 300f;
+                if (Random.value < chance)
+                    map.FireManager.SetFire(topFlammable, Vector2Int.up, 0);
+            }
+        }
+    }
+
+    private int GetMaxNeighborLavaIgnitability(Vector2Int pos)
+    {
+        int max = 0;
         foreach (var dir in CardinalDirs)
         {
-            int nx = position.x + dir.x;
-            int ny = position.y + dir.y;
-            Block neighbor = map.GetBlock(nx, ny);
-            if (neighbor?.GetComponent<FlammableObject>() is not FlammableObject f || !f.isFlammable)
-                continue;
-            if (f.IsBurningAt(Vector2Int.zero)) continue;
-
-            // Lava ignition probability: uses encouragement + sourceStrength multiplier
-            float igniteChance = (f.encouragement + 40f) * sourceStrength / 30f;
-            if (Random.value < igniteChance / 300f)
-                map.FireManager.SetFire(f, Vector2Int.zero, 0);
+            Block b = map.GetBlock(pos.x + dir.x, pos.y + dir.y);
+            if (b?.GetComponent<FlammableObject>() is FlammableObject f)
+                max = Mathf.Max(max, f.lavaIgnitability);
         }
+        return max;
     }
 }

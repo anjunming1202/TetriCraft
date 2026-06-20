@@ -9,6 +9,12 @@ public class FlammableObject : MonoBehaviour
     public int encouragement;
     /// <summary>How quickly this block is destroyed by fire (0–100). 0 = immune to destruction. Mirrors Minecraft flammability.</summary>
     public int flammability;
+    /// <summary>
+    /// Whether lava can ignite this block or cause fire in adjacent air (0 = cannot, >0 = can).
+    /// Distinct from encouragement — a block can be lava-igniteable without being fire-spreadable and vice versa.
+    /// Mirrors Minecraft's separate lava ignitability property.
+    /// </summary>
+    public int lavaIgnitability;
 
     public Action OnBurnAway;
 

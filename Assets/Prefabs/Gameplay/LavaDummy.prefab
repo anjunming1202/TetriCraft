@@ -145,5 +145,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbb504292555aaa459e22036f6f89e44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sourceStrength: 1
-  spreadInterval: 5
+  spreadInterval: 50
