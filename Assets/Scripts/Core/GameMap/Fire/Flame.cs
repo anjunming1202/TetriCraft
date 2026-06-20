@@ -29,7 +29,7 @@ public class Flame : MapObject, IRandomTickable
     private static readonly Vector2Int[] CardinalDirs =
         { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
 
-    public void Init(MapManager map, FireManager fireManager, FlammableObject attachedFlammable, Vector2Int offset)
+    public void Init(MapManager map, FireManager fireManager, FlammableObject attachedFlammable, Vector2Int offset, int initialAge = 0)
     {
         this.map = map;
         this.fireManager = fireManager;
@@ -40,7 +40,7 @@ public class Flame : MapObject, IRandomTickable
         transform.parent = attachedFlammable.transform;
         transform.localPosition = (Vector2)offset;
 
-        age = 0;
+        age = initialAge;
         isDead = false;
 
         map.RandomTickManager.Register(this);
@@ -216,7 +216,7 @@ public class Flame : MapObject, IRandomTickable
         }
     }
 
-    // Minecraft burn formula — immediate destruction for attached block + 4 cardinal neighbors
+    // Minecraft burn formula — sides: b/300, above/below: b/250
     private void TryBurnAdjacentBlocks()
     {
         Vector2Int[] checkDirs = { Vector2Int.zero, Vector2Int.up, Vector2Int.down,
@@ -226,9 +226,44 @@ public class Flame : MapObject, IRandomTickable
             Block b = map.GetBlock(position.x + dir.x, position.y + dir.y);
             if (b?.GetComponent<FlammableObject>() is not FlammableObject f) continue;
             if (!f.isFlammable || f.flammability <= 0) continue;
-            float burnChance = (f.flammability + 10f) / (age + 30f);
-            if (UnityEngine.Random.value < burnChance / (300f * fireManager.BurnRateMultiplier))
+
+            // Wiki: up/down use /250, sides (including zero) use /300
+            float divisor = (dir == Vector2Int.up || dir == Vector2Int.down) ? 250f : 300f;
+            if (UnityEngine.Random.value < f.flammability / (divisor * fireManager.BurnRateMultiplier))
+            {
                 f.BurnAway();
+                TrySpawnFireAfterBurn(b, position + dir);
+            }
         }
+    }
+
+    // Wiki: after a block burns, 5/(10+age) chance to spawn fire in its place.
+    // New flame age: 80% same as this flame, 20% this flame's age +1.
+    // Subscribe to OnAfterRemoved so the spawn runs after the grid slot is vacated —
+    // this avoids attaching a flame to a block that is being destroyed/removed.
+    // The lambda intentionally does not capture 'this'; it only needs the already-computed
+    // position, age, and map reference, so it is safe even if this Flame is destroyed first.
+    private void TrySpawnFireAfterBurn(Block burnedBlock, Vector2Int burnedPos)
+    {
+        if (UnityEngine.Random.value >= 5f / (10 + age)) return;
+
+        int newAge = UnityEngine.Random.value < 0.8f ? age : Mathf.Min(age + 1, maxAge);
+        MapManager capturedMap = map;
+
+        void OnRemoved(Block _)
+        {
+            burnedBlock.OnAfterRemoved -= OnRemoved;
+
+            // Position is now empty — try a top flame on the block below.
+            Block blockBelow = capturedMap.GetBlock(burnedPos.x, burnedPos.y - 1);
+            if (blockBelow?.GetComponent<FlammableObject>() is FlammableObject topFlammable
+                && topFlammable.isFlammable
+                && !topFlammable.IsBurningAt(Vector2Int.up))
+            {
+                capturedMap.FireManager.SetFire(topFlammable, Vector2Int.up, 0, newAge);
+            }
+        }
+
+        burnedBlock.OnAfterRemoved += OnRemoved;
     }
 }

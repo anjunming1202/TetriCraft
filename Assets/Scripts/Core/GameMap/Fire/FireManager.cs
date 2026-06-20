@@ -39,10 +39,10 @@ public class FireManager : MonoBehaviour
     /// Instantiate and register a new Flame on <paramref name="attachedBlock"/> at <paramref name="offset"/>.
     /// offset == zero means side flame (inner block); offset == up means top flame (on top of block).
     /// </summary>
-    public void SetFire(FlammableObject attachedBlock, Vector2Int offset, int randomTick)
+    public void SetFire(FlammableObject attachedBlock, Vector2Int offset, int randomTick, int initialAge = 0)
     {
         Flame flame = Instantiate(offset == Vector2Int.zero ? sideFlamePrefab : topFlamePrefab);
-        flame.Init(map, this, attachedBlock, offset);
+        flame.Init(map, this, attachedBlock, offset, initialAge);
         flames.Add(flame);
     }
 
