@@ -99,6 +99,7 @@ public class BattleGameController : GameController
 
     protected override void PlayingUpdate()
     {
+        TickManager.Update();
         gameManagerP1.UpdateGameplay();
         gameManagerP2.UpdateGameplay();
     }

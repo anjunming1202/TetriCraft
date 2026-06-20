@@ -129,7 +129,6 @@ public class TetrisManager : MonoBehaviour
             UpdateGhostTetromino();
 
             // Update map
-            TickManager.Update();
             map.OnUpdate();
         }
     }

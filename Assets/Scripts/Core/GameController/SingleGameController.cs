@@ -77,6 +77,7 @@ public class SingleGameController : GameController
 
     protected override void PlayingUpdate()
     {
+        TickManager.Update();
         gameManager.UpdateGameplay();
     }
 
