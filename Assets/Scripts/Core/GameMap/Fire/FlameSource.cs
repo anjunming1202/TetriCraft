@@ -72,16 +72,31 @@ public class FlameSource : MapObject
             int maxIgnitability = GetMaxNeighborLavaIgnitability(pos);
             if (maxIgnitability <= 0) return;
 
-            // Attach top flame to the block directly below the empty cell.
-            Block blockBelow = map.GetBlock(pos.x, pos.y - 1);
-            if (blockBelow?.GetComponent<FlammableObject>() is FlammableObject topFlammable
-                && topFlammable.isFlammable
-                && !topFlammable.IsBurningAt(Vector2Int.up))
+            // Try all supported directional flames for this empty cell.
+            TryIgniteDirectional(pos, Vector2Int.down, Vector2Int.up);
+            if (map.FireManager.AllowLeftRightFlames)
             {
-                float chance = maxIgnitability * map.FireManager.SpreadRateMultiplier / 300f;
-                if (Random.value < chance)
-                    map.FireManager.SetFire(topFlammable, Vector2Int.up, 0);
+                TryIgniteDirectional(pos, Vector2Int.right, Vector2Int.left);
+                TryIgniteDirectional(pos, Vector2Int.left,  Vector2Int.right);
             }
+            if (map.FireManager.AllowBottomFlames)
+                TryIgniteDirectional(pos, Vector2Int.up, Vector2Int.down);
+        }
+    }
+
+    // neighborDir: direction from pos toward the supporting block.
+    // offset: direction from the supporting block toward pos (the inverse).
+    private void TryIgniteDirectional(Vector2Int pos, Vector2Int neighborDir, Vector2Int offset)
+    {
+        Block b = map.GetBlock(pos.x + neighborDir.x, pos.y + neighborDir.y);
+        if (b?.GetComponent<FlammableObject>() is FlammableObject f
+            && f.IsFlammable
+            && f.lavaIgnitability > 0
+            && !f.IsBurningAt(offset))
+        {
+            float chance = f.lavaIgnitability * map.FireManager.SpreadRateMultiplier / 300f;
+            if (Random.value < chance)
+                map.FireManager.SetFire(f, offset, 0);
         }
     }
 

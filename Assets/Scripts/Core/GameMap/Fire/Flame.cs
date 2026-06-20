@@ -40,9 +40,19 @@ public class Flame : MapObject, IRandomTickable
         transform.parent = attachedFlammable.transform;
         transform.localPosition = (Vector2)offset;
 
+        // Rotate directional (topFlamePrefab-based) flames to face away from their attached block.
+        // Default prefab orientation is upward; left/right/bottom need to be rotated accordingly.
+        if (offset == Vector2Int.left)
+            transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+        else if (offset == Vector2Int.right)
+            transform.localRotation = Quaternion.Euler(0f, 0f, -90f);
+        else if (offset == Vector2Int.down)
+            transform.localRotation = Quaternion.Euler(0f, 0f, 180f);
+
         age = initialAge;
         isDead = false;
 
+        attachedFlammable.GetComponent<Block>().OnAfterRemoved += OnAttachedBlockRemoved;
         map.RandomTickManager.Register(this);
     }
 
@@ -51,6 +61,7 @@ public class Flame : MapObject, IRandomTickable
     /// </summary>
     public void DetachFromFlammable()
     {
+        attachedFlammable.GetComponent<Block>().OnAfterRemoved -= OnAttachedBlockRemoved;
         attachedFlammable.StopBurningAt(offset);
         map.RandomTickManager.Unregister(this);
     }
@@ -61,8 +72,77 @@ public class Flame : MapObject, IRandomTickable
     /// </summary>
     private void OnDestroy()
     {
+        Block block = attachedFlammable?.GetComponent<Block>();
+        if (block != null) block.OnAfterRemoved -= OnAttachedBlockRemoved;
         map?.RandomTickManager?.Unregister(this);
         fireManager?.UnregisterFlame(this);
+    }
+
+    /// <summary>
+    /// Called when the attached block is removed or destroyed.
+    /// Side flames die with their block; directional flames try to reparent to another support.
+    /// </summary>
+    private void OnAttachedBlockRemoved(Block _)
+    {
+        attachedFlammable.GetComponent<Block>().OnAfterRemoved -= OnAttachedBlockRemoved;
+        if (isDead) return;
+
+        // Side flames occupy the same cell as their block — when that block goes, there is
+        // nothing left to support the flame in that cell, so let Unity destroy it as a child.
+        if (offset == Vector2Int.zero) return;
+
+        TryReparent();
+    }
+
+    /// <summary>
+    /// After losing its attached block, try to reparent to another flammable block that
+    /// borders the same flame cell. Mirrors Minecraft fire checking all 6 (here: 4) neighbors
+    /// for any remaining solid face when its support is removed.
+    /// </summary>
+    private void TryReparent()
+    {
+        Vector2Int flameCell = position; // world-to-grid while still parented — still accurate
+
+        // Detach before the block's GameObject is destroyed so we are not destroyed with it
+        attachedFlammable.StopBurningAt(offset);
+        transform.parent = null;
+
+        // Try each directional support that could host the flame at flameCell (same priority order as spawn)
+        if (TryAttachTo(flameCell, Vector2Int.down,  Vector2Int.up))    return;
+        if (map.FireManager.AllowLeftRightFlames)
+        {
+            if (TryAttachTo(flameCell, Vector2Int.right, Vector2Int.left))  return;
+            if (TryAttachTo(flameCell, Vector2Int.left,  Vector2Int.right)) return;
+        }
+        if (map.FireManager.AllowBottomFlames)
+            if (TryAttachTo(flameCell, Vector2Int.up, Vector2Int.down)) return;
+
+        isDead = true;
+        fireManager.DestroyFlame(this);
+    }
+
+    // neighborOffset: direction from flameCell to the candidate support block.
+    // newOffset:      direction from that block back to flameCell.
+    // Returns true if reparenting succeeded.
+    private bool TryAttachTo(Vector2Int flameCell, Vector2Int neighborOffset, Vector2Int newOffset)
+    {
+        Vector2Int neighborPos = flameCell + neighborOffset;
+        var f = map.GetBlock(neighborPos.x, neighborPos.y)?.GetComponent<FlammableObject>();
+        if (f == null || !f.IsFlammable || f.IsBurningAt(newOffset)) return false;
+
+        attachedFlammable = f;
+        offset = newOffset;
+        f.SetBurningAt(offset, this);
+        transform.parent = f.transform;
+        transform.localPosition = (Vector2)offset;
+
+        if      (offset == Vector2Int.left)  transform.localRotation = Quaternion.Euler(0f, 0f,  90f);
+        else if (offset == Vector2Int.right) transform.localRotation = Quaternion.Euler(0f, 0f, -90f);
+        else if (offset == Vector2Int.down)  transform.localRotation = Quaternion.Euler(0f, 0f, 180f);
+        else                                 transform.localRotation = Quaternion.identity;
+
+        f.GetComponent<Block>().OnAfterRemoved += OnAttachedBlockRemoved;
+        return true;
     }
 
     /// <summary>
@@ -139,13 +219,13 @@ public class Flame : MapObject, IRandomTickable
         // Check self position first: side flames sit at the same grid cell as their attached block,
         // so the attached block won't appear in any cardinal direction.
         Block self = map.GetBlock(position.x, position.y);
-        if (self?.GetComponent<FlammableObject>() is FlammableObject sf && sf.isFlammable)
+        if (self?.GetComponent<FlammableObject>() is FlammableObject sf && sf.IsFlammable)
             return true;
 
         foreach (var dir in CardinalDirs)
         {
             Block b = map.GetBlock(position.x + dir.x, position.y + dir.y);
-            if (b?.GetComponent<FlammableObject>() is FlammableObject f && f.isFlammable)
+            if (b?.GetComponent<FlammableObject>() is FlammableObject f && f.IsFlammable)
                 return true;
         }
         return false;
@@ -177,57 +257,72 @@ public class Flame : MapObject, IRandomTickable
     {
         int max = 0;
         Block self = map.GetBlock(pos.x, pos.y);
-        if (self?.GetComponent<FlammableObject>() is FlammableObject sf && sf.isFlammable)
+        if (self?.GetComponent<FlammableObject>() is FlammableObject sf && sf.IsFlammable)
             max = sf.encouragement;
 
         foreach (var dir in CardinalDirs)
         {
             Block b = map.GetBlock(pos.x + dir.x, pos.y + dir.y);
-            if (b?.GetComponent<FlammableObject>() is FlammableObject f && f.isFlammable)
+            if (b?.GetComponent<FlammableObject>() is FlammableObject f && f.IsFlammable)
                 max = Mathf.Max(max, f.encouragement);
         }
         return max;
     }
 
-    // Place fire: side flame on block at spreadPos, or top flame on block below empty spreadPos
+    // Place fire: side flame on block at spreadPos, or directional flames on any adjacent block
     private void TryPlaceFireAt(Vector2Int spreadPos, int randomTick)
     {
         Block blockAtPos = map.GetBlock(spreadPos.x, spreadPos.y);
 
         // Side flame: flammable block occupies spreadPos
         if (blockAtPos?.GetComponent<FlammableObject>() is FlammableObject sideFlammable
-            && sideFlammable.isFlammable
+            && sideFlammable.IsFlammable
             && !sideFlammable.IsBurningAt(Vector2Int.zero))
         {
             map.FireManager.SetFire(sideFlammable, Vector2Int.zero, randomTick);
             return;
         }
 
-        // Top flame: empty cell, flammable block directly below
-        if (blockAtPos == null)
+        // Directional flames: empty cell — try all adjacent supporting blocks
+        if (blockAtPos != null) return;
+        TryPlaceDirectionalFlame(spreadPos, Vector2Int.down,  Vector2Int.up,    randomTick); // top
+        if (map.FireManager.AllowLeftRightFlames)
         {
-            Block blockBelow = map.GetBlock(spreadPos.x, spreadPos.y - 1);
-            if (blockBelow?.GetComponent<FlammableObject>() is FlammableObject topFlammable
-                && topFlammable.isFlammable
-                && !topFlammable.IsBurningAt(Vector2Int.up))
-            {
-                map.FireManager.SetFire(topFlammable, Vector2Int.up, randomTick);
-            }
+            TryPlaceDirectionalFlame(spreadPos, Vector2Int.right, Vector2Int.left,  randomTick); // left
+            TryPlaceDirectionalFlame(spreadPos, Vector2Int.left,  Vector2Int.right, randomTick); // right
+        }
+        if (map.FireManager.AllowBottomFlames)
+            TryPlaceDirectionalFlame(spreadPos, Vector2Int.up,    Vector2Int.down,  randomTick); // bottom
+    }
+
+    // neighborDir: direction from spreadPos toward the supporting block.
+    // offset: direction from the supporting block toward spreadPos (the inverse).
+    private void TryPlaceDirectionalFlame(Vector2Int spreadPos, Vector2Int neighborDir, Vector2Int offset, int randomTick)
+    {
+        Vector2Int neighborPos = spreadPos + neighborDir;
+        Block b = map.GetBlock(neighborPos.x, neighborPos.y);
+        if (b?.GetComponent<FlammableObject>() is FlammableObject f
+            && f.IsFlammable
+            && !f.IsBurningAt(offset))
+        {
+            map.FireManager.SetFire(f, offset, randomTick);
         }
     }
 
-    // Minecraft burn formula — sides: b/300, above/below: b/250
+    // Side flame: only burns its own attached block (dir zero, divisor 300).
+    // Top flame: burns the four cardinal neighbors of its position (up/down use 250, left/right use 300).
     private void TryBurnAdjacentBlocks()
     {
-        Vector2Int[] checkDirs = { Vector2Int.zero, Vector2Int.up, Vector2Int.down,
-                                    Vector2Int.left, Vector2Int.right };
+        Vector2Int[] checkDirs = offset == Vector2Int.zero
+            ? new[] { Vector2Int.zero }
+            : new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+
         foreach (var dir in checkDirs)
         {
             Block b = map.GetBlock(position.x + dir.x, position.y + dir.y);
             if (b?.GetComponent<FlammableObject>() is not FlammableObject f) continue;
-            if (!f.isFlammable || f.flammability <= 0) continue;
+            if (!f.CanBurnAway) continue;
 
-            // Wiki: up/down use /250, sides (including zero) use /300
             float divisor = (dir == Vector2Int.up || dir == Vector2Int.down) ? 250f : 300f;
             if (UnityEngine.Random.value < f.flammability * fireManager.BurnRateMultiplier / divisor)
             {
@@ -257,7 +352,7 @@ public class Flame : MapObject, IRandomTickable
             // Position is now empty — try a top flame on the block below.
             Block blockBelow = capturedMap.GetBlock(burnedPos.x, burnedPos.y - 1);
             if (blockBelow?.GetComponent<FlammableObject>() is FlammableObject topFlammable
-                && topFlammable.isFlammable
+                && topFlammable.IsFlammable
                 && !topFlammable.IsBurningAt(Vector2Int.up))
             {
                 capturedMap.FireManager.SetFire(topFlammable, Vector2Int.up, 0, newAge);

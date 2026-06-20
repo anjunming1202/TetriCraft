@@ -17,6 +17,13 @@ public class FireManager : MonoBehaviour
     public float SpreadRateMultiplier => spreadRateMultiplier;
     public float BurnRateMultiplier   => burnRateMultiplier;
 
+    [Header("Allowed Flame Types")]
+    [SerializeField] private bool allowLeftRightFlames = true;
+    [SerializeField] private bool allowBottomFlames    = false;
+
+    public bool AllowLeftRightFlames => allowLeftRightFlames;
+    public bool AllowBottomFlames    => allowBottomFlames;
+
     private MapManager map;
     private readonly List<Flame> flames = new();
 
@@ -68,39 +75,43 @@ public class FireManager : MonoBehaviour
 
     /// <summary>
     /// Try to extinguish flames that overlap with a newly placed block (e.g. water flowing in).
-    /// Formerly static Flame.TryExtinguishBy().
+    /// Covers all 5 flame types: side (zero), top (up), left, right, bottom.
     /// </summary>
     public void TryExtinguishAt(Block block)
     {
-        Vector2Int position = block.GridPosition;
+        Vector2Int p = block.GridPosition;
+        bool isWater = block is WaterDummy;
 
-        if (block is WaterDummy waterDummy)
+        if (isWater)
         {
+            WaterDummy waterDummy = (WaterDummy)block;
             FluidElement element = waterDummy.GetSourceElement();
             // down
-            if (element.lowerGridPosition == position.y && element.localLowerLevel == 0)
-                TryExtinguishInnerFlameAt(position + Vector2Int.down);
+            if (element.lowerGridPosition == p.y && element.localLowerLevel == 0)
+                TryExtinguishInnerFlameAt(p + Vector2Int.down);
             // up
-            if (element.upperGridPosition == position.y && element.localUpperLevel == 0)
-                TryExtinguishInnerFlameAt(position + Vector2Int.up);
+            if (element.upperGridPosition == p.y && element.localUpperLevel == 0)
+                TryExtinguishInnerFlameAt(p + Vector2Int.up);
             // sides
-            TryExtinguishInnerFlameAt(position + Vector2Int.left);
-            TryExtinguishInnerFlameAt(position + Vector2Int.right);
+            TryExtinguishInnerFlameAt(p + Vector2Int.left);
+            TryExtinguishInnerFlameAt(p + Vector2Int.right);
         }
 
-        // extinguish top flame on the block directly below
-        Block blockBelow = map.GetBlock(position.x, position.y - 1);
-        if (blockBelow != null && blockBelow.GetComponent<FlammableObject>() is FlammableObject flammableObject)
-        {
-            Flame flame = flammableObject.GetFlame(Vector2Int.up);
-            if (flame != null)
-            {
-                if (block is WaterDummy)
-                    flame.Extinguish();
-                else
-                    flame.Die();
-            }
-        }
+        // Extinguish any directional flame whose flame cell equals p
+        TryExtinguishFlame(p.x,   p.y,   Vector2Int.zero,  isWater); // side flame on block at p
+        TryExtinguishFlame(p.x,   p.y-1, Vector2Int.up,    isWater); // top flame on block below p
+        TryExtinguishFlame(p.x+1, p.y,   Vector2Int.left,  isWater); // left flame on block right of p
+        TryExtinguishFlame(p.x-1, p.y,   Vector2Int.right, isWater); // right flame on block left of p
+        TryExtinguishFlame(p.x,   p.y+1, Vector2Int.down,  isWater); // bottom flame on block above p
+    }
+
+    private void TryExtinguishFlame(int bx, int by, Vector2Int offset, bool isWater)
+    {
+        var f = map.GetBlock(bx, by)?.GetComponent<FlammableObject>();
+        if (f == null) return;
+        Flame flame = f.GetFlame(offset);
+        if (flame == null) return;
+        if (isWater) flame.Extinguish(); else flame.Die();
     }
 
     private void TryExtinguishInnerFlameAt(Vector2Int position)

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Block))]
 public class FlammableObject : MonoBehaviour
 {
-    public bool isFlammable = true;
     /// <summary>How likely nearby fire spreads TO this block (0–300). Mirrors Minecraft encouragement.</summary>
     public int encouragement;
     /// <summary>How quickly this block is destroyed by fire (0–100). 0 = immune to destruction. Mirrors Minecraft flammability.</summary>
@@ -15,6 +15,25 @@ public class FlammableObject : MonoBehaviour
     /// Mirrors Minecraft's separate lava ignitability property.
     /// </summary>
     public int lavaIgnitability;
+
+    /// <summary>
+    /// Fire can exist on or near this block — either it encourages spread or it can be burned away.
+    /// False while the block is still falling (not yet locked down), mirroring the tetromino falling phase.
+    /// </summary>
+    public bool IsFlammable => (encouragement > 0 || flammability > 0) && block.isLocked;
+
+    /// <summary>
+    /// Fire can gradually destroy this block (flammability > 0).
+    /// False while the block is still falling (not yet locked down).
+    /// </summary>
+    public bool CanBurnAway => flammability > 0 && block.isLocked;
+
+    private Block block;
+
+    private void Awake()
+    {
+        block = GetComponent<Block>();
+    }
 
     public Action OnBurnAway;
 

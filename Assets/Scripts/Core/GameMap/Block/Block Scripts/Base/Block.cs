@@ -260,10 +260,7 @@ public abstract class Block : MapObject, IRandomTickable
         // set flame responses
         flammableObject = GetComponent<FlammableObject>();
         if (flammableObject != null)
-        {
             flammableObject.OnBurnAway += OnBurnAway;
-            flammableObject.isFlammable = false; // unlocked block is unflammable
-        }
     }
 
     protected void SetPosition(float x, float y, bool animation = false)
@@ -297,8 +294,7 @@ public abstract class Block : MapObject, IRandomTickable
         //
         if (explosionTarget != null)
             explosionTarget.isUnbreakable = false;
-        if (flammableObject != null)
-            flammableObject.isFlammable = true;
+        // isFlammable/CanBurnAway are derived from block.isLocked — no manual update needed
     }
 
     protected virtual void OnExploded()
