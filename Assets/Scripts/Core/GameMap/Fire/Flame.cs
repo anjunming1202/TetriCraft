@@ -283,21 +283,23 @@ public class Flame : MapObject, IRandomTickable
             return;
         }
 
-        // Directional flames: empty cell — try all adjacent supporting blocks
+        // Directional flames: empty cell — one flame per cell maximum, first valid support wins
         if (blockAtPos != null) return;
-        TryPlaceDirectionalFlame(spreadPos, Vector2Int.down,  Vector2Int.up,    randomTick); // top
+        if (map.FireManager.HasFlameAt(spreadPos)) return;
+        if (TryPlaceDirectionalFlame(spreadPos, Vector2Int.down,  Vector2Int.up,    randomTick)) return;
         if (map.FireManager.AllowLeftRightFlames)
         {
-            TryPlaceDirectionalFlame(spreadPos, Vector2Int.right, Vector2Int.left,  randomTick); // left
-            TryPlaceDirectionalFlame(spreadPos, Vector2Int.left,  Vector2Int.right, randomTick); // right
+            if (TryPlaceDirectionalFlame(spreadPos, Vector2Int.right, Vector2Int.left,  randomTick)) return;
+            if (TryPlaceDirectionalFlame(spreadPos, Vector2Int.left,  Vector2Int.right, randomTick)) return;
         }
         if (map.FireManager.AllowBottomFlames)
-            TryPlaceDirectionalFlame(spreadPos, Vector2Int.up,    Vector2Int.down,  randomTick); // bottom
+            TryPlaceDirectionalFlame(spreadPos, Vector2Int.up, Vector2Int.down, randomTick);
     }
 
     // neighborDir: direction from spreadPos toward the supporting block.
     // offset: direction from the supporting block toward spreadPos (the inverse).
-    private void TryPlaceDirectionalFlame(Vector2Int spreadPos, Vector2Int neighborDir, Vector2Int offset, int randomTick)
+    // Returns true if a flame was placed.
+    private bool TryPlaceDirectionalFlame(Vector2Int spreadPos, Vector2Int neighborDir, Vector2Int offset, int randomTick)
     {
         Vector2Int neighborPos = spreadPos + neighborDir;
         Block b = map.GetBlock(neighborPos.x, neighborPos.y);
@@ -306,7 +308,9 @@ public class Flame : MapObject, IRandomTickable
             && !f.IsBurningAt(offset))
         {
             map.FireManager.SetFire(f, offset, randomTick);
+            return true;
         }
+        return false;
     }
 
     // Side flame: only burns its own attached block (dir zero, divisor 300).
@@ -350,12 +354,15 @@ public class Flame : MapObject, IRandomTickable
             burnedBlock.OnAfterRemoved -= OnRemoved;
 
             // Position is now empty — try a top flame on the block below.
-            Block blockBelow = capturedMap.GetBlock(burnedPos.x, burnedPos.y - 1);
-            if (blockBelow?.GetComponent<FlammableObject>() is FlammableObject topFlammable
-                && topFlammable.IsFlammable
-                && !topFlammable.IsBurningAt(Vector2Int.up))
+            if (!capturedMap.FireManager.HasFlameAt(burnedPos))
             {
-                capturedMap.FireManager.SetFire(topFlammable, Vector2Int.up, 0, newAge);
+                Block blockBelow = capturedMap.GetBlock(burnedPos.x, burnedPos.y - 1);
+                if (blockBelow?.GetComponent<FlammableObject>() is FlammableObject topFlammable
+                    && topFlammable.IsFlammable
+                    && !topFlammable.IsBurningAt(Vector2Int.up))
+                {
+                    capturedMap.FireManager.SetFire(topFlammable, Vector2Int.up, 0, newAge);
+                }
             }
         }
 

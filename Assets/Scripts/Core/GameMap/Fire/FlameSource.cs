@@ -71,13 +71,14 @@ public class FlameSource : MapObject
             // Empty cell: fire can appear here if any neighbor is lava-igniteable.
             int maxIgnitability = GetMaxNeighborLavaIgnitability(pos);
             if (maxIgnitability <= 0) return;
+            if (map.FireManager.HasFlameAt(pos)) return; // cell already occupied
 
-            // Try all supported directional flames for this empty cell.
-            TryIgniteDirectional(pos, Vector2Int.down, Vector2Int.up);
+            // Try all supported directional flames for this empty cell, first valid support wins.
+            if (TryIgniteDirectional(pos, Vector2Int.down, Vector2Int.up)) return;
             if (map.FireManager.AllowLeftRightFlames)
             {
-                TryIgniteDirectional(pos, Vector2Int.right, Vector2Int.left);
-                TryIgniteDirectional(pos, Vector2Int.left,  Vector2Int.right);
+                if (TryIgniteDirectional(pos, Vector2Int.right, Vector2Int.left)) return;
+                if (TryIgniteDirectional(pos, Vector2Int.left,  Vector2Int.right)) return;
             }
             if (map.FireManager.AllowBottomFlames)
                 TryIgniteDirectional(pos, Vector2Int.up, Vector2Int.down);
@@ -86,7 +87,8 @@ public class FlameSource : MapObject
 
     // neighborDir: direction from pos toward the supporting block.
     // offset: direction from the supporting block toward pos (the inverse).
-    private void TryIgniteDirectional(Vector2Int pos, Vector2Int neighborDir, Vector2Int offset)
+    // Returns true if a flame was placed.
+    private bool TryIgniteDirectional(Vector2Int pos, Vector2Int neighborDir, Vector2Int offset)
     {
         Block b = map.GetBlock(pos.x + neighborDir.x, pos.y + neighborDir.y);
         if (b?.GetComponent<FlammableObject>() is FlammableObject f
@@ -96,8 +98,12 @@ public class FlameSource : MapObject
         {
             float chance = f.lavaIgnitability * map.FireManager.SpreadRateMultiplier / 300f;
             if (Random.value < chance)
+            {
                 map.FireManager.SetFire(f, offset, 0);
+                return true;
+            }
         }
+        return false;
     }
 
     private int GetMaxNeighborLavaIgnitability(Vector2Int pos)

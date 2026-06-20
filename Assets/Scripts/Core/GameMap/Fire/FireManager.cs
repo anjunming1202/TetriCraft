@@ -74,6 +74,18 @@ public class FireManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Returns true if any active flame currently occupies the given grid cell.
+    /// Used to prevent multiple directional flames from spawning in the same empty cell.
+    /// </summary>
+    public bool HasFlameAt(Vector2Int gridPos)
+    {
+        foreach (var flame in flames)
+            if (flame != null && flame.position == gridPos)
+                return true;
+        return false;
+    }
+
+    /// <summary>
     /// Try to extinguish flames that overlap with a newly placed block (e.g. water flowing in).
     /// Covers all 5 flame types: side (zero), top (up), left, right, bottom.
     /// </summary>
