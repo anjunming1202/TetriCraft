@@ -29,7 +29,12 @@ public class Flame : MapObject, IRandomTickable
     private static readonly Vector2Int[] CardinalDirs =
         { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
 
-    public void Init(MapManager map, FireManager fireManager, FlammableObject attachedFlammable, Vector2Int offset, int initialAge = 0)
+    /// <param name="immediateSchedule">
+    /// If true, skip the random-tick bootstrap and enter the self-scheduled cycle immediately.
+    /// Use for spread-spawned flames; leave false for the first (manually lit) flame so it
+    /// waits a natural random-tick delay before activating.
+    /// </param>
+    public void Init(MapManager map, FireManager fireManager, FlammableObject attachedFlammable, Vector2Int offset, int initialAge = 0, bool immediateSchedule = false)
     {
         this.map = map;
         this.fireManager = fireManager;
@@ -53,7 +58,11 @@ public class Flame : MapObject, IRandomTickable
         isDead = false;
 
         attachedFlammable.GetComponent<Block>().OnAfterRemoved += OnAttachedBlockRemoved;
-        map.RandomTickManager.Register(this);
+
+        if (immediateSchedule)
+            ScheduleNextTick();
+        else
+            map.RandomTickManager.Register(this);
     }
 
     /// <summary>
@@ -243,7 +252,7 @@ public class Flame : MapObject, IRandomTickable
             Vector2Int spreadPos = new Vector2Int(position.x + dx, position.y + dy);
             int maxEncouragement = GetMaxNeighborEncouragement(spreadPos);
             if (maxEncouragement <= 0) continue;
-            float spreadChance = (maxEncouragement + 40f) / (age + 30f);
+            float spreadChance = (maxEncouragement + 21f + 40f) / (age + 30f);
             if (UnityEngine.Random.value < spreadChance * fireManager.SpreadRateMultiplier / baseChance)
                 TryPlaceFireAt(spreadPos, randomTick);
         }
@@ -272,6 +281,7 @@ public class Flame : MapObject, IRandomTickable
     // Place fire: side flame on block at spreadPos, or directional flames on any adjacent block
     private void TryPlaceFireAt(Vector2Int spreadPos, int randomTick)
     {
+        if (!map.CheckInsideBlockGrid(spreadPos.x, spreadPos.y)) return;
         Block blockAtPos = map.GetBlock(spreadPos.x, spreadPos.y);
 
         // Side flame: flammable block occupies spreadPos
@@ -279,7 +289,7 @@ public class Flame : MapObject, IRandomTickable
             && sideFlammable.IsFlammable
             && !sideFlammable.IsBurningAt(Vector2Int.zero))
         {
-            map.FireManager.SetFire(sideFlammable, Vector2Int.zero, randomTick);
+            map.FireManager.SetFire(sideFlammable, Vector2Int.zero, randomTick, immediateSchedule: true);
             return;
         }
 
@@ -307,7 +317,7 @@ public class Flame : MapObject, IRandomTickable
             && f.IsFlammable
             && !f.IsBurningAt(offset))
         {
-            map.FireManager.SetFire(f, offset, randomTick);
+            map.FireManager.SetFire(f, offset, randomTick, immediateSchedule: true);
             return true;
         }
         return false;
@@ -361,7 +371,7 @@ public class Flame : MapObject, IRandomTickable
                     && topFlammable.IsFlammable
                     && !topFlammable.IsBurningAt(Vector2Int.up))
                 {
-                    capturedMap.FireManager.SetFire(topFlammable, Vector2Int.up, 0, newAge);
+                    capturedMap.FireManager.SetFire(topFlammable, Vector2Int.up, 0, newAge, immediateSchedule: true);
                 }
             }
         }

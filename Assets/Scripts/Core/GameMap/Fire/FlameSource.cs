@@ -52,6 +52,7 @@ public class FlameSource : MapObject
 
     private void TryIgniteAt(Vector2Int pos)
     {
+        if (!map.CheckInsideBlockGrid(pos.x, pos.y)) return;
         Block blockAtPos = map.GetBlock(pos.x, pos.y);
 
         if (blockAtPos != null)
@@ -63,7 +64,7 @@ public class FlameSource : MapObject
             {
                 float chance = sideFlammable.lavaIgnitability * map.FireManager.SpreadRateMultiplier / 300f;
                 if (Random.value < chance)
-                    map.FireManager.SetFire(sideFlammable, Vector2Int.zero, 0);
+                    map.FireManager.SetFire(sideFlammable, Vector2Int.zero, 0, immediateSchedule: true);
             }
         }
         else
@@ -99,7 +100,7 @@ public class FlameSource : MapObject
             float chance = f.lavaIgnitability * map.FireManager.SpreadRateMultiplier / 300f;
             if (Random.value < chance)
             {
-                map.FireManager.SetFire(f, offset, 0);
+                map.FireManager.SetFire(f, offset, 0, immediateSchedule: true);
                 return true;
             }
         }

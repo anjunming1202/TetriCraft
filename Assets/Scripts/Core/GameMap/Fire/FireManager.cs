@@ -44,12 +44,13 @@ public class FireManager : MonoBehaviour
 
     /// <summary>
     /// Instantiate and register a new Flame on <paramref name="attachedBlock"/> at <paramref name="offset"/>.
-    /// offset == zero means side flame (inner block); offset == up means top flame (on top of block).
+    /// offset == zero means side flame (inner block); any other offset means directional flame.
+    /// Pass immediateSchedule = true for spread-spawned flames to skip the random-tick bootstrap.
     /// </summary>
-    public void SetFire(FlammableObject attachedBlock, Vector2Int offset, int randomTick, int initialAge = 0)
+    public void SetFire(FlammableObject attachedBlock, Vector2Int offset, int randomTick, int initialAge = 0, bool immediateSchedule = false)
     {
         Flame flame = Instantiate(offset == Vector2Int.zero ? sideFlamePrefab : topFlamePrefab);
-        flame.Init(map, this, attachedBlock, offset, initialAge);
+        flame.Init(map, this, attachedBlock, offset, initialAge, immediateSchedule);
         flames.Add(flame);
     }
 
