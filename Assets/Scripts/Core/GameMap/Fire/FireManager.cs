@@ -10,6 +10,13 @@ public class FireManager : MonoBehaviour
     [SerializeField] private Flame sideFlamePrefab;
     [SerializeField] private Flame topFlamePrefab;
 
+    [Header("Rate Multipliers")]
+    [SerializeField] private float spreadRateMultiplier = 1f;
+    [SerializeField] private float burnRateMultiplier   = 1f;
+
+    public float SpreadRateMultiplier => spreadRateMultiplier;
+    public float BurnRateMultiplier   => burnRateMultiplier;
+
     private MapManager map;
     private readonly List<Flame> flames = new();
 
@@ -37,7 +44,6 @@ public class FireManager : MonoBehaviour
         Flame flame = Instantiate(offset == Vector2Int.zero ? sideFlamePrefab : topFlamePrefab);
         flame.Init(map, this, attachedBlock, offset);
         flames.Add(flame);
-        flame.Burn(randomTick);
     }
 
     /// <summary>

@@ -243,8 +243,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isFlammable: 1
-  flammability: 7
-  burnAbility: 26
-  canBurnAway: 1
-  igniteProgress: 0
-  burningHealth: 0
+  encouragement: 5
+  flammability: 5

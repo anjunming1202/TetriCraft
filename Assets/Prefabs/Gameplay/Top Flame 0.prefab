@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1105489037653664707}
   - component: {fileID: 2300860983251322440}
-  - component: {fileID: 7248431716625971114}
   - component: {fileID: 306517661036769792}
   - component: {fileID: 2458903291600283529}
   - component: {fileID: 3281758824581445123}
@@ -50,28 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   age: 0
-  damage: 1
   extinguishSound: {fileID: 8300000, guid: 3f00901b26a863f44a01d5437be52f62, type: 3}
---- !u!114 &7248431716625971114
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915919997142960370}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbb504292555aaa459e22036f6f89e44, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sideFlamePrefab: {fileID: 2300860983251322440, guid: 73e7fd8e3f758774590c6c871597eb4a, type: 3}
-  topFlamePrefab: {fileID: 2300860983251322440}
-  sourceStrength: 1
-  spreadableArea:
-    x: -1
-    y: -1
-    width: 2
-    height: 5
 --- !u!212 &306517661036769792
 SpriteRenderer:
   m_ObjectHideFlags: 0

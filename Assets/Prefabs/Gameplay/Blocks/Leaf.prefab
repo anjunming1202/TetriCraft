@@ -150,9 +150,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   orientation: 0
-  isActivated: 0
-  wasActivated: 0
-  isCharged: 0
 --- !u!114 &671932412832912740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180,6 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83cde78856fb25741acdccb7ca2d5758, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerID: 0
   startPosition: {x: 0, y: 0, z: 0}
   endPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &2341808955676992956
@@ -245,8 +243,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isFlammable: 1
-  flammability: 30
-  burnAbility: 60
-  canBurnAway: 1
-  igniteProgress: 0
-  burningHealth: 0
+  encouragement: 30
+  flammability: 60

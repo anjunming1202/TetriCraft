@@ -42,6 +42,11 @@ public class MapManager : MonoBehaviour
     public RandomTickManager RandomTickManager => randomTickManager;
 
 
+    // Scheduled tick manager
+    [SerializeField] private ScheduledTickManager scheduledTickManager;
+    public ScheduledTickManager ScheduledTickManager => scheduledTickManager;
+
+
     // Particle system manager
     [SerializeField] private ParticleManager particleManager;
 
@@ -66,6 +71,7 @@ public class MapManager : MonoBehaviour
         Debug.Assert(fireManager != null);
         Debug.Assert(particleManager != null);
         Debug.Assert(randomTickManager != null);
+        Debug.Assert(scheduledTickManager != null);
 
         // Block subsystem initialise
         blockSystemManager.Initialise(this);
@@ -123,6 +129,9 @@ public class MapManager : MonoBehaviour
         // Random tick
         randomTickManager.Clear();
 
+        // Scheduled tick
+        scheduledTickManager.Clear();
+
         // Particle
         particleManager.ClearAll();
 
@@ -140,6 +149,9 @@ public class MapManager : MonoBehaviour
 
         // Random tick behaviours
         randomTickManager.OnUpdate();
+
+        // Scheduled tick behaviours
+        scheduledTickManager.OnUpdate();
 
         // Entity update
         entityManager.OnUpdate();

@@ -100,9 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07bd1044c3dfe2040b4fafa2897f47e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isInMap: 0
-  isLocked: 0
-  isAnimating: 0
+  orientation: 0
 --- !u!114 &9028015919182796587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -115,6 +113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83cde78856fb25741acdccb7ca2d5758, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerID: 0
   startPosition: {x: 0, y: 0, z: 0}
   endPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &-4112071912644774665
@@ -146,11 +145,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbb504292555aaa459e22036f6f89e44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sideFlamePrefab: {fileID: 2300860983251322440, guid: 73e7fd8e3f758774590c6c871597eb4a, type: 3}
-  topFlamePrefab: {fileID: 2300860983251322440, guid: 5d01ad8a17a648149b406625d94abab5, type: 3}
   sourceStrength: 1
-  spreadableArea:
-    x: -1
-    y: -1
-    width: 2
-    height: 2
+  spreadInterval: 5
