@@ -3885,9 +3885,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sideFlamePrefab: {fileID: 2300860983251322440, guid: 73e7fd8e3f758774590c6c871597eb4a, type: 3}
   topFlamePrefab: {fileID: 2300860983251322440, guid: 5d01ad8a17a648149b406625d94abab5, type: 3}
-  spreadRateMultiplier: 3
-  burnRateMultiplier: 0.5
-  spreadImmediateChance: 0.5
+  spreadRateMultiplier: 2.5
+  burnRateMultiplier: 0.4
+  spreadImmediateChance: 0
   allowLeftRightFlames: 1
   allowBottomFlames: 1
 --- !u!1 &942179737 stripped
@@ -6238,9 +6238,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sideFlamePrefab: {fileID: 2300860983251322440, guid: 73e7fd8e3f758774590c6c871597eb4a, type: 3}
   topFlamePrefab: {fileID: 2300860983251322440, guid: 5d01ad8a17a648149b406625d94abab5, type: 3}
-  spreadRateMultiplier: 3
-  burnRateMultiplier: 0.5
-  spreadImmediateChance: 0.5
+  spreadRateMultiplier: 2.5
+  burnRateMultiplier: 0.4
+  spreadImmediateChance: 0
   allowLeftRightFlames: 1
   allowBottomFlames: 1
 --- !u!1 &1582371763
