@@ -39,3 +39,11 @@ MonoBehaviour:
     weight: 1
   - blockID: 20
     weight: 1
+  - blockID: 21
+    weight: 1
+  - blockID: 22
+    weight: 0.5
+  - blockID: 23
+    weight: 0.1
+  - blockID: 24
+    weight: 1

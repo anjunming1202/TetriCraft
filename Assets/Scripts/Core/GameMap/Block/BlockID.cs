@@ -27,6 +27,7 @@ public enum BlockID
     IronBlock,
     GoldBlock,
     DiamondBlock,
+    NoteBlock,
 
     Count
 }

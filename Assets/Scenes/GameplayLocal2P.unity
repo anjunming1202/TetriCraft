@@ -2532,7 +2532,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 11.110445
+  orthographic size: 5.547812
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -3714,7 +3714,7 @@ MonoBehaviour:
   playerCamera: {fileID: 1091644335}
   debuggedMap: {fileID: 1637309553}
   isDebugging: 1
-  blockSpawned: 10
+  blockSpawned: 24
   selectedGridColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
 --- !u!1 &821650078
 GameObject:
@@ -4563,7 +4563,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 11.110445
+  orthographic size: 5.547812
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
