@@ -360,7 +360,7 @@ public class Flame : MapObject, IRandomTickable
     // position, age, and map reference, so it is safe even if this Flame is destroyed first.
     private void TrySpawnFireAfterBurn(Block burnedBlock, Vector2Int burnedPos)
     {
-        if (UnityEngine.Random.value >= 5f / (10 + age)) return;
+        if (UnityEngine.Random.value >= 5f / (5 + age)) return;
 
         int newAge = UnityEngine.Random.value < 0.8f ? age : Mathf.Min(age + 1, maxAge);
         MapManager capturedMap = map;

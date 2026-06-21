@@ -14,6 +14,11 @@ public class FireManager : MonoBehaviour
     [Header("Rate Multipliers")]
     [SerializeField] private float spreadRateMultiplier = 1f;
     [SerializeField] private float burnRateMultiplier   = 1f;
+    /// <summary>
+    /// Probability that a spread-spawned flame skips the random-tick bootstrap and enters
+    /// the scheduled-tick cycle immediately. 0 = always wait for random tick; 1 = always immediate.
+    /// </summary>
+    [SerializeField, Range(0f, 1f)] private float spreadImmediateChance = 0.5f;
 
     public float SpreadRateMultiplier => spreadRateMultiplier;
     public float BurnRateMultiplier   => burnRateMultiplier;
@@ -51,7 +56,8 @@ public class FireManager : MonoBehaviour
     public void SetFire(FlammableObject attachedBlock, Vector2Int offset, int randomTick, int initialAge = 0, bool immediateSchedule = false)
     {
         Flame flame = Instantiate(offset == Vector2Int.zero ? sideFlamePrefab : topFlamePrefab);
-        flame.Init(map, this, attachedBlock, offset, initialAge, immediateSchedule);
+        bool resolvedImmediate = immediateSchedule && Random.value < spreadImmediateChance;
+        flame.Init(map, this, attachedBlock, offset, initialAge, resolvedImmediate);
         flames.Add(flame);
     }
 
