@@ -288,6 +288,7 @@ public class Flame : MapObject, IRandomTickable
     private void TryPlaceFireAt(Vector2Int spreadPos, int randomTick)
     {
         if (!map.CheckInsideBlockGrid(spreadPos.x, spreadPos.y)) return;
+        if (fireManager.IsWetAt(spreadPos)) return;
         Block blockAtPos = map.GetBlock(spreadPos.x, spreadPos.y);
 
         // Side flame: flammable block occupies spreadPos
@@ -370,7 +371,8 @@ public class Flame : MapObject, IRandomTickable
             burnedBlock.OnAfterRemoved -= OnRemoved;
 
             // Position is now empty — try a top flame on the block below.
-            if (!capturedMap.FireManager.HasFlameAt(burnedPos))
+            if (!capturedMap.FireManager.HasFlameAt(burnedPos)
+                && !capturedMap.FireManager.IsWetAt(burnedPos))
             {
                 Block blockBelow = capturedMap.GetBlock(burnedPos.x, burnedPos.y - 1);
                 if (blockBelow?.GetComponent<FlammableObject>() is FlammableObject topFlammable

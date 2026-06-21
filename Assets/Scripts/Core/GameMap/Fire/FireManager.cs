@@ -82,6 +82,24 @@ public class FireManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Returns true if water is adjacent to <paramref name="pos"/> in a way that would
+    /// prevent fire from spawning there (mirrors Minecraft water-extinguishes-fire rule).
+    /// Checks: any WaterDummy to the left or right; a settled WaterDummy directly above whose
+    /// lower edge touches the top of <paramref name="pos"/>; a WaterDummy below whose upper
+    /// edge touches the bottom of <paramref name="pos"/>.
+    /// </summary>
+    public bool IsWetAt(Vector2Int pos)
+    {
+        if (map.GetBlock(pos.x - 1, pos.y) is WaterDummy) return true;
+        if (map.GetBlock(pos.x + 1, pos.y) is WaterDummy) return true;
+        if (map.GetBlock(pos.x, pos.y + 1) is WaterDummy aboveWater
+            && aboveWater.GetSourceElement().localLowerLevel == 0) return true;
+        if (map.GetBlock(pos.x, pos.y - 1) is WaterDummy belowWater
+            && belowWater.GetSourceElement().localUpperLevel == 0) return true;
+        return false;
+    }
+
+    /// <summary>
     /// Returns true if any active flame currently occupies the given grid cell.
     /// Used to prevent multiple directional flames from spawning in the same empty cell.
     /// </summary>

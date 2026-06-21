@@ -53,6 +53,7 @@ public class FlameSource : MapObject
     private void TryIgniteAt(Vector2Int pos)
     {
         if (!map.CheckInsideBlockGrid(pos.x, pos.y)) return;
+        if (map.FireManager.IsWetAt(pos)) return;
         Block blockAtPos = map.GetBlock(pos.x, pos.y);
 
         if (blockAtPos != null)
