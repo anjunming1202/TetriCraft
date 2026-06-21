@@ -33,6 +33,7 @@ Material:
     - _Animation: 0
     - _BUILTIN_QueueControl: 0
     - _Column: 1
+    - _PingPongAnimation: 1
     - _Reversed: 1
     - _Row: 20
     - _Speed: 0.5

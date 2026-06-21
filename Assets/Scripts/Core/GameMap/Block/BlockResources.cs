@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class BlockResources : PersistentSingleton<BlockResources>
 {
-    [SerializeField] private List<GameObject> blockPrefabList = new List<GameObject>();
+    // Path relative to any Resources/ folder, e.g. "Prefabs/Blocks"
+    [SerializeField] private string blockPrefabsFolder = "Prefabs/Blocks";
 
     static private Dictionary<BlockID, GameObject> BlockIndexer;
 
@@ -12,9 +13,23 @@ public class BlockResources : PersistentSingleton<BlockResources>
         base.Awake();
 
         BlockIndexer = new Dictionary<BlockID, GameObject>();
-        foreach (var prefab in blockPrefabList)
+        GameObject[] prefabs = Resources.LoadAll<GameObject>(blockPrefabsFolder);
+        if (prefabs.Length == 0)
+            Debug.LogWarning($"[BlockResources] No prefabs found at Resources/{blockPrefabsFolder}");
+
+        foreach (var prefab in prefabs)
         {
             Block block = prefab.GetComponent<Block>();
+            if (block == null)
+            {
+                Debug.LogWarning($"[BlockResources] Prefab '{prefab.name}' has no Block component, skipped.");
+                continue;
+            }
+            if (BlockIndexer.ContainsKey(block.ID))
+            {
+                Debug.LogWarning($"[BlockResources] Duplicate BlockID '{block.ID}' from prefab '{prefab.name}', skipped.");
+                continue;
+            }
             BlockIndexer.Add(block.ID, prefab);
         }
     }

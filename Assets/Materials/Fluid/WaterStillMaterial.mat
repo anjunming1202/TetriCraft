@@ -34,6 +34,7 @@ Material:
     - _BUILTIN_QueueControl: 0
     - _Column: 1
     - _Reversed: 1
+    - _Row: 32
     m_Colors:
     - _Color: {r: 0, g: 0.5063281, b: 1, a: 1}
   m_BuildTextureStacks: []

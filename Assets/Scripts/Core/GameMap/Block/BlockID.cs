@@ -24,6 +24,9 @@ public enum BlockID
     PistonHead,
     Bedrock,
     Wool,
+    IronBlock,
+    GoldBlock,
+    DiamondBlock,
 
     Count
 }

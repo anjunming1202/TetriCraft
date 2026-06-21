@@ -34,6 +34,7 @@ Material:
     - _BUILTIN_QueueControl: 0
     - _Column: 2
     - _Reversed: 1
+    - _Row: 32
     - _Speed: 0.5
     m_Colors:
     - _Color: {r: 1, g: 1, b: 0, a: 1}
