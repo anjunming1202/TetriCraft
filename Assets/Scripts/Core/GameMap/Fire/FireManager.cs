@@ -7,6 +7,7 @@ using UnityEngine;
 /// </summary>
 public class FireManager : MonoBehaviour
 {
+    [Header("Flame Prefabs")]
     [SerializeField] private Flame sideFlamePrefab;
     [SerializeField] private Flame topFlamePrefab;
 

@@ -23,6 +23,11 @@ public class Flame : MapObject, IRandomTickable
     [SerializeField] AudioClip extinguishSound;
     [SerializeField] private int minTickDelay = 30;
     [SerializeField] private int maxTickDelay = 40;
+    /// <summary>
+    /// The smoke child object whose world rotation should remain upright regardless of flame rotation.
+    /// Assign the "Smoke" child transform in the inspector.
+    /// </summary>
+    [SerializeField] private Transform smoke;
 
     private bool isDead;
 
@@ -45,14 +50,12 @@ public class Flame : MapObject, IRandomTickable
         transform.parent = attachedFlammable.transform;
         transform.localPosition = (Vector2)offset;
 
-        // Rotate directional (topFlamePrefab-based) flames to face away from their attached block.
-        // Default prefab orientation is upward; left/right/bottom need to be rotated accordingly.
-        if (offset == Vector2Int.left)
-            transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-        else if (offset == Vector2Int.right)
-            transform.localRotation = Quaternion.Euler(0f, 0f, -90f);
-        else if (offset == Vector2Int.down)
-            transform.localRotation = Quaternion.Euler(0f, 0f, 180f);
+        // Rotate topFlamePrefab-based flames to face away from their attached block.
+        // Default prefab orientation is upward; left/right/bottom are rotated in code.
+        if      (offset == Vector2Int.left)  transform.localRotation = Quaternion.Euler(0f, 0f,  90f);
+        else if (offset == Vector2Int.right) transform.localRotation = Quaternion.Euler(0f, 0f, -90f);
+        else if (offset == Vector2Int.down)  transform.localRotation = Quaternion.Euler(0f, 0f, 180f);
+        if (smoke != null) smoke.rotation = Quaternion.identity;
 
         age = initialAge;
         isDead = false;
@@ -149,6 +152,9 @@ public class Flame : MapObject, IRandomTickable
         else if (offset == Vector2Int.right) transform.localRotation = Quaternion.Euler(0f, 0f, -90f);
         else if (offset == Vector2Int.down)  transform.localRotation = Quaternion.Euler(0f, 0f, 180f);
         else                                 transform.localRotation = Quaternion.identity;
+
+        // Keep smoke world-upright so its particles always rise vertically.
+        if (smoke != null) smoke.rotation = Quaternion.identity;
 
         f.GetComponent<Block>().OnAfterRemoved += OnAttachedBlockRemoved;
         return true;
