@@ -1,0 +1,22 @@
+# Core RL / JAX stack
+jax[cpu]           # CPU build for Windows; switch to jax[cuda12] under WSL2 for GPU
+flax               # neural network layers for JAX
+optax              # gradient-based optimizers for JAX
+
+# Environment
+gymnasium          # standard RL environment interface
+numpy
+
+# Visualization & logging
+matplotlib
+tensorboard
+tqdm
+
+# Export / deployment
+onnx
+# tf2onnx and tensorflow are needed for JAX → ONNX export (Phase 3)
+# install separately when needed: pip install tensorflow tf2onnx
+
+# Dev / testing
+pytest
+jupyter
