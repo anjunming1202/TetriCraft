@@ -31,6 +31,9 @@ build/
 .vscode/
 *.swp
 
+# Test cache
+.pytest_cache/
+
 # JAX / XLA cache
 /tmp/
 jax_cache/
