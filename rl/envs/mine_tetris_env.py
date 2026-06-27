@@ -27,10 +27,22 @@ MultiDiscrete([width, 4])
     Columns that would push the piece outside the board are clamped silently
     by tetris_core.  No explicit 'invalid action' penalty is applied.
 
-Reward  (MVP — minimal shaping)
+Reward
 ------
-  +lines_cleared   at each lockdown step  (0 if no lines cleared)
-  -1               on the terminal (game-over) step
+  Base (reward_shaping=False):
+    +lines_cleared   at each lockdown step
+    -1               on game over
+
+  Shaped (reward_shaping=True, default):
+    +lines_cleared              line clear reward
+    -delta_holes * 0.02         symmetric: penalty for new holes, bonus for removing holes
+    -delta_bump  * 0.005        symmetric: penalty for rougher board, bonus for flattening
+    -delta_max_h * 0.005        symmetric: penalty for height growth, bonus for reduction
+    -1                          on game over
+
+  Weights are kept small (≪ 1) so total shaping per episode stays well
+  below the game-over penalty of -1, preserving the incentive to survive.
+  Symmetric deltas reward the board improvements that precede line clears.
 """
 
 from __future__ import annotations
@@ -62,16 +74,18 @@ class MineTetrisEnv(gym.Env):
         height: int = 20,
         obs_mode: str = "features",
         render_mode: str | None = None,
+        reward_shaping: bool = True,
     ) -> None:
         super().__init__()
 
-        assert obs_mode in ("features", "grid"), f"Unknown obs_mode '{obs_mode}'"
+        assert obs_mode in ("features", "grid", "cnn"), f"Unknown obs_mode '{obs_mode}'"
         assert render_mode in (None, "ansi"), f"Unknown render_mode '{render_mode}'"
 
         self.width = width
         self.height = height
-        self.obs_mode = obs_mode
-        self.render_mode = render_mode
+        self.obs_mode       = obs_mode
+        self.render_mode    = render_mode
+        self.reward_shaping = reward_shaping
 
         # ----- Action space -----------------------------------------------
         # dim 0: column  (0 … width-1)
@@ -82,6 +96,13 @@ class MineTetrisEnv(gym.Env):
         if obs_mode == "features":
             # col heights + col holes + max_height + total_holes + 2 × piece one-hot
             n = 2 * width + 2 + 2 * NUM_PIECE_TYPES
+            self.observation_space = spaces.Box(
+                low=0.0, high=1.0, shape=(n,), dtype=np.float32
+            )
+        elif obs_mode == "cnn":
+            # Flat: board pixels (H*W) + current piece one-hot (7) + next piece one-hot (7)
+            # CNNQNet internally reshapes the first H*W values back to (H, W, 1)
+            n = height * width + 2 * NUM_PIECE_TYPES
             self.observation_space = spaces.Box(
                 low=0.0, high=1.0, shape=(n,), dtype=np.float32
             )
@@ -112,13 +133,30 @@ class MineTetrisEnv(gym.Env):
         assert self._state is not None, "Call reset() before step()."
         assert not self._state.game_over, "Episode ended — call reset()."
 
+        # Snapshot board features BEFORE action (needed for shaping)
+        if self.reward_shaping:
+            prev_h     = column_heights(self._state.board)
+            prev_holes = float(column_holes(self._state.board).sum())
+            prev_bump  = float(np.abs(np.diff(prev_h)).sum())
+            prev_agg_h = float(prev_h.sum())   # aggregate height: sum of all column heights
+
         self._state, lines = apply_action(self._state, tuple(action), self._rng)
 
         # --- Reward ---
-        reward = float(lines)          # +lines_cleared per lockdown
+        reward     = float(lines)           # +lines_cleared (0 most steps)
         terminated = self._state.game_over
         if terminated:
-            reward -= 1.0              # penalty on death
+            reward -= 1.0                   # penalty on death
+
+        if self.reward_shaping and not terminated:
+            curr_h     = column_heights(self._state.board)
+            curr_holes = float(column_holes(self._state.board).sum())
+            curr_bump  = float(np.abs(np.diff(curr_h)).sum())
+            curr_agg_h = float(curr_h.sum())
+
+            reward -= 0.02  * (curr_holes - prev_holes)   # penalise new holes, reward removing holes
+            reward -= 0.01  * (curr_bump  - prev_bump)    # penalise rougher board, reward flattening
+            reward -= 0.005 * (curr_agg_h - prev_agg_h)  # penalise ANY height growth (aggregate, not max)
 
         info = {
             "lines_this_step": lines,
@@ -137,8 +175,28 @@ class MineTetrisEnv(gym.Env):
     def _obs(self) -> np.ndarray:
         if self.obs_mode == "features":
             return self._feature_obs()
+        if self.obs_mode == "cnn":
+            return self._cnn_obs()
         # "grid" mode: raw board as float32
         return self._state.board.astype(np.float32)
+
+    def _cnn_obs(self) -> np.ndarray:
+        """
+        Flat observation for CNNQNet.
+
+        Layout:
+          [0 : H*W)        board pixels, row-major, 0.0=empty 1.0=filled
+          [H*W : H*W+7)    current piece one-hot
+          [H*W+7 : H*W+14) next piece one-hot
+
+        CNNQNet reshapes the first H*W values back to (H, W, 1) internally.
+        The piece one-hots are concatenated after the CNN flatten — pieces are
+        not visible on the board, so the network needs them as separate input.
+        """
+        board   = self._state.board.astype(np.float32).reshape(-1)   # (H*W,)
+        curr_oh = np.eye(NUM_PIECE_TYPES, dtype=np.float32)[self._state.piece_type]
+        next_oh = np.eye(NUM_PIECE_TYPES, dtype=np.float32)[self._state.next_piece_type]
+        return np.concatenate([board, curr_oh, next_oh])
 
     def _feature_obs(self) -> np.ndarray:
         """

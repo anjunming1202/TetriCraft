@@ -7,7 +7,11 @@
       "Bash(cd \"E:\\\\Unity Projects\\\\MineTetris\\\\rl\" && python -X utf8 notebooks/verify_env.py 2>&1 | grep -A 10 \"TEST 7\")",
       "Bash(cd \"E:\\\\Unity Projects\\\\MineTetris\\\\rl\" && python -X utf8 notebooks/verify_env.py 2>&1 | tail -20)",
       "Bash(cd \"E:\\\\Unity Projects\\\\MineTetris\\\\rl\" && python -X utf8 notebooks/verify_env.py 2>&1 | grep -E \"\\(TEST [89]|OK |FAIL|WARNING|✓|complete\\\\.|Launch\\)\")",
-      "Bash(cd \"E:\\\\Unity Projects\\\\MineTetris\\\\rl\" && python -X utf8 watch.py --episodes 3 --delay 0 --quiet 2>&1)"
+      "Bash(cd \"E:\\\\Unity Projects\\\\MineTetris\\\\rl\" && python -X utf8 watch.py --episodes 3 --delay 0 --quiet 2>&1)",
+      "Bash(cd \"E:\\\\Unity Projects\\\\MineTetris\\\\rl\" && python -X utf8 watch_q.py --checkpoint outputs/q_run1 --episodes 200 --delay 0 --quiet)",
+      "Bash(cd \"E:\\\\Unity Projects\\\\MineTetris\\\\rl\" && python -X utf8 plot_metrics.py --run-dir outputs/q_run1 --window 1000 --save)",
+      "Bash(cd \"E:\\\\Unity Projects\\\\MineTetris\\\\rl\" && pip install \"jax[cpu]\" flax optax -q 2>&1 | tail -5)",
+      "Bash(python -m venv C:/jx && C:/jx/Scripts/pip.exe install \"jax[cpu]\" flax optax numpy gymnasium tqdm matplotlib -q 2>&1 | tail -8)"
     ]
   }
 }

@@ -131,13 +131,14 @@ def _episode_summary(episode: int, steps: int, total_lines: int, total_reward: f
 
 def watch(
     agent,
-    episodes: int = 5,
-    delay: float  = 0.3,
-    manual: bool  = False,
-    quiet: bool   = False,
-    seed: int     = 0,
+    episodes: int  = 5,
+    delay: float   = 0.3,
+    manual: bool   = False,
+    quiet: bool    = False,
+    seed: int      = 0,
+    env_kwargs: dict | None = None,
 ):
-    env = MineTetrisEnv(width=10, height=20)
+    env = MineTetrisEnv(width=10, height=20, **(env_kwargs or {}))
 
     all_steps   = []
     all_lines   = []
