@@ -135,28 +135,23 @@ class MineTetrisEnv(gym.Env):
 
         # Snapshot board features BEFORE action (needed for shaping)
         if self.reward_shaping:
-            prev_h     = column_heights(self._state.board)
             prev_holes = float(column_holes(self._state.board).sum())
-            prev_bump  = float(np.abs(np.diff(prev_h)).sum())
-            prev_agg_h = float(prev_h.sum())   # aggregate height: sum of all column heights
 
         self._state, lines = apply_action(self._state, tuple(action), self._rng)
 
         # --- Reward ---
-        reward     = float(lines)           # +lines_cleared (0 most steps)
+        reward     = float(lines)           # +lines_cleared
         terminated = self._state.game_over
         if terminated:
             reward -= 1.0                   # penalty on death
 
-        if self.reward_shaping and not terminated:
-            curr_h     = column_heights(self._state.board)
-            curr_holes = float(column_holes(self._state.board).sum())
-            curr_bump  = float(np.abs(np.diff(curr_h)).sum())
-            curr_agg_h = float(curr_h.sum())
+        if not terminated:
+            reward += 0.01                  # survival bonus: reward staying alive each step
+                                            # prevents reward hacking (dying fast to avoid shaping penalties)
 
-            reward -= 0.02  * (curr_holes - prev_holes)   # penalise new holes, reward removing holes
-            reward -= 0.01  * (curr_bump  - prev_bump)    # penalise rougher board, reward flattening
-            reward -= 0.005 * (curr_agg_h - prev_agg_h)  # penalise ANY height growth (aggregate, not max)
+        if self.reward_shaping and not terminated:
+            curr_holes = float(column_holes(self._state.board).sum())
+            reward -= 0.005 * (curr_holes - prev_holes)  # penalise creating holes, reward removing them
 
         info = {
             "lines_this_step": lines,
