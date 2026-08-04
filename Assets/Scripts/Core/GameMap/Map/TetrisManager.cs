@@ -16,7 +16,7 @@ public class TetrisManager : MonoBehaviour
     [SerializeField] private MapManager map;
     protected MapManager Map => map;
 
-    [SerializeField] private MapTetromino fallingTetromino;
+    [SerializeField] protected MapTetromino fallingTetromino;
     [SerializeField] private TetrominoController tetrominoController;
 
     [SerializeField] private GhostTetromino ghostTetromino;

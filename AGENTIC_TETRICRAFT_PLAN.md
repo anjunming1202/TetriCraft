@@ -95,43 +95,74 @@ All changes are additive (new methods/new files), per the existing architectural
 of `TetrisManager`/`MapManager`/`BlockSystemManager`, and `SingleGameController`/`BattleGameController`
 and their scenes are untouched.
 
-### 2.1 `MapTetromino` — one new method
+**Revised approach (superseding an earlier draft of this section): subclass, don't edit in place.**
+The codebase already has a precedent for exactly this problem — `BattleTetrisManager : TetrisManager`
+(`Assets/Scripts/Core/Battle/BattleTetrisManager.cs`) adds mode-specific behavior via subclassing and
+`protected virtual` override points, not by editing `TetrisManager.cs` directly. We follow the same
+convention with a new `PlacementTetrisManager : TetrisManager` (and, later, `PlacementMapTetromino` —
+see §2.1a) rather than adding placement methods straight into the shared files. This matters because
+this branch will eventually merge with the actively-developed gameplay line: subclassing means the only
+diff against shared files is a couple of `private`→`protected` accessibility widenings (see below), and
+all the new logic lives in brand-new files that merge as trivial adds regardless of what gameplay work
+touches `TetrisManager.cs`/`MapTetromino.cs` in the meantime.
+
+**Placement decoding is a separate, decoupled step.** Rather than a placement API that teleports the
+piece straight to its final (rotation, column), a `PlacementDecoder` turns a chosen placement into an
+ordered list of primitive ops (`RotateCW`/`RotateCCW`/`Left`/`Right`/`Drop`) — the same vocabulary
+`TetrominoController` already drives via `MapTetromino.Rotate()`/`Left()`/`Right()`/`HardDrop()` (all
+already `public`), just invoked directly instead of through `PlayerInput` events. This decouples *what*
+placement was chosen from *how* it's carried out: the demo/visualisation scene steps through the ops
+with a visible delay so the piece is seen to move like normal play, while a later headless/training env
+applies the same ops back-to-back with no delay. One decoder, two executors.
+
+### 2.1 `TetrisManager` — one accessibility change, no new methods
 
 ```csharp
-// Bypasses Ground()'s lock-delay coroutine; reuses the same private TryShift/Lockdown
-// already used by HardDrop()/TryImmediateLockdown(). No change to existing methods.
-public void ForceHardDropAndLock(MapManager map)
-{
-    while (TryShift(map, 0, -1)) { }
-    Lockdown(map);
-}
+// was: [SerializeField] private MapTetromino fallingTetromino;
+[SerializeField] protected MapTetromino fallingTetromino;
 ```
+This is the only touch needed to the shared file. Everything `PlacementTetrisManager` needs beyond this
+— `Map`, `boundaryWidth`, `RotateShape()`/`ShiftPending()`/`SetPositionPending()`/`CheckValid()` on
+`MapTetromino`/`Tetromino`, `Rotate()`/`Left()`/`Right()`/`HardDrop()` — is already `protected` or
+`public`.
 
-### 2.2 `TetrisManager` — two new methods
+### 2.1a `PlacementTetrisManager : TetrisManager` (new file)
 
-```csharp
-// Enumerate every legal (rotation, column) for the current falling piece, and — critically —
-// the resulting board for each, computed the same "shift, check, revert" way UpdateGhostTetromino()
-// already does. This is what lets the JAX afterstate method score every candidate placement in a
-// single round trip, without Python ever re-implementing board/line-clear logic itself (Unity stays
-// the only simulator, per DESIGN_INTENT.md).
-public IReadOnlyList<PlacementCandidate> GetLegalPlacements();
+- `GetLegalPlacements()` — enumerates every legal (rotation, column) via the same "rotate/shift, check
+  validity, revert" pattern `TetrisManager.UpdateGhostTetromino()` already uses for the drop-shadow, so
+  no real blocks move while enumerating. Returns `PlacementCandidate { Rotation, Column, LandingY }`.
+- `ApplyOp(PlacementDecoder.PlacementOp)` — applies one decoded primitive op to the live falling piece.
+  Exposed so a demo driver can step through ops externally with a delay.
+- `ExecutePlacement(rotation, column)` — decodes and applies a full placement back-to-back (instant
+  batch form), for later headless/training reuse. Decodes rotation ops against the *target* rotation
+  directly, then decodes the column shift *after* rotation ops are actually applied and read back live
+  (wall kicks during rotation can move the piece's x — a shift count computed against the
+  pre-rotation column would be wrong otherwise).
 
-// Commit one of the candidates returned above: replays the same rotation/shift moves against the
-// *real* fallingTetromino, then calls ForceHardDropAndLock(). The existing OnLockdown → line-clear →
-// turn-finished chain fires unmodified.
-public void ExecutePlacement(int rotation, int column);
-```
+Implemented in `Assets/Scripts/Core/Placement/PlacementTetrisManager.cs` (this branch).
 
-`PlacementCandidate` is a small new struct: `{ rotation, column, resultingBoard (bool[,] or packed
-bits), rows/height-after, willTopOut }`. Computing "resulting board" without mutating real state reuses
-exactly the pattern already in `UpdateGhostTetromino()` — simulate on the live `fallingTetromino`
-temporarily, read the grid, revert `position`/`rotation`. Board readback uses `MapManager.GetBlock(x,y)`
-/ `MapManager.Blocks`, both already public.
+### 2.1b `PlacementDecoder` (new file, static)
 
-*Sanity check this buys us for free:* since the transition is deterministic, the board `ExecutePlacement`
-actually produces must equal the `resultingBoard` the matching candidate predicted. That equality is a
-strong, nearly-free correctness test for the whole seam (see §2.6).
+`DecodeRotation(fromRotation, toRotation)` and `DecodeShift(fromColumn, toColumn)` — pure functions,
+shortest-path op sequences. Kept separate from execution entirely (see decoupling note above).
+Implemented in `Assets/Scripts/Core/Placement/PlacementDecoder.cs` (this branch).
+
+### 2.1c Deferred: instant-lock bypass (`ForceHardDropAndLock`)
+
+An earlier draft of this plan proposed a `MapTetromino.ForceHardDropAndLock()` that bypasses
+`Ground()`'s 0.5s lock-delay coroutine, for headless training throughput. **Not needed for the
+demo/visualisation scene** — the real `HardDrop()` (with its existing lock-delay animation) is actually
+preferable there, since it looks like normal play. This bypass (and the `PlacementMapTetromino`
+subclass + `TryShift`/`Lockdown` `private`→`protected` widening it needs) is deferred to the later
+headless-throughput branch, where wall-clock delay per placement actually matters.
+
+### 2.2 `RandomPlacementDemoDriver` (new file, this branch)
+
+Subscribes to `TetrisManager.OnStartedTurn` (already public, already fired once per new piece); on each
+new piece, calls `GetLegalPlacements()`, picks uniformly at random, and steps through
+`PlacementDecoder`'s ops via `PlacementTetrisManager.ApplyOp()` with a configurable delay between each,
+finishing with a real `HardDrop()`. Implemented in
+`Assets/Scripts/Core/Placement/RandomPlacementDemoDriver.cs`.
 
 ### 2.3 `PlayerGameManager` — one small guard
 
@@ -188,10 +219,16 @@ reads whichever `SpawnableBlockList` is wired in.
 - `Reset(seed)`: `UnityEngine.Random.InitState(seed)` then the existing
   `PrepareNewPlayerGame()`/`StartGameplay()` (no intro). Same seed ⇒ byte-identical piece sequence ⇒
   byte-identical trajectory given the same action sequence.
-- A cheap correctness test: after `ExecutePlacement`, diff the real board against the `PlacementCandidate`
-  that was committed — they must match exactly. This should be an automated Play Mode test
+- A cheap correctness test: after `ExecutePlacement`/the demo driver commits a candidate, the piece's
+  actual final `(rotation, column, landing row)` must match the `PlacementCandidate` that was chosen —
+  they should agree exactly. This should be an automated Play Mode test
   (`com.unity.test-framework` is already a package dependency) run early and often while building this
-  seam.
+  seam. Note one known edge case this test should probe: `GetLegalPlacements()` enumerates *geometric*
+  validity (is rotation R legal at column C at all), not reachability via the decoder's simple
+  "rotate fully at the spawn column, then shift" order — real `Rotate()` calls use wall kicks, which are
+  well-behaved (the trivial (0,0) offset succeeds) near the center spawn column on a mostly-empty
+  board, but could in principle fail for a rotation that's only reachable by shifting first (e.g. a
+  tall stack right at the spawn column). Not solved yet — see §8.
 
 ---
 
@@ -374,5 +411,9 @@ Assets/Scenes/HeadlessTraining.unity
   Tetris heuristic features) is deliberately left as a tuning knob, not fixed here.
 - Exact board crop convention (rows above `boundaryHeight`) should be pinned down with a Play Mode test
   before writing the JAX-side observation encoder, so the two sides agree on array shape byte-for-byte.
-- `ForceHardDropAndLock`/`GetLegalPlacements`/`ExecutePlacement` are proposed method shapes, not final
+- `GetLegalPlacements`/`ExecutePlacement`/`PlacementDecoder` are proposed method shapes, not final
   signatures — expect small adjustments once actually wired against the real prefabs in the Unity Editor.
+- The "rotate fully at spawn, then shift" decode order (§2.6) could in principle miss a
+  geometrically-legal candidate that's only reachable by shifting before rotating, against a tall
+  center stack. Not yet hit in practice; worth a targeted Play Mode test once the demo scene is running
+  against non-trivial boards, not before.
