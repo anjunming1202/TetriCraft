@@ -197,7 +197,7 @@ public class MapTetromino : Tetromino
     /// <summary>
     /// Tetromino lockdown
     /// </summary>
-    private void Lockdown(MapManager map)
+    protected void Lockdown(MapManager map)
     {
         // make sure only lockdown once *
         if (isLocked)

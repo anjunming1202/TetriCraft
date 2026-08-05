@@ -32,6 +32,8 @@ public class BlockParticleManager : MonoBehaviour
 
         // spawn particle at the visual position
         ParticleSystem breakingParticlesInstance = block.GetMap().SpawnParticle(breakingParticles, position);
+        if (breakingParticlesInstance == null)
+            return;
 
         // set particle renderer material
         breakingParticlesRenderer = breakingParticlesInstance.GetComponent<ParticleSystemRenderer>();

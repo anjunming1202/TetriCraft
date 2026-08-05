@@ -9,9 +9,13 @@ public class ScoreManager : Singleton<ScoreManager>
     public TextMeshProUGUI scoreText; // inspector
     public uint digit = 8;
 
+    public uint Score => score;
+    public uint TotalLinesCleared { get; private set; }
+
     public void Reset()
     {
         score = 0;
+        TotalLinesCleared = 0;
         UpdateScoreBoard();
     }
 
@@ -37,6 +41,8 @@ public class ScoreManager : Singleton<ScoreManager>
 
     private void ScoreLineClear(PlayerID id, uint newLineCount, uint totalLineCount, uint combo)
     {
+        TotalLinesCleared += newLineCount;
+
         // for clearing multiple lines
         score = score + GetSingleClearScore(totalLineCount) - GetSingleClearScore(totalLineCount - newLineCount); // count for total line count in one turn
 
@@ -48,6 +54,9 @@ public class ScoreManager : Singleton<ScoreManager>
 
     private void UpdateScoreBoard()
     {
+        if (scoreText == null) // unassigned in a headless scene with no scoreboard UI
+            return;
+
         string output = $"{score}";
         int length = output.Length;
         for (int i = 0; i < digit - length; i++)

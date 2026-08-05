@@ -23,14 +23,42 @@ public readonly struct PlacementCandidate
 /// <summary>
 /// Extends TetrisManager with placement-level actions (one decision per tetromino), following
 /// the same subclassing convention BattleTetrisManager already established for mode-specific
-/// behaviour. Used by the demo/visualisation scene now, and later by the headless training env —
-/// neither needs to touch TetrisManager/MapTetromino beyond the single field this depends on
-/// (fallingTetromino, widened from private to protected).
+/// behaviour. Two distinct commit paths are exposed, for two distinct consumers:
+/// ExecutePlacement()/ApplyOp() (demo/gameplay-fidelity — real Rotate()/Left()/Right()/HardDrop(),
+/// real wall kicks, real lock delay) and CommitPlacementInstant() (training/max efficiency — jumps
+/// straight to the pre-validated candidate and locks with no delay, no wall-kick re-checking, no
+/// animation). Requires the falling piece to actually be a PlacementMapTetromino at runtime (see
+/// ForceLockdown() below) — assign that component instead of plain MapTetromino in any scene using
+/// CommitPlacementInstant.
 /// </summary>
 public class PlacementTetrisManager : TetrisManager
 {
+    [Header("Placement")]
+    [Tooltip("When checked, the automatic per-frame ghost (straight down from the piece's current " +
+             "position) is suppressed so something else — e.g. a test harness previewing a cycled " +
+             "candidate via PreviewCandidate() — can drive the ghost tetromino instead. Leave " +
+             "unchecked (e.g. the demo scene) to keep the normal drop-shadow behaviour.")]
+    [SerializeField] private bool suppressAutomaticGhostUpdate = false;
+
+    [Tooltip("Uncheck for a scene with no GhostTetromino GameObject at all (e.g. a pure training " +
+             "scene with no visualisation) — CreateGhostBlocks()/ClearAllBlocks()/UpdateGhostTetromino() " +
+             "are never called and PreviewCandidate() becomes a no-op.")]
+    [SerializeField] private bool useGhostTetromino = true;
+
     public int FallingRotation => fallingTetromino.rotation;
     public int FallingColumn => fallingTetromino.position.x;
+
+    // Placement-driven pieces are moved only by this class's own commit methods — natural per-frame
+    // gravity must never also be moving/locking the same piece, and none of ApplyOp()'s calls
+    // (Rotate/Left/Right/HardDrop are all called directly on MapTetromino) ever go through
+    // TetrominoController, so it never needs a validly-configured input actions asset either. Fixed
+    // for every PlacementTetrisManager instance — there's no scenario where placement-driven control
+    // and natural input-driven control should coexist on the same piece.
+    protected override bool ShouldActivateTetrominoController => false;
+    protected override bool ShouldInitialiseTetrominoController => false;
+
+    protected override bool ShouldUpdateGhostTetromino => !suppressAutomaticGhostUpdate;
+    protected override bool ShouldUseGhostTetromino => useGhostTetromino;
 
     /// <summary>
     /// Enumerate every legal (rotation, column) placement for the current falling piece.
@@ -104,9 +132,10 @@ public class PlacementTetrisManager : TetrisManager
     }
 
     /// <summary>
-    /// Commit a chosen placement in one instant, back-to-back batch (no delay between ops) —
-    /// the form a headless/training env will use. The demo driver instead calls ApplyOp itself,
-    /// one op at a time with a visible delay, using the same PlacementDecoder output.
+    /// Commit a chosen placement via the same primitive ops TetrominoController would issue —
+    /// real wall kicks, real HardDrop()/lock delay. This is the demo/gameplay-fidelity path; the
+    /// demo driver instead calls ApplyOp itself, one op at a time with a visible delay, using the
+    /// same PlacementDecoder output this method uses in one back-to-back batch.
     /// </summary>
     public void ExecutePlacement(int targetRotation, int targetColumn)
     {
@@ -120,5 +149,52 @@ public class PlacementTetrisManager : TetrisManager
             ApplyOp(op);
 
         ApplyOp(PlacementDecoder.PlacementOp.Drop);
+    }
+
+    /// <summary>
+    /// Commit a candidate from GetLegalPlacements() directly: no wall-kick replay, no per-cell drop
+    /// walk, no animation, no lock delay. Safe only because the candidate's (Rotation, Column,
+    /// LandingY) was already validated during enumeration and nothing mutates the board in
+    /// between — this is the training/headless path.
+    /// </summary>
+    public void CommitPlacementInstant(PlacementCandidate candidate)
+    {
+        var placementTetromino = (PlacementMapTetromino)fallingTetromino;
+
+        foreach (var op in PlacementDecoder.DecodeRotation(FallingRotation, candidate.Rotation))
+            fallingTetromino.RotateShape(op == PlacementDecoder.PlacementOp.RotateCW);
+
+        fallingTetromino.SetPositionPending(new Vector2Int(candidate.Column, candidate.LandingY));
+        fallingTetromino.MoveBlocksToPendingPositions(Map, animation: false);
+
+        placementTetromino.ForceLockdown(Map);
+    }
+
+    /// <summary>
+    /// Point the ghost tetromino at a specific candidate instead of wherever the real falling piece
+    /// currently is — used by HeadlessManualTestHarness while cycling through GetLegalPlacements()
+    /// results (paired with suppressAutomaticGhostUpdate = true, otherwise OnUpdate()'s own ghost
+    /// call would immediately overwrite this every frame). Temporarily rotates the real falling
+    /// piece to compute the correct shadow shape, then reverts — same simulate/revert discipline as
+    /// GetLegalPlacements(), so nothing about the real board is affected.
+    /// </summary>
+    public void PreviewCandidate(PlacementCandidate candidate)
+    {
+        if (!useGhostTetromino)
+            return;
+
+        int originalRotation = fallingTetromino.rotation;
+        int originalLastRotation = fallingTetromino.lastRotation;
+
+        foreach (var op in PlacementDecoder.DecodeRotation(FallingRotation, candidate.Rotation))
+            fallingTetromino.RotateShape(op == PlacementDecoder.PlacementOp.RotateCW);
+
+        ghostTetromino.Shadow(fallingTetromino);
+        ghostTetromino.SetPosition(new Vector2Int(candidate.Column, candidate.LandingY), Map);
+
+        foreach (var op in PlacementDecoder.DecodeRotation(fallingTetromino.rotation, originalRotation))
+            fallingTetromino.RotateShape(op == PlacementDecoder.PlacementOp.RotateCW);
+        fallingTetromino.rotation = originalRotation;
+        fallingTetromino.lastRotation = originalLastRotation;
     }
 }

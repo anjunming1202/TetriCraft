@@ -17,6 +17,11 @@ public class BlockSoundManager : MonoBehaviour
 
     private void PlaySoundOnPlaced(Block b)
     {
+        // Check before the Random.Range draw below, not just before AudioManager use — the draw
+        // itself would perturb the piece RNG stream.
+        if (HeadlessRuntime.IsHeadless)
+            return;
+
         if (placedSounds.Length > 0)
         {
             int random = UnityEngine.Random.Range(0, placedSounds.Length);
@@ -26,6 +31,9 @@ public class BlockSoundManager : MonoBehaviour
 
     private void PlaySoundOnDestroyed(Block b)
     {
+        if (HeadlessRuntime.IsHeadless)
+            return;
+
         if (destroyedSounds.Length > 0)
         {
             int random = UnityEngine.Random.Range(0, destroyedSounds.Length);

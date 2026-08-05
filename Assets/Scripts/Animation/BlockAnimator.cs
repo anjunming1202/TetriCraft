@@ -52,6 +52,13 @@ public class BlockAnimator : MonoBehaviour
 
     protected void AnimationOnSet(Vector3 to, AnimationCurveAsset curveAsset, float speed)
     {
+        // Skip the animation coroutine entirely during headless rollouts
+        if (HeadlessRuntime.IsHeadless)
+        {
+            Finish();
+            return;
+        }
+
         // Stop current animation
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);

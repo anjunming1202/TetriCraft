@@ -42,4 +42,16 @@ public static class TickManager
         else
             IsGameTickUpdate = false;
     }
+
+    // Advances the tick clock by an explicit count, independent of Update()'s real-time accumulator —
+    // for headless/test-harness stepping.
+    public static void AdvanceTicks(int count)
+    {
+        if (count <= 0)
+            return;
+
+        GameTick += (uint)count;
+        DeltaTick = count;
+        IsGameTickUpdate = true;
+    }
 }

@@ -9,6 +9,9 @@ public class ParticleManager : MonoBehaviour
 
     public ParticleSystem SpawnParticle(ParticleSystem prefab, Vector3 worldPosition, Quaternion rotation = default, Transform parentOverride = null)
     {
+        if (HeadlessRuntime.IsHeadless)
+            return null;
+
         if (prefab == null)
         {
             Debug.LogWarning("ParticleManager.SpawnParticle called with null prefab.");

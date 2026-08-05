@@ -19,7 +19,7 @@ public class TetrisManager : MonoBehaviour
     [SerializeField] protected MapTetromino fallingTetromino;
     [SerializeField] private TetrominoController tetrominoController;
 
-    [SerializeField] private GhostTetromino ghostTetromino;
+    [SerializeField] protected GhostTetromino ghostTetromino;
 
     [SerializeField] private DummyTetromino[] nextTetrominoList = new DummyTetromino[4];
     public List<DummyTetromino> nextTetrominos { get; private set; } = new List<DummyTetromino>();
@@ -59,12 +59,17 @@ public class TetrisManager : MonoBehaviour
     {
         map.Initialise();
 
-        tetrominoController.Initialise();
+        if (ShouldInitialiseTetrominoController)
+            tetrominoController.Initialise();
 
         fallingTetromino.OnLockdown += OnLockdown;
         fallingTetromino.OnSoftDrop += (MapTetromino tetromino) => OnTetrominoSoftDrop?.Invoke(tetromino);
         fallingTetromino.OnHardDrop += (MapTetromino tetromino) => OnTetrominoHardDrop?.Invoke(tetromino);
     }
+
+    // Override false to skip TetrominoController.Initialise() — placement-driven subclasses
+    // don't route through it, so it needs no input actions asset wired.
+    protected virtual bool ShouldInitialiseTetrominoController => true;
 
     public void PrepareNewTetrisMap(int boundaryWidth, int boundaryHeight, PlayerID playerID)
     {
@@ -82,7 +87,8 @@ public class TetrisManager : MonoBehaviour
         tetrominoController.Reset(map, fallingTetromino);
 
         // Initialise ghost tetromino
-        ghostTetromino.CreateGhostBlocks();
+        if (ShouldUseGhostTetromino)
+            ghostTetromino.CreateGhostBlocks();
 
         // Initialise next tetrominos
         InitNextTetrominoList();
@@ -99,7 +105,8 @@ public class TetrisManager : MonoBehaviour
     {
         map.ClearMap();
 
-        ghostTetromino.ClearAllBlocks();
+        if (ShouldUseGhostTetromino)
+            ghostTetromino.ClearAllBlocks();
         fallingTetromino.ClearAllBlocks();
         foreach (var tetromino in nextTetrominoList)
             tetromino.ClearAllBlocks();
@@ -126,7 +133,8 @@ public class TetrisManager : MonoBehaviour
             TryClearLines();
 
             // Display ghost tetromino
-            UpdateGhostTetromino();
+            if (ShouldUseGhostTetromino && ShouldUpdateGhostTetromino)
+                UpdateGhostTetromino();
 
             // Update map
             map.OnUpdate();
@@ -156,8 +164,21 @@ public class TetrisManager : MonoBehaviour
     public void ResumeUpdating()
     {
         isUpdating = true;
-        tetrominoController.Activate();
+        if (ShouldActivateTetrominoController)
+            tetrominoController.Activate();
     }
+
+    // Override false to skip activating natural gravity/key-repeat — placement-driven subclasses
+    // move the falling piece themselves.
+    protected virtual bool ShouldActivateTetrominoController => true;
+
+    // Override false to suppress the automatic ghost update, e.g. when a test harness drives
+    // ghostTetromino itself to preview a candidate placement.
+    protected virtual bool ShouldUpdateGhostTetromino => true;
+
+    // Override false to skip ghostTetromino entirely — CreateGhostBlocks()/ClearAllBlocks() are
+    // never called, so a scene doesn't need the GameObject at all.
+    protected virtual bool ShouldUseGhostTetromino => true;
 
     public void TryEndGame()
     {

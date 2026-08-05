@@ -96,6 +96,9 @@ public class AudioManager : PersistentSingleton<AudioManager>
     /// </summary>
     public void PlaySFXAtPoint(AudioClip clip, Vector3 position, float volume = 1f, AudioBus output = AudioBus.Master)
     {
+        if (HeadlessRuntime.IsHeadless)
+            return;
+
         GameObject gameObject = new GameObject("One shot audio");
         gameObject.transform.position = position;
         AudioSource audioSource = (AudioSource)gameObject.AddComponent(typeof(AudioSource));
@@ -112,6 +115,9 @@ public class AudioManager : PersistentSingleton<AudioManager>
     /// </summary>
     public bool PlaySFX(AudioClip clip, float volume = 1f, AudioBus output = AudioBus.Master)
     {
+        if (HeadlessRuntime.IsHeadless)
+            return false;
+
         if (sfxPool.Count == 0)
         {
             // no pool available
@@ -142,6 +148,9 @@ public class AudioManager : PersistentSingleton<AudioManager>
     /// </summary>
     public void PlaySFXFollowing(AudioClip clip, Transform target, float volume = 1f, AudioBus output = AudioBus.Master)
     {
+        if (HeadlessRuntime.IsHeadless)
+            return;
+
         GameObject tempGO = new GameObject("TempAudio");
         tempGO.transform.position = target.position;
         tempGO.transform.parent = target;

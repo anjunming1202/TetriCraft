@@ -10,6 +10,68 @@ method names below are real and current as of this branch's fork point.
 
 ---
 
+## Design philosophy (read before extending the headless path further)
+
+These are the judgment calls this phase kept coming back to, stated explicitly because they'll keep
+mattering through Stage 2+, not just as a record of what happened this phase.
+
+1. **Unity is the simulator, permanently — no parallel reimplementation, ever.** The abandoned
+   `v1.3-Dev-RL-Agent` branch reimplemented Tetris in NumPy, decoupled from the real game logic; this
+   whole line exists to reverse that mistake. `TetrisManager`'s turn/lockdown/line-clear/spawn logic is
+   never duplicated, only reused, via subclassing and instant/decoded execution paths that call the same
+   protected methods real gameplay calls. If a hook or wrapper starts looking heavy enough that
+   reimplementing seems easier, that's a signal to stop, not a green light — it's the exact failure mode
+   already lived through once.
+
+2. **Subclass with minimal, additive hooks — never fork the shared file.** Every `TetrisManager`/
+   `MapTetromino` change this phase is either a `private`→`protected` accessibility widening or a
+   `protected virtual bool ShouldX => true` hook defaulting to `main`'s existing behavior unchanged
+   (`BattleTetrisManager` is the precedent `PlacementTetrisManager` follows). A hook earns its place when
+   it fixes a *recurring* correctness/throughput problem in shared default behavior (natural gravity
+   racing the agent, animation coroutines piling up) or removes a whole *category* of unnecessary setup
+   friction (the input-actions-asset requirement) — not for one-off session-orchestration behavior, which
+   is the signal to build a separate class instead (see #3).
+
+3. **A genuinely different control-flow shape gets its own class, not more hooks on the old one.**
+   `RolloutEnvironment` exists because driving the rollout *through* `GameController`'s session lifecycle
+   meant every new headless need became another toggle threaded through shared classes — a pattern that
+   doesn't converge. The same reasoning eliminated `PlayerGameManager` from the headless path: it bundles
+   a few genuinely-essential calls with human-session-only concerns (UI, intro, pause), and routing
+   through it would mean every future headless gap becomes another guard in a file `main` also owns.
+
+4. **Verification and training are two different consumers of the same core — never let one leak into
+   the other.** `RolloutEnvironment`/`PlacementTetrisManager` have zero knowledge that
+   `HeadlessManualTestHarness` exists; the harness holds references *into* the core, never the reverse.
+   Building more verification tooling (HUD, auto-tick, pause controls) should only ever touch the harness
+   file. If a verification feature seems to require touching `RolloutEnvironment.cs`, that's worth
+   pausing on before proceeding.
+
+5. **Determinism is non-negotiable and checked by grep, not assumption.** Anything that draws from
+   `UnityEngine.Random` outside the seeded piece-sequence path (sound-clip selection was the real bug
+   found this way) silently breaks reproducibility — found by proactively auditing, not by waiting for a
+   crash. The same discipline applies to any future non-obvious global/static state.
+
+6. **"No errors" is not verification.** A scene can run clean and still be doing nothing (the tick-flush-
+   before-first-`OnUpdate()` bug), or doing the wrong thing silently (the ghost-desync bug, the
+   spawn/move batch-conflict bug). Every non-trivial change to the headless path gets exercised through
+   `HeadlessManualTestHarness` before being trusted, not just checked for the absence of a stack trace.
+
+7. **Gate side effects (sound/particle/animation) at the lowest shared entry point, except where
+   determinism requires gating earlier.** `AudioManager`/`ParticleManager` are gated once, centrally,
+   catching every caller (TNT, fire, note blocks, generic effects) without editing each one individually.
+   The one exception is `BlockSoundManager`, which must gate *before* its `Random.Range` clip-selection
+   draw — that's a determinism concern, not a noise concern, and has to stay at the call site regardless
+   of what's gated downstream.
+
+8. **Audit before declaring something removable — in either direction.** `GameController` looked
+   unavoidable until a full-codebase grep showed `BoundaryDataManager` was its only real dependent;
+   `PlayerGameManager` looked necessary until the same treatment. The instinct to question "do we
+   actually need this" is correct and should keep being applied — but always backed by grep, not
+   assumption: don't keep something out of caution, and don't cut something out of instinct without
+   checking first.
+
+---
+
 ## 1. What the codebase actually looks like (relevant to Stage 0)
 
 ### 1.1 Control flow
@@ -147,14 +209,31 @@ Implemented in `Assets/Scripts/Core/Placement/PlacementTetrisManager.cs` (this b
 shortest-path op sequences. Kept separate from execution entirely (see decoupling note above).
 Implemented in `Assets/Scripts/Core/Placement/PlacementDecoder.cs` (this branch).
 
-### 2.1c Deferred: instant-lock bypass (`ForceHardDropAndLock`)
+### 2.1c Training/headless commit path: `CommitPlacementInstant` (built on `Feature-Headless-Controller`)
 
-An earlier draft of this plan proposed a `MapTetromino.ForceHardDropAndLock()` that bypasses
-`Ground()`'s 0.5s lock-delay coroutine, for headless training throughput. **Not needed for the
-demo/visualisation scene** — the real `HardDrop()` (with its existing lock-delay animation) is actually
-preferable there, since it looks like normal play. This bypass (and the `PlacementMapTetromino`
-subclass + `TryShift`/`Lockdown` `private`→`protected` widening it needs) is deferred to the later
-headless-throughput branch, where wall-clock delay per placement actually matters.
+An earlier draft of this section proposed a loop-based `MapTetromino.ForceHardDropAndLock()` (drop one
+cell at a time like `HardDrop()`, then lock with no delay). That turned out to be more work than
+needed: since `GetLegalPlacements()` already computes each candidate's exact `LandingY`, the training
+path doesn't need to *search* for the landing row at all — it can teleport straight there. The actual
+primitives built:
+
+- `MapTetromino.Lockdown` widened `private`→`protected` (the only additional shared-file touch this
+  phase needed; `TryShift` was **not** widened — nothing needs the per-cell drop walk once `LandingY`
+  is already known).
+- `PlacementMapTetromino : MapTetromino` (new file) — one method, `ForceLockdown(map) => Lockdown(map)`.
+- `PlacementTetrisManager.CommitPlacementInstant(candidate)` (new method) — sets `fallingTetromino`'s
+  rotation/position directly to the candidate's `(Rotation, Column, LandingY)` (via `RotateShape`,
+  *not* the wall-kicked `Rotate()` — the candidate was already validated during enumeration, so no
+  wall-kick math is wanted here), calls `MoveBlocksToPendingPositions(map, animation: false)` to snap
+  the real blocks there, then `ForceLockdown()`. No decoder, no per-op collision re-checks, no
+  animation, no lock delay.
+
+This is deliberately a **third** execution path, distinct from both of §2.1a's: `ExecutePlacement()`/
+`ApplyOp()` (decoded ops, real wall-kicked `Rotate()`/`Left()`/`Right()`, real `HardDrop()` + lock
+delay — demo/gameplay-fidelity) and `CommitPlacementInstant()` (direct teleport, no delay — training/
+max efficiency). The falling piece must actually be a `PlacementMapTetromino` component at runtime for
+`CommitPlacementInstant` to work (a downcast inside the method) — assign that component instead of
+plain `MapTetromino` in any scene that uses it.
 
 ### 2.2 `RandomPlacementDemoDriver` (new file, this branch)
 
@@ -164,55 +243,271 @@ new piece, calls `GetLegalPlacements()`, picks uniformly at random, and steps th
 finishing with a real `HardDrop()`. Implemented in
 `Assets/Scripts/Core/Placement/RandomPlacementDemoDriver.cs`.
 
-### 2.3 `PlayerGameManager` — one small guard
+### 2.3 `PlayerGameManager` is not part of the headless path either
 
-`Initialise()` unconditionally calls `nextTetrominoUIController.SetTetrisManager(...)` and
-`.InitialiseAsync()`, and `CleanUpBoard()` calls `.ClearTetrominoIcons()`. For a scene with genuinely no
-UI Canvas (per the handoff's intent), null-guard these two call sites:
+Same reasoning as `GameController` in §2.4: `PlayerGameManager` bundles a handful of genuinely-essential
+calls (`tetrisManager.Initialise()`/`PrepareNewTetrisMap()`/`StartNewMap()`, boundary data creation) together
+with purely human-session concerns (`IntroController`, `nextTetrominoUIController`, `ScoreManager` UI
+subscription, pause/resume). Routing the rollout through it would mean every headless-only gap in those
+UI-facing parts turns into another null-guard added to a file `main`'s Single/Battle also shares.
+`RolloutEnvironment` instead owns a `PlacementTetrisManager` reference directly (not `PlayerGameManager`),
+plus its own boundary `Transform` and `PlayerID`, and calls the essential `TetrisManager` methods itself.
+`PlayerGameManager.cs` has zero diff from `main`'s fork point — it's simply absent from the headless
+scene, the same way `GameController` is.
 
-```csharp
-if (nextTetrominoUIController != null) { nextTetrominoUIController.SetTetrisManager(tetrisManager); nextTetrominoUIController.InitialiseAsync().Forget(); }
-```
+One consequence worth noting: `PlayerGameManager` is what forces `GameInputController` into a scene
+(`[RequireComponent(typeof(GameInputController))]`, mutual with `GameInputController`'s own
+`[RequireComponent(typeof(PlayerGameManager))]`). Without `PlayerGameManager` in the headless scene,
+`GameInputController` isn't forced either — one less unwired-field NRE risk (§2.5b's error #4). A bare
+`TetrominoController` (which does still need a `PlayerInput` component, per its own `RequireComponent`)
+must still exist to satisfy `TetrisManager`'s serialized field, but never has its methods called
+(`ShouldInitialiseTetrominoController`/`ShouldActivateTetrominoController` are both `false`), so the
+`PlayerInput` never needs a valid action map wired.
 
-This is the one touch to a shared file; it's purely additive (an `if` around existing calls) and changes
-no behavior for `SingleGameController`/`BattleGameController`, which will keep assigning the field.
+### 2.4 Architecture revision: `RolloutEnvironment` is the real driver, `GameController` isn't needed at all
 
-`boundaryRegion` (a `SpriteMask`) stays required — `MapBoundaryData.Create()` only reads its `transform`,
-so the headless scene includes a plain, unrendered `SpriteMask` object to define board bounds. No code
-change needed for that one.
+**Superseding the first cut of `HeadlessGameController`** (which drove gameplay through
+`gameManager.UpdateGameplay()` every frame from `PlayingUpdate()`, matching `Single`/`Battle`'s shape).
+Building it that way meant every further headless-specific need turned into one more toggle threaded
+through `TetrisManager`/`GameController` (`ShouldActivateTetrominoController`,
+`ShouldUpdateGhostTetromino`, camera/UI null-guards…). That pattern doesn't converge — there's always
+one more piece of human-session behavior fighting the environment. The actual fix: stop trying to make
+the rollout drive *through* `GameController`'s session lifecycle, and build the rollout API as its own
+thing that composes the genuinely-reusable simulation core directly.
 
-### 2.4 New sibling: `HeadlessGameController`
+**First-principles requirement list** for a rollout environment (not "a game"): `reset(seed)`,
+`step(placement)`, `get_legal_placements()`, `get_observation()` (not built yet — §3), determinism,
+episode-end detection. None of that needs a state machine with Loading/Intro/Playing/Paused/GameOver,
+a pause button, an intro animation, a scoreboard, a camera, or human input — those are session-facing
+concerns `GameController`/`PlayerGameManager`/`MatchStateMachine`/`GameStateMachine` exist for.
 
-`GameController` is already built for this — it's `abstract` specifically so new modes can be added
-without touching `SingleGameController`/`BattleGameController`. `HeadlessGameController`:
+**One thing looked genuinely unavoidable and turned out not to be.** `BoundaryDataManager.GetBoundaryData(playerID)`
+was a static call straight to `GameController.Instance.GetBoundaryData(playerID)`, and
+`Block.GetWorldPosition()` calls this unconditionally on *every* block move — so it looked like some
+`GameController` singleton had to exist just to keep block moves from throwing. A grep across the whole
+codebase confirmed `BoundaryDataManager` is the *only* thing anywhere that ever touches
+`GameController.Instance`. First attempt fixed this by having `PlayerGameManager.Initialise()` push into
+a static registry directly — wrong call: it added a new static dependency to a file every scene (`main`'s
+Single/Battle included) shares, and replaced a live property read with a push that could go stale.
+Corrected version: `BoundaryDataManager.GetBoundaryData()` keeps `GameController.Instance` as the primary
+path (unchanged, zero diff for Single/Battle) and only falls back to a registry when no `GameController`
+exists at all. `RolloutEnvironment` — the one file that only exists on this branch — populates that
+registry itself in `Awake()`/`OnDestroy()`, since it already holds the `PlayerGameManager` reference.
+`PlayerGameManager.cs` ends up with no `BoundaryDataManager` dependency at all.
 
-- Owns **one** `PlayerGameManager` (single board — Stage 1 scope is single-agent, not battle).
-- Implements `IntroGame()` **without** calling `PlayerGameManager.PlayIntro()` — skips the 0.2s camera
-  tween entirely; no `IntroController`/camera wiring needed in the headless scene.
-- `PlayingUpdate()` does not drive gameplay from wall-clock time at all. Every engine frame it just polls
-  the IPC layer (§4) for a pending request and, if one exists, executes it synchronously
-  (`GetLegalPlacements`/`ExecutePlacement`/reset) and writes the response. `TickManager.Update()` is never
-  called in Stage 1 scope (§1.3). This turns Unity's frame loop into a plain request/response pump —
-  there is no real-time simulation to keep in sync with, since nothing in Stage 1 depends on wall-clock
-  time once the lock-delay/gravity/intro real-time couplings are bypassed.
-- Subscribes to `PlayerGameManager.OnPlayerBoardDead` for the `done` signal, same event
-  `SingleGameController` already uses for game-over.
-- Runs with `Application.targetFrameRate = -1`, `QualitySettings.vSyncCount = 0`, launched
-  `-batchmode -nographics`, so the poll loop runs as fast as the OS scheduler allows rather than capped to
-  a display refresh rate.
+**Net effect: `GameController` is not needed anywhere in the headless path at all** — not "thin
+scaffolding," genuinely absent. `HeadlessGameController.cs` was deleted. This also means no
+`Singleton<GameController>`, no `[RequireComponent(typeof(PauseManager))]` dragging in a `PauseManager`,
+and no `GameController.Start()` calling `InputRoot.DisableOutOfGameUIInput()` on a singleton that only
+exists via the normal `Bootstrapper` boot chain a standalone headless scene never runs. All three were
+downstream symptoms of the one unnecessary dependency. `PauseManager.cs` itself needed no changes and
+is back to matching `main` exactly — it's simply absent from the headless scene, not defensively guarded.
 
-### 2.5 New minimal scene: `HeadlessTraining.unity`
+**Remaining genuinely-unavoidable item:** `TetrisManager.Initialise()` unconditionally called
+`tetrominoController.Initialise()`, which looks up an input action map and throws if the `PlayerInput`
+isn't validly configured — forcing a real input actions asset to be wired even though nothing would
+ever read an action from it. `TetrisManager` gets one hook for this, `ShouldInitialiseTetrominoController`
+(default `true`). `PlacementTetrisManager` overrides it to `false` — fixed for every instance (not a
+per-scene toggle like `suppressAutomaticGhostUpdate`), since placement-driven pieces never route through
+`TetrominoController` at all, in either the demo or headless scene. This is the last hook added to
+`TetrisManager` for this reason; see the heuristic below.
 
-One `PlayerGameManager` wired to: `TetrisManager`/`MapManager`/`BlockSystemManager` subtree (reused
-prefabs), a plain `SpriteMask` for boundary, a `TetrominoController` + `PlayerInput` (still required by
-`PlayerGameManager`'s `RequireComponent` chain — `PlayerGameManager → GameInputController →
-TetrominoController → PlayerInput`) pointed at the project's existing input actions asset so
-`Initialise()` succeeds, but never `Activate()`d — it just sits inert. No Canvas, no menu, no
-`IntroController`/camera. A **Stage-1 `SpawnableBlockList`** asset containing only inert block IDs
-(e.g. `Cobblestone`, `Dirt`, `Stone`, `WoodenPlanks`, `Wool`, `Glass` — excluding `Sand`, `Water`, `Lava`,
-`TNT`, `Redstone*`, pistons, `NoteBlock`) is what actually realizes "disable special mechanics" from
-`DESIGN_INTENT.md` — no code branch needed, just a data asset swap, since `BlockRandomSelector` already
-reads whichever `SpawnableBlockList` is wired in.
+**What the headless hierarchy now consists of, top to bottom:** `RolloutEnvironment` (new, the real
+driver — no base class beyond `MonoBehaviour`, owns boundary data and registers it itself — §2.3) →
+`PlacementTetrisManager`/`PlacementMapTetromino` → `MapManager` and its required subsystems. No
+`GameController`, no `PlayerGameManager`, no `PauseManager`, no `MatchStateMachine`, no `Canvas`, no
+`Camera`. A bare `TetrominoController`/`PlayerInput` still needs to exist to satisfy `TetrisManager`'s
+serialized field (§2.3), but it's fully inert (`ShouldActivateTetrominoController`,
+`ShouldInitialiseTetrominoController` both `false`) and, without `PlayerGameManager` in the scene,
+`GameInputController` isn't dragged in at all.
+
+- `RolloutEnvironment` (`Assets/Scripts/Core/Placement/RolloutEnvironment.cs`) is the real driver: owns
+  a `PlacementTetrisManager` reference, a boundary `Transform`, and a `PlayerID` directly, and:
+  - `Reset(seed)`: `UnityEngine.Random.InitState(seed)` → `tetrisManager.CleanUpTetrisMap()` →
+    `tetrisManager.PrepareNewTetrisMap(...)` → `tetrisManager.StartNewMap()` — the essential
+    `TetrisManager` calls, made directly, with no `PlayerGameManager`/`GameController` session lifecycle
+    in between.
+  - `Step(candidate)`: `tetrisManager.CommitPlacementInstant(candidate)` then `tetrisManager.OnUpdate()`,
+    called directly and synchronously — **not polled from a frame loop at all**. This removes the last
+    frame-rate dependency from stepping; a training loop (or the manual harness) calls `Step()` exactly
+    when it has a decision, with zero relationship to Unity's render/update cadence.
+  - `GetLegalPlacements()`, `IsDone` (+ `OnEpisodeEnded` event, subscribed directly to
+    `TetrisManager.OnGameDead`).
+  - Sets `HeadlessRuntime.IsHeadless = true` in `Awake()` (§2.5a) — this is the class that actually
+    means "this is a headless rollout."
+- `HeadlessManualTestHarness` now drives `RolloutEnvironment.Reset()`/`Step()`/`GetLegalPlacements()`
+  directly (the same shape a training loop will eventually call over IPC), keeping a separate
+  `PlacementTetrisManager` reference only for the ghost-preview extras (`PreviewCandidate()`,
+  `OnStartedTurn`), which are a visualization concern, not part of the core env API.
+
+**A heuristic worth writing down, since this is the second time the question came up**: a hook into
+`TetrisManager`/`GameController` is worth adding when it fixes a *recurring* correctness or throughput
+problem in the shared class's default behavior (natural gravity racing the agent, animation coroutines
+piling up, a static clock coupling to real time), or removes an entire *category* of required-but-
+irrelevant setup friction (the input-actions-asset requirement, just removed). It's not worth it for
+one-off session-orchestration behaviors — those are the signal to stop extending the shared class and
+build a purpose-specific one instead, which is what `RolloutEnvironment` is.
+
+### 2.5 Scenes: build the minimal core first, verification scene *from* it — not the reverse
+
+**Superseding the first cut**, which built `DemoRandomPolicy.unity`/`HeadlessVerification.unity` by
+duplicating `GameplayLocal2P.unity` and stripping/guarding pieces out. That was reasonable for getting
+the seam working fast, but it means the "verification" scene was never actually verifying a *minimal*
+environment — it inherited a full human-session scene's worth of wiring (`MatchStateMachine`, full
+`RequireComponent` chain, etc.) that the new architecture above no longer needs at all.
+
+Going forward: build a from-scratch minimal scene first (`RolloutEnvironment` (no `GameController`,
+no `PlayerGameManager` anywhere — §2.3/§2.4) + `PlacementTetrisManager`/`PlacementMapTetromino` +
+`MapManager`'s required subsystems + next-piece `DummyTetromino` slots + an inert `TetrominoController`/
+`PlayerInput` (component must exist to satisfy `TetrisManager`'s serialized field, no valid input asset
+needed, and — with no `PlayerGameManager` in the scene — no `GameInputController` forced either) + a
+plain `Transform` for boundary bounds — no Canvas, no Camera, no `ScoreManager` UI, no
+`MatchStateMachine`, no `IntroController`, no `PauseManager`). `HeadlessVerification.unity` is then
+built by duplicating *that* minimal scene and adding a Camera + `HeadlessManualTestHarness` on top —
+harness/visualization layered onto the real minimal core, not the other way round. `DemoRandomPolicy.unity`
+(already built, still valid) stays as it is — it's deliberately session-shaped, since it exists to watch
+gameplay-fidelity behavior, not to be the minimal rollout core.
+
+Deliberately *not* doing: forking block prefabs into headless-only variants (stripping `BlockAnimator`/
+`BlockSoundManager`/`SpriteRenderer`). `HeadlessRuntime.IsHeadless` (§2.5a) already removes the actual
+runtime cost of both; forking prefabs would only create asset-maintenance drift for no remaining
+benefit — reuse the same block prefabs.
+
+A **Stage-1 `SpawnableBlockList`** asset containing only inert block IDs (e.g. `Cobblestone`, `Dirt`,
+`Stone`, `WoodenPlanks`, `Wool`, `Glass` — excluding `Sand`, `Water`, `Lava`, `TNT`, `Redstone*`, pistons,
+`NoteBlock`) is what actually realizes "disable special mechanics" from `DESIGN_INTENT.md` — no code
+branch needed, just a data asset swap, since `BlockRandomSelector` already reads whichever
+`SpawnableBlockList` is wired in. Not yet built — still applies to whichever scene ends up used for
+real training runs.
+
+**What this does *not* solve** (worth restating so it isn't assumed away): true concurrent
+multi-environment execution *within one process*. `TickManager`/`GameStateMachine`/the global
+`UnityEngine.Random` stream/`ScoreManager`-as-`Singleton<T>` are all process-global static state
+(§1.3) — multiple `RolloutEnvironment` instances in one process would still step on each other's tick
+clock, RNG stream, and (if `ScoreManager` is ever actually used for reward) score state. Multiple
+rollouts still means multiple OS processes (§4); reusing loaded resources *within* a process (asset
+loading, scene setup, not rebuilding the hierarchy per episode — which `Reset()` already achieves) is a
+legitimate, separate, smaller optimization from running genuinely independent simulations concurrently.
+
+### 2.5a Discretizing time: `TickManager.AdvanceTicks` and `HeadlessManualTestHarness`
+
+Scope decision worth recording: `TickManager` (the 20 Hz redstone/fluid/random-tick clock) and
+`MapTetromino`'s lock-delay coroutine are two *separate* clocks today (§1.3), and only the lock-delay
+one is a real `WaitForSeconds`. Since both execution paths available to the headless controller bypass
+`Ground()`/lock-delay entirely (`CommitPlacementInstant` always; `ExecutePlacement` only if a future
+consumer chooses it over the instant path), converting lock-delay itself to tick-based scheduling was
+considered and **deliberately not done** — it would touch a coroutine every mode (`Single`/`Battle`/the
+demo scene) still relies on, for no consumer that currently needs it. Revisit only if something
+concretely needs an *accelerable-but-still-real-lock-delay* mode.
+
+**Coroutine audit.** Worth recording since it came up directly: a full grep for `StartCoroutine`/
+`WaitForSeconds` across `Assets/Scripts` turns up `PrimedTNT`'s fuse/explosion timers and `Piston`'s
+extend/retract delay — both confined to block types Stage 1's inert-only `SpawnableBlockList` never
+spawns, so they're correctly deferred to Stage 2, not worked around. One is *not* block-type-confined,
+though: `BlockAnimator` (attached to every block) subscribes to `Block.OnLockedDown` unconditionally
+and starts a real-time Lerp coroutine on every lock, regardless of which path caused it — including
+`CommitPlacementInstant`. Harmless for correctness (it only touches `transform.position`/`isAnimating`,
+neither read by the observation/reward pipeline; grid state is already fully updated before the
+animation starts), but wasteful at training scale if left running. Fixed with a shared static flag, `HeadlessRuntime.IsHeadless`
+(`Assets/Scripts/Core/Placement/HeadlessRuntime.cs`) — set `true` only by `RolloutEnvironment.Awake()`
+(§2.4) — that `BlockAnimator.AnimationOnSet()` checks to snap instantly (`Finish()`) instead of
+starting the coroutine. `CommitPlacementInstant`'s existing `animation: false` already skipped the
+separate *move*-animation coroutine (`OnInstantMove` vs `OnAnimatedMove`); this closes the *lockdown*-
+animation gap, which has no animate/don't-animate parameter of its own to hook into otherwise.
+
+**A second, more serious instance of the same pattern, found later while reviewing an actual built
+scene rather than just the code**: `BlockSoundManager` (also attached to every block) subscribes to
+`Block.OnLockedDown`/`OnAfterDestroyed` unconditionally, exactly like `BlockAnimator`. But its handlers
+call `UnityEngine.Random.Range(...)` to pick a sound clip *before* touching `AudioManager.Instance` —
+meaning every block lock and every line-clear-destroyed block silently draws from the same RNG stream
+the piece sequence's determinism depends on, regardless of whether audio even plays. This is a
+correctness bug, not a throughput nicety: it would make `Reset(seed)` non-reproducible. Both
+`PlaySoundOnPlaced`/`PlaySoundOnDestroyed` now check `HeadlessRuntime.IsHeadless` and return *before*
+the `Random.Range` call (`Assets/Scripts/Core/GameMap/Block/Components/BlockSoundManager.cs`).
+`BlockAnimator`'s own flag was generalized into `HeadlessRuntime.IsHeadless` so both consumers share
+one signal rather than each owning a separate one. Worth treating this as a standing question when
+reviewing any other per-block component subscribed to `Block`'s events: does it touch
+`UnityEngine.Random`, and if so, does it need the same guard?
+
+What was built instead: `TickManager.AdvanceTicks(int count)` — a new static method alongside the
+existing real-time `Update()` (untouched), bumping `GameTick` by an explicit count with zero dependency
+on elapsed real time. Nothing in the headless path calls the real-time `Update()`; ticks only move
+when something explicitly asks. This is what `HeadlessManualTestHarness`
+(`Assets/Scripts/Core/Placement/HeadlessManualTestHarness.cs`) uses for its keypress-driven controls —
+cycle/commit a `GetLegalPlacements()` candidate via `RolloutEnvironment.Step()`, step `N` ticks, adjust
+`N`, restart the board (`RolloutEnvironment.Reset()`, §2.4) — all `[SerializeField]` so key bindings and
+tick-step size are adjustable in the Inspector, not hardcoded. This also lays the groundwork for Stage
+2's tick-gated mechanics (redstone/fluid) to be steppable/accelerable the same way, without committing
+to *how* yet.
+
+### 2.5b Minimal-core audit: what a rollout environment actually needs
+
+Prompted by a direct question worth recording: which components are genuinely required for
+placement-level gameplay logic, versus cruft that should be stripped from the *core* environment
+(reusable for real training) and only added back as a debug/harness layer in a *verification* scene.
+
+**Genuinely required** (grid/turn/placement logic doesn't work without these):
+`RolloutEnvironment` → `PlacementTetrisManager` → `PlacementMapTetromino` (falling piece) →
+`MapManager` → `BlockSystemManager` → `BlockGridManager` → `BlockGrid`, plus the next-piece
+`DummyTetromino[]` slots (`TetrisManager.nextTetrominos` needs real `TetrominoType` data even if
+nothing renders it — cheap either way, just transform-position bookkeeping, no coroutines).
+
+**`GhostTetromino` is now genuinely optional, not required** — hit the hard way first:
+`PrepareNewTetrisMap()`/`CleanUpTetrisMap()` called `ghostTetromino.CreateGhostBlocks()`/
+`ClearAllBlocks()` unconditionally, with no `Should*` hook guarding either (unlike the per-frame
+`UpdateGhostTetromino()`, which `ShouldUpdateGhostTetromino` already gated), so a scene missing the
+GameObject NREs on the very first `Reset()`. Fixed properly rather than just re-adding the GameObject:
+`TetrisManager` gets `ShouldUseGhostTetromino` (new hook, guards both calls plus ANDs into the
+`OnUpdate()` ghost-update check), and `PlacementTetrisManager` exposes it as an instance-level
+`[SerializeField] useGhostTetromino` (default `true`) alongside the existing `suppressAutomaticGhostUpdate`
+— `PreviewCandidate()` no-ops when unchecked too. A genuinely minimal training-only scene can now
+uncheck it and omit the `GhostTetromino` GameObject entirely; the demo/verification scenes leave it
+checked.
+
+**Present but functionally inert by construction, not by luck** (can't be deleted from the hierarchy —
+`TetrisManager` dereferences these fields directly — but now genuinely never do anything):
+- `TetrominoController`/`PlayerInput` — must exist to satisfy `TetrisManager`'s serialized field, but
+  `PlacementTetrisManager.ShouldActivateTetrominoController` (new, `TetrisManager.cs`) now returns
+  `false`, so `tetrominoController.Activate()` is never called and natural per-frame gravity never
+  starts. **This was a real bug, not a non-issue**: before this fix, `ResumeUpdating()` activated it
+  unconditionally, and the only reason it hadn't visibly interfered yet is that commits happened
+  faster than the gravity interval — not a guarantee once a real decision (e.g. a Python round trip)
+  takes longer than that. No `GameInputController` needed to satisfy this — that's only forced by
+  `PlayerGameManager`, which isn't in the scene (§2.3).
+- `EntityManager`/`FireManager`/`RandomTickManager`/`ScheduledTickManager`/`FluidSystemManager`/
+  `ParticleManager` — `MapManager.Initialise()` asserts none of these are null, so they must be
+  present, but Stage 1's inert-blocks-only `SpawnableBlockList` never triggers any of them into doing
+  real work. Confirmed concretely: fluid physics gate on `TickManager.IsGameTickUpdate`, which the
+  headless controller only ever sets via explicit `AdvanceTicks()` — nothing flows until something
+  asks it to.
+
+**Not part of the core at all** (absent from the scene, not null-guarded — §2.3):
+- `PlayerGameManager`/`GameController`/`GameInputController`/`ScoreManager`/`IntroController`/
+  `NextTetrominoUIController`. All of `PlayerGameManager`'s/`ScoreManager`'s/`PauseManager`'s files have
+  zero diff from `main` — nothing in them needed to change, because nothing in the headless scene
+  references them at all. Reward computation for the RL env was always meant to read line-clear events
+  directly off `TetrisManager` (§3), not `ScoreManager`'s internal score/UI, so its absence doesn't
+  affect training correctness.
+- The automatic per-frame ghost tetromino (`TetrisManager.UpdateGhostTetromino()`) is now gated by
+  `ShouldUpdateGhostTetromino`, an **instance-level** toggle (`PlacementTetrisManager`'s
+  `suppressAutomaticGhostUpdate` `[SerializeField]`, not a hardcoded per-subclass override) — the demo
+  scene leaves it unchecked (normal drop-shadow, matches human-watchable play), the verification scene
+  checks it so `HeadlessManualTestHarness` can drive the same ghost tetromino to preview whichever
+  candidate is currently selected (`PlacementTetrisManager.PreviewCandidate()`, new) instead of
+  wherever the real falling piece happens to be.
+
+**Gizmos/Camera/rendering** (direct question worth recording the answer to):
+- Gizmos (`OnDrawGizmos`, e.g. `BlockGridDebugger`) are Editor-only — stripped entirely from real
+  builds including `-batchmode -nographics`. Zero cost in an actual training run; nothing to disable.
+- A `Camera` isn't needed by simulator logic at all (`Block.GetWorldPosition()`/`BoundaryDataManager`
+  are pure math) — `IntroController` was the only camera-dependent piece, and `RolloutEnvironment`
+  never calls `PlayerGameManager.PlayIntro()`. A real training build can omit the Camera entirely; the
+  verification scene keeps one since a human watches it.
+- Canvas is the one that costs something even in `-nographics` (layout/rebuild still runs without a
+  display) — hence actually removing the dependency above, not just ignoring it.
+
+Packaging the minimal hierarchy as an actual Prefab (e.g. `HeadlessRolloutEnvironment.prefab`), and the
+limits of what that does/doesn't solve for running multiple rollouts, are covered in §2.5.
 
 ### 2.6 Determinism/testing hooks this seam gives us
 
@@ -254,7 +549,8 @@ human-facing score, computed from `TryClearLines()`'s reported `newLineCount`/`t
 `combo` — not the live `ScoreManager` component itself (which is a `Singleton<T>` and out of scope to
 touch). This is a first-phase default, expected to be tuned.
 
-**Episode end**: `PlayerGameManager.OnPlayerBoardDead` (unchanged existing event).
+**Episode end**: `TetrisManager.OnGameDead` (unchanged existing event, subscribed directly by
+`RolloutEnvironment` — §2.3).
 
 ---
 
@@ -384,14 +680,25 @@ training/
     test_env_determinism.py   # exercises the §2.6 reproducibility guarantee
 ```
 
-Unity-side additions (all new files except the two small guarded edits noted above):
+Unity-side additions, actual paths (all new files except the `private`→`protected` widenings noted in
+§2.1/§2.1c — those are the only shared-file touches):
 ```
-Assets/Scripts/Core/GameController/HeadlessGameController.cs
-Assets/Scripts/Core/Headless/HeadlessIpcServer.cs        # socket listener, polled from PlayingUpdate
-Assets/Scripts/Core/Headless/PlacementProtocol.cs        # mirrors training/tetricraft_env/protocol.py
-Assets/Scripts/Core/GameMap/Block Selector/Stage1SpawnableBlockList.asset
-Assets/Scenes/HeadlessTraining.unity
+Assets/Scripts/Core/Placement/PlacementTetrisManager.cs         # done
+Assets/Scripts/Core/Placement/PlacementMapTetromino.cs          # done
+Assets/Scripts/Core/Placement/PlacementDecoder.cs               # done
+Assets/Scripts/Core/Placement/RandomPlacementDemoDriver.cs      # done
+Assets/Scripts/Core/Placement/RolloutEnvironment.cs             # done — the real driver, no GameController
+Assets/Scripts/Core/Placement/HeadlessRuntime.cs                # done — shared IsHeadless signal
+Assets/Scripts/Core/Placement/HeadlessManualTestHarness.cs      # done
+Assets/Scenes/AgenticTetricraft/DemoRandomPolicy.unity          # done
+Assets/Scenes/AgenticTetricraft/HeadlessRollout.unity           # in progress (Editor wiring)
+HeadlessVerification.unity (duplicated from HeadlessRollout + Camera + harness)  # not yet built
+Assets/Scripts/Core/GameMap/Block Selector/Stage1SpawnableBlockList.asset  # not yet built
+Assets/Scripts/Core/Headless/HeadlessIpcServer.cs        # not yet built — socket listener
+Assets/Scripts/Core/Headless/PlacementProtocol.cs        # not yet built — mirrors training/tetricraft_env/protocol.py
 ```
+(`HeadlessGameController.cs` was written, then deleted this same phase once `BoundaryDataManager` no
+longer needed a `GameController` to relay through — see §2.4.)
 
 ---
 
