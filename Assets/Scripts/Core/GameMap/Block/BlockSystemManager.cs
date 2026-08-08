@@ -103,7 +103,6 @@ public class BlockSystemManager : MonoBehaviour
                 Vector2Int gridPosition = tetromino.LocalToMap(r, c);
                 int x = gridPosition.x;
                 int y = gridPosition.y;
-                Debug.Log(new Vector2Int(x, y));
 
                 // request spawns
                 blockGridManager.RequestSpawnBlock(block, new(x, y), false);
@@ -111,7 +110,6 @@ public class BlockSystemManager : MonoBehaviour
                 // parenting
                 block.transform.SetParent(tetromino.transform);
             }
-        Debug.Log($"Twtromino positon {tetromino.position}");
     }
 
     public void RequestSpawnBlock(Block block, int x, int y)

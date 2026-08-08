@@ -51,11 +51,10 @@ public class PlacementTetrisManager : TetrisManager
     // Placement-driven pieces are moved only by this class's own commit methods — natural per-frame
     // gravity must never also be moving/locking the same piece, and none of ApplyOp()'s calls
     // (Rotate/Left/Right/HardDrop are all called directly on MapTetromino) ever go through
-    // TetrominoController, so it never needs a validly-configured input actions asset either. Fixed
-    // for every PlacementTetrisManager instance — there's no scenario where placement-driven control
-    // and natural input-driven control should coexist on the same piece.
-    protected override bool ShouldActivateTetrominoController => false;
-    protected override bool ShouldInitialiseTetrominoController => false;
+    // TetrominoController at all. Fixed for every instance — there's no scenario where placement-driven
+    // control and natural input-driven control should coexist on the same piece — so the
+    // TetrominoController field can stay unassigned; no component needs to exist in the scene.
+    protected override bool ShouldUseTetrominoController => false;
 
     protected override bool ShouldUpdateGhostTetromino => !suppressAutomaticGhostUpdate;
     protected override bool ShouldUseGhostTetromino => useGhostTetromino;
@@ -128,16 +127,23 @@ public class PlacementTetrisManager : TetrisManager
             case PlacementDecoder.PlacementOp.Left:      fallingTetromino.Left(Map);          break;
             case PlacementDecoder.PlacementOp.Right:     fallingTetromino.Right(Map);         break;
             case PlacementDecoder.PlacementOp.Drop:      fallingTetromino.HardDrop(Map);      break;
+            case PlacementDecoder.PlacementOp.DropImmediate:
+                ((PlacementMapTetromino)fallingTetromino).HardDropImmediate(Map);
+                break;
         }
     }
 
     /// <summary>
-    /// Commit a chosen placement via the same primitive ops TetrominoController would issue —
-    /// real wall kicks, real HardDrop()/lock delay. This is the demo/gameplay-fidelity path; the
-    /// demo driver instead calls ApplyOp itself, one op at a time with a visible delay, using the
-    /// same PlacementDecoder output this method uses in one back-to-back batch.
+    /// Commit a chosen placement via the same primitive ops TetrominoController would issue — real
+    /// wall kicks, and (by default) real HardDrop()/lock delay. This is the demo/gameplay-fidelity
+    /// path; the demo driver instead calls ApplyOp itself, one op at a time with a visible delay,
+    /// using the same PlacementDecoder output this method uses in one back-to-back batch.
+    /// <paramref name="immediateLockdown"/>: skip Ground()'s lock-delay coroutine and lock instantly
+    /// instead — for fidelity checks comparing against CommitPlacementInstant's board trajectory
+    /// without waiting through real timing. Defaults false so every existing caller (the demo) is
+    /// unaffected.
     /// </summary>
-    public void ExecutePlacement(int targetRotation, int targetColumn)
+    public void ExecutePlacement(int targetRotation, int targetColumn, bool immediateLockdown = false)
     {
         foreach (var op in PlacementDecoder.DecodeRotation(FallingRotation, targetRotation))
             ApplyOp(op);
@@ -148,7 +154,7 @@ public class PlacementTetrisManager : TetrisManager
         foreach (var op in PlacementDecoder.DecodeShift(FallingColumn, targetColumn))
             ApplyOp(op);
 
-        ApplyOp(PlacementDecoder.PlacementOp.Drop);
+        ApplyOp(immediateLockdown ? PlacementDecoder.PlacementOp.DropImmediate : PlacementDecoder.PlacementOp.Drop);
     }
 
     /// <summary>

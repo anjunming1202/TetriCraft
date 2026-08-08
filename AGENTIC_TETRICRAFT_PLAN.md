@@ -258,11 +258,8 @@ scene, the same way `GameController` is.
 One consequence worth noting: `PlayerGameManager` is what forces `GameInputController` into a scene
 (`[RequireComponent(typeof(GameInputController))]`, mutual with `GameInputController`'s own
 `[RequireComponent(typeof(PlayerGameManager))]`). Without `PlayerGameManager` in the headless scene,
-`GameInputController` isn't forced either — one less unwired-field NRE risk (§2.5b's error #4). A bare
-`TetrominoController` (which does still need a `PlayerInput` component, per its own `RequireComponent`)
-must still exist to satisfy `TetrisManager`'s serialized field, but never has its methods called
-(`ShouldInitialiseTetrominoController`/`ShouldActivateTetrominoController` are both `false`), so the
-`PlayerInput` never needs a valid action map wired.
+`GameInputController` isn't forced either — one less unwired-field NRE risk. `TetrominoController` isn't
+needed either, once `ShouldUseTetrominoController` (§2.4) exists — the field can stay `None`.
 
 ### 2.4 Architecture revision: `RolloutEnvironment` is the real driver, `GameController` isn't needed at all
 
@@ -303,23 +300,23 @@ exists via the normal `Bootstrapper` boot chain a standalone headless scene neve
 downstream symptoms of the one unnecessary dependency. `PauseManager.cs` itself needed no changes and
 is back to matching `main` exactly — it's simply absent from the headless scene, not defensively guarded.
 
-**Remaining genuinely-unavoidable item:** `TetrisManager.Initialise()` unconditionally called
-`tetrominoController.Initialise()`, which looks up an input action map and throws if the `PlayerInput`
-isn't validly configured — forcing a real input actions asset to be wired even though nothing would
-ever read an action from it. `TetrisManager` gets one hook for this, `ShouldInitialiseTetrominoController`
-(default `true`). `PlacementTetrisManager` overrides it to `false` — fixed for every instance (not a
-per-scene toggle like `suppressAutomaticGhostUpdate`), since placement-driven pieces never route through
-`TetrominoController` at all, in either the demo or headless scene. This is the last hook added to
-`TetrisManager` for this reason; see the heuristic below.
+**`TetrominoController` turned out to be fully eliminable too, in two passes.** First pass:
+`TetrisManager.Initialise()` unconditionally called `tetrominoController.Initialise()` (looks up an
+input action map, throws if `PlayerInput` isn't validly configured), so `ShouldInitialiseTetrominoController`
+and `ShouldActivateTetrominoController` were added to skip that plus `Activate()`. That still left three
+*other* unconditional dereferences unnoticed at the time — `PrepareNewTetrisMap()`'s
+`tetrominoController.Reset(...)`, `OnUpdate()`'s `tetrominoController.OnUpdate()`, `StopUpdating()`'s
+`tetrominoController.Deactivate()` — which is why a bare `TetrominoController`/`PlayerInput` still had to
+exist in the scene even after those two hooks. Caught when directly asked "why do we need it at all,"
+which is exactly the right question to keep asking (§ design philosophy #8). Fixed by consolidating into
+one `ShouldUseTetrominoController` hook covering all five call sites — `PlacementTetrisManager` overrides
+it `false`, and now the field can stay `None`; no component needs to exist in either headless scene.
 
 **What the headless hierarchy now consists of, top to bottom:** `RolloutEnvironment` (new, the real
 driver — no base class beyond `MonoBehaviour`, owns boundary data and registers it itself — §2.3) →
 `PlacementTetrisManager`/`PlacementMapTetromino` → `MapManager` and its required subsystems. No
 `GameController`, no `PlayerGameManager`, no `PauseManager`, no `MatchStateMachine`, no `Canvas`, no
-`Camera`. A bare `TetrominoController`/`PlayerInput` still needs to exist to satisfy `TetrisManager`'s
-serialized field (§2.3), but it's fully inert (`ShouldActivateTetrominoController`,
-`ShouldInitialiseTetrominoController` both `false`) and, without `PlayerGameManager` in the scene,
-`GameInputController` isn't dragged in at all.
+`Camera`, no `TetrominoController`/`PlayerInput`/`GameInputController`.
 
 - `RolloutEnvironment` (`Assets/Scripts/Core/Placement/RolloutEnvironment.cs`) is the real driver: owns
   a `PlacementTetrisManager` reference, a boundary `Transform`, and a `PlayerID` directly, and:
@@ -357,11 +354,10 @@ environment — it inherited a full human-session scene's worth of wiring (`Matc
 `RequireComponent` chain, etc.) that the new architecture above no longer needs at all.
 
 Going forward: build a from-scratch minimal scene first (`RolloutEnvironment` (no `GameController`,
-no `PlayerGameManager` anywhere — §2.3/§2.4) + `PlacementTetrisManager`/`PlacementMapTetromino` +
-`MapManager`'s required subsystems + next-piece `DummyTetromino` slots + an inert `TetrominoController`/
-`PlayerInput` (component must exist to satisfy `TetrisManager`'s serialized field, no valid input asset
-needed, and — with no `PlayerGameManager` in the scene — no `GameInputController` forced either) + a
-plain `Transform` for boundary bounds — no Canvas, no Camera, no `ScoreManager` UI, no
+no `PlayerGameManager`, no `TetrominoController`/`GameInputController` anywhere — §2.3/§2.4) +
+`PlacementTetrisManager`/`PlacementMapTetromino` + `MapManager`'s required subsystems + next-piece
+`DummyTetromino` slots + a plain `Transform` for boundary bounds + `SettingsManager`/`AudioManager`
+(kept deliberately required, not gated — §2.5b) — no Canvas, no Camera, no `ScoreManager` UI, no
 `MatchStateMachine`, no `IntroController`, no `PauseManager`). `HeadlessVerification.unity` is then
 built by duplicating *that* minimal scene and adding a Camera + `HeadlessManualTestHarness` on top —
 harness/visualization layered onto the real minimal core, not the other way round. `DemoRandomPolicy.unity`
@@ -465,29 +461,32 @@ uncheck it and omit the `GhostTetromino` GameObject entirely; the demo/verificat
 checked.
 
 **Present but functionally inert by construction, not by luck** (can't be deleted from the hierarchy —
-`TetrisManager` dereferences these fields directly — but now genuinely never do anything):
-- `TetrominoController`/`PlayerInput` — must exist to satisfy `TetrisManager`'s serialized field, but
-  `PlacementTetrisManager.ShouldActivateTetrominoController` (new, `TetrisManager.cs`) now returns
-  `false`, so `tetrominoController.Activate()` is never called and natural per-frame gravity never
-  starts. **This was a real bug, not a non-issue**: before this fix, `ResumeUpdating()` activated it
-  unconditionally, and the only reason it hadn't visibly interfered yet is that commits happened
-  faster than the gravity interval — not a guarantee once a real decision (e.g. a Python round trip)
-  takes longer than that. No `GameInputController` needed to satisfy this — that's only forced by
-  `PlayerGameManager`, which isn't in the scene (§2.3).
+`MapManager.Initialise()` asserts these are non-null — but genuinely never do anything):
 - `EntityManager`/`FireManager`/`RandomTickManager`/`ScheduledTickManager`/`FluidSystemManager`/
-  `ParticleManager` — `MapManager.Initialise()` asserts none of these are null, so they must be
-  present, but Stage 1's inert-blocks-only `SpawnableBlockList` never triggers any of them into doing
-  real work. Confirmed concretely: fluid physics gate on `TickManager.IsGameTickUpdate`, which the
-  headless controller only ever sets via explicit `AdvanceTicks()` — nothing flows until something
-  asks it to.
+  `ParticleManager` — must be present, but Stage 1's inert-blocks-only `SpawnableBlockList` never
+  triggers any of them into doing real work. Confirmed concretely: fluid physics gate on
+  `TickManager.IsGameTickUpdate`, which the headless controller only ever sets via explicit
+  `AdvanceTicks()` — nothing flows until something asks it to.
 
-**Not part of the core at all** (absent from the scene, not null-guarded — §2.3):
+**Not part of the core at all** (absent from the scene, not null-guarded):
 - `PlayerGameManager`/`GameController`/`GameInputController`/`ScoreManager`/`IntroController`/
-  `NextTetrominoUIController`. All of `PlayerGameManager`'s/`ScoreManager`'s/`PauseManager`'s files have
-  zero diff from `main` — nothing in them needed to change, because nothing in the headless scene
-  references them at all. Reward computation for the RL env was always meant to read line-clear events
-  directly off `TetrisManager` (§3), not `ScoreManager`'s internal score/UI, so its absence doesn't
-  affect training correctness.
+  `NextTetrominoUIController` (§2.3). All of `PlayerGameManager`'s/`ScoreManager`'s/`PauseManager`'s
+  files have zero diff from `main` — nothing in them needed to change, because nothing in the headless
+  scene references them at all. Reward computation for the RL env was always meant to read line-clear
+  events directly off `TetrisManager` (§3), not `ScoreManager`'s internal score/UI, so its absence
+  doesn't affect training correctness.
+- `TetrominoController`/`PlayerInput` — was "present but inert," now eliminated outright (§2.4's
+  `ShouldUseTetrominoController` consolidation). **The interim state was a real bug, not a non-issue**:
+  before `ShouldActivateTetrominoController` existed, `ResumeUpdating()` activated it unconditionally,
+  and the only reason it hadn't visibly interfered yet is that commits happened faster than the gravity
+  interval — not a guarantee once a real decision (e.g. a Python round trip) takes longer than that.
+
+**Deliberately kept required, not gated** — `SettingsManager`/`AudioManager`. Both are dereferenced by
+shared gameplay-utility code (`BlockAnimator.animationSpeed`, `GhostBlockRenderer.type`/`opacity`,
+`AudioManager.Instance.PlaySFX...`) with no null-checks, on purpose — a missing setup is meant to throw
+loudly rather than silently do nothing. Explicit product decision: leave that fail-loud behavior alone
+rather than retrofit null-checks purely to make these two optional in headless scenes. Both are present
+as real GameObjects in `HeadlessRollout.unity`/`HeadlessVerification.unity` now.
 - The automatic per-frame ghost tetromino (`TetrisManager.UpdateGhostTetromino()`) is now gated by
   `ShouldUpdateGhostTetromino`, an **instance-level** toggle (`PlacementTetrisManager`'s
   `suppressAutomaticGhostUpdate` `[SerializeField]`, not a hardcoded per-subclass override) — the demo
@@ -509,21 +508,37 @@ checked.
 Packaging the minimal hierarchy as an actual Prefab (e.g. `HeadlessRolloutEnvironment.prefab`), and the
 limits of what that does/doesn't solve for running multiple rollouts, are covered in §2.5.
 
+**Status: `HeadlessRollout.unity` verified.** Both `HeadlessRollout.unity` (the training-facing scene)
+and `HeadlessVerification.unity` have been manually confirmed to spawn, move/rotate, commit, clear
+lines, and restart correctly, and are structurally in sync (confirmed by direct comparison, not just
+assumption) — the only remaining gap being real-time/coroutine-driven mechanics (TNT fuse timing and
+similar), which are out of scope until Stage 2 enables those blocks at all. Stage 0's headless
+environment is functionally done; next steps move to fidelity verification against real gameplay (§2.6)
+and Stage 1's `SpawnableBlockList`.
+
 ### 2.6 Determinism/testing hooks this seam gives us
 
 - `Reset(seed)`: `UnityEngine.Random.InitState(seed)` then the existing
   `PrepareNewPlayerGame()`/`StartGameplay()` (no intro). Same seed ⇒ byte-identical piece sequence ⇒
   byte-identical trajectory given the same action sequence.
-- A cheap correctness test: after `ExecutePlacement`/the demo driver commits a candidate, the piece's
-  actual final `(rotation, column, landing row)` must match the `PlacementCandidate` that was chosen —
-  they should agree exactly. This should be an automated Play Mode test
-  (`com.unity.test-framework` is already a package dependency) run early and often while building this
-  seam. Note one known edge case this test should probe: `GetLegalPlacements()` enumerates *geometric*
-  validity (is rotation R legal at column C at all), not reachability via the decoder's simple
-  "rotate fully at the spawn column, then shift" order — real `Rotate()` calls use wall kicks, which are
-  well-behaved (the trivial (0,0) offset succeeds) near the center spawn column on a mostly-empty
-  board, but could in principle fail for a rotation that's only reachable by shifting first (e.g. a
-  tall stack right at the spawn column). Not solved yet — see §8.
+- **Fidelity test, not yet built**: does `CommitPlacementInstant` (the training path) produce the exact
+  same board trajectory as real gameplay, for the same seed and the same sequence of chosen
+  `(rotation, column)` decisions? Doesn't need two scenes or manual cross-run comparison — one
+  `[UnityTest]`, one seed, run twice *sequentially* against the same `PlacementTetrisManager`:
+  pass 1 uses `CommitPlacementInstant` and records `(rotation, column)` + a board snapshot after every
+  turn; pass 2 re-seeds (`UnityEngine.Random.InitState(seed)` again — same seed ⇒ same piece sequence)
+  and *replays* the exact recorded decisions via `ExecutePlacement(rotation, column, immediateLockdown:
+  true)` (real wall kicks/collision-based `Left`/`Right`/`Rotate`, but locks instantly via the new
+  `PlacementMapTetromino.HardDropImmediate`/`PlacementOp.DropImmediate` instead of `Ground()`'s lock-delay
+  coroutine — so the whole comparison is synchronous, no multi-frame waiting needed). First snapshot
+  mismatch immediately localizes any divergence. `HardDrop()`/`Ground()`/`ExecutePlacement`'s default
+  (`immediateLockdown: false`) are untouched by this — the demo's real-timing path is unaffected.
+  Known edge case this test should probe: `GetLegalPlacements()` enumerates *geometric* validity (is
+  rotation R legal at column C at all), not reachability via the decoder's simple "rotate fully at the
+  spawn column, then shift" order — real `Rotate()` calls use wall kicks, which are well-behaved (the
+  trivial (0,0) offset succeeds) near the center spawn column on a mostly-empty board, but could in
+  principle fail for a rotation only reachable by shifting first (e.g. a tall stack right at the spawn
+  column). Not solved yet — see §8.
 
 ---
 

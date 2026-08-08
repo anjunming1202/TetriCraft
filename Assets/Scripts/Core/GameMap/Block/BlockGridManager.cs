@@ -77,12 +77,9 @@ public class BlockGridManager : MonoBehaviour
 
     public void ProcessPendingBlockRequests()
     {
-        LogRequests();
         requestProcessPhase = RequestProcessPhase.PreResolvingConflicts;
         ResolveRequestConflicts();
         ResolveOccupationConflicts();
-
-        LogRequests();
 
         requestProcessPhase = RequestProcessPhase.ProcessingRemove;
         ProcessDestroyBatch();
@@ -663,17 +660,5 @@ public class BlockGridManager : MonoBehaviour
         blockRemoveBatch.Clear();
         blockDestroyBatch.Clear();
         blockMoveBatch.Clear();
-    }
-
-    private void LogRequests()
-    {
-        if (blockSpawnBatch.Count == 0 && blockMoveBatch.Count == 0 && blockDestroyBatch.Count == 0 && blockRemoveBatch.Count == 0)
-            return;
-        Debug.Log($"Current Phase: {requestProcessPhase}");
-        Debug.Log($"Spawn Requests: {blockSpawnBatch.Count}");
-        Debug.Log($"Move Requests: {blockMoveBatch.Count}");
-        Debug.Log($"Destroy Requests: {blockDestroyBatch.Count}");
-        Debug.Log($"Remove Requests: {blockRemoveBatch.Count}");
-        Debug.Log($"Total Registered Blocks: {registeredBlocks.Count}");
     }
 }

@@ -59,7 +59,7 @@ public class TetrisManager : MonoBehaviour
     {
         map.Initialise();
 
-        if (ShouldInitialiseTetrominoController)
+        if (ShouldUseTetrominoController)
             tetrominoController.Initialise();
 
         fallingTetromino.OnLockdown += OnLockdown;
@@ -67,9 +67,10 @@ public class TetrisManager : MonoBehaviour
         fallingTetromino.OnHardDrop += (MapTetromino tetromino) => OnTetrominoHardDrop?.Invoke(tetromino);
     }
 
-    // Override false to skip TetrominoController.Initialise() — placement-driven subclasses
-    // don't route through it, so it needs no input actions asset wired.
-    protected virtual bool ShouldInitialiseTetrominoController => true;
+    // Override false to skip TetrominoController entirely — placement-driven subclasses move the
+    // falling piece themselves and never route through it, so a scene doesn't need the
+    // component/PlayerInput to exist at all (the field can stay unassigned).
+    protected virtual bool ShouldUseTetrominoController => true;
 
     public void PrepareNewTetrisMap(int boundaryWidth, int boundaryHeight, PlayerID playerID)
     {
@@ -84,7 +85,8 @@ public class TetrisManager : MonoBehaviour
         // Initialise falling tetromino
         fallingTetromino.InitEmptyTetromino();
         fallingTetromino.Reset();
-        tetrominoController.Reset(map, fallingTetromino);
+        if (ShouldUseTetrominoController)
+            tetrominoController.Reset(map, fallingTetromino);
 
         // Initialise ghost tetromino
         if (ShouldUseGhostTetromino)
@@ -127,7 +129,8 @@ public class TetrisManager : MonoBehaviour
             }
 
             // Update tetromino
-            tetrominoController.OnUpdate();
+            if (ShouldUseTetrominoController)
+                tetrominoController.OnUpdate();
 
             // Try clear lines
             TryClearLines();
@@ -158,19 +161,16 @@ public class TetrisManager : MonoBehaviour
     public void StopUpdating()
     {
         isUpdating = false;
-        tetrominoController.Deactivate();
+        if (ShouldUseTetrominoController)
+            tetrominoController.Deactivate();
     }
 
     public void ResumeUpdating()
     {
         isUpdating = true;
-        if (ShouldActivateTetrominoController)
+        if (ShouldUseTetrominoController)
             tetrominoController.Activate();
     }
-
-    // Override false to skip activating natural gravity/key-repeat — placement-driven subclasses
-    // move the falling piece themselves.
-    protected virtual bool ShouldActivateTetrominoController => true;
 
     // Override false to suppress the automatic ghost update, e.g. when a test harness drives
     // ghostTetromino itself to preview a candidate placement.

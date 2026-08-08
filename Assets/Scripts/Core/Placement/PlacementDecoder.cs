@@ -22,7 +22,11 @@ public static class PlacementDecoder
         RotateCCW,
         Left,
         Right,
-        Drop
+        // real HardDrop() + Ground()'s lock-delay coroutine — gameplay-fidelity timing
+        Drop,
+        // same shift-to-floor movement, but locks instantly — for fidelity checks that want real
+        // wall-kick/collision movement without waiting through the lock delay
+        DropImmediate
     }
 
     /// <summary>
