@@ -751,6 +751,7 @@ Assets/AgenticTetricraft/HeadlessVerification.unity             # done
 Assets/AgenticTetricraft/HeadlessFidelityCheck.unity            # done
 Assets/AgenticTetricraft/PretrainingBlockList.asset             # done — Cobblestone only
 Assets/Scripts/Core/Placement/PlacementFidelityCheck.cs        # done — PASSED
+Assets/Scripts/Core/Placement/AfterStateFidelityCheck.cs # done (code) — needs scene wiring + run
 Assets/Scripts/Core/Headless/HeadlessIpcServer.cs        # not yet built — socket listener
 Assets/Scripts/Core/Headless/PlacementProtocol.cs        # not yet built — mirrors training/tetricraft_env/protocol.py
 ```
@@ -780,10 +781,10 @@ longer needed a `GameController` to relay through — see §2.4.)
 - ~~Fidelity check~~ — PASSED (14 turns, identical trajectory).
 
 **Still open:**
-- Exact board crop convention (rows above `boundaryHeight`) should be pinned down with a Play Mode test
-  before writing the JAX-side observation encoder, so the two sides agree on array shape byte-for-byte.
-- Rollback-capable after-state enumeration — save/restore mechanism for the board grid needs design and
-  implementation. Current `GetBoardSnapshot()` is string-based and too heavy for per-candidate use.
+- ~~Exact board crop convention~~ — resolved: `GetBoardOccupancy()` crops to `boundaryHeight`, row-major
+  `byte[y * width + x]`. Pin down with `AfterStateFidelityCheck` scene run before writing JAX encoder.
+- ~~Rollback-capable after-state enumeration~~ — resolved: `ComputeAfterState()` is pure byte-array math
+  (copy base grid → stamp 4 cells → simulate line clears). No board mutation, no save/restore needed.
 - The "rotate fully at spawn, then shift" decode order (§2.6) could in principle miss a
   geometrically-legal candidate that's only reachable by shifting before rotating, against a tall
   center stack. Not yet hit in practice; worth a targeted Play Mode test once training is running.
