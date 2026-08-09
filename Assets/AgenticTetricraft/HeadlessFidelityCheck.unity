@@ -863,6 +863,55 @@ Transform:
   - {fileID: 1395575823}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1222567556
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1222567558}
+  - component: {fileID: 1222567557}
+  m_Layer: 0
+  m_Name: FidelityChecker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1222567557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222567556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6870f199f77fe494dba629b3e1818fa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  environment: {fileID: 1696585144}
+  tetrisManager: {fileID: 1192846217}
+  seed: 12345
+  maxTurns: 40
+  settleTicksPerTurn: 1
+--- !u!4 &1222567558
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222567556}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.9843364, y: 0.36671236, z: -0.0712462}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1240614408
 GameObject:
   m_ObjectHideFlags: 0
@@ -1415,7 +1464,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6440fc9d12f2e09449421e31b8a09165, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  list: {fileID: 11400000, guid: fafd0cb1fe4d0bb4c97bd82278419b8e, type: 2}
+  list: {fileID: 11400000, guid: f373d20babda8d44b8c5825a6061feda, type: 2}
 --- !u!4 &1834187765
 Transform:
   m_ObjectHideFlags: 0
@@ -1698,3 +1747,4 @@ SceneRoots:
   - {fileID: 47330069}
   - {fileID: 816605694}
   - {fileID: 187762873}
+  - {fileID: 1222567558}
