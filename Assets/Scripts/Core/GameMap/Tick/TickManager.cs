@@ -54,4 +54,13 @@ public static class TickManager
         DeltaTick = count;
         IsGameTickUpdate = true;
     }
+
+    // Clears IsGameTickUpdate manually — for headless paths where Update() never runs.
+    // Call after systems have responded to AdvanceTicks(), so a later OnUpdate() doesn't
+    // re-fire tick-gated systems (e.g. RandomTickManager) and perturb RNG state.
+    public static void ConsumeTick()
+    {
+        IsGameTickUpdate = false;
+        DeltaTick = 0;
+    }
 }

@@ -145,13 +145,15 @@ public class PlacementTetrisManager : TetrisManager
     /// </summary>
     public void ExecutePlacement(int targetRotation, int targetColumn, bool immediateLockdown = false)
     {
-        foreach (var op in PlacementDecoder.DecodeRotation(FallingRotation, targetRotation))
+        var rotationOps = PlacementDecoder.DecodeRotation(FallingRotation, targetRotation);
+        foreach (var op in rotationOps)
             ApplyOp(op);
 
         // Column shift is decoded *after* rotation ops are applied, against the piece's actual
         // resulting column — wall kicks during rotation can move it, so this must not be
         // precomputed against the pre-rotation column.
-        foreach (var op in PlacementDecoder.DecodeShift(FallingColumn, targetColumn))
+        var shiftOps = PlacementDecoder.DecodeShift(FallingColumn, targetColumn);
+        foreach (var op in shiftOps)
             ApplyOp(op);
 
         ApplyOp(immediateLockdown ? PlacementDecoder.PlacementOp.DropImmediate : PlacementDecoder.PlacementOp.Drop);
@@ -174,6 +176,26 @@ public class PlacementTetrisManager : TetrisManager
         fallingTetromino.MoveBlocksToPendingPositions(Map, animation: false);
 
         placementTetromino.ForceLockdown(Map);
+    }
+
+    // Canonical locked-cell snapshot (occupancy + BlockID, full grid including the spawn-buffer rows)
+    // for comparing board trajectories between different execution paths — e.g. PlacementFidelityCheck
+    // comparing CommitPlacementInstant against ExecutePlacement. Deliberately exposed here rather than
+    // widening Map's accessibility, since an external checker isn't a TetrisManager subclass.
+    public string GetBoardSnapshot()
+    {
+        var sb = new System.Text.StringBuilder();
+        for (int y = 0; y < Map.GridHeight; y++)
+        {
+            for (int x = 0; x < Map.GridWidth; x++)
+            {
+                Block block = Map.GetBlock(x, y);
+                sb.Append(block == null ? "_" : ((int)block.ID).ToString());
+                sb.Append(',');
+            }
+            sb.Append('|');
+        }
+        return sb.ToString();
     }
 
     /// <summary>

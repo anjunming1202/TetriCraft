@@ -66,6 +66,11 @@ public class RolloutEnvironment : MonoBehaviour
         // point BlockGridManager.ResolveRequestConflicts() resolves the spawn/move conflict in favour
         // of the (stale) spawn — silently discarding the placement move. One extra OnUpdate() here
         // flushes it immediately, before anything else can race it.
+        //
+        // Headless path never calls TickManager.Update(), so a prior episode's last Step()
+        // can leave IsGameTickUpdate true. Clear it before the flush so RandomTickManager
+        // doesn't fire and shift the new episode's RNG state.
+        TickManager.ConsumeTick();
         tetrisManager.OnUpdate();
 
         IsDone = false;
@@ -74,9 +79,24 @@ public class RolloutEnvironment : MonoBehaviour
     public IReadOnlyList<PlacementCandidate> GetLegalPlacements() => tetrisManager.GetLegalPlacements();
 
     // Commits the placement and advances the turn synchronously — no frame-loop dependency.
-    public void Step(PlacementCandidate candidate)
+    // Explicit ticks (not real-time Update()-driven) are what let tick-gated systems like
+    // FluidManager's settle-into-FluidDummy step actually run between placements; without at least
+    // one, TickManager.IsGameTickUpdate never goes true in a synchronous/headless run.
+    //
+    // tickCount defaults to 1 — the training path has no time-related mechanics once the Stage-1
+    // block set (inert only) lands, so one tick per action is both correct and cheapest. Fluid flows
+    // gradually (FluidManager.Flow() moves a small unitFlowingAmount per tick), so a caller that still
+    // has fluid in play — the fidelity check, exercising today's full block set — needs to pass a
+    // larger tickCount to let flow/settling fully resolve before the next placement, or it can catch
+    // a fluid block mid-transition and see stale state that never happens in real (many-frames-per-
+    // turn) gameplay.
+    public void Step(PlacementCandidate candidate, int tickCount = 1)
     {
         tetrisManager.CommitPlacementInstant(candidate);
-        tetrisManager.OnUpdate();
+        for (int i = 0; i < tickCount; i++)
+        {
+            TickManager.AdvanceTicks(1);
+            tetrisManager.OnUpdate();
+        }
     }
 }

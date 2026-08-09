@@ -1,3 +1,5 @@
+using UnityEngine;
+
 /// <summary>
 /// Exposes the instant-lock primitive the training/headless path needs: lock the piece into the
 /// board right now, with no lock-delay wait. Unlike the demo/gameplay-fidelity path (which uses the

@@ -279,6 +279,10 @@ public class TetrisManager : MonoBehaviour
 
     private void InitNextTetrominoList()
     {
+        // Without this, repeated calls append to the stale list instead of replacing it,
+        // corrupting the queue order and the piece sequence on episode/game restarts.
+        nextTetrominos.Clear();
+
         foreach (var tetromino in nextTetrominoList)
         {
             TetrominoGenerator.NewRandomTetromino(tetromino);
