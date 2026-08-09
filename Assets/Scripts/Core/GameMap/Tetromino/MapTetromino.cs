@@ -271,7 +271,6 @@ public class MapTetromino : Tetromino
                         if (!collide)
                             continue;
 
-                        Debug.Log($"COLLIDING {position} {mapBlock} {mapBlock.isLocked}");
                         return true;
                     }
                 }

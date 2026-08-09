@@ -13,11 +13,7 @@ public class SpawnableBlockList : ScriptableObject
 
     public void Remove(BlockID blockID)
     {
-        foreach (BlockEntry entry in list)
-        {
-            if (entry.blockID == blockID)
-                list.Remove(entry);
-        }
+        list.RemoveAll(entry => entry.blockID == blockID);
     }
 
     public BlockID GetBlockID(float value)
