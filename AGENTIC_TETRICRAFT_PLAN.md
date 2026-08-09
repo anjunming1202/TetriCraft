@@ -542,30 +542,70 @@ and Stage 1's `SpawnableBlockList`.
 
 ---
 
-## 3. Action semantics and observations
+## 3. Action semantics, observations, and reward
 
 **Action** = one legal `(rotation ∈ {0,1,2,3} deduplicated for symmetric pieces, column)` pair for the
 current falling piece, i.e. the classical Tetris placement-action set (Dellacherie/Bertsekas-style), which
 is exactly what "one decision per tetromino" in `DESIGN_INTENT.md` means and exactly what
 `GetLegalPlacements()` enumerates. There is no primitive left/right/rotate action in this phase.
 
-**Observation**, Stage 1 (single block type, no typed-board yet — that's Stage 2):
-- Board occupancy: `GridWidth × boundaryHeight` binary grid (crop out the `+5` spawn-buffer rows that
-  `TetrisManager.PrepareNewTetrisMap` adds above the visible boundary — those exist so pieces can spawn
-  off-screen, not as playable rows; `CheckGameDead()`'s `deathline = boundaryHeight` is the actual
-  game-over row to key off).
-- Next-piece queue: `tetrisManager.nextTetrominos` (already public, already a fixed-length lookahead —
-  matches the "N next pieces visible" convention standard in Tetris RL setups).
-- Current falling piece identity (needed to interpret `GetLegalPlacements()`'s candidates).
+### 3.1 Observation — after-state board (confirmed design)
 
-**Reward**, Stage 1 default: score delta using the same clear-value table already in
-`ScoreManager.GetSingleClearScore()` (500/1200/2500/8000/… ) reused read-only for consistency with the
-human-facing score, computed from `TryClearLines()`'s reported `newLineCount`/`totalClearLineCount`/
-`combo` — not the live `ScoreManager` component itself (which is a `Singleton<T>` and out of scope to
-touch). This is a first-phase default, expected to be tuned.
+The training method is **deep after-state value learning** (Bertsekas/Scherrer-style with a CNN instead
+of linear features). The value network V(s') evaluates **after-states** — the board after a placement is
+committed and lines are cleared, but before the next piece is drawn.
 
-**Episode end**: `TetrisManager.OnGameDead` (unchanged existing event, subscribed directly by
-`RolloutEnvironment` — §2.3).
+**What V(s') sees** (one input):
+- Board occupancy: `GridWidth × boundaryHeight` binary grid, 0=empty, 1=occupied.
+  Crop out the `+5` spawn-buffer rows — those exist for spawning, not gameplay.
+
+**What is explicitly excluded** (confirmed by literature review — see `memory/training-research.md`):
+- Next-piece queue: the standard after-state formulation evaluates the board independent of what piece
+  comes next (Algorta & Simsek 2019 survey: including next-piece makes results incomparable). The value
+  function learns "how good is this board state" regardless of next piece.
+- Hand-crafted features (holes, bumpiness, height, DT features): deliberately excluded. The deep network
+  must learn spatial patterns from the raw grid. This is harder than linear-feature methods (which achieve
+  35-51M lines) but more general for later stages with Minecraft block mechanics.
+- Current piece identity: not needed — each candidate's after-state already encodes the result of placing
+  that specific piece.
+
+**Per-decision flow**:
+1. `GetLegalPlacements()` → N candidates
+2. For each candidate: save board → `CommitPlacementInstant` → snapshot grid as `int[W,H]` → restore board
+3. Send all N after-state grids to Python in one IPC round-trip
+4. Python: batch forward pass V(s') on all N → argmax → send chosen index back
+5. Unity: `CommitPlacement(chosen_index)` → advance turn
+
+**Key implementation need**: rollback-capable after-state enumeration. Current `CommitPlacementInstant`
+mutates the board permanently. Options:
+- Save/restore: lightweight grid-state snapshot (just the int occupancy, not full Block objects) before
+  each trial placement, restore after. Preferred — simpler than cloning.
+- The existing `GetBoardSnapshot()` (string-based) is too heavy for per-candidate use; need a fast
+  int-array snapshot/restore pair.
+
+### 3.2 Reward (confirmed design)
+
+**Primary**: `r_t = number of lines cleared at step t` (the classical standard — Bertsekas 1996, Thiery
+2009, Gabillon 2013 all use exactly this, nothing else).
+
+**Rationale for sparse reward**: board-quality knowledge (holes, height, bumpiness) should be learned
+*by the value network* from the raw grid, not force-fed through reward shaping. Shaping risks proxy
+optimization (agent learns to keep board flat but never clears lines).
+
+**Fallback if sparse is too slow**: minimal shaping only:
+- Small survival bonus (e.g. +0.01 per piece placed)
+- Game-over penalty (e.g. -1)
+- No hole/height/bumpiness penalties in the reward
+
+**Discount**: γ=1.0 (undiscounted, episodic — a line cleared later is worth the same as now). Use γ=0.99
+if training is unstable.
+
+**Implementation**: count lines cleared directly from `TetrisManager.TryClearLines()` output or the
+`OnLineClearWithInfo` event's `newLineCount` parameter. No dependency on `ScoreManager`.
+
+### 3.3 Episode end
+
+`TetrisManager.OnGameDead` (unchanged existing event, subscribed directly by `RolloutEnvironment` — §2.3).
 
 ---
 
@@ -705,10 +745,12 @@ Assets/Scripts/Core/Placement/RandomPlacementDemoDriver.cs      # done
 Assets/Scripts/Core/Placement/RolloutEnvironment.cs             # done — the real driver, no GameController
 Assets/Scripts/Core/Placement/HeadlessRuntime.cs                # done — shared IsHeadless signal
 Assets/Scripts/Core/Placement/HeadlessManualTestHarness.cs      # done
-Assets/Scenes/AgenticTetricraft/DemoRandomPolicy.unity          # done
-Assets/Scenes/AgenticTetricraft/HeadlessRollout.unity           # in progress (Editor wiring)
-HeadlessVerification.unity (duplicated from HeadlessRollout + Camera + harness)  # not yet built
-Assets/Scripts/Core/GameMap/Block Selector/Stage1SpawnableBlockList.asset  # not yet built
+Assets/AgenticTetricraft/DemoRandomPolicy.unity                 # done
+Assets/AgenticTetricraft/HeadlessEnvironment.unity              # done (was HeadlessRollout)
+Assets/AgenticTetricraft/HeadlessVerification.unity             # done
+Assets/AgenticTetricraft/HeadlessFidelityCheck.unity            # done
+Assets/AgenticTetricraft/PretrainingBlockList.asset             # done — Cobblestone only
+Assets/Scripts/Core/Placement/PlacementFidelityCheck.cs        # done — PASSED
 Assets/Scripts/Core/Headless/HeadlessIpcServer.cs        # not yet built — socket listener
 Assets/Scripts/Core/Headless/PlacementProtocol.cs        # not yet built — mirrors training/tetricraft_env/protocol.py
 ```
@@ -727,15 +769,21 @@ longer needed a `GameController` to relay through — see §2.4.)
 
 ---
 
-## 8. Open items for review before implementation starts
+## 8. Open items
 
-- Reward shaping beyond raw score delta (hole count, bumpiness, aggregate height penalties — classic
-  Tetris heuristic features) is deliberately left as a tuning knob, not fixed here.
+**Resolved:**
+- ~~Reward shaping~~ — confirmed: `r_t = lines_cleared` (sparse). Minimal shaping as fallback only (§3.2).
+- ~~Observation design~~ — confirmed: raw binary grid, no features, no next-piece (§3.1).
+- ~~After-state computation location~~ — confirmed: inside Unity, rollback-capable enumeration (§3.1).
+- ~~External vs internal rollout management~~ — confirmed: external (Python drives via IPC).
+- ~~PretrainingBlockList~~ — done: Cobblestone-only asset at `Assets/AgenticTetricraft/`.
+- ~~Fidelity check~~ — PASSED (14 turns, identical trajectory).
+
+**Still open:**
 - Exact board crop convention (rows above `boundaryHeight`) should be pinned down with a Play Mode test
   before writing the JAX-side observation encoder, so the two sides agree on array shape byte-for-byte.
-- `GetLegalPlacements`/`ExecutePlacement`/`PlacementDecoder` are proposed method shapes, not final
-  signatures — expect small adjustments once actually wired against the real prefabs in the Unity Editor.
+- Rollback-capable after-state enumeration — save/restore mechanism for the board grid needs design and
+  implementation. Current `GetBoardSnapshot()` is string-based and too heavy for per-candidate use.
 - The "rotate fully at spawn, then shift" decode order (§2.6) could in principle miss a
   geometrically-legal candidate that's only reachable by shifting before rotating, against a tall
-  center stack. Not yet hit in practice; worth a targeted Play Mode test once the demo scene is running
-  against non-trivial boards, not before.
+  center stack. Not yet hit in practice; worth a targeted Play Mode test once training is running.

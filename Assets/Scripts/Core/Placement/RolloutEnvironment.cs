@@ -78,6 +78,9 @@ public class RolloutEnvironment : MonoBehaviour
 
     public IReadOnlyList<PlacementCandidate> GetLegalPlacements() => tetrisManager.GetLegalPlacements();
 
+    public int BoardWidth => tetrisManager.BoundaryWidth;
+    public int BoardHeight => tetrisManager.BoundaryHeight;
+
     // Commits the placement and advances the turn synchronously — no frame-loop dependency.
     // Explicit ticks (not real-time Update()-driven) are what let tick-gated systems like
     // FluidManager's settle-into-FluidDummy step actually run between placements; without at least
@@ -90,7 +93,10 @@ public class RolloutEnvironment : MonoBehaviour
     // larger tickCount to let flow/settling fully resolve before the next placement, or it can catch
     // a fluid block mid-transition and see stale state that never happens in real (many-frames-per-
     // turn) gameplay.
-    public void Step(PlacementCandidate candidate, int tickCount = 1)
+    //
+    // Returns lines cleared this turn (from totalClearLineCount, which is reset at the start of each
+    // OnLockdown and accumulated by TryClearLines within that lockdown + subsequent OnUpdate passes).
+    public int Step(PlacementCandidate candidate, int tickCount = 1)
     {
         tetrisManager.CommitPlacementInstant(candidate);
         for (int i = 0; i < tickCount; i++)
@@ -98,5 +104,27 @@ public class RolloutEnvironment : MonoBehaviour
             TickManager.AdvanceTicks(1);
             tetrisManager.OnUpdate();
         }
+        return (int)tetrisManager.totalClearLineCount;
+    }
+
+    /// <summary>
+    /// Single-call after-state query: for each legal placement of the current piece, compute the
+    /// resulting board occupancy grid and lines cleared — without mutating any Unity state.
+    /// Callers pre-allocate afterStates[maxCandidates][w*h] and linesCleared[maxCandidates].
+    /// Returns the actual number of candidates populated.
+    /// </summary>
+    public int QueryAfterStates(byte[][] afterStates, int[] linesCleared)
+    {
+        var candidates = tetrisManager.GetLegalPlacements();
+        int n = candidates.Count;
+
+        int gridSize = BoardWidth * BoardHeight;
+        byte[] baseGrid = new byte[gridSize];
+        tetrisManager.GetBoardOccupancy(baseGrid);
+
+        for (int i = 0; i < n; i++)
+            linesCleared[i] = tetrisManager.ComputeAfterState(baseGrid, candidates[i], afterStates[i]);
+
+        return n;
     }
 }

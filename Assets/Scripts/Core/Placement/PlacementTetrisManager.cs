@@ -12,11 +12,22 @@ public readonly struct PlacementCandidate
     public readonly int Column;   // matches MapTetromino.position.x
     public readonly int LandingY; // resulting MapTetromino.position.y after dropping to the floor
 
-    public PlacementCandidate(int rotation, int column, int landingY)
+    // Absolute grid positions of the 4 blocks this placement occupies — populated during
+    // GetLegalPlacements() enumeration at zero extra cost (the shape is already in the right
+    // rotation/position). Used by ComputeAfterState() to stamp the piece onto a flat grid
+    // without touching any Unity objects.
+    public readonly Vector2Int Cell0, Cell1, Cell2, Cell3;
+
+    public PlacementCandidate(int rotation, int column, int landingY,
+                              Vector2Int cell0, Vector2Int cell1, Vector2Int cell2, Vector2Int cell3)
     {
         Rotation = rotation;
         Column = column;
         LandingY = landingY;
+        Cell0 = cell0;
+        Cell1 = cell1;
+        Cell2 = cell2;
+        Cell3 = cell3;
     }
 }
 
@@ -103,7 +114,19 @@ public class PlacementTetrisManager : TetrisManager
                 }
                 fallingTetromino.ShiftPending(0, 1); // step back onto the last valid cell
 
-                candidates.Add(new PlacementCandidate(fallingTetromino.rotation, column, fallingTetromino.position.y));
+                // Collect the 4 absolute grid positions the piece occupies at this landing spot.
+                Vector2Int c0 = default, c1 = default, c2 = default, c3 = default;
+                int cellIdx = 0;
+                for (int r = 0; r < fallingTetromino.size; r++)
+                    for (int c = 0; c < fallingTetromino.size; c++)
+                        if (fallingTetromino.shape[r, c] != null)
+                        {
+                            var pos = fallingTetromino.LocalToMap(r, c);
+                            switch (cellIdx++) { case 0: c0 = pos; break; case 1: c1 = pos; break; case 2: c2 = pos; break; case 3: c3 = pos; break; }
+                        }
+
+                candidates.Add(new PlacementCandidate(fallingTetromino.rotation, column, fallingTetromino.position.y,
+                                                      c0, c1, c2, c3));
             }
         }
 
@@ -230,5 +253,73 @@ public class PlacementTetrisManager : TetrisManager
             fallingTetromino.RotateShape(op == PlacementDecoder.PlacementOp.RotateCW);
         fallingTetromino.rotation = originalRotation;
         fallingTetromino.lastRotation = originalLastRotation;
+    }
+
+    //================================//
+    //  Observation / After-state API
+    //================================//
+
+    public int BoundaryWidth => boundaryWidth;
+    public int BoundaryHeight => boundaryHeight;
+
+    /// <summary>
+    /// Fill a pre-allocated flat byte[] of size BoundaryWidth * BoundaryHeight with 0/1 occupancy.
+    /// Row-major: buffer[y * BoundaryWidth + x] = 1 if occupied, 0 otherwise.
+    /// Crops to boundaryHeight (excludes the +5 spawn-buffer rows above the playable area).
+    /// </summary>
+    public void GetBoardOccupancy(byte[] buffer)
+    {
+        for (int y = 0; y < boundaryHeight; y++)
+            for (int x = 0; x < boundaryWidth; x++)
+                buffer[y * boundaryWidth + x] = (byte)(Map.GetBlock(x, y) != null ? 1 : 0);
+    }
+
+    /// <summary>
+    /// Pure int-array after-state computation — no Unity object mutation.
+    /// 1. Copies baseGrid → output
+    /// 2. Stamps the candidate's 4 cells as occupied
+    /// 3. Simulates line clears (bottom-to-top, shift-down)
+    /// Returns the number of lines cleared.
+    /// </summary>
+    public int ComputeAfterState(byte[] baseGrid, PlacementCandidate candidate, byte[] output)
+    {
+        int w = boundaryWidth;
+        int h = boundaryHeight;
+
+        System.Array.Copy(baseGrid, output, w * h);
+
+        // Stamp the 4 cells
+        StampCell(output, candidate.Cell0, w, h);
+        StampCell(output, candidate.Cell1, w, h);
+        StampCell(output, candidate.Cell2, w, h);
+        StampCell(output, candidate.Cell3, w, h);
+
+        // Simulate line clears bottom-to-top
+        int linesCleared = 0;
+        for (int y = 0; y < h; y++)
+        {
+            bool full = true;
+            for (int x = 0; x < w; x++)
+            {
+                if (output[y * w + x] == 0) { full = false; break; }
+            }
+            if (!full) continue;
+
+            linesCleared++;
+            // Shift every row above down by one
+            for (int row = y; row < h - 1; row++)
+                System.Array.Copy(output, (row + 1) * w, output, row * w, w);
+            // Clear the top row
+            for (int x = 0; x < w; x++)
+                output[(h - 1) * w + x] = 0;
+            y--; // re-check this position (a new row shifted into it)
+        }
+        return linesCleared;
+    }
+
+    private static void StampCell(byte[] grid, Vector2Int cell, int w, int h)
+    {
+        if (cell.x >= 0 && cell.x < w && cell.y >= 0 && cell.y < h)
+            grid[cell.y * w + cell.x] = 1;
     }
 }

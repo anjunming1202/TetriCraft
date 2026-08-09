@@ -30,7 +30,7 @@ public class TetrisManager : MonoBehaviour
 
     // Tetris map data
     protected int boundaryWidth;
-    private int boundaryHeight;
+    protected int boundaryHeight;
 
     // Line clear data
     public uint totalClearLineCount { get; private set; }
