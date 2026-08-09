@@ -67,6 +67,12 @@ public class PlacementTetrisManager : TetrisManager
     /// </summary>
     public IReadOnlyList<PlacementCandidate> GetLegalPlacements()
     {
+        // A just-spawned piece is still a pending grid request (isInMap == false) when OnStartedTurn
+        // fires, before the tick's trailing map.OnUpdate() flush. Glass.CanBeReplacedBy rejects an
+        // incoming block whose isInMap is false, so enumerating now would rest the piece on top of
+        // replaceable terrain instead of overlapping it. Flush first so we see the committed board.
+        Map.ImmediatelyProcessGridPendingUpdates();
+
         var candidates = new List<PlacementCandidate>();
 
         Vector2Int originalPosition = fallingTetromino.position;

@@ -112,10 +112,11 @@ public class HeadlessManualTestHarness : MonoBehaviour
             TryMoveTarget(candidates, rotationDelta: 0, columnDelta: -1);
         if (Input.GetKeyDown(moveRightKey))
             TryMoveTarget(candidates, rotationDelta: 0, columnDelta: 1);
+        // Clockwise decrements the rotation index, CCW increments it (see Tetromino.RotateShape).
         if (Input.GetKeyDown(rotateCCWKey))
-            TryMoveTarget(candidates, rotationDelta: -1, columnDelta: 0);
-        if (Input.GetKeyDown(rotateCWKey))
             TryMoveTarget(candidates, rotationDelta: 1, columnDelta: 0);
+        if (Input.GetKeyDown(rotateCWKey))
+            TryMoveTarget(candidates, rotationDelta: -1, columnDelta: 0);
 
         if (Input.GetKeyDown(commitKey))
             TryCommit(candidates);
