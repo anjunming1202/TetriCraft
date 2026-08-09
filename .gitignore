@@ -77,4 +77,5 @@ crashlytics-build.properties
 
 # Claude Code local project files (not tracked)
 /CLAUDE.md
+/NOTES.md
 /.claude/
