@@ -81,6 +81,8 @@ public class RolloutEnvironment : MonoBehaviour
     public int BoardWidth => tetrisManager.BoundaryWidth;
     public int BoardHeight => tetrisManager.BoundaryHeight;
 
+    public void GetBoardOccupancy(byte[] buffer) => tetrisManager.GetBoardOccupancy(buffer);
+
     // Commits the placement and advances the turn synchronously — no frame-loop dependency.
     // Explicit ticks (not real-time Update()-driven) are what let tick-gated systems like
     // FluidManager's settle-into-FluidDummy step actually run between placements; without at least

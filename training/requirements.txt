@@ -1,0 +1,6 @@
+jax[cpu]
+flax
+jax2onnx>=0.12
+onnxruntime
+onnx
+numpy
