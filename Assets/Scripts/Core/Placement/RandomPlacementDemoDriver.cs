@@ -8,24 +8,41 @@ using UnityEngine;
 /// Exercises the exact same PlacementTetrisManager/PlacementDecoder seam a later headless training
 /// env will use — only the delay between ops differs.
 /// </summary>
-[RequireComponent(typeof(PlacementTetrisManager))]
+[DefaultExecutionOrder(-100)]   // run early so the seed lands before the board draws its first pieces
 public class RandomPlacementDemoDriver : MonoBehaviour
 {
+    [Tooltip("The PlacementTetrisManager driving the board (may be on another GameObject). " +
+             "Auto-found on this GameObject if left empty.")]
+    [SerializeField] private PlacementTetrisManager tetrisManager;
+    [Tooltip("ON: use `randomSeed` (reproducible game + policy). OFF: fresh random seed each run " +
+             "for a varied demo (the chosen seed is logged so you can reproduce a good run).")]
+    [SerializeField] private bool useFixedSeed = true;
     [SerializeField] private int randomSeed = 12345;
     [SerializeField] private float stepDelaySeconds = 0.15f;
 
-    private PlacementTetrisManager tetrisManager;
     private System.Random rng;
     private bool isPlaying;
 
     private void Awake()
     {
-        tetrisManager = GetComponent<PlacementTetrisManager>();
-        rng = new System.Random(randomSeed);
+        if (tetrisManager == null)
+            tetrisManager = GetComponent<PlacementTetrisManager>();   // fallback: same-GameObject usage
+        int effectiveSeed = SeedOption.Resolve(useFixedSeed, randomSeed, "RandomDemo");
+        UnityEngine.Random.InitState(effectiveSeed);   // seed the game's piece/material RNG (was missing)
+        rng = new System.Random(effectiveSeed);         // and this driver's placement-choice RNG
     }
 
-    private void OnEnable() => tetrisManager.OnStartedTurn += HandleStartedTurn;
-    private void OnDisable() => tetrisManager.OnStartedTurn -= HandleStartedTurn;
+    private void OnEnable()
+    {
+        if (tetrisManager != null)
+            tetrisManager.OnStartedTurn += HandleStartedTurn;
+    }
+
+    private void OnDisable()
+    {
+        if (tetrisManager != null)
+            tetrisManager.OnStartedTurn -= HandleStartedTurn;
+    }
 
     private void HandleStartedTurn()
     {
