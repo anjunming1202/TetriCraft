@@ -50,3 +50,35 @@ class ReplayBuffer:
             self.next_boards[idx],  # uint8 [B, bs]
             self.dones[idx],        # float32 [B]
         )
+
+    # --- resume support ---------------------------------------------------- #
+    # The buffer is persisted alongside the model so a resumed run keeps its warmed
+    # sample distribution instead of cold-restarting warmup. The sampling RNG lives
+    # in the trainer's checkpoint (rng_state.pkl), not here, so save()/load() only
+    # move the array contents + write position.
+    def save(self, path: str) -> str:
+        np.savez(
+            path,
+            boards=self.boards,
+            next_boards=self.next_boards,
+            rewards=self.rewards,
+            dones=self.dones,
+            pos=np.int64(self._pos),
+            full=np.bool_(self._full),
+        )
+        return path
+
+    def load(self, path: str):
+        d = np.load(path)
+        if d["boards"].shape != self.boards.shape:
+            raise ValueError(
+                f"replay shape {d['boards'].shape} != buffer {self.boards.shape}; "
+                f"capacity/board_size changed between runs"
+            )
+        self.boards[:] = d["boards"]
+        self.next_boards[:] = d["next_boards"]
+        self.rewards[:] = d["rewards"]
+        self.dones[:] = d["dones"]
+        self._pos = int(d["pos"])
+        self._full = bool(d["full"])
+        return self

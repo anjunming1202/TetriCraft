@@ -32,11 +32,18 @@ def parse_args():
     p.add_argument("--gamma", type=float, default=None)
     p.add_argument("--batch-size", type=int, default=None)
     p.add_argument("--warmup-steps", type=int, default=None)
+    p.add_argument("--ckpt-every", type=int, default=None, help="Env steps between checkpoints.")
+    p.add_argument("--eval-every", type=int, default=None, help="Env steps between evals.")
     p.add_argument("--reward-aware", action="store_true",
                    help="Select argmax[r + gamma*V] instead of argmax V (plan default is V only).")
     p.add_argument("--seed", type=int, default=None)
     p.add_argument("--run-dir", type=str, default=None)
     p.add_argument("--onnx-out", type=str, default=None)
+    p.add_argument("--resume-from", type=str, default=None,
+                   help="Run dir (uses checkpoints/latest.json) or a specific checkpoint "
+                        "dir to resume from. Pass the same path as --run-dir for SLURM requeue.")
+    p.add_argument("--keep-last-ckpts", type=int, default=None,
+                   help="Prune step checkpoints beyond the newest N (0 = keep all).")
     return p.parse_args()
 
 
@@ -57,6 +64,10 @@ def main():
         cfg.batch_size = a.batch_size
     if a.warmup_steps is not None:
         cfg.warmup_steps = a.warmup_steps
+    if a.ckpt_every is not None:
+        cfg.ckpt_every = a.ckpt_every
+    if a.eval_every is not None:
+        cfg.eval_every = a.eval_every
     if a.reward_aware:
         cfg.reward_aware_selection = True
     if a.seed is not None:
@@ -65,6 +76,10 @@ def main():
         cfg.run_dir = a.run_dir
     if a.onnx_out is not None:
         cfg.onnx_out = a.onnx_out
+    if a.resume_from is not None:
+        cfg.resume_from = a.resume_from
+    if a.keep_last_ckpts is not None:
+        cfg.keep_last_ckpts = a.keep_last_ckpts
     train(cfg)
 
 

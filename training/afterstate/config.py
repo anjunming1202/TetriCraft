@@ -43,6 +43,15 @@ class TrainConfig:
     # --- Seeding ---
     seed: int = 0                      # master seed: params init, exploration, episode seeds
 
+    # --- Resume ---
+    # Path to a run dir (or a specific checkpoints/step_* dir) to resume from. When a
+    # run dir is given, its checkpoints/latest.json pointer selects the checkpoint.
+    # None => fresh run. Resuming restores model/target/optimizer/counters/RNG/replay
+    # and continues from the saved env_step. Safe to point at run_dir==resume_from for
+    # SLURM requeue (same dir, picks up where the crash left off).
+    resume_from: str = None
+    keep_last_ckpts: int = 3           # prune older step checkpoints beyond this many (0 = keep all)
+
     # --- Eval (greedy, epsilon=0, fixed seeds) ---
     eval_seeds: List[int] = field(default_factory=lambda: list(range(10)))
     eval_every: int = 20_000           # env steps

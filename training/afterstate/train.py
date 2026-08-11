@@ -13,10 +13,14 @@ The loop is identical; only the env count / launch mode changes.
 """
 
 import inspect
+import json
 import os
+import re
+import shutil
 import sys
 import time
 from collections import deque
+from dataclasses import asdict
 
 import jax
 import jax.numpy as jnp
@@ -35,7 +39,7 @@ from afterstate.config import TrainConfig
 from afterstate.replay_buffer import ReplayBuffer
 from afterstate.agent import score_boards, select_index
 from tetricraft_env.vector_env import SyncVectorEnv
-from common.seeding import SeedStream, make_rng
+from common.seeding import SeedStream, make_rng, get_rng_state, set_rng_state
 from common.logging import ScalarLogger
 from common import checkpointing
 
@@ -110,10 +114,87 @@ def _launch_kwargs(cfg: TrainConfig, port: int):
     return {"launch_exe": cfg.unity_exe, "log_path": log_path}
 
 
+# --------------------------------------------------------------------------- #
+# Resume / checkpoint helpers
+# --------------------------------------------------------------------------- #
+def _resolve_resume_ckpt(resume_from: str):
+    """Resolve resume_from to a concrete checkpoint dir, or None if none exists.
+
+    Accepts either a specific checkpoint dir (contains meta.json) or a run dir
+    (uses its checkpoints/latest.json pointer). run_dir==resume_from is the normal
+    SLURM-requeue case: the same dir, picking up the latest committed checkpoint.
+    """
+    resume_from = os.path.abspath(resume_from)
+    if os.path.exists(os.path.join(resume_from, "meta.json")):
+        return resume_from
+    return checkpointing.read_latest(os.path.join(resume_from, "checkpoints"))
+
+
+def _restore_rng_states(rng_states, rng, seed_stream, buf_rng):
+    try:
+        if "rng" in rng_states:
+            set_rng_state(rng, rng_states["rng"])
+        if "seed_stream" in rng_states:
+            seed_stream.set_state(rng_states["seed_stream"])
+        if "buf_rng" in rng_states:
+            set_rng_state(buf_rng, rng_states["buf_rng"])
+    except Exception as e:  # noqa: BLE001
+        print(f"[train] RNG restore skipped ({type(e).__name__}: {e})")
+
+
+def _save_ckpt(cfg, model, target, optimizer, buffer,
+               rng, seed_stream, buf_rng, env_step, grad_steps):
+    """Write one full resumable checkpoint and advance the latest pointer."""
+    ckpts_dir = os.path.join(cfg.run_dir, "checkpoints")
+    name = f"step_{env_step}"
+    meta = {
+        "env_step": env_step,
+        "grad_steps": grad_steps,
+        "num_envs": cfg.num_envs,
+        "board_h": cfg.board_h,
+        "board_w": cfg.board_w,
+        "gamma": cfg.gamma,
+        "buffer_len": len(buffer),
+    }
+    rng_states = {
+        "rng": get_rng_state(rng),
+        "seed_stream": seed_stream.get_state(),
+        "buf_rng": get_rng_state(buf_rng),
+    }
+    path = checkpointing.save_training_state(
+        os.path.join(ckpts_dir, name),
+        model=model, target=target, optimizer=optimizer,
+        meta=meta, rng_states=rng_states, replay=buffer)
+    checkpointing.write_latest(ckpts_dir, name)
+    _prune_ckpts(ckpts_dir, cfg.keep_last_ckpts)
+    print(f"[ckpt]  saved {path} (env_step={env_step}, buf={len(buffer)})")
+
+
+def _prune_ckpts(ckpts_dir, keep):
+    """Delete step_* checkpoints older than the newest `keep` (0/None = keep all)."""
+    if not keep or keep <= 0:
+        return
+    entries = []
+    for n in os.listdir(ckpts_dir):
+        m = re.fullmatch(r"step_(\d+)", n)
+        if m and os.path.isdir(os.path.join(ckpts_dir, n)):
+            entries.append((int(m.group(1)), n))
+    entries.sort()
+    for _, n in entries[:-keep]:
+        shutil.rmtree(os.path.join(ckpts_dir, n), ignore_errors=True)
+
+
 def train(cfg: TrainConfig):
     os.makedirs(cfg.run_dir, exist_ok=True)
     logger = ScalarLogger(os.path.join(cfg.run_dir, "tb"))
     print(f"[train] run_dir={cfg.run_dir}  num_envs={cfg.num_envs}  ports={cfg.ports}")
+
+    # Snapshot the run config for reproducibility / audit (best-effort).
+    try:
+        with open(os.path.join(cfg.run_dir, "config.json"), "w") as f:
+            json.dump(asdict(cfg), f, indent=2, default=str)
+    except Exception as e:  # noqa: BLE001
+        print(f"[train] config snapshot skipped ({type(e).__name__}: {e})")
 
     rng = make_rng(cfg.seed)              # exploration
     seed_stream = SeedStream(cfg.seed + 1)  # episode seeds
@@ -140,22 +221,41 @@ def train(cfg: TrainConfig):
 
     buffer = ReplayBuffer(cfg.buffer_capacity, cfg.board_size, rng=buf_rng)
 
+    # Resume: restore model/target/optimizer/counters/RNG/replay and continue from
+    # the saved env_step. Falls back to a fresh run if no checkpoint is present.
+    grad_steps = 0
+    env_step = 0
+    if cfg.resume_from:
+        ckpt = _resolve_resume_ckpt(cfg.resume_from)
+        if ckpt is None:
+            print(f"[train] resume_from={cfg.resume_from!r} has no checkpoint; starting fresh")
+        else:
+            meta = checkpointing.restore_training_state(
+                ckpt, model=model, target=target, optimizer=optimizer, replay=buffer)
+            env_step = int(meta.get("env_step", 0))
+            grad_steps = int(meta.get("grad_steps", 0))
+            _restore_rng_states(meta.get("rng_states", {}), rng, seed_stream, buf_rng)
+            print(f"[train] resumed from {ckpt} at env_step={env_step} "
+                  f"grad_steps={grad_steps} buf={len(buffer)}")
+
     prev_after = [None] * cfg.num_envs
     ep_return = [0.0] * cfg.num_envs
     ep_len = [0] * cfg.num_envs
     recent_returns = deque(maxlen=100)
     recent_lens = deque(maxlen=100)
 
-    grad_steps = 0
-    env_step = 0
     last_loss = float("nan")
     t0 = time.monotonic()
-    last_log_step, last_log_t = 0, t0
+    last_log_step, last_log_t = env_step, t0
 
-    next_log = cfg.log_every
-    next_eval = cfg.eval_every
-    next_ckpt = cfg.ckpt_every
-    next_onnx = cfg.onnx_every
+    # Next milestone at/after the resumed env_step (avoids firing them all at once).
+    def _next_after(every):
+        return ((env_step // every) + 1) * every
+    next_log = _next_after(cfg.log_every)
+    next_eval = _next_after(cfg.eval_every)
+    next_ckpt = _next_after(cfg.ckpt_every)
+    next_onnx = _next_after(cfg.onnx_every)
+    last_ckpt_step = -1   # so the finally save is skipped if this step was just checkpointed
 
     try:
         while env_step < cfg.total_env_steps:
@@ -260,11 +360,11 @@ def train(cfg: TrainConfig):
                       f"median={med_r:.1f} mean_len={mean_l:.1f}")
                 next_eval += cfg.eval_every
 
-            # 8) checkpoint
+            # 8) checkpoint (full resumable state + latest pointer)
             if env_step >= next_ckpt:
-                ckpt_path = os.path.join(cfg.run_dir, "checkpoints", f"step_{env_step}")
-                checkpointing.save_model(ckpt_path, model)
-                print(f"[ckpt]  saved {ckpt_path}")
+                _save_ckpt(cfg, model, target, optimizer, buffer,
+                           rng, seed_stream, buf_rng, env_step, grad_steps)
+                last_ckpt_step = env_step
                 next_ckpt += cfg.ckpt_every
 
             # 9) ONNX re-export (Unity/Sentis artifact). Optional: jax2onnx needs Python
@@ -276,7 +376,16 @@ def train(cfg: TrainConfig):
                 next_onnx += cfg.onnx_every
 
     finally:
-        # Final artifacts
+        # Resumable state first — covers a mid-run Python-level crash (dropped env,
+        # exception) so a requeue continues from here. A SIGSEGV skips this block;
+        # the periodic checkpoints above cover that case.
+        try:
+            if env_step != last_ckpt_step:
+                _save_ckpt(cfg, model, target, optimizer, buffer,
+                           rng, seed_stream, buf_rng, env_step, grad_steps)
+        except Exception as e:  # noqa: BLE001
+            print(f"[train] final training-state save failed: {type(e).__name__}: {e}")
+        # Deploy artifact: model params + ONNX (what Unity/Sentis consumes).
         try:
             checkpointing.save_model(os.path.join(cfg.run_dir, "checkpoints", "final"), model)
             _try_export_onnx(model, cfg.onnx_out)
