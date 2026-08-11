@@ -78,8 +78,15 @@ public class RolloutEnvironment : MonoBehaviour
 
     public IReadOnlyList<PlacementCandidate> GetLegalPlacements() => tetrisManager.GetLegalPlacements();
 
-    public int BoardWidth => tetrisManager.BoundaryWidth;
-    public int BoardHeight => tetrisManager.BoundaryHeight;
+    // tetrisManager.BoundaryWidth/Height are only populated by PrepareNewTetrisMap() inside Reset().
+    // Before the first Reset (e.g. HeadlessIpcServer reads dims to send HELLO at startup) fall back
+    // to boundaryData, which Awake() already computed from boundaryRegion.
+    public int BoardWidth => tetrisManager.BoundaryWidth > 0
+        ? tetrisManager.BoundaryWidth
+        : (boundaryData != null ? boundaryData.width : 0);
+    public int BoardHeight => tetrisManager.BoundaryHeight > 0
+        ? tetrisManager.BoundaryHeight
+        : (boundaryData != null ? boundaryData.height : 0);
 
     public void GetBoardOccupancy(byte[] buffer) => tetrisManager.GetBoardOccupancy(buffer);
 
