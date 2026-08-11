@@ -19,6 +19,11 @@ import time
 from . import protocol
 
 
+class WorkerError(Exception):
+    """A worker's connection or process failed mid-run; the env must be recovered
+    (reconnected / respawned) before it can be used again."""
+
+
 class UnityWorkerConnection:
     def __init__(
         self,
@@ -85,6 +90,30 @@ class UnityWorkerConnection:
             os.makedirs(os.path.dirname(os.path.abspath(self.log_path)), exist_ok=True)
             args += ["-logFile", self.log_path]
         self.proc = subprocess.Popen(args)
+
+    def reconnect(self):
+        """Tear down a dead socket/process and establish a fresh connection.
+
+        In spawn mode this respawns the headless build (connect() relaunches when
+        launch_exe is set); in attach mode it re-dials the same host:port, blocking
+        until a server is listening again. Re-reads the HELLO handshake. Used to
+        recover a worker that dropped mid-run without killing the whole training run.
+        """
+        if self.sock is not None:
+            try:
+                self.sock.close()
+            except OSError:
+                pass
+            self.sock = None
+        if self.proc is not None:
+            if self.proc.poll() is None:
+                try:
+                    self.proc.kill()
+                    self.proc.wait(timeout=10.0)
+                except Exception:  # noqa: BLE001
+                    pass
+            self.proc = None
+        return self.connect()
 
     # ------------------------------------------------------------------ #
     def reset(self, seed: int):

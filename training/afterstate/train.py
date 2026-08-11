@@ -39,6 +39,7 @@ from afterstate.config import TrainConfig
 from afterstate.replay_buffer import ReplayBuffer
 from afterstate.agent import score_boards, select_index
 from tetricraft_env.vector_env import SyncVectorEnv
+from tetricraft_env.unity_bridge import WorkerError
 from common.seeding import SeedStream, make_rng, get_rng_state, set_rng_state
 from common.logging import ScalarLogger
 from common import checkpointing
@@ -296,7 +297,20 @@ def train(cfg: TrainConfig):
                     continue
                 idx = select_index(per_env_vals[i], cand[i][1], eps, rng,
                                    cfg.gamma, cfg.reward_aware_selection)
-                reward, _next_board, done = venv.envs[i].commit(idx)
+                try:
+                    reward, _next_board, done = venv.envs[i].commit(idx)
+                except WorkerError as e:
+                    # Worker died committing this placement: recover it and drop the
+                    # in-flight transition (no buffer.add). Its episode ends here; the
+                    # next autoreset restarts it. If recovery is exhausted, bail to the
+                    # finally-block checkpoint (resumable).
+                    print(f"[train] env {i} commit failed ({e}); recovering, dropping episode")
+                    if not venv.recover(i):
+                        raise
+                    recent_returns.append(ep_return[i])
+                    recent_lens.append(ep_len[i])
+                    prev_after[i] = None
+                    continue
                 chosen_after = cand[i][0][idx]  # S'_next = the afterstate we scored & committed
                 buffer.add(prev_after[i], float(reward), chosen_after, done)
                 ep_return[i] += float(reward)

@@ -9,7 +9,12 @@ Boards are flat uint8 arrays of length board_size, row-major (index = y*width + 
 the same layout ValueNetInference.cs feeds to Sentis — reshape to [H, W] to match.
 """
 
-from .unity_bridge import UnityWorkerConnection
+from .unity_bridge import UnityWorkerConnection, WorkerError
+
+# Socket/stream failures that mean "the worker died" (as opposed to a bug): a dropped
+# connection, a hung read that timed out, an EOF mid-frame. All surface as WorkerError
+# so the trainer can recover this one env instead of crashing the run.
+_WORKER_FAILURES = (OSError, EOFError, ConnectionError)
 
 
 class TetricraftEnv:
@@ -27,13 +32,19 @@ class TetricraftEnv:
         return self.width, self.height
 
     def reset(self, seed: int):
-        board = self.conn.reset(seed)
+        try:
+            board = self.conn.reset(seed)
+        except _WORKER_FAILURES as e:
+            raise WorkerError(f"reset failed on port {self.conn.port}: {e}") from e
         self.done = False
         self.steps = 0
         return board
 
     def query(self):
-        boards, lines = self.conn.query()
+        try:
+            boards, lines = self.conn.query()
+        except _WORKER_FAILURES as e:
+            raise WorkerError(f"query failed on port {self.conn.port}: {e}") from e
         if boards.shape[0] == 0:
             # No legal placement: treat as terminal (topout).
             self.done = True
@@ -42,10 +53,23 @@ class TetricraftEnv:
     def commit(self, index: int):
         # UnityWorkerConnection.commit returns wire order (lines, done, board);
         # re-order to the (reward, board, done) convention callers expect.
-        reward, done, board = self.conn.commit(index)
+        try:
+            reward, done, board = self.conn.commit(index)
+        except _WORKER_FAILURES as e:
+            raise WorkerError(f"commit failed on port {self.conn.port}: {e}") from e
         self.done = done
         self.steps += 1
         return reward, board, done
+
+    def restart(self):
+        """Recover a dead worker: reconnect/respawn and mark it unstarted so the next
+        autoreset gives it a fresh episode. Raises WorkerError if recovery itself fails."""
+        try:
+            self.conn.reconnect()
+        except _WORKER_FAILURES as e:
+            raise WorkerError(f"restart failed on port {self.conn.port}: {e}") from e
+        self.done = True
+        self.steps = 0
 
     def close(self):
         self.conn.close()
