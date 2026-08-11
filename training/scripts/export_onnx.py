@@ -78,19 +78,58 @@ def export_value_net(model, onnx_path, ref_path=None, verify=True):
     return diff
 
 
+def _resolve_model_dir(checkpoint: str) -> str:
+    """Resolve --checkpoint to the dir holding model params (orbax/ or state.msgpack).
+
+    Accepts a training step dir (has a model/ subdir), a run dir (uses its
+    checkpoints/latest.json), or a model dir itself.
+    """
+    from common import checkpointing
+
+    checkpoint = os.path.abspath(checkpoint)
+    if os.path.isdir(os.path.join(checkpoint, "model")):
+        return os.path.join(checkpoint, "model")            # step_* checkpoint dir
+    if os.path.isdir(os.path.join(checkpoint, "orbax")) or \
+       os.path.exists(os.path.join(checkpoint, "state.msgpack")):
+        return checkpoint                                    # already a model dir
+    latest = checkpointing.read_latest(os.path.join(checkpoint, "checkpoints"))
+    if latest and os.path.isdir(os.path.join(latest, "model")):
+        return os.path.join(latest, "model")                 # run dir -> latest checkpoint
+    raise FileNotFoundError(f"Could not find model params under {checkpoint}")
+
+
 def main():
+    import argparse
+
+    p = argparse.ArgumentParser(description="Export a ValueNetwork to ONNX for Unity/Sentis.")
+    p.add_argument("--checkpoint", default=None,
+                   help="Training checkpoint (step_* dir, run dir, or model dir) to export. "
+                        "Omit to export a deterministic random net (pipeline check).")
+    p.add_argument("--onnx-out", default=None, help="Output .onnx path.")
+    p.add_argument("--no-verify", action="store_true",
+                   help="Skip the onnxruntime vs JAX numerical check.")
+    a = p.parse_args()
+
     out_dir = os.path.join(os.path.dirname(__file__), "..", "models")
     os.makedirs(out_dir, exist_ok=True)
-    onnx_path = os.path.join(out_dir, "value_net.onnx")
+    onnx_path = a.onnx_out or os.path.join(out_dir, "value_net.onnx")
     ref_path = os.path.join(out_dir, "reference_io.npz")
 
-    # Deterministic random weights — standalone pipeline check.
     model = ValueNetwork(rngs=nnx.Rngs(0))
-    diff = export_value_net(model, onnx_path, ref_path=ref_path, verify=True)
+    if a.checkpoint:
+        from common import checkpointing
+        model_dir = _resolve_model_dir(a.checkpoint)
+        checkpointing.restore_into(model_dir, model)
+        print(f"Restored trained weights from {model_dir}")
+    else:
+        print("No --checkpoint: exporting deterministic random weights (seed 0).")
+
+    diff = export_value_net(model, onnx_path, ref_path=ref_path, verify=not a.no_verify)
     print(f"Exported ONNX model → {onnx_path}")
     print(f"Saved reference I/O → {ref_path}")
-    print(f"Max abs diff (JAX vs ORT): {diff:.2e}")
-    print("ONNX export verification PASSED")
+    if diff is not None:
+        print(f"Max abs diff (JAX vs ORT): {diff:.2e}")
+        print("ONNX export verification PASSED")
 
 
 if __name__ == "__main__":
