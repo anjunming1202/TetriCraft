@@ -50,6 +50,43 @@ public static class HeadlessLinuxBuild
             EditorApplication.Exit(1);
     }
 
+    // Builds the CURRENTLY ACTIVE build target + subtarget, inheriting whatever was configured in
+    // Build Profiles (e.g. Linux Server / ARM64 / IL2CPP). Use this for the ARM64 Dedicated Server
+    // cluster build — it avoids needing a scripted architecture API (Unity 6 only exposes ARM64 via
+    // the UI), by building exactly the active configuration:
+    //   "…/6000.x/Editor/Unity.exe" -batchmode -quit -projectPath . \
+    //       -executeMethod HeadlessLinuxBuild.BuildActive -logFile build_arm64.log
+    // IMPORTANT: do NOT pass -buildTarget — that would reset the active target/subtarget/architecture.
+    // Optional -scene / -output overrides work as with Build().
+    public static void BuildActive()
+    {
+        string scene = GetArg("-scene") ?? DefaultScene;
+        string output = GetArg("-output") ?? "Builds/LinuxServerArm64/TetricraftHeadless.aarch64";
+
+        var opts = new BuildPlayerOptions
+        {
+            scenes = new[] { scene },
+            locationPathName = output,
+            target = EditorUserBuildSettings.activeBuildTarget,                    // e.g. StandaloneLinux64
+            subtarget = (int)EditorUserBuildSettings.standaloneBuildSubtarget,     // Server, as set in the UI
+            options = BuildOptions.None,
+        };
+
+        // NOTE: ARM64 Linux ships ONLY IL2CPP player variations (linuxarm64_server_*_il2cpp). The
+        // Scripting Backend must be IL2CPP (set in Player Settings) before building, else the build
+        // fails looking for the nonexistent linuxarm64_server_*_mono variation.
+        Debug.Log($"[HeadlessLinuxBuild] BuildActive: target={opts.target} " +
+                  $"subtarget={(StandaloneBuildSubtarget)opts.subtarget} scene={scene} -> {output}");
+
+        BuildReport report = BuildPipeline.BuildPlayer(opts);
+        BuildSummary s = report.summary;
+        Debug.Log($"[HeadlessLinuxBuild] result={s.result} size={s.totalSize} errors={s.totalErrors} " +
+                  $"target={opts.target} subtarget={(StandaloneBuildSubtarget)opts.subtarget} -> {output}");
+
+        if (s.result != BuildResult.Succeeded)
+            EditorApplication.Exit(1);
+    }
+
     static string GetArg(string name)
     {
         string[] args = Environment.GetCommandLineArgs();
