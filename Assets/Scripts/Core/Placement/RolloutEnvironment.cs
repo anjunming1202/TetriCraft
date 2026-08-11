@@ -116,6 +116,28 @@ public class RolloutEnvironment : MonoBehaviour
         return (int)tetrisManager.totalClearLineCount;
     }
 
+    // --- Playback hooks (visual harness) --------------------------------------------- //
+    // Step() commits a placement and advances its ticks atomically for the synchronous
+    // training/headless path. A real-time visual harness needs the two separated so it can
+    // pace ticks (e.g. watch fluid/TNT resolve tick by tick). These are thin additive
+    // wrappers over the exact calls Step() makes — they do not change Step() or any training
+    // behaviour, and nothing on the training path calls them.
+    public void CommitPlacement(PlacementCandidate candidate)
+    {
+        tetrisManager.CommitPlacementInstant(candidate);
+    }
+
+    public void AdvanceOneTick()
+    {
+        TickManager.AdvanceTicks(1);
+        tetrisManager.OnUpdate();
+    }
+
+    // Lines cleared accumulated for the current turn (reset each lockdown, accumulated by
+    // TryClearLines during the lockdown + subsequent OnUpdate passes) — read after a
+    // placement + its ticks to report that placement's line clears.
+    public int LinesClearedThisTurn => (int)tetrisManager.totalClearLineCount;
+
     /// <summary>
     /// Single-call after-state query: for each legal placement of the current piece, compute the
     /// resulting board occupancy grid and lines cleared — without mutating any Unity state.
