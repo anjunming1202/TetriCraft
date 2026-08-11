@@ -64,15 +64,32 @@ public class BlockGridManager : MonoBehaviour
 
     public void ClearForced()
     {
+        // Destroy every block GameObject: those tracked for updates AND those sitting in the grid
+        // (locked blocks may only be in the grid, not in registeredBlocks). Destroying a GameObject
+        // that is already scheduled for destruction is a safe no-op, so the overlap is harmless.
         foreach (Block block in registeredBlocks)
         {
             if (block != null)
                 GameObject.Destroy(block.gameObject);
         }
+        foreach (Block block in blockGrid.Blocks)
+        {
+            if (block != null)
+                GameObject.Destroy(block.gameObject);
+        }
+
+        // Clear ALL bookkeeping so nothing leaks across restarts. Previously only the request
+        // batches were cleared — registeredBlocks and the grid's blocks/positions were left
+        // populated, so every restart (this path is shared with real gameplay's RestartNewGame via
+        // CleanUpTetrisMap) leaked blocks: BlockSystemManager.OnUpdate iterates blockGrid.Blocks
+        // every tick, so per-tick cost and memory grew with each restart, and stale entities
+        // lingered. blockGrid.Clear() empties the grid array + positions + blocks list.
+        registeredBlocks.Clear();
         blockSpawnBatch.Clear();
         blockMoveBatch.Clear();
         blockRemoveBatch.Clear();
         blockDestroyBatch.Clear();
+        blockGrid.Clear();
     }
 
     public void ProcessPendingBlockRequests()
