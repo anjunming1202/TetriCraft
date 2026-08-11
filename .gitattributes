@@ -1,0 +1,5 @@
+# Keep shell scripts LF-only so they run under Linux/WSL even when checked out on
+# Windows (a CRLF in `#!/usr/bin/env bash` breaks the interpreter). Applies to the
+# cluster (training/cluster/*) and WSL (training/wsl/*) launchers.
+*.sh    text eol=lf
+*.sbatch text eol=lf
