@@ -817,6 +817,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 209426861}
   m_CullTransparentMesh: 1
+--- !u!1 &263697652
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 263697654}
+  - component: {fileID: 263697653}
+  m_Layer: 0
+  m_Name: NeuralNetGameplayDriver
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &263697653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263697652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a36f0229e9ee1464b9d837897da1f6f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tetrisManager: {fileID: 1106322969}
+  valueNetModel: {fileID: 5022602860645237092, guid: 04ed5c8277984a940b5930723f42387b, type: 3}
+  rewardAware: 0
+  stepDelaySeconds: 0
+  useFixedSeed: 1
+  seed: 42
+--- !u!4 &263697654
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 263697652}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.9843364, y: 0.36671236, z: -0.0712462}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &264316337
 GameObject:
   m_ObjectHideFlags: 0
@@ -2585,7 +2635,6 @@ GameObject:
   - component: {fileID: 1106322968}
   - component: {fileID: 1106322969}
   - component: {fileID: 1106322967}
-  - component: {fileID: 1106322970}
   m_Layer: 0
   m_Name: Tetris Map Manager P1
   m_TagString: Untagged
@@ -2648,20 +2697,8 @@ MonoBehaviour:
   - {fileID: 1305638256}
   - {fileID: 2031295483}
   sceneCanvas: {fileID: 1148377019}
---- !u!114 &1106322970
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1106322965}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8dfeddd5bffa6f409aab68394d49e4c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  randomSeed: 12345
-  stepDelaySeconds: 0.15
+  suppressAutomaticGhostUpdate: 0
+  useGhostTetromino: 1
 --- !u!1 &1148377017
 GameObject:
   m_ObjectHideFlags: 0
@@ -4295,3 +4332,4 @@ SceneRoots:
   - {fileID: 274629830}
   - {fileID: 165705759}
   - {fileID: 6790966485018957946}
+  - {fileID: 263697654}
