@@ -1,4 +1,4 @@
-using Unity.Sentis;
+
 using UnityEngine;
 
 /// <summary>
@@ -7,16 +7,16 @@ using UnityEngine;
 /// </summary>
 public static class ValueNetInference
 {
-    private static Worker worker;
+    private static Unity.InferenceEngine.Worker worker;
 
     public static bool IsLoaded => worker != null;
 
     /// <summary>Load an ONNX model imported as a Sentis ModelAsset.</summary>
-    public static void LoadModel(ModelAsset modelAsset)
+    public static void LoadModel(Unity.InferenceEngine.ModelAsset modelAsset)
     {
         Dispose();
-        var runtimeModel = ModelLoader.Load(modelAsset);
-        worker = new Worker(runtimeModel, BackendType.CPU);
+        var runtimeModel = Unity.InferenceEngine.ModelLoader.Load(modelAsset);
+        worker = new Unity.InferenceEngine.Worker(runtimeModel, Unity.InferenceEngine.BackendType.CPU);
     }
 
     /// <summary>Evaluate a single board and return the scalar value estimate.</summary>
@@ -27,9 +27,9 @@ public static class ValueNetInference
         for (int i = 0; i < boardSize; i++)
             data[i] = boardOccupancy[i];
 
-        using var input = new Tensor<float>(new TensorShape(1, 1, height, width), data);
+        using var input = new Unity.InferenceEngine.Tensor<float>(new Unity.InferenceEngine.TensorShape(1, 1, height, width), data);
         worker.Schedule(input);
-        var output = worker.PeekOutput() as Tensor<float>;
+        var output = worker.PeekOutput() as Unity.InferenceEngine.Tensor<float>;
         var values = output.DownloadToArray();
         return values[0];
     }
@@ -49,9 +49,9 @@ public static class ValueNetInference
                 data[offset + j] = boards[i][j];
         }
 
-        using var input = new Tensor<float>(new TensorShape(count, 1, height, width), data);
+        using var input = new Unity.InferenceEngine.Tensor<float>(new Unity.InferenceEngine.TensorShape(count, 1, height, width), data);
         worker.Schedule(input);
-        var output = worker.PeekOutput() as Tensor<float>;
+        var output = worker.PeekOutput() as Unity.InferenceEngine.Tensor<float>;
         var values = output.DownloadToArray();
         for (int i = 0; i < count; i++)
             results[i] = values[i];

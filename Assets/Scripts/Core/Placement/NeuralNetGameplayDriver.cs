@@ -1,5 +1,5 @@
 using Cysharp.Threading.Tasks;
-using Unity.Sentis;
+
 using UnityEngine;
 
 /// <summary>
@@ -23,7 +23,7 @@ public class NeuralNetGameplayDriver : MonoBehaviour
     [SerializeField] private PlacementTetrisManager tetrisManager;
 
     [Header("Policy")]
-    [SerializeField] private ModelAsset valueNetModel;
+    [SerializeField] private Unity.InferenceEngine.ModelAsset valueNetModel;
     [Tooltip("Selection rule.\n" +
              "  ON  (reward-aware):  i* = argmaxᵢ [ rᵢ + γ · V(s'ᵢ) ]   — favours immediate clears\n" +
              "  OFF (V-only):        i* = argmaxᵢ V(s'ᵢ)                 — matches the training default\n" +

@@ -1,5 +1,5 @@
 using System.Collections;
-using Unity.Sentis;
+
 using UnityEngine;
 
 /// <summary>
@@ -16,7 +16,7 @@ public class NeuralNetPolicyDriver : MonoBehaviour
 {
     [Header("Policy")]
     [SerializeField] private RolloutEnvironment environment;
-    [SerializeField] private ModelAsset valueNetModel;
+    [SerializeField] private Unity.InferenceEngine.ModelAsset valueNetModel;
     [Tooltip("ON: use `seed` (reproducible). OFF: fresh random seed each episode/restart for a varied " +
              "demo (the chosen seed is logged so you can reproduce a good run).")]
     [SerializeField] private bool useFixedSeed = true;
