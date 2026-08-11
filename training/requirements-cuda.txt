@@ -1,0 +1,19 @@
+# GPU training deps (Linux / WSL2 with an NVIDIA GPU + recent driver).
+# Native Windows has NO official JAX CUDA support — run the trainer under WSL2 or on a
+# Linux box; keep Unity on Windows and connect over TCP (see training/README.md).
+#
+#   pip install -r training/requirements-cuda.txt
+#   python -c "import jax; print(jax.devices())"   # -> [CudaDevice(id=0)]
+#
+# NOTE: jax2onnx (ONNX export) is intentionally NOT here — it requires Python >=3.11, while
+# common Linux/WSL bases (Ubuntu 22.04) ship 3.10. The trainer degrades gracefully without it
+# (checkpoints still save); export to ONNX for Unity/Sentis on a Python>=3.11 host (e.g. the
+# Windows env, which has jax2onnx) from a saved checkpoint. On a 3.11+ Linux host you can add
+# `jax2onnx>=0.12` to get in-loop ONNX re-export too.
+
+jax[cuda12]
+flax
+optax
+orbax-checkpoint
+numpy
+tensorboard

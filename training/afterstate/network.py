@@ -47,8 +47,11 @@ class ValueNetwork(nnx.Module):
         self.initial_conv = nnx.Conv(1, CHANNELS, kernel_size=(3, 3), padding="SAME", rngs=rngs)
         self.initial_ln = nnx.LayerNorm(CHANNELS, rngs=rngs)
 
-        # Residual trunk
-        self.blocks = nnx.List([ResBlock(CHANNELS, rngs=rngs) for _ in range(NUM_BLOCKS)])
+        # Residual trunk. Stored as numbered attributes (block0..blockN-1) rather than
+        # nnx.List so the module builds across flax versions: nnx.List exists in flax >=0.12
+        # (the Windows export env) but not in 0.10.x (the Python-3.10 WSL/Linux training env).
+        for i in range(NUM_BLOCKS):
+            setattr(self, f"block{i}", ResBlock(CHANNELS, rngs=rngs))
 
         # Value head: spatial collapse → dense
         self.head_conv = nnx.Conv(CHANNELS, HEAD_CHANNELS, kernel_size=(1, 1), rngs=rngs)
@@ -65,8 +68,8 @@ class ValueNetwork(nnx.Module):
         x = jax.nn.silu(self.initial_ln(self.initial_conv(x)))  # [B, H, W, C]
 
         # Residual trunk
-        for block in self.blocks:
-            x = block(x)
+        for i in range(NUM_BLOCKS):
+            x = getattr(self, f"block{i}")(x)
 
         # Value head
         x = jax.nn.silu(self.head_ln(self.head_conv(x)))  # [B, H, W, HEAD_CHANNELS]

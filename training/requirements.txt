@@ -1,6 +1,9 @@
 jax[cpu]
 flax
+optax
+orbax-checkpoint
 jax2onnx>=0.12
 onnxruntime
 onnx
 numpy
+tensorboard
