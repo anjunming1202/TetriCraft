@@ -17,3 +17,4 @@ optax
 orbax-checkpoint
 numpy
 tensorboard
+wandb        # optional cloud logging (enable with --wandb; run `wandb login` first)

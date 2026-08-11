@@ -57,6 +57,12 @@ class TrainConfig:
     eval_every: int = 20_000           # env steps
     eval_max_steps: int = 5_000        # cap per eval episode
 
+    # --- Weights & Biases (optional cloud logging; resume-aware, off by default) ---
+    use_wandb: bool = False
+    wandb_project: str = "tetricraft-afterstate"
+    wandb_entity: str = None
+    wandb_run_name: str = None
+
     # --- Logging / checkpointing / export ---
     run_dir: str = "training/runs/afterstate"
     log_every: int = 200               # env steps

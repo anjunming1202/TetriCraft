@@ -34,6 +34,8 @@ def parse_args():
     p.add_argument("--warmup-steps", type=int, default=None)
     p.add_argument("--ckpt-every", type=int, default=None, help="Env steps between checkpoints.")
     p.add_argument("--eval-every", type=int, default=None, help="Env steps between evals.")
+    p.add_argument("--epsilon-decay-steps", type=int, default=None,
+                   help="Env steps to linearly decay exploration epsilon over.")
     p.add_argument("--reward-aware", action="store_true",
                    help="Select argmax[r + gamma*V] instead of argmax V (plan default is V only).")
     p.add_argument("--seed", type=int, default=None)
@@ -44,6 +46,10 @@ def parse_args():
                         "dir to resume from. Pass the same path as --run-dir for SLURM requeue.")
     p.add_argument("--keep-last-ckpts", type=int, default=None,
                    help="Prune step checkpoints beyond the newest N (0 = keep all).")
+    p.add_argument("--wandb", action="store_true", help="Also log to Weights & Biases.")
+    p.add_argument("--wandb-project", type=str, default=None)
+    p.add_argument("--wandb-entity", type=str, default=None)
+    p.add_argument("--wandb-run-name", type=str, default=None)
     return p.parse_args()
 
 
@@ -68,6 +74,8 @@ def main():
         cfg.ckpt_every = a.ckpt_every
     if a.eval_every is not None:
         cfg.eval_every = a.eval_every
+    if a.epsilon_decay_steps is not None:
+        cfg.epsilon_decay_steps = a.epsilon_decay_steps
     if a.reward_aware:
         cfg.reward_aware_selection = True
     if a.seed is not None:
@@ -80,6 +88,14 @@ def main():
         cfg.resume_from = a.resume_from
     if a.keep_last_ckpts is not None:
         cfg.keep_last_ckpts = a.keep_last_ckpts
+    if a.wandb:
+        cfg.use_wandb = True
+    if a.wandb_project is not None:
+        cfg.wandb_project = a.wandb_project
+    if a.wandb_entity is not None:
+        cfg.wandb_entity = a.wandb_entity
+    if a.wandb_run_name is not None:
+        cfg.wandb_run_name = a.wandb_run_name
     train(cfg)
 
 

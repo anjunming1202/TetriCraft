@@ -187,7 +187,15 @@ def _prune_ckpts(ckpts_dir, keep):
 
 def train(cfg: TrainConfig):
     os.makedirs(cfg.run_dir, exist_ok=True)
-    logger = ScalarLogger(os.path.join(cfg.run_dir, "tb"))
+    logger = ScalarLogger(
+        os.path.join(cfg.run_dir, "tb"),
+        run_dir=cfg.run_dir,
+        wandb_enabled=cfg.use_wandb,
+        wandb_project=cfg.wandb_project,
+        wandb_entity=cfg.wandb_entity,
+        wandb_run_name=cfg.wandb_run_name,
+        config=asdict(cfg),
+    )
     print(f"[train] run_dir={cfg.run_dir}  num_envs={cfg.num_envs}  ports={cfg.ports}")
 
     # Snapshot the run config for reproducibility / audit (best-effort).
