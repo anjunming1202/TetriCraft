@@ -20,6 +20,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 from afterstate.network import ValueNetwork, BOARD_H, BOARD_W
+from afterstate.net_factory import make_network
 
 
 def export_value_net(model, onnx_path, ref_path=None, verify=True):
@@ -108,6 +109,8 @@ def main():
     p.add_argument("--onnx-out", default=None, help="Output .onnx path.")
     p.add_argument("--no-verify", action="store_true",
                    help="Skip the onnxruntime vs JAX numerical check.")
+    p.add_argument("--net-kind", choices=["cnn", "features"], default="cnn",
+                   help="Architecture to build/export; must match the checkpoint's net_kind.")
     a = p.parse_args()
 
     out_dir = os.path.join(os.path.dirname(__file__), "..", "models")
@@ -115,7 +118,7 @@ def main():
     onnx_path = a.onnx_out or os.path.join(out_dir, "value_net.onnx")
     ref_path = os.path.join(out_dir, "reference_io.npz")
 
-    model = ValueNetwork(rngs=nnx.Rngs(0))
+    model = make_network(a.net_kind, rngs=nnx.Rngs(0))
     if a.checkpoint:
         from common import checkpointing
         model_dir = _resolve_model_dir(a.checkpoint)

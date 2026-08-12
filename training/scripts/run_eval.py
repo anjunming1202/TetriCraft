@@ -14,7 +14,7 @@ from flax import nnx
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from afterstate.network import ValueNetwork
+from afterstate.net_factory import make_network
 from afterstate.config import TrainConfig
 from afterstate.train import _greedy_episode
 from tetricraft_env.env import TetricraftEnv
@@ -29,6 +29,8 @@ def parse_args():
     p.add_argument("--seeds", type=int, nargs="+", default=list(range(10)))
     p.add_argument("--max-steps", type=int, default=5000)
     p.add_argument("--reward-aware", action="store_true")
+    p.add_argument("--net-kind", choices=["cnn", "features"], default="cnn",
+                   help="Architecture to build; must match the checkpoint's net_kind.")
     return p.parse_args()
 
 
@@ -38,7 +40,7 @@ def main():
     cfg.eval_max_steps = a.max_steps
     cfg.reward_aware_selection = a.reward_aware
 
-    model = ValueNetwork(rngs=nnx.Rngs(0))
+    model = make_network(a.net_kind, rngs=nnx.Rngs(0))
     checkpointing.restore_into(a.ckpt, model)
     print(f"[eval] restored {a.ckpt}")
 

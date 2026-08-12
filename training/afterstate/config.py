@@ -20,6 +20,11 @@ class TrainConfig:
     board_h: int = 20
     board_w: int = 10
 
+    # --- Network ---
+    # "cnn"      = raw-grid residual CNN (network.py, the original plan)
+    # "features" = MLP over hand-crafted board features (feature_network.py, the proven approach)
+    net_kind: str = "cnn"
+
     # --- RL ---
     gamma: float = 1.0                 # undiscounted episodic (plan §3.2); try 0.99 if unstable
     reward_aware_selection: bool = False

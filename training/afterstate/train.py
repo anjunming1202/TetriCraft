@@ -39,6 +39,7 @@ from afterstate.config import TrainConfig
 from afterstate.replay_buffer import ReplayBuffer
 from afterstate.agent import score_boards, select_index
 from afterstate import reward_shaping
+from afterstate.net_factory import make_network
 from tetricraft_env.vector_env import SyncVectorEnv
 from tetricraft_env.unity_bridge import WorkerError
 from common.seeding import SeedStream, make_rng, get_rng_state, set_rng_state
@@ -210,7 +211,7 @@ def train(cfg: TrainConfig):
     seed_stream = SeedStream(cfg.seed + 1)  # episode seeds
     buf_rng = make_rng(cfg.seed + 2)
 
-    model = ValueNetwork(rngs=nnx.Rngs(cfg.seed))
+    model = make_network(cfg.net_kind, rngs=nnx.Rngs(cfg.seed))
     target = nnx.clone(model)
     optimizer = nnx.Optimizer(model, optax.adam(cfg.lr), wrt=nnx.Param)
 
