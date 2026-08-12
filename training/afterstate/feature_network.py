@@ -19,7 +19,7 @@ from flax import nnx
 from afterstate import features as F
 from afterstate.network import BOARD_H, BOARD_W
 
-HIDDEN = 64
+HIDDEN = 128   # v3h128 capacity variant
 
 # Fixed, board-derived per-feature scales (order matches F.FEATURE_NAMES) to bring the raw counts
 # to ~O(1) before the MLP. Constant division => export-safe, and keeps eval/deploy deterministic.
@@ -30,6 +30,8 @@ _SCALES = jnp.array([
     BOARD_H * BOARD_W,        # bumpiness    (~<= 190)
     BOARD_H * (BOARD_W + 1),  # row_transitions
     (BOARD_H + 1) * BOARD_W,  # col_transitions
+    BOARD_H * BOARD_W,        # well_sum      (<= 200)
+    BOARD_H,                  # max_well      (<= 20)
 ], dtype=jnp.float32)
 
 

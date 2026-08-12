@@ -63,7 +63,8 @@ def _train_step(model, target, optimizer, boards_prev, rewards, boards_next, don
 
     def loss_fn(m):
         v = m(boards_prev)[:, 0]
-        return jnp.mean((v - y) ** 2)
+        # v3 STABILIZE: Huber (with reward down-scaling below) bounds heavy-tailed TD errors.
+        return optax.huber_loss(v, y, delta=1.0).mean()
 
     loss, grads = nnx.value_and_grad(loss_fn)(model)
     if _OPT_UPDATE_TAKES_MODEL:
@@ -356,6 +357,7 @@ def train(cfg: TrainConfig):
                     # Proven Tetris-RL reward (nuno-faria/uvipen): dense survival + superlinear
                     # line bonus, game-over penalty. reward == lines_cleared here.
                     r_store = -1.0 if done else 1.0 + float(reward) ** 2 * cfg.board_w
+                    r_store = r_store / 10.0   # v3 STABILIZE: down-scale targets to ~O(10) for Huber
                 elif cfg.use_shaped_reward:
                     r_store = reward_shaping.shaped_reward(
                         chosen_after, reward, cfg.board_w, shaping_w)
