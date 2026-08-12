@@ -213,7 +213,10 @@ def train(cfg: TrainConfig):
 
     model = make_network(cfg.net_kind, rngs=nnx.Rngs(cfg.seed))
     target = nnx.clone(model)
-    optimizer = nnx.Optimizer(model, optax.adam(cfg.lr), wrt=nnx.Param)
+    tx = optax.adam(cfg.lr)
+    if cfg.grad_clip_norm and cfg.grad_clip_norm > 0:
+        tx = optax.chain(optax.clip_by_global_norm(cfg.grad_clip_norm), optax.adam(cfg.lr))
+    optimizer = nnx.Optimizer(model, tx, wrt=nnx.Param)
 
     # Per-env launch kwargs differ by port; SyncVectorEnv takes one dict, so for spawn
     # mode we pass exe/log-dir and let it template per port. Attach mode needs nothing.

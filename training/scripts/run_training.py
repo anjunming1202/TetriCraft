@@ -29,6 +29,8 @@ def parse_args():
                    help="Path to headless build (spawn mode). Omit to attach to a running Editor.")
     p.add_argument("--total-steps", type=int, default=None, help="Total env steps.")
     p.add_argument("--lr", type=float, default=None)
+    p.add_argument("--grad-clip-norm", type=float, default=None,
+                   help="Global-norm gradient clip (0 = off). Guards TD divergence.")
     p.add_argument("--gamma", type=float, default=None)
     p.add_argument("--batch-size", type=int, default=None)
     p.add_argument("--warmup-steps", type=int, default=None)
@@ -72,6 +74,8 @@ def main():
         cfg.total_env_steps = a.total_steps
     if a.lr is not None:
         cfg.lr = a.lr
+    if a.grad_clip_norm is not None:
+        cfg.grad_clip_norm = a.grad_clip_norm
     if a.gamma is not None:
         cfg.gamma = a.gamma
     if a.batch_size is not None:

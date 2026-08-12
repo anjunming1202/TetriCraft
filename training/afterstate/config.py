@@ -47,6 +47,7 @@ class TrainConfig:
     warmup_steps: int = 2_000          # env steps collected before any grad update
     updates_per_step: int = 1          # grad steps per env step
     target_sync_period: int = 1_000    # grad steps between hard target-net copies
+    grad_clip_norm: float = 10.0       # global-norm gradient clip (0 = off); guards TD divergence
 
     # --- Exploration (linear epsilon decay over env steps) ---
     epsilon_start: float = 1.0
