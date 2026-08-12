@@ -213,9 +213,15 @@ def train(cfg: TrainConfig):
 
     model = make_network(cfg.net_kind, rngs=nnx.Rngs(cfg.seed))
     target = nnx.clone(model)
-    tx = optax.adam(cfg.lr)
+    # v2 LR-DECAY: cosine anneal lr (init cfg.lr) -> 0.1*cfg.lr over the run's grad steps, to
+    # settle the late-training thrash. decay_steps ~= grad steps for the full run
+    # (total_env_steps * updates_per_step / num_envs). Warm-start resumes mid-schedule via count.
+    _n_envs = max(1, len(cfg.ports))
+    _decay_steps = max(1, (cfg.total_env_steps * cfg.updates_per_step) // _n_envs)
+    _lr_sched = optax.cosine_decay_schedule(init_value=cfg.lr, decay_steps=_decay_steps, alpha=0.1)
+    tx = optax.adam(_lr_sched)
     if cfg.grad_clip_norm and cfg.grad_clip_norm > 0:
-        tx = optax.chain(optax.clip_by_global_norm(cfg.grad_clip_norm), optax.adam(cfg.lr))
+        tx = optax.chain(optax.clip_by_global_norm(cfg.grad_clip_norm), optax.adam(_lr_sched))
     optimizer = nnx.Optimizer(model, tx, wrt=nnx.Param)
 
     # Per-env launch kwargs differ by port; SyncVectorEnv takes one dict, so for spawn
