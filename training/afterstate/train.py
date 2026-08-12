@@ -352,7 +352,11 @@ def train(cfg: TrainConfig):
                 chosen_after = cand[i][0][idx]  # S'_next = the afterstate we scored & committed
                 # Additive board-quality shaping (optional) reshapes only the TD-target reward
                 # stored in the buffer; ep_return keeps TRUE lines so logs/eval stay comparable.
-                if cfg.use_shaped_reward:
+                if cfg.reward_mode == "survival_sq":
+                    # Proven Tetris-RL reward (nuno-faria/uvipen): dense survival + superlinear
+                    # line bonus, game-over penalty. reward == lines_cleared here.
+                    r_store = -1.0 if done else 1.0 + float(reward) ** 2 * cfg.board_w
+                elif cfg.use_shaped_reward:
                     r_store = reward_shaping.shaped_reward(
                         chosen_after, reward, cfg.board_w, shaping_w)
                 else:

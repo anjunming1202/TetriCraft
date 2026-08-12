@@ -31,6 +31,13 @@ class TrainConfig:
     # Value target: "td" = one-step bootstrap (fast, can diverge on this task); "mc" = Monte
     # Carlo returns to episode end (no bootstrapping => no deadly-triad collapse; more stable).
     target_mode: str = "td"
+    # Reward shaping of the stored TD/MC reward:
+    #   "lines"       = raw lines_cleared (sparse; the plan default, learns poorly)
+    #   "survival_sq" = the proven Tetris-RL reward (nuno-faria / uvipen, 800k+ pts):
+    #                   +1 per placement, + lines^2 * board_width per clear, -1 on game over.
+    #                   Dense (+1/step rewards long episodes) and superlinear in clears; makes
+    #                   plain TD stable. Eval still measures true lines.
+    reward_mode: str = "lines"
 
     # --- Reward shaping (additive board-quality penalty; see reward_shaping.py) ---
     # Off by default => pure sparse lines_cleared reward (the baseline). When on, the TD-target
