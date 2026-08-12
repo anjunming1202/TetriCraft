@@ -38,6 +38,12 @@ def parse_args():
                    help="Env steps to linearly decay exploration epsilon over.")
     p.add_argument("--reward-aware", action="store_true",
                    help="Select argmax[r + gamma*V] instead of argmax V (plan default is V only).")
+    p.add_argument("--shaped-reward", action="store_true",
+                   help="Potential-based reward shaping from the afterstate grid "
+                        "(holes/height/bumpiness). Off = pure sparse lines reward.")
+    p.add_argument("--shape-w-holes", type=float, default=None)
+    p.add_argument("--shape-w-agg-height", type=float, default=None)
+    p.add_argument("--shape-w-bumpiness", type=float, default=None)
     p.add_argument("--seed", type=int, default=None)
     p.add_argument("--run-dir", type=str, default=None)
     p.add_argument("--onnx-out", type=str, default=None)
@@ -78,6 +84,14 @@ def main():
         cfg.epsilon_decay_steps = a.epsilon_decay_steps
     if a.reward_aware:
         cfg.reward_aware_selection = True
+    if a.shaped_reward:
+        cfg.use_shaped_reward = True
+    if a.shape_w_holes is not None:
+        cfg.shape_w_holes = a.shape_w_holes
+    if a.shape_w_agg_height is not None:
+        cfg.shape_w_agg_height = a.shape_w_agg_height
+    if a.shape_w_bumpiness is not None:
+        cfg.shape_w_bumpiness = a.shape_w_bumpiness
     if a.seed is not None:
         cfg.seed = a.seed
     if a.run_dir is not None:

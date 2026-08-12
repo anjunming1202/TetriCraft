@@ -24,6 +24,15 @@ class TrainConfig:
     gamma: float = 1.0                 # undiscounted episodic (plan §3.2); try 0.99 if unstable
     reward_aware_selection: bool = False
 
+    # --- Reward shaping (potential-based, from the afterstate grid; see reward_shaping.py) ---
+    # Off by default => pure sparse lines_cleared reward (the baseline). When on, the TD target
+    # reward becomes  lines + gamma*Phi(next) - Phi(prev),  Phi = -(w_holes*holes +
+    # w_agg*aggHeight + w_bump*bumpiness). Eval still measures true lines, so runs stay comparable.
+    use_shaped_reward: bool = False
+    shape_w_holes: float = 1.0
+    shape_w_agg_height: float = 0.05
+    shape_w_bumpiness: float = 0.2
+
     # --- Optimization ---
     lr: float = 1e-4
     batch_size: int = 256

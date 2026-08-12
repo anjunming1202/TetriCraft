@@ -38,6 +38,7 @@ from afterstate.network import ValueNetwork
 from afterstate.config import TrainConfig
 from afterstate.replay_buffer import ReplayBuffer
 from afterstate.agent import score_boards, select_index
+from afterstate import reward_shaping
 from tetricraft_env.vector_env import SyncVectorEnv
 from tetricraft_env.unity_bridge import WorkerError
 from common.seeding import SeedStream, make_rng, get_rng_state, set_rng_state
@@ -230,6 +231,12 @@ def train(cfg: TrainConfig):
 
     buffer = ReplayBuffer(cfg.buffer_capacity, cfg.board_size, rng=buf_rng)
 
+    shaping_w = reward_shaping.ShapingWeights(
+        holes=cfg.shape_w_holes, agg_height=cfg.shape_w_agg_height,
+        bumpiness=cfg.shape_w_bumpiness)
+    if cfg.use_shaped_reward:
+        print(f"[train] potential-based reward shaping ON: {shaping_w}")
+
     # Resume: restore model/target/optimizer/counters/RNG/replay and continue from
     # the saved env_step. Falls back to a fresh run if no checkpoint is present.
     grad_steps = 0
@@ -320,7 +327,15 @@ def train(cfg: TrainConfig):
                     prev_after[i] = None
                     continue
                 chosen_after = cand[i][0][idx]  # S'_next = the afterstate we scored & committed
-                buffer.add(prev_after[i], float(reward), chosen_after, done)
+                # Potential-based shaping (optional) reshapes only the TD-target reward stored
+                # in the buffer; ep_return keeps TRUE lines so logs/eval stay comparable.
+                if cfg.use_shaped_reward:
+                    r_store = reward_shaping.shaped_reward(
+                        prev_after[i], chosen_after, reward, done,
+                        cfg.gamma, cfg.board_w, shaping_w)
+                else:
+                    r_store = float(reward)
+                buffer.add(prev_after[i], r_store, chosen_after, done)
                 ep_return[i] += float(reward)
                 ep_len[i] += 1
                 env_step += 1
