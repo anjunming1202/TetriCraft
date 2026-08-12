@@ -6,10 +6,14 @@ Everything below is a drop-in for `NeuralNetPolicyDriver` — the featurizer is 
 graph's first layer, so the `[count,1,20,10] -> [count]` contract never changes.
 
 ## TL;DR results
-- **Current best deployed model: `value_net_2026-08-12_featmlp_stabnowells_step4600000_mean588.onnx`**
-  (branch `Afterstate-Feature-MLP-v2`). Robust 30-episode eval: **mean 588 / median 414 / min 85**.
-- Winning recipe = **survival_sq reward (÷10) + Huber loss + gamma 0.995**, simple net (6 features,
-  HIDDEN 64). Wells and HIDDEN=128 did **not** help.
+- **Current best deployed model: `value_net_2026-08-12_featmlp_v4_g995s1_best_mean1326.onnx`**
+  (branch `Afterstate-Feature-MLP-v4`, from run v4-g995-s1's `best_model`). Robust 30-episode eval:
+  **mean 1326 / median 1380 / p25 800 / max 1993**.
+- Winning recipe = **survival_sq + Huber + gamma 0.995 + adaptive return-normalization + wells + HIDDEN128**,
+  with best-checkpoint-by-eval saving (the winning weights were a mid-run peak, not the final step).
+- IMPORTANT nuance: wells + HIDDEN128 *hurt* WITHOUT normalization (v3: robust 364 vs no-wells 588) but
+  *win big* WITH adaptive-norm (v4: robust 1326). Normalization unlocked the extra capacity.
+- Prior bests for reference: v3-stab-nowells (no-wells/H64, robust 588/414); v3-h128 (364); g995 (194).
 
 ## Infrastructure / harness
 - **Placeholder sleep-hold jobs** (`train1..4`, `training2`) hold nodes so we skip the queue; run
