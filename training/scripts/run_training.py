@@ -34,6 +34,8 @@ def parse_args():
     p.add_argument("--gamma", type=float, default=None)
     p.add_argument("--batch-size", type=int, default=None)
     p.add_argument("--warmup-steps", type=int, default=None)
+    p.add_argument("--updates-per-step", type=int, default=None,
+                   help="Gradient updates per outer loop (more = train harder per data).")
     p.add_argument("--ckpt-every", type=int, default=None, help="Env steps between checkpoints.")
     p.add_argument("--eval-every", type=int, default=None, help="Env steps between evals.")
     p.add_argument("--epsilon-decay-steps", type=int, default=None,
@@ -86,6 +88,8 @@ def main():
         cfg.batch_size = a.batch_size
     if a.warmup_steps is not None:
         cfg.warmup_steps = a.warmup_steps
+    if a.updates_per_step is not None:
+        cfg.updates_per_step = a.updates_per_step
     if a.ckpt_every is not None:
         cfg.ckpt_every = a.ckpt_every
     if a.eval_every is not None:
