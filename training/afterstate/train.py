@@ -57,20 +57,23 @@ _OPT_UPDATE_TAKES_MODEL = "model" in inspect.signature(nnx.Optimizer.update).par
 # Jitted TD(0) update
 # --------------------------------------------------------------------------- #
 @nnx.jit
-def _train_step(model, target, optimizer, boards_prev, rewards, boards_next, dones, gamma):
+def _train_step(model, target, optimizer, boards_prev, rewards, boards_next, dones, gamma, scale):
     v_next = target(boards_next)[:, 0]                       # [B], bootstrap from target net
     y = jax.lax.stop_gradient(rewards + gamma * v_next * (1.0 - dones))
 
     def loss_fn(m):
         v = m(boards_prev)[:, 0]
-        return jnp.mean((v - y) ** 2)
+        # v4 ADAPTIVE NORM: Huber on the residual divided by a running RMS of targets, so the
+        # effective loss/grad scale stays ~O(1) as returns grow (replaces the fixed ÷10 hack).
+        resid = (v - y) / scale
+        return optax.huber_loss(resid, jnp.zeros_like(resid), delta=1.0).mean()
 
     loss, grads = nnx.value_and_grad(loss_fn)(model)
     if _OPT_UPDATE_TAKES_MODEL:
         optimizer.update(model, grads)
     else:
         optimizer.update(grads)
-    return loss
+    return loss, jnp.mean(y ** 2)
 
 
 def _to_input(boards_u8, h, w):
@@ -245,6 +248,8 @@ def train(cfg: TrainConfig):
     # the saved env_step. Falls back to a fresh run if no checkpoint is present.
     grad_steps = 0
     env_step = 0
+    ret_ms = 1.0       # v4: EMA of mean(target^2) for adaptive normalization (re-converges on resume)
+    best_eval = -1.0   # v4: track best eval mean_lines to save best-by-eval checkpoint
     if cfg.resume_from:
         ckpt = _resolve_resume_ckpt(cfg.resume_from)
         if ckpt is None:
@@ -356,6 +361,7 @@ def train(cfg: TrainConfig):
                     # Proven Tetris-RL reward (nuno-faria/uvipen): dense survival + superlinear
                     # line bonus, game-over penalty. reward == lines_cleared here.
                     r_store = -1.0 if done else 1.0 + float(reward) ** 2 * cfg.board_w
+                    # v4: no fixed reward scaling — adaptive target normalization handles the scale.
                 elif cfg.use_shaped_reward:
                     r_store = reward_shaping.shaped_reward(
                         chosen_after, reward, cfg.board_w, shaping_w)
@@ -381,11 +387,13 @@ def train(cfg: TrainConfig):
             if len(buffer) >= cfg.warmup_steps and len(buffer) >= cfg.batch_size:
                 for _ in range(cfg.updates_per_step):
                     b, r, nb, d = buffer.sample(cfg.batch_size)
-                    loss = _train_step(
+                    scale = jnp.float32(ret_ms ** 0.5 + 1e-6)   # v4 adaptive target-RMS
+                    loss, ms = _train_step(
                         model, target, optimizer,
                         _to_input(b, H, W), jnp.asarray(r),
-                        _to_input(nb, H, W), jnp.asarray(d), cfg.gamma,
+                        _to_input(nb, H, W), jnp.asarray(d), cfg.gamma, scale,
                     )
+                    ret_ms = 0.999 * ret_ms + 0.001 * float(ms)   # EMA of mean target^2
                     grad_steps += 1
                     if grad_steps % cfg.target_sync_period == 0:
                         nnx.update(target, nnx.state(model))
@@ -426,6 +434,18 @@ def train(cfg: TrainConfig):
                 })
                 print(f"[eval]  step={env_step} mean_lines={mean_r:.2f} "
                       f"median={med_r:.1f} mean_len={mean_l:.1f}")
+                # v4: save best-by-eval model so oscillation/pruning never loses the peak.
+                if mean_r > best_eval:
+                    best_eval = mean_r
+                    try:
+                        checkpointing.save_model(
+                            os.path.join(cfg.run_dir, "checkpoints", "best_model"), model)
+                        with open(os.path.join(cfg.run_dir, "checkpoints", "best.json"), "w") as bf:
+                            json.dump({"env_step": int(env_step), "eval_mean_lines": float(mean_r),
+                                       "eval_median": float(med_r)}, bf)
+                        print(f"[best]  new best mean_lines={mean_r:.2f} @ step {env_step} -> best_model")
+                    except Exception as e:  # noqa: BLE001
+                        print(f"[best]  save failed: {type(e).__name__}: {e}")
                 next_eval += cfg.eval_every
 
             # 8) checkpoint (full resumable state + latest pointer)
