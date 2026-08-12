@@ -30,6 +30,8 @@ _SCALES = jnp.array([
     BOARD_H * BOARD_W,        # bumpiness    (~<= 190)
     BOARD_H * (BOARD_W + 1),  # row_transitions
     (BOARD_H + 1) * BOARD_W,  # col_transitions
+    BOARD_H * BOARD_W,        # well_sum      (<= 200)
+    BOARD_H,                  # max_well      (<= 20)
 ], dtype=jnp.float32)
 
 
