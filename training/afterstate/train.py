@@ -235,7 +235,7 @@ def train(cfg: TrainConfig):
         holes=cfg.shape_w_holes, agg_height=cfg.shape_w_agg_height,
         bumpiness=cfg.shape_w_bumpiness)
     if cfg.use_shaped_reward:
-        print(f"[train] potential-based reward shaping ON: {shaping_w}")
+        print(f"[train] additive board-quality reward shaping ON: {shaping_w}")
 
     # Resume: restore model/target/optimizer/counters/RNG/replay and continue from
     # the saved env_step. Falls back to a fresh run if no checkpoint is present.
@@ -327,12 +327,11 @@ def train(cfg: TrainConfig):
                     prev_after[i] = None
                     continue
                 chosen_after = cand[i][0][idx]  # S'_next = the afterstate we scored & committed
-                # Potential-based shaping (optional) reshapes only the TD-target reward stored
-                # in the buffer; ep_return keeps TRUE lines so logs/eval stay comparable.
+                # Additive board-quality shaping (optional) reshapes only the TD-target reward
+                # stored in the buffer; ep_return keeps TRUE lines so logs/eval stay comparable.
                 if cfg.use_shaped_reward:
                     r_store = reward_shaping.shaped_reward(
-                        prev_after[i], chosen_after, reward, done,
-                        cfg.gamma, cfg.board_w, shaping_w)
+                        chosen_after, reward, cfg.board_w, shaping_w)
                 else:
                     r_store = float(reward)
                 buffer.add(prev_after[i], r_store, chosen_after, done)

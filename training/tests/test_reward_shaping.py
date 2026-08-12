@@ -1,4 +1,4 @@
-"""Unit tests for potential-based reward shaping (numpy only, no GPU/Unity).
+"""Unit tests for additive board-quality reward shaping (numpy only, no GPU/Unity).
 
 Board convention (verified against the live replay buffer): flat uint8 length H*W, row-major
 (index = y*W + x), row 0 = floor. Heights measure UP from row 0.
@@ -27,8 +27,8 @@ def _flat(cells):
 def test_empty_board():
     assert rs.board_stats(_flat([]), W) == {
         "holes": 0, "agg_height": 0, "bumpiness": 0, "max_height": 0}
-    assert rs.potential(_flat([]), W, ShapingWeights()) == 0.0
-    assert rs.potential(None, W, ShapingWeights()) == 0.0
+    assert rs.penalty(_flat([]), W, ShapingWeights()) == 0.0
+    assert rs.penalty(None, W, ShapingWeights()) == 0.0
 
 
 def test_single_column_stack_no_holes():
@@ -53,31 +53,30 @@ def test_flat_floor_row_has_no_bumpiness():
     assert s["bumpiness"] == 0 and s["holes"] == 0
 
 
-def test_potential_is_nonpositive_and_penalizes_holes():
+def test_penalty_is_nonnegative_and_grows_with_holes():
     w = ShapingWeights()
-    clean = rs.potential(_flat([(0, 0), (1, 0)]), W, w)        # 2-tall clean column
-    holey = rs.potential(_flat([(1, 0), (2, 0)]), W, w)        # same-ish height, 2 buried holes
-    assert clean <= 0 and holey < clean                        # holes make Phi strictly worse
+    clean = rs.penalty(_flat([(0, 0), (1, 0)]), W, w)          # 2-tall clean column
+    holey = rs.penalty(_flat([(1, 0), (2, 0)]), W, w)          # taller + 2 buried holes
+    assert clean >= 0 and holey > clean                        # holes/height make it worse
 
 
-def test_potential_based_zero_reward_when_gamma1_and_unchanged():
-    b = _flat([(0, 0), (1, 0)])
-    r = rs.shaped_reward(b, b, lines=0, done=False, gamma=1.0, width=W, w=ShapingWeights())
-    assert abs(r) < 1e-6                                        # gamma=1, Phi(next)-Phi(prev)=0
-
-
-def test_done_zeros_next_potential():
+def test_shaped_reward_subtracts_penalty():
     w = ShapingWeights()
-    prev = _flat([(0, 0)])
-    nxt = _flat([(0, 0), (1, 0)])
-    r = rs.shaped_reward(prev, nxt, lines=2, done=True, gamma=0.99, width=W, w=w)
-    assert abs(r - (2.0 - rs.potential(prev, W, w))) < 1e-6     # phi_next zeroed on terminal
+    nxt = _flat([(1, 0), (2, 0)])                              # has holes -> nonzero penalty
+    r = rs.shaped_reward(nxt, lines=2, width=W, w=w)
+    assert abs(r - (2.0 - rs.penalty(nxt, W, w))) < 1e-6
 
 
-def test_lines_passthrough_on_empty_transition():
-    r = rs.shaped_reward(_flat([]), _flat([]), lines=3, done=False,
-                         gamma=0.99, width=W, w=ShapingWeights())
-    assert abs(r - 3.0) < 1e-6                                  # both potentials 0
+def test_worse_board_gives_lower_reward():
+    w = ShapingWeights()
+    good = rs.shaped_reward(_flat([(0, x) for x in range(W)]), lines=0, width=W, w=w)  # flat floor
+    bad = rs.shaped_reward(_flat([(5, 0)]), lines=0, width=W, w=w)                      # tall + holes
+    assert bad < good                                          # argmax V would prefer `good`
+
+
+def test_lines_passthrough_on_empty_board():
+    r = rs.shaped_reward(_flat([]), lines=3, width=W, w=ShapingWeights())
+    assert abs(r - 3.0) < 1e-6                                 # empty board, penalty 0
 
 
 def _run_all():
