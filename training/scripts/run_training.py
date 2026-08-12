@@ -40,6 +40,8 @@ def parse_args():
                    help="Env steps to linearly decay exploration epsilon over.")
     p.add_argument("--net-kind", choices=["cnn", "features"], default=None,
                    help="Value net architecture: 'cnn' (raw grid) or 'features' (board-feature MLP).")
+    p.add_argument("--target-mode", choices=["td", "mc"], default=None,
+                   help="'td' one-step bootstrap or 'mc' Monte Carlo returns (no bootstrap, stable).")
     p.add_argument("--reward-aware", action="store_true",
                    help="Select argmax[r + gamma*V] instead of argmax V (plan default is V only).")
     p.add_argument("--shaped-reward", action="store_true",
@@ -90,6 +92,8 @@ def main():
         cfg.epsilon_decay_steps = a.epsilon_decay_steps
     if a.net_kind is not None:
         cfg.net_kind = a.net_kind
+    if a.target_mode is not None:
+        cfg.target_mode = a.target_mode
     if a.reward_aware:
         cfg.reward_aware_selection = True
     if a.shaped_reward:

@@ -264,6 +264,20 @@ def train(cfg: TrainConfig):
     recent_returns = deque(maxlen=100)
     recent_lens = deque(maxlen=100)
 
+    # Monte Carlo mode: accumulate each env's (afterstate, reward) trajectory and, on episode
+    # end, push the discounted returns as regression targets. Storing (board, G, board, done=1)
+    # makes the existing TD step's (1 - done) factor zero the bootstrap, so the target is exactly
+    # G — no next-state value, no deadly-triad divergence. Higher variance, far more stable.
+    mc = (cfg.target_mode == "mc")
+    traj = [[] for _ in range(cfg.num_envs)]
+
+    def flush_mc(i):
+        G = 0.0
+        for board_k, r_k in reversed(traj[i]):
+            G = r_k + cfg.gamma * G
+            buffer.add(board_k, G, board_k, 1.0)
+        traj[i] = []
+
     last_loss = float("nan")
     t0 = time.monotonic()
     last_log_step, last_log_t = env_step, t0
@@ -284,6 +298,7 @@ def train(cfg: TrainConfig):
                 prev_after[i] = board.copy()
                 ep_return[i] = 0.0
                 ep_len[i] = 0
+                traj[i] = []
 
             # 2) query candidates for every env
             cand = venv.query_all()
@@ -310,6 +325,8 @@ def train(cfg: TrainConfig):
                 if k == 0:
                     # topout with no legal placement: end episode, no transition
                     venv.envs[i].done = True
+                    if mc:
+                        flush_mc(i)      # topout ends a valid episode; bank its returns
                     recent_returns.append(ep_return[i])
                     recent_lens.append(ep_len[i])
                     prev_after[i] = None
@@ -326,6 +343,8 @@ def train(cfg: TrainConfig):
                     print(f"[train] env {i} commit failed ({e}); recovering, dropping episode")
                     if not venv.recover(i):
                         raise
+                    if mc:
+                        traj[i] = []     # worker died: drop this episode's trajectory
                     recent_returns.append(ep_return[i])
                     recent_lens.append(ep_len[i])
                     prev_after[i] = None
@@ -338,7 +357,12 @@ def train(cfg: TrainConfig):
                         chosen_after, reward, cfg.board_w, shaping_w)
                 else:
                     r_store = float(reward)
-                buffer.add(prev_after[i], r_store, chosen_after, done)
+                if mc:
+                    traj[i].append((prev_after[i].copy(), r_store))
+                    if done:
+                        flush_mc(i)      # episode ended: bank discounted returns
+                else:
+                    buffer.add(prev_after[i], r_store, chosen_after, done)
                 ep_return[i] += float(reward)
                 ep_len[i] += 1
                 env_step += 1

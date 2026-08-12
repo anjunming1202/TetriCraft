@@ -28,6 +28,9 @@ class TrainConfig:
     # --- RL ---
     gamma: float = 1.0                 # undiscounted episodic (plan §3.2); try 0.99 if unstable
     reward_aware_selection: bool = False
+    # Value target: "td" = one-step bootstrap (fast, can diverge on this task); "mc" = Monte
+    # Carlo returns to episode end (no bootstrapping => no deadly-triad collapse; more stable).
+    target_mode: str = "td"
 
     # --- Reward shaping (additive board-quality penalty; see reward_shaping.py) ---
     # Off by default => pure sparse lines_cleared reward (the baseline). When on, the TD-target
