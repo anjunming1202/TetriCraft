@@ -19,7 +19,7 @@ from flax import nnx
 from afterstate import features as F
 from afterstate.network import BOARD_H, BOARD_W
 
-HIDDEN = 64
+HIDDEN = 128   # v2 capacity experiment: widened from 64
 
 # Fixed, board-derived per-feature scales (order matches F.FEATURE_NAMES) to bring the raw counts
 # to ~O(1) before the MLP. Constant division => export-safe, and keeps eval/deploy deterministic.
