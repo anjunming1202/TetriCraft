@@ -9,6 +9,7 @@ the trainer concatenates candidates across envs for a single batched forward pas
 splits the results back per env.
 """
 
+import os
 from typing import Callable, List, Tuple
 
 import numpy as np
@@ -24,10 +25,19 @@ class SyncVectorEnv:
         seed_fn: Callable[[], int],
         host: str = "127.0.0.1",
         launch_kwargs: dict = None,
+        log_dir: str = None,
         max_recover_attempts: int = 5,
     ):
         launch_kwargs = launch_kwargs or {}
-        self.envs = [TetricraftEnv(port=p, host=host, **launch_kwargs) for p in ports]
+        # Spawn mode: give each worker its own -logFile so N Unity processes don't
+        # clobber a shared default Player.log. Attach mode has no process to log.
+        spawn_mode = "launch_exe" in launch_kwargs
+        self.envs = []
+        for p in ports:
+            kw = dict(launch_kwargs)
+            if log_dir and spawn_mode:
+                kw["log_path"] = os.path.join(log_dir, f"unity_{p}.log")
+            self.envs.append(TetricraftEnv(port=p, host=host, **kw))
         self.seed_fn = seed_fn
         self.num_envs = len(self.envs)
         self.max_recover_attempts = max_recover_attempts

@@ -108,16 +108,6 @@ def evaluate(model, env, cfg):
 
 
 # --------------------------------------------------------------------------- #
-# Main loop
-# --------------------------------------------------------------------------- #
-def _launch_kwargs(cfg: TrainConfig, port: int):
-    if cfg.unity_exe is None:
-        return {}
-    log_path = os.path.join(cfg.unity_log_dir, f"unity_{port}.log")
-    return {"launch_exe": cfg.unity_exe, "log_path": log_path}
-
-
-# --------------------------------------------------------------------------- #
 # Resume / checkpoint helpers
 # --------------------------------------------------------------------------- #
 def _resolve_resume_ckpt(resume_from: str):
@@ -218,12 +208,17 @@ def train(cfg: TrainConfig):
         tx = optax.chain(optax.clip_by_global_norm(cfg.grad_clip_norm), optax.adam(cfg.lr))
     optimizer = nnx.Optimizer(model, tx, wrt=nnx.Param)
 
-    # Per-env launch kwargs differ by port; SyncVectorEnv takes one dict, so for spawn
-    # mode we pass exe/log-dir and let it template per port. Attach mode needs nothing.
+    # Spawn mode passes the exe; SyncVectorEnv templates a per-port -logFile under
+    # <run_dir>/unity_logs so N Unity processes don't clobber a shared Player.log.
+    # Attach mode needs neither.
     launch_kwargs = {}
+    unity_log_dir = None
     if cfg.unity_exe is not None:
         launch_kwargs = {"launch_exe": cfg.unity_exe}
-    venv = SyncVectorEnv(cfg.ports, seed_fn=seed_stream, host=cfg.host, launch_kwargs=launch_kwargs)
+        unity_log_dir = os.path.join(cfg.run_dir, "unity_logs")
+        os.makedirs(unity_log_dir, exist_ok=True)
+    venv = SyncVectorEnv(cfg.ports, seed_fn=seed_stream, host=cfg.host,
+                         launch_kwargs=launch_kwargs, log_dir=unity_log_dir)
     venv.connect()
     H, W = cfg.board_h, cfg.board_w
     if venv.board_size != cfg.board_size:
