@@ -18,6 +18,7 @@ import jax.numpy as jnp
 FEATURE_NAMES = (
     "agg_height", "max_height", "holes", "bumpiness",
     "row_transitions", "col_transitions",
+    "well_sum", "max_well",              # v3 FEATURES (El-Tetris well sums)
 )
 N_FEATURES = len(FEATURE_NAMES)
 
@@ -55,5 +56,14 @@ def board_features(board):
     col_pad = jnp.pad(filled, ((0, 0), (1, 0), (0, 0)), constant_values=1.0)   # [B, H+1, W]
     col_transitions = jnp.abs(col_pad[:, 1:, :] - col_pad[:, :-1, :]).sum(axis=(1, 2)).reshape(-1, 1)
 
+    # v3 FEATURES (El-Tetris "well sums", export-safe: pad/min/sub/relu/max only).
+    H = filled.shape[1]
+    hp = jnp.pad(heights, ((0, 0), (1, 1)), constant_values=float(H))          # [B, W+2] wall=H
+    neigh_min = jnp.minimum(hp[:, :-2], hp[:, 2:])                             # [B, W]
+    well_depth = jnp.maximum(neigh_min - heights, 0.0)                         # [B, W]
+    well_sum = well_depth.sum(axis=1, keepdims=True)
+    max_well = well_depth.max(axis=1, keepdims=True)
+
     return jnp.concatenate(
-        [agg_height, max_height, holes, bumpiness, row_transitions, col_transitions], axis=1)
+        [agg_height, max_height, holes, bumpiness, row_transitions, col_transitions,
+         well_sum, max_well], axis=1)
