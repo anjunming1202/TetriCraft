@@ -55,6 +55,17 @@ def parse_args():
     p.add_argument("--shape-w-agg-height", type=float, default=None)
     p.add_argument("--shape-w-bumpiness", type=float, default=None)
     p.add_argument("--seed", type=int, default=None)
+    # v5 single-lever stabilization knobs (defaults reproduce v4)
+    p.add_argument("--lr-final", type=float, default=None,
+                   help="A: cosine-decay lr to this value over --lr-decay-steps grad steps.")
+    p.add_argument("--lr-decay-steps", type=int, default=None,
+                   help="A: grad-step horizon for cosine lr decay (default total_env_steps*updates).")
+    p.add_argument("--target-tau", type=float, default=None,
+                   help="B: Polyak soft-target rate per grad step (0 = hard sync).")
+    p.add_argument("--nstep", type=int, default=None,
+                   help="D: n-step TD returns (1 = one-step TD).")
+    p.add_argument("--eval-episodes", type=int, default=None,
+                   help="F: number of fixed-seed greedy eval episodes (in-loop).")
     p.add_argument("--run-dir", type=str, default=None)
     p.add_argument("--onnx-out", type=str, default=None)
     p.add_argument("--resume-from", type=str, default=None,
@@ -114,6 +125,16 @@ def main():
         cfg.shape_w_bumpiness = a.shape_w_bumpiness
     if a.seed is not None:
         cfg.seed = a.seed
+    if a.lr_final is not None:
+        cfg.lr_final = a.lr_final
+    if a.lr_decay_steps is not None:
+        cfg.lr_decay_steps = a.lr_decay_steps
+    if a.target_tau is not None:
+        cfg.target_tau = a.target_tau
+    if a.nstep is not None:
+        cfg.nstep = a.nstep
+    if a.eval_episodes is not None:
+        cfg.eval_seeds = list(range(a.eval_episodes))
     if a.run_dir is not None:
         cfg.run_dir = a.run_dir
     if a.onnx_out is not None:

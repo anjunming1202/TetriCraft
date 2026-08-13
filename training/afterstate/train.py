@@ -123,6 +123,13 @@ def _launch_kwargs(cfg: TrainConfig, port: int):
 # --------------------------------------------------------------------------- #
 # Resume / checkpoint helpers
 # --------------------------------------------------------------------------- #
+def _soft_update(target, model, tau):
+    """B (v5): Polyak soft target update. target <- target + tau*(model - target) on Params."""
+    tp = nnx.state(target, nnx.Param)
+    mp = nnx.state(model, nnx.Param)
+    nnx.update(target, jax.tree_util.tree_map(lambda t, m: t + tau * (m - t), tp, mp))
+
+
 def _resolve_resume_ckpt(resume_from: str):
     """Resolve resume_from to a concrete checkpoint dir, or None if none exists.
 
@@ -149,7 +156,7 @@ def _restore_rng_states(rng_states, rng, seed_stream, buf_rng):
 
 
 def _save_ckpt(cfg, model, target, optimizer, buffer,
-               rng, seed_stream, buf_rng, env_step, grad_steps):
+               rng, seed_stream, buf_rng, env_step, grad_steps, ret_ms=1.0):
     """Write one full resumable checkpoint and advance the latest pointer."""
     ckpts_dir = os.path.join(cfg.run_dir, "checkpoints")
     name = f"step_{env_step}"
@@ -161,6 +168,7 @@ def _save_ckpt(cfg, model, target, optimizer, buffer,
         "board_w": cfg.board_w,
         "gamma": cfg.gamma,
         "buffer_len": len(buffer),
+        "ret_ms": float(ret_ms),   # v5: adaptive-norm EMA, so scale survives resume (no post-resume kick)
     }
     rng_states = {
         "rng": get_rng_state(rng),
@@ -216,9 +224,18 @@ def train(cfg: TrainConfig):
 
     model = make_network(cfg.net_kind, rngs=nnx.Rngs(cfg.seed))
     target = nnx.clone(model)
-    tx = optax.adam(cfg.lr)
+    # A (v5): optional cosine lr decay. The schedule reads the optimizer's step count,
+    # which the checkpoint restores, so decay position is correct across resumes.
+    if cfg.lr_final is not None:
+        decay_steps = cfg.lr_decay_steps or (cfg.total_env_steps * cfg.updates_per_step)
+        lr_spec = optax.cosine_decay_schedule(
+            init_value=cfg.lr, decay_steps=decay_steps, alpha=cfg.lr_final / cfg.lr)
+        print(f"[train] cosine lr {cfg.lr:g} -> {cfg.lr_final:g} over {decay_steps} grad steps")
+    else:
+        lr_spec = cfg.lr
+    tx = optax.adam(lr_spec)
     if cfg.grad_clip_norm and cfg.grad_clip_norm > 0:
-        tx = optax.chain(optax.clip_by_global_norm(cfg.grad_clip_norm), optax.adam(cfg.lr))
+        tx = optax.chain(optax.clip_by_global_norm(cfg.grad_clip_norm), optax.adam(lr_spec))
     optimizer = nnx.Optimizer(model, tx, wrt=nnx.Param)
 
     # Per-env launch kwargs differ by port; SyncVectorEnv takes one dict, so for spawn
@@ -259,9 +276,20 @@ def train(cfg: TrainConfig):
                 ckpt, model=model, target=target, optimizer=optimizer, replay=buffer)
             env_step = int(meta.get("env_step", 0))
             grad_steps = int(meta.get("grad_steps", 0))
+            ret_ms = float(meta.get("ret_ms", 1.0))   # v5: restore adaptive-norm scale (no post-resume kick)
             _restore_rng_states(meta.get("rng_states", {}), rng, seed_stream, buf_rng)
             print(f"[train] resumed from {ckpt} at env_step={env_step} "
-                  f"grad_steps={grad_steps} buf={len(buffer)}")
+                  f"grad_steps={grad_steps} buf={len(buffer)} ret_ms={ret_ms:.3g}")
+    # v5 resume-safety: seed best_eval from best.json so a resumed run's first (noisy) eval
+    # can never overwrite a better historical best_model captured before the reap/crash.
+    _best_json = os.path.join(cfg.run_dir, "checkpoints", "best.json")
+    if os.path.exists(_best_json):
+        try:
+            with open(_best_json) as _bf:
+                best_eval = float(json.load(_bf).get("eval_mean_lines", best_eval))
+            print(f"[train] seeded best_eval={best_eval:.2f} from best.json (protects best_model)")
+        except Exception as e:  # noqa: BLE001
+            print(f"[train] best.json read skipped ({type(e).__name__}: {e})")
 
     prev_after = [None] * cfg.num_envs
     ep_return = [0.0] * cfg.num_envs
@@ -282,6 +310,30 @@ def train(cfg: TrainConfig):
             G = r_k + cfg.gamma * G
             buffer.add(board_k, G, board_k, 1.0)
         traj[i] = []
+
+    # D (v5): n-step returns. nstep>1 accumulates a per-env sliding window of (board, reward)
+    # and emits (s_t, sum_{k<n} gamma^k r_{t+k}, s_{t+n}, done). Bootstrap uses gamma**nstep
+    # (boot_gamma below). On episode end, every pending start is flushed with done=1 (truncated
+    # return, bootstrap zeroed). nstep==1 reduces exactly to one-step TD (handled inline).
+    nstep_mode = (not mc) and cfg.nstep > 1
+    nwin = [[] for _ in range(cfg.num_envs)]
+    boot_gamma = cfg.gamma ** cfg.nstep   # discount applied to the bootstrap value (gamma when nstep==1)
+
+    def flush_nstep(i, boot_board, terminal):
+        win = nwin[i]
+        if terminal:
+            for j in range(len(win)):
+                R = 0.0
+                for k in range(j, len(win)):
+                    R += (cfg.gamma ** (k - j)) * win[k][1]
+                buffer.add(win[j][0], R, win[j][0], 1.0)   # done=1: bootstrap zeroed, next_board unused
+            nwin[i] = []
+        elif len(win) >= cfg.nstep:
+            R = 0.0
+            for k in range(cfg.nstep):
+                R += (cfg.gamma ** k) * win[k][1]
+            buffer.add(win[0][0], R, boot_board, 0.0)
+            win.pop(0)
 
     last_loss = float("nan")
     t0 = time.monotonic()
@@ -304,6 +356,7 @@ def train(cfg: TrainConfig):
                 ep_return[i] = 0.0
                 ep_len[i] = 0
                 traj[i] = []
+                nwin[i] = []
 
             # 2) query candidates for every env
             cand = venv.query_all()
@@ -332,6 +385,8 @@ def train(cfg: TrainConfig):
                     venv.envs[i].done = True
                     if mc:
                         flush_mc(i)      # topout ends a valid episode; bank its returns
+                    elif nstep_mode:
+                        flush_nstep(i, None, terminal=True)   # bank truncated n-step returns
                     recent_returns.append(ep_return[i])
                     recent_lens.append(ep_len[i])
                     prev_after[i] = None
@@ -350,6 +405,8 @@ def train(cfg: TrainConfig):
                         raise
                     if mc:
                         traj[i] = []     # worker died: drop this episode's trajectory
+                    elif nstep_mode:
+                        nwin[i] = []     # worker died: drop this episode's n-step window
                     recent_returns.append(ep_return[i])
                     recent_lens.append(ep_len[i])
                     prev_after[i] = None
@@ -371,6 +428,9 @@ def train(cfg: TrainConfig):
                     traj[i].append((prev_after[i].copy(), r_store))
                     if done:
                         flush_mc(i)      # episode ended: bank discounted returns
+                elif nstep_mode:
+                    nwin[i].append((prev_after[i].copy(), r_store))
+                    flush_nstep(i, chosen_after, terminal=done)
                 else:
                     buffer.add(prev_after[i], r_store, chosen_after, done)
                 ep_return[i] += float(reward)
@@ -391,11 +451,14 @@ def train(cfg: TrainConfig):
                     loss, ms = _train_step(
                         model, target, optimizer,
                         _to_input(b, H, W), jnp.asarray(r),
-                        _to_input(nb, H, W), jnp.asarray(d), cfg.gamma, scale,
+                        _to_input(nb, H, W), jnp.asarray(d), boot_gamma, scale,
                     )
                     ret_ms = 0.999 * ret_ms + 0.001 * float(ms)   # EMA of mean target^2
                     grad_steps += 1
-                    if grad_steps % cfg.target_sync_period == 0:
+                    # B (v5): Polyak soft target when tau>0, else v4 hard periodic sync.
+                    if cfg.target_tau > 0.0:
+                        _soft_update(target, model, cfg.target_tau)
+                    elif grad_steps % cfg.target_sync_period == 0:
                         nnx.update(target, nnx.state(model))
                 last_loss = float(loss)
 
@@ -451,7 +514,7 @@ def train(cfg: TrainConfig):
             # 8) checkpoint (full resumable state + latest pointer)
             if env_step >= next_ckpt:
                 _save_ckpt(cfg, model, target, optimizer, buffer,
-                           rng, seed_stream, buf_rng, env_step, grad_steps)
+                           rng, seed_stream, buf_rng, env_step, grad_steps, ret_ms)
                 last_ckpt_step = env_step
                 next_ckpt += cfg.ckpt_every
 
@@ -470,7 +533,7 @@ def train(cfg: TrainConfig):
         try:
             if env_step != last_ckpt_step:
                 _save_ckpt(cfg, model, target, optimizer, buffer,
-                           rng, seed_stream, buf_rng, env_step, grad_steps)
+                           rng, seed_stream, buf_rng, env_step, grad_steps, ret_ms)
         except Exception as e:  # noqa: BLE001
             print(f"[train] final training-state save failed: {type(e).__name__}: {e}")
         # Deploy artifact: model params + ONNX (what Unity/Sentis consumes).

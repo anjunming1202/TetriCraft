@@ -59,6 +59,19 @@ class TrainConfig:
     target_sync_period: int = 1_000    # grad steps between hard target-net copies
     grad_clip_norm: float = 10.0       # global-norm gradient clip (0 = off); guards TD divergence
 
+    # --- v5 single-lever stabilization experiments (defaults exactly reproduce v4) ---
+    # A: cosine-decay the lr from `lr` to `lr_final` over `lr_decay_steps` GRAD steps.
+    #    None => constant lr (v4 behavior). The optax schedule reads the optimizer's own
+    #    step count, which the checkpoint restores, so decay position is resume-correct.
+    lr_final: float = None
+    lr_decay_steps: int = None         # None => total_env_steps * updates_per_step
+    # B: Polyak (soft) target update. tau>0 => target += tau*(model-target) every grad step
+    #    (smoother bootstrap, damps oscillation); 0 => hard sync every target_sync_period (v4).
+    target_tau: float = 0.0
+    # D: n-step TD returns. 1 => one-step TD (v4). n>1 accumulates an n-step discounted return
+    #    and bootstraps with gamma**n (less bootstrap dependence, faster credit assignment).
+    nstep: int = 1
+
     # --- Exploration (linear epsilon decay over env steps) ---
     epsilon_start: float = 1.0
     epsilon_end: float = 0.05
