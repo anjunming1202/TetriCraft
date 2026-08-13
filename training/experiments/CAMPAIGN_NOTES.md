@@ -74,9 +74,40 @@ graph's first layer, so the `[count,1,20,10] -> [count]` contract never changes.
 - **Driver logs (full stdout eval curves)**: `~/tetricraft_val/*.driver.log`.
 - **Exported ONNX**: `Assets/AgenticTetricraft/Models/value_net_<date>_featmlp_*.onnx` on the branches above.
 
+## v5 round (2026-08-13): attack non-convergence, not the ceiling
+The ceiling is already high (peaks ≈1900); the bottleneck is that the policy VISITS great regions
+but won't STAY (oscillates ≈1↔≈1900 even late). v5 keeps the v4 winner recipe fixed and tests, one
+lever at a time, changes aimed at *damping the oscillation* — which lifts the robust mean far more
+than another ceiling bump would. Code on branch `Afterstate-Feature-MLP-v5` (commit a0654b5); all
+levers are flags whose defaults reproduce v4 exactly. Launchers: `launchers/launcher_v5.sh`,
+`launchers/smoke_v5.sh`.
+
+**Resume-safety fixes first (protect the 1326 champion on resume):**
+- Persist/restore `ret_ms` (adaptive-norm EMA) in checkpoint meta — a naive resume reset it to 1.0,
+  making the loss scale wrong and kicking the policy right at resume. Now scale survives.
+- Seed `best_eval` from `best.json` on resume — a resumed run's first (noisy) eval could otherwise
+  overwrite a better historical `best_model`. Both verified live on GH200 (resume smoke test).
+
+**Levers under test (single-lever, seed 1, γ0.995, clean 30-ep eval every 100k):**
+| Run | Lever | Flag | Hypothesis |
+|---|---|---|---|
+| `v5A-lrdecay-g995-s1` | A: cosine lr decay | `--lr-final 1e-4` | hot fixed lr at high γ is the source of late kicks |
+| `v5B-polyak-g995-s1` | B: Polyak soft target | `--target-tau 0.005` | smooth bootstrap target damps value oscillation |
+| `v5D-nstep3-g995-s1` | D: n-step returns | `--nstep 3` | less bootstrap dependence, faster credit assignment |
+| `v4-g995-s1-resume8M` | (fishing) resume peak ckpt step_4700000 → 8M | — | does more training from the peak region help or oscillate away? |
+
+n-step D adds NO buffer schema change: it accumulates a per-env sliding window and emits
+`(s_t, Σ γ^k r, s_{t+n}, done)`, bootstrapping with `gamma**n`; nstep=1 is byte-identical to
+one-step TD. F (clean eval) is `--eval-episodes 30` so convergence is finally visible in-loop.
+**Verdict on "resume for more steps":** weak on its own (runs never converged at 5M, so more steps
+only buys more best-ckpt lottery draws) — run as cheap background fishing, never as the main compute,
+and only after the two resume fixes (else it destroys the champion).
+
 ## Next directions (not yet done)
 1. Principled convergence: Pop-Art (full adaptive value normalization) — v4's return-norm is the lite version.
 2. Tune Huber δ (currently 1 on O(10) targets — try 3–10 for more learning signal).
 3. Higher horizon / n-step or TD(λ) returns; γ0.997/0.999 sweep is running under v4.
-4. Cleaner in-loop eval (more episodes / fixed seeds) so plateaus are visible.
-5. lr-decay revisited on top of the stabilized recipe.
+4. Cleaner in-loop eval (more episodes / fixed seeds) so plateaus are visible.  [DONE in v5: --eval-episodes]
+5. lr-decay revisited on top of the stabilized recipe.  [RUNNING in v5: v5A]
+6. If a v5 lever damps oscillation: combine the winning stabilizer(s) into v6, then revisit C
+   (Double-DQN decoupling to cut afterstate-max overestimation) and E (Pop-Art).
