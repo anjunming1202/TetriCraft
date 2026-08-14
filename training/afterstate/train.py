@@ -286,7 +286,9 @@ def train(cfg: TrainConfig):
     if os.path.exists(_best_json):
         try:
             with open(_best_json) as _bf:
-                best_eval = float(json.load(_bf).get("eval_mean_lines", best_eval))
+                _bj = json.load(_bf)
+                # seed on the same metric this run selects by (fallback to legacy eval_mean_lines)
+                best_eval = float(_bj.get("best_value", _bj.get("eval_mean_lines", best_eval)))
             print(f"[train] seeded best_eval={best_eval:.2f} from best.json (protects best_model)")
         except Exception as e:  # noqa: BLE001
             print(f"[train] best.json read skipped ({type(e).__name__}: {e})")
@@ -498,15 +500,19 @@ def train(cfg: TrainConfig):
                 print(f"[eval]  step={env_step} mean_lines={mean_r:.2f} "
                       f"median={med_r:.1f} mean_len={mean_l:.1f}")
                 # v4: save best-by-eval model so oscillation/pruning never loses the peak.
-                if mean_r > best_eval:
-                    best_eval = mean_r
+                # v6: select on mean or MEDIAN (median favors consistent policies over lucky spikes).
+                sel = med_r if cfg.best_metric == "median" else mean_r
+                if sel > best_eval:
+                    best_eval = sel
                     try:
                         checkpointing.save_model(
                             os.path.join(cfg.run_dir, "checkpoints", "best_model"), model)
                         with open(os.path.join(cfg.run_dir, "checkpoints", "best.json"), "w") as bf:
                             json.dump({"env_step": int(env_step), "eval_mean_lines": float(mean_r),
-                                       "eval_median": float(med_r)}, bf)
-                        print(f"[best]  new best mean_lines={mean_r:.2f} @ step {env_step} -> best_model")
+                                       "eval_median": float(med_r), "best_metric": cfg.best_metric,
+                                       "best_value": float(sel)}, bf)
+                        print(f"[best]  new best {cfg.best_metric}={sel:.2f} "
+                              f"(mean={mean_r:.1f} median={med_r:.1f}) @ step {env_step} -> best_model")
                     except Exception as e:  # noqa: BLE001
                         print(f"[best]  save failed: {type(e).__name__}: {e}")
                 next_eval += cfg.eval_every

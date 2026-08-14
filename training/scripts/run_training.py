@@ -66,6 +66,8 @@ def parse_args():
                    help="D: n-step TD returns (1 = one-step TD).")
     p.add_argument("--eval-episodes", type=int, default=None,
                    help="F: number of fixed-seed greedy eval episodes (in-loop).")
+    p.add_argument("--best-metric", choices=["mean", "median"], default=None,
+                   help="v6: select best_model by eval mean or median (median = consistency).")
     p.add_argument("--run-dir", type=str, default=None)
     p.add_argument("--onnx-out", type=str, default=None)
     p.add_argument("--resume-from", type=str, default=None,
@@ -135,6 +137,8 @@ def main():
         cfg.nstep = a.nstep
     if a.eval_episodes is not None:
         cfg.eval_seeds = list(range(a.eval_episodes))
+    if a.best_metric is not None:
+        cfg.best_metric = a.best_metric
     if a.run_dir is not None:
         cfg.run_dir = a.run_dir
     if a.onnx_out is not None:

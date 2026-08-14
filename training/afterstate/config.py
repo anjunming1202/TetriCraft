@@ -71,6 +71,10 @@ class TrainConfig:
     # D: n-step TD returns. 1 => one-step TD (v4). n>1 accumulates an n-step discounted return
     #    and bootstraps with gamma**n (less bootstrap dependence, faster credit assignment).
     nstep: int = 1
+    # v6: metric for best-by-eval checkpoint selection. "mean" (v4/v5) picks the highest-mean eval,
+    #    which can chase a lucky high-variance spike; "median" picks the most CONSISTENT policy
+    #    (the low tail / early-death games are what cap the deployable mean).
+    best_metric: str = "mean"
 
     # --- Exploration (linear epsilon decay over env steps) ---
     epsilon_start: float = 1.0
