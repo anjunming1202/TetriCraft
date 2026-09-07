@@ -847,8 +847,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tetrisManager: {fileID: 1106322969}
-  valueNetModel: {fileID: 5022602860645237092, guid: 04ed5c8277984a940b5930723f42387b, type: 3}
-  rewardAware: 0
+  valueNetModel: {fileID: 5022602860645237092, guid: d139660956a3fe64888e03207bac9aad, type: 3}
+  rewardAware: 1
   stepDelaySeconds: 0
   useFixedSeed: 1
   seed: 42
