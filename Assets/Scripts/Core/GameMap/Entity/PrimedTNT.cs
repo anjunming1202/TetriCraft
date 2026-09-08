@@ -1,10 +1,16 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PrimedTNT : Entity
 {
     public Explosion explosionPrefab;
     public float fuseTime = 4f;
+
+    private int fuseTicks;
+    private int fuseBlinkEndTick;
+    private int expansionTicks;
+    private int blinkTicks;
+    private int elapsedTicks;
+    private bool exploded;
 
     public void Init(float fuseTime)
     {
@@ -16,7 +22,14 @@ public class PrimedTNT : Entity
         base.OnSpawned(map, position);
         AddMomentum(RandomVelocity());
         AudioManager.Instance.PlaySFXFollowing(fuseSound, this.transform, 1f, AudioBus.Block);
-        StartCoroutine(FuseCountdown());
+
+        // Convert the second-based fuse into ticks so detonation timing is tick-exact.
+        expansionTicks = Mathf.Max(1, Mathf.RoundToInt(expansionTime / TickManager.TickTime));
+        blinkTicks = Mathf.Max(1, Mathf.RoundToInt(blinkInterval / TickManager.TickTime));
+        fuseTicks = Mathf.Max(expansionTicks + 1, Mathf.RoundToInt(fuseTime / TickManager.TickTime));
+        fuseBlinkEndTick = fuseTicks - expansionTicks;
+        elapsedTicks = 0;
+        exploded = false;
     }
 
     //
@@ -27,42 +40,38 @@ public class PrimedTNT : Entity
         props = new MaterialPropertyBlock();
     }
 
-    private IEnumerator FuseCountdown()
+    public override void OnTickUpdate(float dt)
     {
-        float timer = 0f;
-        bool isBlinking = false;
+        base.OnTickUpdate(dt);   // physics falling (tick-driven)
 
-        while (timer < fuseTime - expansionTime)
+        if (exploded)
+            return;
+
+        elapsedTicks++;
+
+        if (elapsedTicks < fuseBlinkEndTick)
         {
-            // blink
-            isBlinking = !isBlinking;
-            Render(isBlinking);
-
-            yield return new WaitForSeconds(blinkInterval);
-            timer += blinkInterval;
+            // blink (presentation), toggling every blinkTicks
+            Render((elapsedTicks / blinkTicks) % 2 == 1);
         }
-
-        Render(true);
-        StartCoroutine(Explode());
+        else if (elapsedTicks < fuseTicks)
+        {
+            // final expansion pop (presentation)
+            Render(true);
+            float p = (elapsedTicks - fuseBlinkEndTick) / (float)expansionTicks;
+            transform.localScale = Vector3.one * (1f + expandionVolumn * expansionCurve.Evaluate(p));
+        }
+        else
+        {
+            Explode();
+        }
     }
 
-    private IEnumerator Explode()
+    private void Explode()
     {
-        // expand
-        float timer = 0;
-        while (timer < expansionTime)
-        {
-            transform.localScale = Vector3.one * (1f + expandionVolumn * expansionCurve.Evaluate(timer / expansionTime));
-
-            yield return new WaitForSeconds(Time.deltaTime);
-            timer += Time.deltaTime;
-        }
-
-        // explode
+        exploded = true;
         Explosion explosion = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
         explosion.Set(map, position, blastRadius);
-
-        // remove entity
         this.Removed();
     }
 
