@@ -14,7 +14,8 @@ public abstract class Entity : MapObject
     private Vector2Int collideGrid;
 
     // motion dynamics
-    protected Vector2 position;
+    protected Vector2 position;       // logical position, advanced on tick
+    protected Vector2 prevPosition;   // logical position at the start of the current tick (for render interpolation)
     protected Vector2 velocity;
 
     // motion states
@@ -32,10 +33,11 @@ public abstract class Entity : MapObject
     {
         this.map = map;
         this.position = position;
+        this.prevPosition = position;
         this.velocity = Vector2.zero;
         this.isFalling = false;
 
-        SetPosition(position);
+        ApplyRenderPosition(position);   // snap transform to spawn point
 
         OnAfterSpawned?.Invoke(this);
     }
@@ -51,10 +53,23 @@ public abstract class Entity : MapObject
         GameObject.Destroy(this.gameObject);
     }
 
+    // Advance one fixed tick of simulation. Called by EntityManager on tick frames.
+    public void TickStep(float dt)
+    {
+        prevPosition = position;
+        OnTickUpdate(dt);
+    }
+
     public virtual void OnTickUpdate(float dt)
     {
-        //Debug.Assert(dt == Time.deltaTime, $"dt: {dt}, delta time: {Time.deltaTime}");
         UpdateFalling(dt);
+    }
+
+    // Render pass (every frame): smoothly interpolate the visual transform between the previous
+    // and current tick positions. Logic never writes the transform directly.
+    public void RenderInterpolate(float partialTick)
+    {
+        ApplyRenderPosition(Vector2.Lerp(prevPosition, position, partialTick));
     }
 
     public void AddMomentum(Vector2 velocity)
@@ -62,10 +77,15 @@ public abstract class Entity : MapObject
         this.velocity += velocity / (inertia + float.Epsilon);
     }
 
+    // Logic-only position update (no transform write — rendering is done by RenderInterpolate).
     protected void SetPosition(Vector2 position)
     {
         this.position = position;
-        transform.position = BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(this.position);
+    }
+
+    private void ApplyRenderPosition(Vector2 mapPosition)
+    {
+        transform.position = BoundaryDataManager.GetBoundaryData(map.PlayerID).MapToWorld(mapPosition);
     }
 
     protected void UpdateFalling(float deltaTime)

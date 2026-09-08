@@ -34,12 +34,29 @@ public class EntityManager : MonoBehaviour
 
     public void OnUpdate()
     {
+        // Simulation advances on the tick clock at a fixed timestep, honoring catch-up (DeltaTick).
+        if (TickManager.IsGameTickUpdate)
+        {
+            for (int t = 0; t < TickManager.DeltaTick; t++)
+            {
+                foreach (var entity in entities)
+                {
+                    if (entity != null)
+                        entity.TickStep(TickManager.TickTime);
+                }
+            }
+        }
+
+        ProcessPendingEntityRequests();
+
+        // Render every frame: interpolate visual transforms between the previous and current tick
+        // positions so discrete 20 Hz motion looks smooth (data/render separation).
+        float partialTick = TickManager.PartialTick;
         foreach (var entity in entities)
         {
             if (entity != null)
-                entity.OnTickUpdate(Time.deltaTime);
+                entity.RenderInterpolate(partialTick);
         }
-        ProcessPendingEntityRequests();
     }
 
     public void RequestAddEntity(Entity entity, float x, float y)
