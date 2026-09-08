@@ -10,6 +10,11 @@ public static class TickManager
     private static float timer;
     private const float gameTickTime = 1f / 20;
 
+    // Fixed logic timestep (seconds) — single source of truth for per-tick simulation dt.
+    public const float TickTime = gameTickTime;
+    // Fraction [0,1) from the last tick toward the next — for render interpolation.
+    public static float PartialTick => Mathf.Clamp01(timer / gameTickTime);
+
     private static uint lastTick;
     private static float lastTickTime;
 
